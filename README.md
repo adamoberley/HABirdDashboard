@@ -1,118 +1,187 @@
-# AvianVisitors
+# AvianVisitors for Home Assistant
 
-*A live bird collage from your window.*
-
-See it running at [bird.onethreenine.net](https://bird.onethreenine.net).
+*A live bird collage from your window - as a Home Assistant dashboard, fed by BirdNET-Go.*
 
 <img alt="avianvisitors collage" src="docs/thumb.png" />
 
----
+A microphone and [BirdNET-Go](https://github.com/tphakala/birdnet-go) identify
+every passing bird; this dashboard turns those detections into a living
+collage. Each species appears as a kachō-e style illustration, sized by how
+often it's been heard, packed by its actual silhouette so wings cradle tails.
+Confident detections perch; uncertain ones fly past.
 
-## ⭐ This fork: Home Assistant + BirdNET-Go
+It's a static page served straight from Home Assistant's `www` folder - no
+add-on of its own, no server, no database. The browser reads BirdNET-Go's
+REST API directly.
 
-This fork adds a build of the collage that runs as a **Home Assistant
-dashboard fed by [BirdNET-Go](https://github.com/tphakala/birdnet-go)**
-(e.g. the [alexbelgium add-on](https://github.com/alexbelgium/hassio-addons/tree/master/birdnet-go)) -
-no BirdNET-Pi install required. Same illustrations, same mask-nesting layout
-math; the data layer reads BirdNET-Go's REST API directly, and birds perch
-when their best in-window confidence is ≥ 96% (flying otherwise).
-
-**→ Setup guide: [`homeassistant/README.md`](homeassistant/README.md)**
-
-Everything below is the original BirdNET-Pi-based install.
-
----
-
-## BOM
-
-| Qty | Description | Price | Link | Notes |
-|-----|-------------|-------|------| ----- |
-| 1 | Raspberry Pi (4B / 5 / Zero 2W) | ~$35-80 | [Raspberry Pi](https://www.raspberrypi.com/products/) | [See note for RPi20](https://github.com/mcguirepr89/BirdNET-Pi/wiki/RPi0W2-Installation-Guide) |
-| 1 | Micro SD Card (≥32 GB) | ~$10 | [Amazon](https://www.amazon.com/s?k=32gb+micro+sd+card&i=electronics&crid=1RCJAD1J0EPDX&sprefix=32gb+micro+sd+card%2Celectronics%2C226&ref=nb_sb_noss_1) | |
-| 1 | USB lavalier microphone | $16.95 | [Amazon](https://www.amazon.com/dp/B0176NRE1G) | |
-| 1 | Pi power supply | ~$10 | - | |
-
-Optional: a [Gemini API key](https://aistudio.google.com/apikey) to restyle illustrations, an [eBird API key](https://ebird.org/api/keygen) to filter species by region.
+This is a fork of [AvianVisitors](https://github.com/Twarner491/AvianVisitors)
+(which runs on BirdNET-Pi on a dedicated Raspberry Pi), reworked to run
+against BirdNET-Go on Home Assistant.
 
 ---
 
-## 1. Flash the SD card
+## What you get
 
-Use [Raspberry Pi Imager](https://www.raspberrypi.com/software/). Pick Raspberry Pi OS Lite (64-bit). In the customisation dialog set:
+- **The collage** - every species heard in the selected window (1H / 12H /
+  24H / 7D / ALL), nested by silhouette masks with no overlaps, area scaled
+  to call count. Hover for counts, click a bird for its detail card.
+- **Sitting or flying** - a species shows its perched illustration when its
+  best detection confidence in the window is ≥ 96% (configurable), and its
+  flight pose otherwise. A clear, close bird has settled in; a faint maybe is
+  just passing through. Birds visibly "land" when a confident detection
+  arrives.
+- **Stats** - an editorial detection timeline plus by-period counts, top
+  species, and the newest additions to your life list.
+- **Atlas** - a field-guide card grid of every species ever heard, with
+  playback of the latest recording and client-rendered spectrograms that
+  follow the light/dark theme.
+- **Detail modals** - per-species recording history with scrubbable
+  spectrograms, Wikipedia descriptions, rarity, and links out to Wikipedia
+  and eBird.
+- **498 bundled illustrations** - 249 (mostly North American) species, a
+  perched and a flight pose each, with photo-cutout fallbacks. A
+  [regeneration pipeline](avian/scripts/README.md) builds sets for other
+  regions.
 
-- Username
-- WiFi SSID + password
-- Hostname: `birdnet`
-- Enable SSH with password auth
-
-Plug the USB mic into the Pi. Place the capsule in a window or mount it outside. Boot.
+Data refreshes every 30 seconds (paused while the tab is hidden).
 
 ---
 
-## 2. Run the installer
+## Prerequisites
 
-Installer assumes passwordless sudo (Raspberry Pi OS Lite default - if you've tightened it, run `sudo raspi-config` -> *System Options* -> restore the default first).
+- Home Assistant with BirdNET-Go detecting birds - e.g. the
+  [alexbelgium birdnet-go add-on](https://github.com/alexbelgium/hassio-addons/tree/master/birdnet-go)
+  - or any BirdNET-Go instance reachable from your browser.
+- A way to put files into HA's `/config/www`: the **Terminal & SSH** add-on,
+  the **Samba share** add-on, or the VS Code add-on.
+
+---
+
+## Install
+
+From the Terminal & SSH add-on (or anywhere `/config` is visible):
 
 ```bash
-ssh <your-username>@birdnet.local
-curl -s https://raw.githubusercontent.com/Twarner491/AvianVisitors/avian-visitors/newinstaller.sh | bash
+git clone https://github.com/adamoberley/avianvisitorsHA.git
+cd avianvisitorsHA/homeassistant
+./install.sh                    # copies to /config/www/avianvisitors
 ```
 
-Clones this fork, installs BirdNET-Pi, symlinks the AvianVisitors overlay into the Caddy web root. Takes 20-40 minutes. Reboots when done.
+Or copy by hand: everything in `homeassistant/www/`, plus
+`avian/assets/illustrations/` and `avian/assets/cutouts/` as
+`assets/illustrations` and `assets/cutouts`, into
+`/config/www/avianvisitors/`. The artwork is ~350MB.
 
-Collage: `http://birdnet.local/`. Stock BirdNET-Pi UI: `http://birdnet.local/index.php`. The menu button in the top right opens an admin overlay with settings, system, log, and tool panels.
+Then open:
+
+```
+http://<your-ha-host>:8123/local/avianvisitors/index.html
+```
+
+> If `/config/www` didn't exist before, restart Home Assistant once - HA
+> only starts serving `/local/` after the folder exists at boot.
+
+### Add it as a dashboard
+
+**Sidebar (recommended):** Settings → Dashboards → **Add dashboard** →
+**Webpage**, URL `/local/avianvisitors/index.html`. Full screen, its own
+sidebar entry.
+
+**As a card:** add a **Webpage (iframe) card** to any dashboard with the same
+URL. Give it plenty of height - the collage wants room.
 
 ---
 
-## 3. (Optional) Restyle the illustrations
+## Configuration
 
-The repo ships with 498 bundled illustrations (249 species, perched + flight). To restyle them or generate a set for your own region:
+Edit `/config/www/avianvisitors/config.js`:
 
-```bash
-pip install -r ~/BirdNET-Pi/avian/scripts/requirements.txt
-export GEMINI_API_KEY='your-key'
+```js
+window.AV_CONFIG = {
+  // Where BirdNET-Go lives. '' (default) = same host as this page, port
+  // 8080 - right for the stock add-on. Otherwise e.g. 'http://192.168.1.50:8080'.
+  birdnetGoUrl: '',
 
-# generate on a cream ground, cut the ground off, rebuild the collage masks
-python3 ~/BirdNET-Pi/avian/scripts/pregen.py --labels ~/BirdNET-Pi/model/labels.txt --force
-python3 ~/BirdNET-Pi/avian/scripts/cutout.py
-python3 ~/BirdNET-Pi/avian/scripts/build_masks.py
+  // Sitting-or-flying: perched at/above this best-in-window confidence,
+  // flight pose below it.
+  sitConfidence: 0.96,
+};
 ```
 
-Filter to your region with `--ebird-region US-CA` (needs `EBIRD_API_KEY`). The full pipeline, prompt, reference images, and per-species tuning live in [`avian/scripts/README.md`](avian/scripts/README.md). Style lives in [`prompt.template.md`](avian/scripts/prompt.template.md).
+The installer never overwrites an existing `config.js`.
 
 ---
 
-## 4. (Optional) Forward off your LAN
+## How it maps onto BirdNET-Go
 
-See [`avian/forwarding/`](avian/forwarding/) for three independent recipes:
+The frontend reads BirdNET-Go's API v2 (public routes, CORS-open by default):
 
-- **Cloudflare Tunnel** for a public HTTPS URL.
-- **Home Assistant REST sensor** that exposes the latest detection.
-- **MQTT bridge** that publishes every new detection.
+| Dashboard data | BirdNET-Go endpoint |
+|---|---|
+| Life list / ALL window / 7D window | `/api/v2/analytics/species/summary` |
+| 1H / 12H / 24H rolling windows | `/api/v2/analytics/species/daily` for today (+ yesterday), summing the `hourly_counts` buckets that intersect the window |
+| Daily + hourly charts | `/api/v2/analytics/time/daily`, `/api/v2/analytics/species/diversity`, `/api/v2/analytics/time/distribution/hourly` |
+| Per-species recordings list | `/api/v2/detections?queryType=search` |
+| Audio playback + spectrograms | `/api/v2/audio/:id` (spectrograms rendered client-side from the audio) |
+| Species descriptions | Wikipedia REST API, fetched directly |
+
+The 1H/12H windows are hour-bucket precise (the daily summary aggregates per
+hour), so the window edge can be fuzzy by up to an hour - invisible in a
+collage sized by relative counts.
+
+---
+
+## Troubleshooting
+
+- **Nothing loads / console shows CORS errors.** BirdNET-Go allows all
+  origins by default. If you've restricted `allowedorigins` in its security
+  settings, add your HA origin (e.g. `http://homeassistant.local:8123`).
+- **Page is blank over Nabu Casa / HTTPS remote access.** The browser blocks
+  an `https://` page from calling the add-on's plain-`http` API (mixed
+  content). On the LAN over `http://` everything works; for remote use you'd
+  need the BirdNET-Go API behind HTTPS too (e.g. a reverse proxy).
+- **Counts look shifted by a day.** Make sure the add-on's `TZ` option
+  matches your actual timezone - the dashboard aligns its rolling windows
+  with BirdNET-Go's local dates.
+- **A species shows no picture.** The repo bundles 249 (mostly North
+  American) species. Missing ones fall back to a photo cutout when bundled,
+  otherwise the image is hidden. To generate illustrations for your region,
+  see [`avian/scripts/README.md`](avian/scripts/README.md), then re-run
+  `homeassistant/install.sh`.
+- **BirdNET-Go auth.** Only public BirdNET-Go routes are used, so the
+  dashboard works even with the add-on's authentication enabled.
 
 ---
 
 ## Repo layout
 
 ```
-avian/                  # everything we add to BirdNET-Pi
-├── frontend/           # static HTML/JS/CSS for the collage
-├── assets/             # 498 bundled illustrations + photo-cutout fallbacks
-├── api/                # PHP shims served by BirdNET-Pi's PHP-FPM
-├── scripts/            # generate -> cutout -> masks pipeline + prompt
-└── forwarding/         # optional HA / MQTT / Cloudflare configs
+homeassistant/
+├── install.sh       # copies the dashboard + artwork into /config/www
+└── www/
+    ├── index.html   # app shell
+    ├── config.js    # your settings (BirdNET-Go URL, sit confidence)
+    ├── apt.js       # collage app + BirdNET-Go adapter (silhouette masks embedded)
+    ├── styles.css
+    └── favicon.png
+avian/
+├── assets/          # 498 bundled illustrations + photo-cutout fallbacks
+└── scripts/         # generate -> cutout -> masks pipeline (Gemini + BiRefNet)
+docs/                # screenshot
 ```
 
-Everything outside `avian/` is upstream BirdNET-Pi.
-
 ---
 
-## License
+## Credits & license
 
-CC-BY-NC-SA-4.0, inherited from [BirdNET-Pi](https://github.com/Nachtzuster/BirdNET-Pi/blob/main/LICENSE). Non-commercial use only. See the [BirdNET-Pi README](https://github.com/Nachtzuster/BirdNET-Pi/blob/main/README.md) for full Cornell attribution.
+- Original [AvianVisitors](https://github.com/Twarner491/AvianVisitors)
+  collage, illustrations, and layout by
+  [Teddy Warner](https://theodore.net).
+- [BirdNET-Go](https://github.com/tphakala/birdnet-go) by Tomi P. Hakala,
+  packaged for Home Assistant by
+  [alexbelgium](https://github.com/alexbelgium/hassio-addons).
+- Bird identification by [BirdNET](https://birdnet.cornell.edu/) (Cornell
+  Lab of Ornithology / Chemnitz University of Technology).
 
----
-
-- [Fork this repository](https://github.com/Twarner491/AvianVisitors/fork)
-- [Watch this repo](https://github.com/Twarner491/AvianVisitors/subscription)
-- [Create issue](https://github.com/Twarner491/AvianVisitors/issues/new)
+License: [CC-BY-NC-SA-4.0](LICENSE), inherited from AvianVisitors /
+BirdNET-Pi. Non-commercial use only.

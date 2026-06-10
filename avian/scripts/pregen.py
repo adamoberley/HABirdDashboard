@@ -38,17 +38,17 @@ Contrastive anti-reference:
 
 Usage:
     # Every species BirdNET-Pi knows:
-    python3 pregen.py --labels ~/BirdNET-Pi/model/labels.txt
+    python3 pregen.py --labels labels.txt
 
     # Only species observed in an eBird region:
-    python3 pregen.py --labels ~/BirdNET-Pi/model/labels.txt \\
+    python3 pregen.py --labels labels.txt \\
                       --ebird-region US-CA --ebird-key YOUR_KEY
 
     # Re-render a single species (useful after editing the prompt):
     python3 pregen.py --species "Calypte anna|Anna's Hummingbird" --force
 
     # Re-render everything after a prompt change:
-    python3 pregen.py --labels ~/BirdNET-Pi/model/labels.txt --force
+    python3 pregen.py --labels labels.txt --force
 
 Set GEMINI_API_KEY in the environment (preferred) or pass --gemini-key.
 """
@@ -212,7 +212,7 @@ USER_AGENT = "AvianVisitors/1.0 (https://github.com/Twarner491/AvianVisitors)"
 
 
 def slugify(sci: str) -> str:
-    """Match avian/frontend/apt.js slugify() exactly."""
+    """Match homeassistant/www/apt.js slugify() exactly."""
     return re.sub(r"[^a-z0-9]+", "-", sci.lower()).strip("-")
 
 
