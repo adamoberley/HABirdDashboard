@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# AvianVisitors for Home Assistant + BirdNET-Go - installer.
+# HABirdDashboard - installer.
 #
 # Copies the static dashboard (homeassistant/www) plus the bundled bird
 # illustrations (avian/assets) into Home Assistant's www folder, where it
-# is served at /local/avianvisitors/index.html.
+# is served at /local/habird/index.html.
 #
 # Run it from a clone of this repo on the machine that can see your HA
 # config directory - e.g. inside the "Terminal & SSH" app
@@ -11,18 +11,18 @@
 # folder mounted via the Samba app.
 #
 # Usage:
-#   ./install.sh [target]        # default target: /config/www/avianvisitors
+#   ./install.sh [target]        # default target: /config/www/habird
 
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-TARGET="${1:-/config/www/avianvisitors}"
+TARGET="${1:-/config/www/habird}"
 
 if [ ! -d "$(dirname "$TARGET")" ]; then
   mkdir -p "$(dirname "$TARGET")"
 fi
 
-echo "Installing AvianVisitors dashboard to: $TARGET"
+echo "Installing HABirdDashboard to: $TARGET"
 mkdir -p "$TARGET/assets"
 
 # Frontend (index.html, apt.js, styles.css, config.js, favicon).
@@ -44,6 +44,6 @@ cp -r "$REPO_ROOT/avian/assets/illustrations" "$TARGET/assets/"
 cp -r "$REPO_ROOT/avian/assets/cutouts" "$TARGET/assets/"
 
 echo
-echo "Done. Open: http://<your-home-assistant>:8123/local/avianvisitors/index.html"
+echo "Done. Open: http://<your-home-assistant>:8123/local/habird/index.html"
 echo "Then add it to HA: Settings -> Dashboards -> Add dashboard -> Webpage,"
-echo "with URL /local/avianvisitors/index.html"
+echo "with URL /local/habird/index.html"

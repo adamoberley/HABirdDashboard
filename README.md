@@ -1,8 +1,8 @@
-# AvianVisitors for Home Assistant
+# HABirdDashboard
 
-*A live bird collage from your window - as a Home Assistant dashboard, fed by BirdNET-Go.*
+*A live bird collage for Home Assistant, fed by BirdNET-Go.*
 
-<img alt="avianvisitors collage" src="docs/thumb.png" />
+<img alt="HABirdDashboard collage" src="docs/thumb.png" />
 
 A dashboard for the data the
 [BirdNET-Go Home Assistant app](https://github.com/alexbelgium/hassio-addons/tree/master/birdnet-go)
@@ -18,9 +18,11 @@ static page served from Home Assistant's `www` folder (no separate app, no
 server, no database of its own), and the browser reads your BirdNET-Go
 app's REST API directly.
 
-This is a fork of [AvianVisitors](https://github.com/Twarner491/AvianVisitors)
-(which runs on BirdNET-Pi on a dedicated Raspberry Pi), reworked to run
-against the BirdNET-Go app on Home Assistant.
+The artwork and the silhouette-masking collage layout come from
+[AvianVisitors](https://github.com/Twarner491/AvianVisitors) (a BirdNET-Pi
+project for a dedicated Raspberry Pi); everything else here - the data
+layer, the confidence-based poses, the deployment - is built for Home
+Assistant + BirdNET-Go.
 
 ---
 
@@ -113,12 +115,12 @@ them there:
 open its web terminal, and run:
 
 ```bash
-git clone https://github.com/adamoberley/avianvisitorsHA.git /tmp/avianvisitors
-/tmp/avianvisitors/homeassistant/install.sh
-rm -rf /tmp/avianvisitors
+git clone https://github.com/adamoberley/HABirdDashboard.git /tmp/habird
+/tmp/habird/homeassistant/install.sh
+rm -rf /tmp/habird
 ```
 
-That copies everything to `/config/www/avianvisitors` (the artwork is
+That copies everything to `/config/www/habird` (the artwork is
 ~350MB, so the clone and copy take a minute or two).
 
 **Option B - Samba (no terminal):** install the official **Samba share**
@@ -127,7 +129,7 @@ app, then from your computer:
 1. Download this repo as a ZIP (**Code → Download ZIP** on GitHub) and
    extract it.
 2. Open HA's network share (`\\homeassistant\config` on Windows,
-   `smb://homeassistant/config` on Mac) and create `www/avianvisitors/`.
+   `smb://homeassistant/config` on Mac) and create `www/habird/`.
 3. Copy into that folder:
    - all five files from `homeassistant/www/` (`index.html`, `config.js`,
      `apt.js`, `styles.css`, `favicon.png`),
@@ -137,7 +139,7 @@ app, then from your computer:
 Then open it in a browser to check it works:
 
 ```
-http://<your-ha-host>:8123/local/avianvisitors/index.html
+http://<your-ha-host>:8123/local/habird/index.html
 ```
 
 > Blank 404? If `/config/www` didn't exist before this, restart Home
@@ -147,7 +149,7 @@ http://<your-ha-host>:8123/local/avianvisitors/index.html
 ## Step 4 — Add it to Home Assistant
 
 **Sidebar (recommended):** **Settings → Dashboards → + Add dashboard →
-Webpage**, URL `/local/avianvisitors/index.html`, give it a name like
+Webpage**, URL `/local/habird/index.html`, give it a name like
 "Birds" and an icon (`mdi:bird`). It appears in your sidebar, full screen.
 
 **As a card instead:** add a **Webpage** card to any existing dashboard with
@@ -160,7 +162,7 @@ has history, it shows up immediately.
 
 ## Configuration
 
-Edit `/config/www/avianvisitors/config.js`:
+Edit `/config/www/habird/config.js`:
 
 ```js
 window.AV_CONFIG = {
