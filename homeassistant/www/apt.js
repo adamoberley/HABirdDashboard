@@ -43,7 +43,7 @@
 
   var AV_CFG = window.AV_CONFIG || {};
   // '' -> same host the dashboard is served from, port 8080 (the stock
-  // alexbelgium add-on exposes BirdNET-Go there on the HA box itself).
+  // alexbelgium app (add-on) exposes BirdNET-Go there on the HA box itself).
   var BG_BASE = (AV_CFG.birdnetGoUrl || '').replace(/\/+$/, '') ||
     (location.protocol + '//' + location.hostname + ':8080');
   // Perched at/above this best-in-window confidence, flying below it.

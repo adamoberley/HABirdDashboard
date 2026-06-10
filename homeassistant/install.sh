@@ -6,9 +6,9 @@
 # is served at /local/avianvisitors/index.html.
 #
 # Run it from a clone of this repo on the machine that can see your HA
-# config directory - e.g. inside the "Terminal & SSH" add-on
+# config directory - e.g. inside the "Terminal & SSH" app
 # (config lives at /config), or on any computer with the HA config
-# folder mounted via the Samba add-on.
+# folder mounted via the Samba app.
 #
 # Usage:
 #   ./install.sh [target]        # default target: /config/www/avianvisitors
