@@ -8,6 +8,21 @@ See it running at [bird.onethreenine.net](https://bird.onethreenine.net).
 
 ---
 
+## ⭐ This fork: Home Assistant + BirdNET-Go
+
+This fork adds a build of the collage that runs as a **Home Assistant
+dashboard fed by [BirdNET-Go](https://github.com/tphakala/birdnet-go)**
+(e.g. the [alexbelgium add-on](https://github.com/alexbelgium/hassio-addons/tree/master/birdnet-go)) -
+no BirdNET-Pi install required. Same illustrations, same mask-nesting layout
+math; the data layer reads BirdNET-Go's REST API directly, and birds perch
+when their best in-window confidence is ≥ 96% (flying otherwise).
+
+**→ Setup guide: [`homeassistant/README.md`](homeassistant/README.md)**
+
+Everything below is the original BirdNET-Pi-based install.
+
+---
+
 ## BOM
 
 | Qty | Description | Price | Link | Notes |
