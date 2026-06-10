@@ -20,4 +20,22 @@ window.AV_CONFIG = {
   // a loud, unmistakable bird is probably settled nearby - a faint,
   // uncertain one is just passing through.
   sitConfidence: 0.96,
+
+  // Wall-mounted display extras. All off by default for desk browsing.
+  //
+  // Tip: instead of (or in addition to) these, you can switch them on
+  // per-display from the URL, so one install serves both your laptop
+  // and the hallway tablet:
+  //   /local/habird/index.html?wall            clock + weather + cursor hiding
+  //   /local/habird/index.html?wall&cycle=45   ...plus rotate views every 45s
+  wall: {
+    clock: false,        // time + date, top right, matching the page style
+    weather: false,      // current conditions + sunrise/sunset, straight from
+                         // BirdNET-Go's weather support (yr.no by default -
+                         // no API key; hides itself if you've disabled it)
+    fahrenheit: false,   // BirdNET-Go reports Celsius; true converts for display
+    cycleSeconds: 0,     // auto-rotate collage -> stats -> atlas every N
+                         // seconds (0 = off); any touch postpones the hop
+    hideCursor: false,   // hide the mouse cursor after 8s idle (kiosks)
+  },
 };

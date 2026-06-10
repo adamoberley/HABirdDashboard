@@ -39,6 +39,21 @@
     <button data-h="168" type="button">7D</button>
     <button data-h="1000000" type="button">ALL</button>
   </div>
+  <!-- Wall-display widgets (clock / weather). Hidden unless enabled via
+       config.js (wall: {...}) or a ?wall query param - apt.js unhides and
+       populates them. Sits where the menu button was in the Pi build. -->
+  <div class="wall-widgets" id="wallWidgets" hidden>
+    <div class="ww-block" id="wwClock" hidden>
+      <span class="ww-big" id="wwTime">--:--</span>
+      <span class="ww-cap" id="wwDate"></span>
+    </div>
+    <i class="ww-rule" id="wwRule" hidden aria-hidden="true"></i>
+    <div class="ww-block" id="wwWeather" hidden>
+      <span class="ww-big" id="wwTemp"></span>
+      <span class="ww-cap" id="wwCond"></span>
+      <span class="ww-cap" id="wwSun"></span>
+    </div>
+  </div>
   <button class="menu-btn" id="menuBtn">menu</button>
 </header>
 

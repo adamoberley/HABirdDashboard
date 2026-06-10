@@ -3406,4 +3406,120 @@
     var s = readHash();
     if (s) highlightAtlas(s);
   };
+
+  // ===========================================================================
+  // Wall-display extras (HA build)
+  // ===========================================================================
+  // Opt-in widgets for wall-mounted dashboards: a clock, current weather
+  // (from BirdNET-Go's own weather endpoint, so no extra provider or key),
+  // automatic view cycling, and idle cursor hiding. Enabled per-install via
+  // config.js `wall: {...}`, or per-display via the URL - `?wall` turns on
+  // clock + weather + cursor hiding, `?cycle=45` rotates the views - so one
+  // install can serve both a desk browser and a kiosk.
+  (function wallDisplay() {
+    var WALL = AV_CFG.wall || {};
+    function urlFlag(name) {
+      return new RegExp('[?&]' + name + '(=|&|$)').test(location.search);
+    }
+    function urlNum(name) {
+      var m = location.search.match(new RegExp('[?&]' + name + '=(\\d+)'));
+      return m ? +m[1] : 0;
+    }
+    var wallOn      = urlFlag('wall');
+    var showClock   = !!WALL.clock || wallOn;
+    var showWeather = !!WALL.weather || wallOn;
+    var cycleSec    = urlNum('cycle') || +WALL.cycleSeconds || 0;
+    var hideCursor  = !!WALL.hideCursor || wallOn;
+
+    var wrap = document.getElementById('wallWidgets');
+    if (wrap && (showClock || showWeather)) wrap.hidden = false;
+
+    // ---- Clock ----
+    // Minute precision; re-renders on the minute boundary so it never
+    // drifts visibly. Locale decides 12/24h and date wording.
+    if (showClock && wrap) {
+      var clockEl = document.getElementById('wwClock');
+      var timeEl = document.getElementById('wwTime');
+      var dateEl = document.getElementById('wwDate');
+      clockEl.hidden = false;
+      var drawClock = function () {
+        var now = new Date();
+        timeEl.textContent = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+        dateEl.textContent = now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+        setTimeout(drawClock, (61 - now.getSeconds()) * 1000);
+      };
+      drawClock();
+    }
+
+    // ---- Weather ----
+    // BirdNET-Go records conditions alongside detections (yr.no by
+    // default). If its weather support is disabled the fetch fails and
+    // the block simply never shows. Values are metric at the source;
+    // wall.fahrenheit converts for display.
+    if (showWeather && wrap) {
+      var wxEl = document.getElementById('wwWeather');
+      var tempEl = document.getElementById('wwTemp');
+      var condEl = document.getElementById('wwCond');
+      var sunEl = document.getElementById('wwSun');
+      var hhmm = function (iso) {
+        var d = new Date(iso);
+        return isNaN(d) ? '' : d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      };
+      var drawWeather = function () {
+        bgJson('/weather/latest').then(function (j) {
+          var h = (j && j.hourly) || {};
+          if (typeof h.temperature !== 'number') return;
+          var t = WALL.fahrenheit ? (h.temperature * 9 / 5 + 32) : h.temperature;
+          tempEl.textContent = Math.round(t) + '°';
+          condEl.textContent = (h.weather_desc || h.weather_main || '').toLowerCase();
+          var daily = j.daily || {};
+          var rise = daily.sunrise ? hhmm(daily.sunrise) : '';
+          var set = daily.sunset ? hhmm(daily.sunset) : '';
+          sunEl.textContent = (rise && set) ? ('sun ' + rise + ' – ' + set) : '';
+          wxEl.hidden = false;
+          var rule = document.getElementById('wwRule');
+          if (rule && showClock) rule.hidden = false;
+        }).catch(function () { /* weather disabled in BirdNET-Go - stay hidden */ });
+      };
+      drawWeather();
+      setInterval(drawWeather, 10 * 60 * 1000);
+    }
+
+    // ---- View cycling ----
+    // Rotates collage -> stats -> atlas every cycleSec seconds. Any
+    // touch/click/keypress postpones the next hop so a passerby can
+    // poke around without the screen yanking away mid-look.
+    if (cycleSec > 0) {
+      var cycleT = null;
+      var armCycle = function () {
+        clearTimeout(cycleT);
+        cycleT = setTimeout(function () {
+          go((currentView + 1) % 3);
+          armCycle();
+        }, cycleSec * 1000);
+      };
+      ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) {
+        document.addEventListener(ev, armCycle, { passive: true });
+      });
+      armCycle();
+    }
+
+    // ---- Idle cursor hiding ----
+    // Kiosk browsers usually park the pointer dead-centre; hide it after
+    // 8s of stillness and bring it back on any movement.
+    if (hideCursor) {
+      var idleT = null;
+      var wake = function () {
+        document.body.classList.remove('ww-cursor-hidden');
+        clearTimeout(idleT);
+        idleT = setTimeout(function () {
+          document.body.classList.add('ww-cursor-hidden');
+        }, 8000);
+      };
+      ['pointermove', 'pointerdown', 'keydown'].forEach(function (ev) {
+        document.addEventListener(ev, wake, { passive: true });
+      });
+      wake();
+    }
+  })();
 })();
