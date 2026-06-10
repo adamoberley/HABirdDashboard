@@ -51,56 +51,110 @@ Data refreshes every 30 seconds (paused while the tab is hidden).
 
 ---
 
-## Requirements
+## What you need
 
-1. **The BirdNET-Go app (required).** Install the
-   [alexbelgium birdnet-go app](https://github.com/alexbelgium/hassio-addons/tree/master/birdnet-go)
-   (Settings → Add-ons / Apps → Add-on Store → add the
-   `https://github.com/alexbelgium/hassio-addons` repository), start it, and
-   make sure it's detecting birds at `http://<your-ha-host>:8080` before
-   adding this dashboard. The dashboard has no data of its own - everything
-   it shows comes from BirdNET-Go.
+- **Home Assistant OS or Supervised** - apps (add-ons) only exist on these
+  install types. Container/Core installs can still use this dashboard, but
+  you'll need to run [BirdNET-Go](https://github.com/tphakala/birdnet-go)
+  yourself (e.g. in Docker) and skip to
+  [Step 3](#step-3--install-this-dashboard).
+- **A microphone** the Home Assistant machine can hear birds with - a cheap
+  USB lavalier mic in a window works great.
+- About **30 minutes** and ~400MB of disk for the app + artwork.
 
-   (Any other BirdNET-Go instance reachable from your browser works too -
-   point `config.js` at it.)
-
-2. **A way to put files into HA's `/config/www`**: the **Terminal & SSH**
-   app, the **Samba share** app, or the VS Code app.
+The whole setup is: install the BirdNET-Go app (the thing that listens and
+identifies) → confirm it's detecting → copy this dashboard into HA's `www`
+folder → add it to your sidebar. Step by step:
 
 ---
 
-## Install
+## Step 1 — Install the BirdNET-Go app
 
-From the Terminal & SSH app (or anywhere `/config` is visible):
+BirdNET-Go isn't in the built-in app store; it comes from
+[alexbelgium's](https://github.com/alexbelgium/hassio-addons) well-known
+community repository, which you add once:
+
+1. Click this to add the repository to your HA instance:
+
+   [![Open your Home Assistant instance and add the alexbelgium repository.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Falexbelgium%2Fhassio-addons)
+
+   Or by hand: **Settings → Add-ons → Add-on Store** (HA is renaming these
+   "Apps") → **⋮ menu (top-right) → Repositories** → paste
+   `https://github.com/alexbelgium/hassio-addons` → **Add** → **Close**.
+
+2. Back in the store, search for **BirdNET-Go** (refresh the page if it
+   doesn't show up yet - it's under "Alexbelgium's Hass.io Add-ons").
+3. Open it and click **Install**. It's a large image; give it a few minutes.
+4. On the app's **Configuration** tab, set `TZ` to your timezone (this
+   matters - the dashboard's time windows follow it), then **Save**.
+5. On the **Info** tab, click **Start**, and watch the **Log** tab until it
+   settles.
+
+## Step 2 — Get BirdNET-Go detecting
+
+1. Open the BirdNET-Go web UI at `http://<your-ha-host>:8080` (there's also
+   an **Open Web UI** button on the app page).
+2. In BirdNET-Go's **Settings**, set your **latitude/longitude** (so it
+   knows which species are plausible) and pick your **audio capture
+   device** - your USB mic should be listed.
+3. Wait for a bird (or play birdsong from your phone near the mic) and
+   confirm detections appear on BirdNET-Go's own dashboard.
+
+Don't move on until BirdNET-Go is detecting - this dashboard is only a
+prettier window onto that data.
+
+## Step 3 — Install this dashboard
+
+The dashboard is static files in HA's `/config/www` folder. Two ways to get
+them there:
+
+**Option A - Terminal & SSH app (easiest):** install the official
+**Terminal & SSH** app from the app store (no custom repository needed),
+open its web terminal, and run:
 
 ```bash
-git clone https://github.com/adamoberley/avianvisitorsHA.git
-cd avianvisitorsHA/homeassistant
-./install.sh                    # copies to /config/www/avianvisitors
+git clone https://github.com/adamoberley/avianvisitorsHA.git /tmp/avianvisitors
+/tmp/avianvisitors/homeassistant/install.sh
+rm -rf /tmp/avianvisitors
 ```
 
-Or copy by hand: everything in `homeassistant/www/`, plus
-`avian/assets/illustrations/` and `avian/assets/cutouts/` as
-`assets/illustrations` and `assets/cutouts`, into
-`/config/www/avianvisitors/`. The artwork is ~350MB.
+That copies everything to `/config/www/avianvisitors` (the artwork is
+~350MB, so the clone and copy take a minute or two).
 
-Then open:
+**Option B - Samba (no terminal):** install the official **Samba share**
+app, then from your computer:
+
+1. Download this repo as a ZIP (**Code → Download ZIP** on GitHub) and
+   extract it.
+2. Open HA's network share (`\\homeassistant\config` on Windows,
+   `smb://homeassistant/config` on Mac) and create `www/avianvisitors/`.
+3. Copy into that folder:
+   - all five files from `homeassistant/www/` (`index.html`, `config.js`,
+     `apt.js`, `styles.css`, `favicon.png`),
+   - `avian/assets/illustrations/` → as `assets/illustrations/`,
+   - `avian/assets/cutouts/` → as `assets/cutouts/`.
+
+Then open it in a browser to check it works:
 
 ```
 http://<your-ha-host>:8123/local/avianvisitors/index.html
 ```
 
-> If `/config/www` didn't exist before, restart Home Assistant once - HA
-> only starts serving `/local/` after the folder exists at boot.
+> Blank 404? If `/config/www` didn't exist before this, restart Home
+> Assistant once - HA only starts serving `/local/` after the folder exists
+> at boot.
 
-### Add it as a dashboard
+## Step 4 — Add it to Home Assistant
 
-**Sidebar (recommended):** Settings → Dashboards → **Add dashboard** →
-**Webpage**, URL `/local/avianvisitors/index.html`. Full screen, its own
-sidebar entry.
+**Sidebar (recommended):** **Settings → Dashboards → + Add dashboard →
+Webpage**, URL `/local/avianvisitors/index.html`, give it a name like
+"Birds" and an icon (`mdi:bird`). It appears in your sidebar, full screen.
 
-**As a card:** add a **Webpage (iframe) card** to any dashboard with the same
-URL. Give it plenty of height - the collage wants room.
+**As a card instead:** add a **Webpage** card to any existing dashboard with
+the same URL. Give it plenty of height - the collage wants room.
+
+That's it. The collage fills in as birds are heard; if BirdNET-Go already
+has history, it shows up immediately.
 
 ---
 
