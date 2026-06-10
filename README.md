@@ -1,28 +1,28 @@
 # HABirdDashboard
 
-*A live bird collage for Home Assistant, fed by BirdNET-Go.*
+*A live bird collage card for Home Assistant, fed by BirdNET-Go.*
 
 <img alt="HABirdDashboard collage" src="docs/thumb.png" />
 
-A dashboard for the data the
+A custom dashboard card for the data the
 [BirdNET-Go Home Assistant app](https://github.com/alexbelgium/hassio-addons/tree/master/birdnet-go)
-collects. BirdNET-Go identifies every bird your microphone hears; this
-dashboard turns those detections into a living collage. Each species appears
-as a kachō-e style illustration, sized by how often it's been heard, packed
-by its actual silhouette so wings cradle tails. Confident detections perch;
+collects. BirdNET-Go identifies every bird your microphone hears; this card
+turns those detections into a living collage. Each species appears as a
+kachō-e style illustration, sized by how often it's been heard, packed by
+its actual silhouette so wings cradle tails. Confident detections perch;
 uncertain ones fly past.
 
-**You need BirdNET-Go running** - this dashboard is the display layer, not
-the detector. What it *doesn't* need is anything extra beyond that: it's a
-static page served from Home Assistant's `www` folder (no separate app, no
-server, no database of its own), and the browser reads your BirdNET-Go
-app's REST API directly.
+**You need BirdNET-Go running** - this card is the display layer, not the
+detector. The card itself installs like any other custom card (HACS, one
+file), reads BirdNET-Go's API directly, gets weather and theme from Home
+Assistant natively, and lazy-loads bird artwork per species - nothing else
+to set up.
 
 The artwork and the silhouette-masking collage layout come from
 [AvianVisitors](https://github.com/Twarner491/AvianVisitors) (a BirdNET-Pi
 project for a dedicated Raspberry Pi); everything else here - the data
-layer, the confidence-based poses, the deployment - is built for Home
-Assistant + BirdNET-Go.
+layer, the confidence-based poses, the Home Assistant card - is built for
+Home Assistant + BirdNET-Go.
 
 ---
 
@@ -36,37 +36,41 @@ Assistant + BirdNET-Go.
   flight pose otherwise. A clear, close bird has settled in; a faint maybe is
   just passing through. Birds visibly "land" when a confident detection
   arrives.
+- **Clock + weather in the collage** (optional) - togglable in the card
+  settings. The block sits in a corner of the collage and the bird-packing
+  treats it as one of the flock: grow enough birds and they nest around the
+  numerals. Weather comes from your HA weather integration, in your HA
+  units, with sunrise/sunset from HA's sun - no tokens, no API keys.
 - **Stats** - an editorial detection timeline plus by-period counts, top
   species, and the newest additions to your life list.
 - **Atlas** - a field-guide card grid of every species ever heard, with
-  playback of the latest recording and client-rendered spectrograms that
-  follow the light/dark theme.
+  playback of the latest recording and client-rendered spectrograms.
 - **Detail modals** - per-species recording history with scrubbable
   spectrograms, Wikipedia descriptions, rarity, and links out to Wikipedia
   and eBird.
-- **498 bundled illustrations** - 249 (mostly North American) species, a
-  perched and a flight pose each, with photo-cutout fallbacks. A
-  [regeneration pipeline](avian/scripts/README.md) builds sets for other
-  regions.
-
-Data refreshes every 30 seconds (paused while the tab is hidden).
+- **498 illustrations** - 249 (mostly North American) species, a perched
+  and a flight pose each, lazy-loaded per detected species (no bulk
+  download). A [regeneration pipeline](avian/scripts/README.md) builds sets
+  for other regions.
+- Light/dark follows your Home Assistant theme. Data refreshes every 30
+  seconds (paused while the tab is hidden). Fully responsive - the collage
+  re-packs itself for any screen or orientation.
 
 ---
 
 ## What you need
 
 - **Home Assistant OS or Supervised** - apps (add-ons) only exist on these
-  install types. Container/Core installs can still use this dashboard, but
-  you'll need to run [BirdNET-Go](https://github.com/tphakala/birdnet-go)
-  yourself (e.g. in Docker) and skip to
-  [Step 3](#step-3--install-this-dashboard).
+  install types. Container/Core installs can still use the card; run
+  [BirdNET-Go](https://github.com/tphakala/birdnet-go) yourself (e.g. in
+  Docker) and skip to [Step 3](#step-3--install-the-card).
 - **A microphone** the Home Assistant machine can hear birds with - a cheap
   USB lavalier mic in a window works great.
-- About **30 minutes** and ~400MB of disk for the app + artwork.
+- About **20 minutes**.
 
 The whole setup is: install the BirdNET-Go app (the thing that listens and
-identifies) → confirm it's detecting → copy this dashboard into HA's `www`
-folder → add it to your sidebar. Step by step:
+identifies) → confirm it's detecting → install the card → add it to a
+dashboard. Step by step:
 
 ---
 
@@ -102,140 +106,90 @@ community repository, which you add once:
 3. Wait for a bird (or play birdsong from your phone near the mic) and
    confirm detections appear on BirdNET-Go's own dashboard.
 
-Don't move on until BirdNET-Go is detecting - this dashboard is only a
-prettier window onto that data.
+Don't move on until BirdNET-Go is detecting - this card is only a prettier
+window onto that data.
 
-## Step 3 — Install this dashboard
+## Step 3 — Install the card
 
-The dashboard is static files in HA's `/config/www` folder. Two ways to get
-them there:
+**With HACS (recommended):**
 
-**Option A - Terminal & SSH app (easiest):** install the official
-**Terminal & SSH** app from the app store (no custom repository needed),
-open its web terminal, and run:
+1. In HACS: **⋮ menu (top-right) → Custom repositories**, add
+   `https://github.com/adamoberley/HABirdDashboard` with type **Dashboard**.
+2. Search HACS for **HABird Card** and **Download** it.
+3. Reload your browser when prompted.
 
-```bash
-git clone https://github.com/adamoberley/HABirdDashboard.git /tmp/habird
-/tmp/habird/homeassistant/install.sh
-rm -rf /tmp/habird
-```
+**Without HACS:** download
+[`dist/habird-card.js`](dist/habird-card.js) into `/config/www/` (Samba or
+the Terminal & SSH app), then **Settings → Dashboards → ⋮ → Resources →
++ Add resource**, URL `/local/habird-card.js`, type **JavaScript module**.
 
-That copies everything to `/config/www/habird` (the artwork is
-~350MB, so the clone and copy take a minute or two).
+## Step 4 — Add the card to a dashboard
 
-**Option B - Samba (no terminal):** install the official **Samba share**
-app, then from your computer:
+1. Edit any dashboard → **+ Add card** → search **HABird**.
+2. The visual editor has everything: BirdNET-Go URL (leave empty for the
+   stock app on the same host), the sit/fly confidence slider, and toggles
+   for the clock, weather, corner, theme, and cursor hiding.
 
-1. Download this repo as a ZIP (**Code → Download ZIP** on GitHub) and
-   extract it.
-2. Open HA's network share (`\\homeassistant\config` on Windows,
-   `smb://homeassistant/config` on Mac) and create `www/habird/`.
-3. Copy into that folder:
-   - all five files from `homeassistant/www/` (`index.html`, `config.js`,
-     `apt.js`, `styles.css`, `favicon.png`),
-   - `avian/assets/illustrations/` → as `assets/illustrations/`,
-   - `avian/assets/cutouts/` → as `assets/cutouts/`.
-
-Then open it in a browser to check it works:
-
-```
-http://<your-ha-host>:8123/local/habird/index.html
-```
-
-> Blank 404? If `/config/www` didn't exist before this, restart Home
-> Assistant once - HA only starts serving `/local/` after the folder exists
-> at boot.
-
-## Step 4 — Add it to Home Assistant
-
-**Sidebar (recommended):** **Settings → Dashboards → + Add dashboard →
-Webpage**, URL `/local/habird/index.html`, give it a name like
-"Birds" and an icon (`mdi:bird`). It appears in your sidebar, full screen.
-
-**As a card instead:** add a **Webpage** card to any existing dashboard with
-the same URL. Give it plenty of height - the collage wants room.
+For a **full-screen view** (the way it's meant to be seen): create a new
+dashboard or view, set the view's layout to **Panel (single card)**, and
+put the card there - it fills the screen edge to edge. Name it "Birds",
+icon `mdi:bird`.
 
 That's it. The collage fills in as birds are heard; if BirdNET-Go already
 has history, it shows up immediately.
 
 ---
 
-## Configuration
+## Card options
 
-Edit `/config/www/habird/config.js`:
+All editable in the visual editor; YAML equivalents:
 
-```js
-window.AV_CONFIG = {
-  // Where BirdNET-Go lives. '' (default) = same host as this page, port
-  // 8080 - right for the stock app. Otherwise e.g. 'http://192.168.1.50:8080'.
-  birdnetGoUrl: '',
-
-  // Sitting-or-flying: perched at/above this best-in-window confidence,
-  // flight pose below it.
-  sitConfidence: 0.96,
-
-  // Wall-mounted display extras - see the next section.
-  wall: {
-    clock: false,           // time + date, in a corner of the collage
-    weather: false,         // current conditions + sunrise/sunset
-    corner: 'bottom-right', // which corner the block lives in
-    hideCursor: false,      // hide the mouse cursor after 8s idle
-    haToken: '',            // set to use Home Assistant's weather (see below)
-    weatherEntity: '',      // e.g. 'weather.forecast_home'; empty = auto
-    fahrenheit: false,      // BirdNET-Go source only; HA uses your HA units
-  },
-};
+```yaml
+type: custom:habird-card
+birdnet_url: ""              # empty = this host, port 8080 (the stock app)
+sit_confidence: 0.96         # perched at/above, flying below
+clock: true                  # time + date in a corner of the collage
+weather: true                # conditions + sunrise/sunset from HA
+weather_entity: ""           # empty = first weather.* entity found
+corner: bottom-right         # where the clock/weather block lives
+hide_cursor: false           # hide the pointer after 8s idle (wall displays)
+theme: auto                  # auto = follow HA light/dark; or light / dark
+image_base: ""               # empty = artwork from CDN (see below)
+height: ""                   # px; empty = fill the space (560px minimum)
 ```
 
-The installer never overwrites an existing `config.js`.
+**Weather** reads your Home Assistant weather integration directly through
+the card's own connection - no access token, in your HA units, with
+sunrise/sunset from HA's `sun.sun`. If HA has no weather entity, the card
+quietly falls back to BirdNET-Go's built-in weather (yr.no).
+
+**Artwork** lazy-loads per species from a CDN view of this repo
+(jsDelivr) - only birds you've actually heard are ever fetched, one PNG
+each, cached by the browser. For a fully offline install, copy
+`avian/assets/` to `/config/www/habird-art/` and set
+`image_base: /local/habird-art/`.
 
 ---
 
 ## Wall-mounted displays
 
-The layout is fully responsive - the collage re-packs itself for any screen,
-portrait or landscape - so it already looks right on a hallway tablet or a
-TV. For a display that's *only* a bird dashboard, there are a few extras,
-styled to match the page (serif numerals over small letterspaced captions,
-following the light/dark theme):
+Turn on **clock** and **weather** in the card settings and put the card on
+a panel-view dashboard - that's the whole setup. The block sits quietly in
+whichever corner you pick, styled like the rest of the page (serif numerals
+over small letterspaced captions, following light/dark), and the
+bird-packing treats it as one of the flock: when enough birds show up to
+reach that corner, they nest around the numerals with the same
+silhouette-mask spacing they use against each other.
 
-- **Clock + weather, inside the collage** - time, date, current
-  temperature, conditions, and sunrise/sunset sit quietly in a corner of
-  the collage itself. The bird-packing treats the block as one of the
-  flock: when enough birds show up to reach that corner, they nest around
-  the numerals with the same silhouette-mask spacing they use against each
-  other. Pick the corner with `wall.corner`.
-- **Cursor hiding** - the pointer disappears after 8 seconds idle.
-
-**Weather sources.** By default conditions come from BirdNET-Go's built-in
-weather support (yr.no - no API key, no setup; if you've disabled it the
-widget stays hidden). To use **Home Assistant's weather instead** - your
-configured weather integration, in your HA units, with sunrise/sunset from
-HA's own `sun.sun` - set `wall.haToken` to a long-lived access token
-(HA profile → Security → Long-lived access tokens) and optionally
-`wall.weatherEntity`. One caution: files under `/config/www` are served
-without authentication, so anyone on your LAN could read that token - use
-a dedicated, non-administrator HA user for it.
-
-Turn it all on for everyone in `config.js` (above), or - nicer - per
-display **from the URL**, so the same install serves your laptop plainly
-and the wall tablet fully dressed:
-
-```
-/local/habird/index.html?wall                    clock + weather + cursor hiding
-/local/habird/index.html?wall&corner=top-left    ...in a different corner
-```
-
-Point your wall setup (a Webpage dashboard in kiosk mode, Fully Kiosk
-Browser, WallPanel, etc.) at the `?wall` URL and you're done. Dark theme
-suits evening rooms - toggle it once on the device (it's saved per
-browser).
+**hide_cursor** makes the pointer disappear after 8 seconds idle - useful
+for kiosk browsers (Fully Kiosk, WallPanel, or HA's own kiosk-mode
+dashboards) that park the mouse mid-screen.
 
 ---
 
 ## How it maps onto BirdNET-Go
 
-The frontend reads BirdNET-Go's API v2 (public routes, CORS-open by default):
+The card reads BirdNET-Go's API v2 (public routes, CORS-open by default):
 
 | Dashboard data | BirdNET-Go endpoint |
 |---|---|
@@ -252,44 +206,76 @@ collage sized by relative counts.
 
 ---
 
+## Alternative: standalone webpage install
+
+Before it was a card, this dashboard was a static page served from
+`/config/www` - that still works, and suits setups that want a plain URL
+(`/local/habird/index.html`) for an iframe or external kiosk browser:
+
+```bash
+git clone https://github.com/adamoberley/HABirdDashboard.git /tmp/habird
+/tmp/habird/homeassistant/install.sh     # copies page + artwork (~350MB)
+rm -rf /tmp/habird
+```
+
+Configure via `/config/www/habird/config.js` (BirdNET-Go URL, sit
+confidence, and `wall: {...}` for clock/weather - same features as the
+card; weather defaults to BirdNET-Go's built-in support, or set
+`wall.haToken` to use HA's). Add it with a **Webpage** dashboard pointing
+at `/local/habird/index.html`, and use `?wall` / `?corner=top-left` URL
+params to dress up a specific display.
+
+---
+
 ## Troubleshooting
 
 - **Nothing loads / console shows CORS errors.** BirdNET-Go allows all
   origins by default. If you've restricted `allowedorigins` in its security
   settings, add your HA origin (e.g. `http://homeassistant.local:8123`).
-- **Page is blank over Nabu Casa / HTTPS remote access.** The browser blocks
-  an `https://` page from calling the BirdNET-Go app's plain-`http` API (mixed
-  content). On the LAN over `http://` everything works; for remote use you'd
-  need the BirdNET-Go API behind HTTPS too (e.g. a reverse proxy).
-- **Counts look shifted by a day.** Make sure the BirdNET-Go app's `TZ` option
-  matches your actual timezone - the dashboard aligns its rolling windows
+- **Card loads but no data over Nabu Casa / HTTPS remote access.** The
+  browser blocks an `https://` page from calling the BirdNET-Go app's
+  plain-`http` API (mixed content). On the LAN over `http://` everything
+  works; for remote use you'd need the BirdNET-Go API behind HTTPS too
+  (e.g. a reverse proxy).
+- **No bird pictures.** The default artwork source is a CDN
+  (`cdn.jsdelivr.net`), so the *browser viewing the dashboard* needs
+  internet access. For offline/local-only setups use the `image_base`
+  option (see Card options).
+- **Counts look shifted by a day.** Make sure the BirdNET-Go app's `TZ`
+  option matches your actual timezone - the card aligns its rolling windows
   with BirdNET-Go's local dates.
 - **A species shows no picture.** The repo bundles 249 (mostly North
   American) species. Missing ones fall back to a photo cutout when bundled,
   otherwise the image is hidden. To generate illustrations for your region,
-  see [`avian/scripts/README.md`](avian/scripts/README.md), then re-run
-  `homeassistant/install.sh`.
-- **BirdNET-Go auth.** Only public BirdNET-Go routes are used, so the
-  dashboard works even with the BirdNET-Go app's authentication enabled.
+  see [`avian/scripts/README.md`](avian/scripts/README.md).
+- **BirdNET-Go auth.** Only public BirdNET-Go routes are used, so the card
+  works even with the BirdNET-Go app's authentication enabled.
 
 ---
 
 ## Repo layout
 
 ```
+dist/
+└── habird-card.js   # the custom card (generated - what HACS installs)
 homeassistant/
-├── install.sh       # copies the dashboard + artwork into /config/www
-└── www/
-    ├── index.html   # app shell
-    ├── config.js    # your settings (BirdNET-Go URL, sit confidence)
-    ├── apt.js       # collage app + BirdNET-Go adapter (silhouette masks embedded)
+├── card/build.js    # builds dist/habird-card.js from the www sources
+├── install.sh       # standalone-page install (copies page + artwork)
+└── www/             # source of truth: the app as a static page
+    ├── index.html
+    ├── config.js    # standalone-page settings
+    ├── apt.js       # collage app + BirdNET-Go adapter (masks embedded)
     ├── styles.css
     └── favicon.png
 avian/
 ├── assets/          # 498 bundled illustrations + photo-cutout fallbacks
 └── scripts/         # generate -> cutout -> masks pipeline (Gemini + BiRefNet)
 docs/                # screenshot
+hacs.json            # HACS metadata
 ```
+
+After editing anything in `homeassistant/www/`, regenerate the card with
+`node homeassistant/card/build.js` and commit `dist/habird-card.js`.
 
 ---
 
