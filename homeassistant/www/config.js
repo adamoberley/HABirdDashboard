@@ -6,7 +6,7 @@ window.AV_CONFIG = {
   //
   // Leave '' (empty) to auto-derive it as the host this page is served
   // from, on port 8080 - which is correct for the stock alexbelgium
-  // birdnet-go add-on running on the same Home Assistant box, however
+  // birdnet-go app (add-on) running on the same Home Assistant box, however
   // you reach it (IP, homeassistant.local, hostname).
   //
   // Set it explicitly if BirdNET-Go runs elsewhere or on another port,

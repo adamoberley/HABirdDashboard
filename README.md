@@ -4,19 +4,23 @@
 
 <img alt="avianvisitors collage" src="docs/thumb.png" />
 
-A microphone and [BirdNET-Go](https://github.com/tphakala/birdnet-go) identify
-every passing bird; this dashboard turns those detections into a living
-collage. Each species appears as a kachō-e style illustration, sized by how
-often it's been heard, packed by its actual silhouette so wings cradle tails.
-Confident detections perch; uncertain ones fly past.
+A dashboard for the data the
+[BirdNET-Go Home Assistant app](https://github.com/alexbelgium/hassio-addons/tree/master/birdnet-go)
+collects. BirdNET-Go identifies every bird your microphone hears; this
+dashboard turns those detections into a living collage. Each species appears
+as a kachō-e style illustration, sized by how often it's been heard, packed
+by its actual silhouette so wings cradle tails. Confident detections perch;
+uncertain ones fly past.
 
-It's a static page served straight from Home Assistant's `www` folder - no
-add-on of its own, no server, no database. The browser reads BirdNET-Go's
-REST API directly.
+**You need BirdNET-Go running** - this dashboard is the display layer, not
+the detector. What it *doesn't* need is anything extra beyond that: it's a
+static page served from Home Assistant's `www` folder (no separate app, no
+server, no database of its own), and the browser reads your BirdNET-Go
+app's REST API directly.
 
 This is a fork of [AvianVisitors](https://github.com/Twarner491/AvianVisitors)
 (which runs on BirdNET-Pi on a dedicated Raspberry Pi), reworked to run
-against BirdNET-Go on Home Assistant.
+against the BirdNET-Go app on Home Assistant.
 
 ---
 
@@ -47,19 +51,27 @@ Data refreshes every 30 seconds (paused while the tab is hidden).
 
 ---
 
-## Prerequisites
+## Requirements
 
-- Home Assistant with BirdNET-Go detecting birds - e.g. the
-  [alexbelgium birdnet-go add-on](https://github.com/alexbelgium/hassio-addons/tree/master/birdnet-go)
-  - or any BirdNET-Go instance reachable from your browser.
-- A way to put files into HA's `/config/www`: the **Terminal & SSH** add-on,
-  the **Samba share** add-on, or the VS Code add-on.
+1. **The BirdNET-Go app (required).** Install the
+   [alexbelgium birdnet-go app](https://github.com/alexbelgium/hassio-addons/tree/master/birdnet-go)
+   (Settings → Add-ons / Apps → Add-on Store → add the
+   `https://github.com/alexbelgium/hassio-addons` repository), start it, and
+   make sure it's detecting birds at `http://<your-ha-host>:8080` before
+   adding this dashboard. The dashboard has no data of its own - everything
+   it shows comes from BirdNET-Go.
+
+   (Any other BirdNET-Go instance reachable from your browser works too -
+   point `config.js` at it.)
+
+2. **A way to put files into HA's `/config/www`**: the **Terminal & SSH**
+   app, the **Samba share** app, or the VS Code app.
 
 ---
 
 ## Install
 
-From the Terminal & SSH add-on (or anywhere `/config` is visible):
+From the Terminal & SSH app (or anywhere `/config` is visible):
 
 ```bash
 git clone https://github.com/adamoberley/avianvisitorsHA.git
@@ -99,7 +111,7 @@ Edit `/config/www/avianvisitors/config.js`:
 ```js
 window.AV_CONFIG = {
   // Where BirdNET-Go lives. '' (default) = same host as this page, port
-  // 8080 - right for the stock add-on. Otherwise e.g. 'http://192.168.1.50:8080'.
+  // 8080 - right for the stock app. Otherwise e.g. 'http://192.168.1.50:8080'.
   birdnetGoUrl: '',
 
   // Sitting-or-flying: perched at/above this best-in-window confidence,
@@ -137,10 +149,10 @@ collage sized by relative counts.
   origins by default. If you've restricted `allowedorigins` in its security
   settings, add your HA origin (e.g. `http://homeassistant.local:8123`).
 - **Page is blank over Nabu Casa / HTTPS remote access.** The browser blocks
-  an `https://` page from calling the add-on's plain-`http` API (mixed
+  an `https://` page from calling the BirdNET-Go app's plain-`http` API (mixed
   content). On the LAN over `http://` everything works; for remote use you'd
   need the BirdNET-Go API behind HTTPS too (e.g. a reverse proxy).
-- **Counts look shifted by a day.** Make sure the add-on's `TZ` option
+- **Counts look shifted by a day.** Make sure the BirdNET-Go app's `TZ` option
   matches your actual timezone - the dashboard aligns its rolling windows
   with BirdNET-Go's local dates.
 - **A species shows no picture.** The repo bundles 249 (mostly North
@@ -149,7 +161,7 @@ collage sized by relative counts.
   see [`avian/scripts/README.md`](avian/scripts/README.md), then re-run
   `homeassistant/install.sh`.
 - **BirdNET-Go auth.** Only public BirdNET-Go routes are used, so the
-  dashboard works even with the add-on's authentication enabled.
+  dashboard works even with the BirdNET-Go app's authentication enabled.
 
 ---
 
