@@ -173,10 +173,52 @@ window.AV_CONFIG = {
   // Sitting-or-flying: perched at/above this best-in-window confidence,
   // flight pose below it.
   sitConfidence: 0.96,
+
+  // Wall-mounted display extras - see the next section.
+  wall: {
+    clock: false,        // time + date, top right
+    weather: false,      // current conditions + sunrise/sunset from BirdNET-Go
+    fahrenheit: false,   // convert BirdNET-Go's Celsius for display
+    cycleSeconds: 0,     // auto-rotate collage -> stats -> atlas (0 = off)
+    hideCursor: false,   // hide the mouse cursor after 8s idle
+  },
 };
 ```
 
 The installer never overwrites an existing `config.js`.
+
+---
+
+## Wall-mounted displays
+
+The layout is fully responsive - the collage re-packs itself for any screen,
+portrait or landscape - so it already looks right on a hallway tablet or a
+TV. For a display that's *only* a bird dashboard, there are a few extras,
+styled to match the page (serif numerals over small letterspaced captions,
+following the light/dark theme):
+
+- **Clock** - time and date, top right.
+- **Weather** - current temperature, conditions, and sunrise/sunset, pulled
+  from BirdNET-Go's own weather support (yr.no by default, no API key, no
+  setup). If you've disabled weather in BirdNET-Go the widget just stays
+  hidden.
+- **View cycling** - rotate collage → stats → atlas every N seconds; any
+  touch pauses the rotation so passers-by can poke around.
+- **Cursor hiding** - the pointer disappears after 8 seconds idle.
+
+Turn them on for everyone in `config.js` (above), or - nicer - per display
+**from the URL**, so the same install serves your laptop plainly and the
+wall tablet fully dressed:
+
+```
+/local/habird/index.html?wall              clock + weather + cursor hiding
+/local/habird/index.html?wall&cycle=45     ...plus rotate views every 45s
+```
+
+Point your wall setup (a Webpage dashboard in kiosk mode, Fully Kiosk
+Browser, WallPanel, etc.) at the `?wall` URL and you're done. Dark theme
+suits evening rooms - toggle it once on the device (it's saved per
+browser).
 
 ---
 
