@@ -1586,37 +1586,50 @@ body.av-local #dd-locked { display: none; }
 body.av-local #dd-items  { display: block; }
 
 /* ============ Wall-display widgets (HA build) ============
-   Clock + weather in the top-right slot the Pi build's menu button
-   occupied. Same editorial recipe as the rest of the page: a serif
-   display line over a monospace, letterspaced micro-caption, all on
-   the paper/ink variables so the dark theme inverts for free. */
+   Clock + weather as a quiet corner block INSIDE the collage view.
+   renderCollage() stamps this element's box into the silhouette-packing
+   grid, so when the flock grows the birds nest around the numerals the
+   same way they nest around each other. Same editorial recipe as the
+   rest of the page: a serif display line over a monospace, letterspaced
+   micro-caption, on the paper/ink variables so dark theme inverts free.
+   pointer-events:none keeps hover/click hit-testing on the birds. */
 .wall-widgets {
-  display: flex; align-items: center; gap: 18px;
-  text-align: right;
+  position: absolute; z-index: 6;
+  display: flex; flex-direction: column; gap: 10px;
+  pointer-events: none;
 }
 .wall-widgets[hidden] { display: none; }
-.ww-block { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+.wall-widgets[data-corner="bottom-right"] { right: 36px; bottom: 96px; align-items: flex-end; text-align: right; }
+.wall-widgets[data-corner="bottom-left"]  { left: 36px;  bottom: 96px; align-items: flex-start; text-align: left; }
+.wall-widgets[data-corner="top-right"]    { right: 36px; top: 14px;    align-items: flex-end; text-align: right; }
+.wall-widgets[data-corner="top-left"]     { left: 36px;  top: 14px;    align-items: flex-start; text-align: left; }
+.ww-block { display: flex; flex-direction: column; gap: 3px; }
+.wall-widgets[data-corner$="right"] .ww-block { align-items: flex-end; }
+.wall-widgets[data-corner$="left"] .ww-block { align-items: flex-start; }
 .ww-block[hidden] { display: none; }
 .ww-big {
-  font: 600 clamp(20px, 2.3vw, 30px)/1 ui-serif, "Iowan Old Style", "Bookman Old Style", Georgia, serif;
+  font: 600 clamp(26px, 3vw, 40px)/1 ui-serif, "Iowan Old Style", "Bookman Old Style", Georgia, serif;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.01em;
 }
 .ww-cap {
-  font: 9.5px/1.35 ui-monospace, Menlo, monospace;
+  font: 9.5px/1.45 ui-monospace, Menlo, monospace;
   letter-spacing: 0.16em; text-transform: uppercase;
   color: var(--ink-soft);
 }
 .ww-cap:empty { display: none; }
 .ww-rule {
-  width: 1px; align-self: stretch;
+  width: 44px; height: 1px;
   background: var(--hairline);
 }
 .ww-rule[hidden] { display: none; }
 @media (max-width: 700px) {
-  .wall-widgets { gap: 12px; }
-  .ww-big { font-size: 17px; }
+  .wall-widgets { gap: 8px; }
+  .wall-widgets[data-corner$="right"] { right: 18px; }
+  .wall-widgets[data-corner$="left"]  { left: 18px; }
+  .wall-widgets[data-corner^="bottom"] { bottom: 92px; }
+  .ww-big { font-size: 20px; }
   .ww-cap { font-size: 8px; letter-spacing: 0.1em; }
   /* The sunrise/sunset caption is the first thing to go on a phone. */
   #wwSun { display: none; }

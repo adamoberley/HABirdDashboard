@@ -23,19 +23,37 @@ window.AV_CONFIG = {
 
   // Wall-mounted display extras. All off by default for desk browsing.
   //
+  // The clock/weather block lives in a corner of the collage itself, and
+  // the bird-packing treats it as one of the flock: if enough birds show
+  // up to reach that corner, they nest around the numerals the same way
+  // they nest around each other.
+  //
   // Tip: instead of (or in addition to) these, you can switch them on
   // per-display from the URL, so one install serves both your laptop
   // and the hallway tablet:
-  //   /local/habird/index.html?wall            clock + weather + cursor hiding
-  //   /local/habird/index.html?wall&cycle=45   ...plus rotate views every 45s
+  //   /local/habird/index.html?wall                   clock + weather + cursor hiding
+  //   /local/habird/index.html?wall&corner=top-left   ...in a different corner
   wall: {
-    clock: false,        // time + date, top right, matching the page style
-    weather: false,      // current conditions + sunrise/sunset, straight from
-                         // BirdNET-Go's weather support (yr.no by default -
-                         // no API key; hides itself if you've disabled it)
-    fahrenheit: false,   // BirdNET-Go reports Celsius; true converts for display
-    cycleSeconds: 0,     // auto-rotate collage -> stats -> atlas every N
-                         // seconds (0 = off); any touch postpones the hop
-    hideCursor: false,   // hide the mouse cursor after 8s idle (kiosks)
+    clock: false,          // time + date
+    weather: false,        // current conditions + sunrise/sunset
+    corner: 'bottom-right', // 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+    hideCursor: false,     // hide the mouse cursor after 8s idle (kiosks)
+
+    // Weather source. With haToken set, conditions come from Home
+    // Assistant itself - your configured weather integration, in HA's
+    // units, plus sunrise/sunset from sun.sun. Create the token under
+    // your HA profile -> Security -> Long-lived access tokens.
+    //
+    // SECURITY NOTE: /config/www files are served without authentication,
+    // so this token is readable by anyone who can reach your HA on the
+    // LAN. Use a token from a dedicated, non-administrator HA user.
+    //
+    // Left empty, weather falls back to BirdNET-Go's built-in support
+    // (yr.no by default - zero setup; hides itself if you disabled it).
+    haToken: '',
+    weatherEntity: '',     // e.g. 'weather.forecast_home'; empty = first
+                           // weather.* entity found in HA
+    fahrenheit: false,     // BirdNET-Go source only (it reports Celsius);
+                           // the HA source already uses your HA units
   },
 };
