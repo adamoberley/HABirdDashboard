@@ -9,7 +9,8 @@ this directory.
 
 1. `pregen.py` renders each bird with Gemini 2.5 Flash Image, on a flat cream ground.
 2. `cutout.py` removes the ground with BiRefNet and crops to the bird.
-3. `build_masks.py` rebuilds the collage silhouette masks inlined in `apt.js`.
+3. `build_masks.py` rebuilds the collage silhouette masks inlined in
+   `homeassistant/www/apt.js`.
 4. `verify.py` (optional) runs an adversarial species-ID + anatomy check.
 
 ```bash
@@ -17,7 +18,7 @@ pip install -r requirements.txt
 export GEMINI_API_KEY='your-key'
 
 # 1. generate (cream ground) for your region's species
-python3 pregen.py --labels ~/BirdNET-Pi/model/labels.txt --ebird-region US-CA
+python3 pregen.py --labels labels.txt --ebird-region US-CA
 
 # 2. cut the ground off and crop
 python3 cutout.py
@@ -26,10 +27,13 @@ python3 cutout.py
 python3 build_masks.py
 ```
 
-`--labels` takes any `Sci|Com` per-line file (BirdNET-Pi's `labels.txt` works
-directly). `--ebird-region` filters to species actually seen in your region
-(needs `EBIRD_API_KEY`). Re-render one bird with
-`--species "Calypte anna|Anna's Hummingbird" --force`.
+`--labels` takes any `Sci|Com` per-line file; the bundled `labels.txt` is the
+full BirdNET 6K species list with English common names. `--ebird-region`
+filters to species actually seen in your region (needs `EBIRD_API_KEY`).
+Re-render one bird with `--species "Calypte anna|Anna's Hummingbird" --force`.
+
+After regenerating, re-run `homeassistant/install.sh` to copy the new
+illustrations into Home Assistant's www folder.
 
 ## Why a cream ground
 

@@ -58,7 +58,7 @@ Be honest. If the bird looks more like a different species, say so. If the anato
 
 
 def slugify(sci: str) -> str:
-    """Match avian/frontend/apt.js slugify() exactly."""
+    """Match homeassistant/www/apt.js slugify() exactly."""
     return re.sub(r"[^a-z0-9]+", "-", sci.lower()).strip("-")
 
 

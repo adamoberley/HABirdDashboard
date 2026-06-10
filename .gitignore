@@ -1,59 +1,16 @@
-# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
-# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
-
-# User-specific stuff
-.idea/**/workspace.xml
-.idea/**/tasks.xml
-.idea/**/usage.statistics.xml
-.idea/**/dictionaries
-.idea/**/shelf
-
-# AWS User-specific
-.idea/**/aws.xml
-
-# Generated files
-.idea/**/contentModel.xml
-.idea
-
-# Sensitive or high-churn files
-.idea/**/dataSources/
-.idea/**/dataSources.ids
-.idea/**/dataSources.local.xml
-.idea/**/sqlDataSources.xml
-.idea/**/dynamic.xml
-.idea/**/uiDesigner.xml
-.idea/**/dbnavigator.xml
-
-*.pyc
-__pycache__/
-*.flac
-.vscode
-model/labels.txt
-datasets/
-birdnet.conf
-IdentifiedSoFar.txt
-IdentifiedSoFar.txt.bak
-Birders_Guide_Installer_Configuration.txt
-birdnet/
-templates/*.service
-scripts/*.txt
-scripts/*.db
-analyzing_now.txt
-apprise.txt
-body.txt
-BirdDB.txt
-exclude_species_list.txt
-firstrun.ini
-HUMAN.txt
-include_species_list.txt
-whitelist_species_list.txt
-/nbproject/private/
+# IDEs / editors
+.idea/
+.vscode/
 .DS_Store
+__pycache__/
+*.pyc
 
-# --- AvianVisitors: local-only material, deliberately not shipped ---
+# Node tooling (local tests)
+node_modules/
+
 # Claude Code session data
 .claude/
-# Large source / reference imagery kept on disk for working
+
+# Illustration pipeline: large source / reference imagery kept on disk
 avian/assets/references/
-# Superseded assets retained locally
 avian/assets/_legacy/
