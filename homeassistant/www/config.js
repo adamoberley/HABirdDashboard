@@ -1,4 +1,4 @@
-// AvianVisitors for Home Assistant + BirdNET-Go - user configuration.
+// HABirdDashboard - user configuration.
 // Loaded before apt.js so the dashboard knows where your BirdNET-Go
 // instance lives and how to choose each bird's pose.
 window.AV_CONFIG = {
