@@ -614,10 +614,24 @@
 
   // Mask-aware nester. tiles: { fullW, fullH, mask, data }. Returns the
   // same tiles with .x, .y assigned (top-left in viewport coords).
-  function maskPack(tiles, W, H, xBias, yBias, pad) {
+  // `obstacle` (optional, {x,y,w,h} in the same coords) is stamped into
+  // the occupancy grid before any bird is placed, so the flock packs
+  // around it exactly as it packs around another bird - used for the
+  // wall-display clock/weather block sitting inside the collage.
+  function maskPack(tiles, W, H, xBias, yBias, pad, obstacle) {
     var GW = Math.ceil(W / GRID_STRIDE) + 2;
     var GH = Math.ceil(H / GRID_STRIDE) + 2;
     var grid = new Uint8Array(GW * GH);
+    if (obstacle) {
+      var ox0 = Math.max(0, obstacle.x / GRID_STRIDE | 0);
+      var oy0 = Math.max(0, obstacle.y / GRID_STRIDE | 0);
+      var ox1 = Math.min(GW - 1, (obstacle.x + obstacle.w) / GRID_STRIDE | 0);
+      var oy1 = Math.min(GH - 1, (obstacle.y + obstacle.h) / GRID_STRIDE | 0);
+      for (var ogy = oy0; ogy <= oy1; ogy++) {
+        var ooff = ogy * GW;
+        for (var ogx = ox0; ogx <= ox1; ogx++) grid[ooff + ogx] = 1;
+      }
+    }
 
     function cellRange(tile, tx, ty, c) {
       // For mask cell (c[0], c[1]), return [gx0, gy0, gx1, gy1] (inclusive)
@@ -678,7 +692,10 @@
     for (var i = 0; i < tiles.length; i++) {
       var t = tiles[i];
       var tx, ty;
-      if (i === 0) {
+      // Anchor bird goes dead-centre - unless an obstacle (the wall
+      // clock on a small screen) reaches that far, in which case it
+      // falls through to the spiral search like everyone else.
+      if (i === 0 && !(obstacle && collides(t, cx - t.fullW / 2, cy - t.fullH / 2))) {
         tx = cx - t.fullW / 2;
         ty = cy - t.fullH / 2;
         t.x = tx; t.y = ty;
@@ -698,7 +715,10 @@
         comY += (p.y + p.fullH / 2) * a;
         comW += a;
       });
-      comX /= comW; comY /= comW;
+      // Nothing placed yet (anchor was displaced by an obstacle):
+      // grow from the viewport centre instead of a 0/0 NaN.
+      if (comW > 0) { comX /= comW; comY /= comW; }
+      else { comX = cx; comY = cy; }
 
       var best = null, bestCost = Infinity;
       var step = Math.max(GRID_STRIDE, Math.min(t.fullW, t.fullH) * 0.05);
@@ -810,7 +830,20 @@
     var yBias = narrow ? 1.7 : 1;   // gentler than the desktop bias so the
                                     // portrait cluster stays a bit wider / less tall
     var pad = narrow ? Math.max(1, COLLAGE_PAD - 1) : COLLAGE_PAD;
-    var placed = maskPack(tiles, W, H, xBias, yBias, pad);
+    // Wall-display clock/weather block: when visible, its box (plus a
+    // little air so birds don't kiss the numerals) becomes a pre-stamped
+    // obstacle in the packing grid - the flock flows around it.
+    var obstacle = (function () {
+      var wEl = document.getElementById('wallWidgets');
+      if (!wEl || wEl.hidden) return null;
+      var wb = wEl.getBoundingClientRect();
+      if (!wb.width || !wb.height) return null;
+      var cb = collage.getBoundingClientRect();
+      var M = 12;
+      return { x: wb.left - cb.left - M, y: wb.top - cb.top - M,
+               w: wb.width + 2 * M, h: wb.height + 2 * M };
+    })();
+    var placed = maskPack(tiles, W, H, xBias, yBias, pad, obstacle);
 
     // Scale-to-fit: iterate shrink + repack until every tile lands on
     // screen. The old single-pass version dropped birds when one pass
@@ -843,16 +876,20 @@
         scale = Math.min(scale, sx, sy);
       }
       tiles.forEach(function (t) { t.fullW *= scale; t.fullH *= scale; });
-      placed = maskPack(tiles, W, H, xBias, yBias, pad);
+      placed = maskPack(tiles, W, H, xBias, yBias, pad, obstacle);
       b = clusterBounds(placed);
     }
 
     // Re-centre the cluster in the viewport so a small cluster doesn't
-    // drift to one side from the spiral's center-of-mass bias.
-    var dx = W / 2 - (b.L + b.R) / 2;
-    var dy = H / 2 - (b.T + b.B) / 2;
-    if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
-      placed.forEach(function (t) { if (t.x > -1000) { t.x += dx; t.y += dy; } });
+    // drift to one side from the spiral's center-of-mass bias. Skipped
+    // when an obstacle is stamped - a blind translation could shove a
+    // bird back over the clock the packer just avoided.
+    if (!obstacle) {
+      var dx = W / 2 - (b.L + b.R) / 2;
+      var dy = H / 2 - (b.T + b.B) / 2;
+      if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+        placed.forEach(function (t) { if (t.x > -1000) { t.x += dx; t.y += dy; } });
+      }
     }
 
     placed.forEach(function (r) {
@@ -3410,34 +3447,60 @@
   // ===========================================================================
   // Wall-display extras (HA build)
   // ===========================================================================
-  // Opt-in widgets for wall-mounted dashboards: a clock, current weather
-  // (from BirdNET-Go's own weather endpoint, so no extra provider or key),
-  // automatic view cycling, and idle cursor hiding. Enabled per-install via
+  // Opt-in widgets for wall-mounted dashboards: a clock + current weather
+  // living in a corner of the collage itself (renderCollage stamps their
+  // box into the packing grid so the birds nest around the numerals), and
+  // idle cursor hiding for kiosk browsers. Enabled per-install via
   // config.js `wall: {...}`, or per-display via the URL - `?wall` turns on
-  // clock + weather + cursor hiding, `?cycle=45` rotates the views - so one
-  // install can serve both a desk browser and a kiosk.
+  // clock + weather + cursor hiding, `?corner=top-left` repositions - so
+  // one install can serve both a desk browser and a kiosk.
+  //
+  // Weather sources, in order of preference:
+  //   1. Home Assistant itself (wall.haToken set): the page is served by
+  //      HA, so /api/* is same-origin - we read the weather entity (HA's
+  //      configured integration, in HA's configured units) and sun.sun
+  //      for sunrise/sunset.
+  //   2. BirdNET-Go's /api/v2/weather/latest (no token needed; yr.no by
+  //      default). wall.fahrenheit converts its Celsius for display.
   (function wallDisplay() {
     var WALL = AV_CFG.wall || {};
     function urlFlag(name) {
       return new RegExp('[?&]' + name + '(=|&|$)').test(location.search);
     }
-    function urlNum(name) {
-      var m = location.search.match(new RegExp('[?&]' + name + '=(\\d+)'));
-      return m ? +m[1] : 0;
+    function urlStr(name) {
+      var m = location.search.match(new RegExp('[?&]' + name + '=([\\w-]+)'));
+      return m ? m[1] : '';
     }
     var wallOn      = urlFlag('wall');
     var showClock   = !!WALL.clock || wallOn;
     var showWeather = !!WALL.weather || wallOn;
-    var cycleSec    = urlNum('cycle') || +WALL.cycleSeconds || 0;
     var hideCursor  = !!WALL.hideCursor || wallOn;
 
     var wrap = document.getElementById('wallWidgets');
-    if (wrap && (showClock || showWeather)) wrap.hidden = false;
+    if (!wrap) return;
+    var corner = urlStr('corner') || WALL.corner || 'bottom-right';
+    if (['top-left', 'top-right', 'bottom-left', 'bottom-right'].indexOf(corner) >= 0) {
+      wrap.setAttribute('data-corner', corner);
+    }
+    if (showClock || showWeather) wrap.hidden = false;
+
+    // The widget box is a packing obstacle, so whenever its size settles
+    // or changes (first weather paint, mostly) the collage re-packs
+    // around the new footprint. The 30s data poll re-packs anyway; this
+    // just avoids a visibly-overlapped first half-minute.
+    var lastW = 0, lastH = 0;
+    function repackIfGrown() {
+      var r = wrap.getBoundingClientRect();
+      if (Math.abs(r.width - lastW) > 6 || Math.abs(r.height - lastH) > 6) {
+        lastW = r.width; lastH = r.height;
+        renderCollageFromData();
+      }
+    }
 
     // ---- Clock ----
     // Minute precision; re-renders on the minute boundary so it never
     // drifts visibly. Locale decides 12/24h and date wording.
-    if (showClock && wrap) {
+    if (showClock) {
       var clockEl = document.getElementById('wwClock');
       var timeEl = document.getElementById('wwTime');
       var dateEl = document.getElementById('wwDate');
@@ -3452,11 +3515,7 @@
     }
 
     // ---- Weather ----
-    // BirdNET-Go records conditions alongside detections (yr.no by
-    // default). If its weather support is disabled the fetch fails and
-    // the block simply never shows. Values are metric at the source;
-    // wall.fahrenheit converts for display.
-    if (showWeather && wrap) {
+    if (showWeather) {
       var wxEl = document.getElementById('wwWeather');
       var tempEl = document.getElementById('wwTemp');
       var condEl = document.getElementById('wwCond');
@@ -3465,43 +3524,84 @@
         var d = new Date(iso);
         return isNaN(d) ? '' : d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
       };
-      var drawWeather = function () {
-        bgJson('/weather/latest').then(function (j) {
+      var paintWeather = function (temp, cond, rise, set) {
+        if (typeof temp !== 'number' || isNaN(temp)) return;
+        tempEl.textContent = Math.round(temp) + '\u00b0';
+        condEl.textContent = (cond || '').toLowerCase();
+        sunEl.textContent = (rise && set) ? ('sun ' + rise + ' \u2013 ' + set) : '';
+        wxEl.hidden = false;
+        var rule = document.getElementById('wwRule');
+        if (rule && showClock) rule.hidden = false;
+        repackIfGrown();
+      };
+
+      // -- Source 1: Home Assistant (same-origin /api with a long-lived
+      // token). Weather entity comes from wall.weatherEntity, or is
+      // auto-discovered as the first available weather.* entity.
+      var haEntity = WALL.weatherEntity || '';
+      var haJson = function (path) {
+        return fetch('/api' + path, {
+          cache: 'no-store',
+          headers: { 'Authorization': 'Bearer ' + WALL.haToken },
+        }).then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); });
+      };
+      // HA condition slugs -> printable words.
+      var haCond = function (s) {
+        if (s === 'partlycloudy') return 'partly cloudy';
+        if (s === 'windy-variant') return 'windy';
+        return String(s || '').replace(/-/g, ' ');
+      };
+      var drawWeatherHA = function () {
+        var entityP = haEntity
+          ? Promise.resolve(haEntity)
+          : haJson('/states').then(function (all) {
+              var hit = (all || []).filter(function (e) {
+                return /^weather\./.test(e.entity_id) && e.state !== 'unavailable';
+              })[0];
+              if (!hit) throw new Error('no weather entity');
+              haEntity = hit.entity_id;
+              return haEntity;
+            });
+        return entityP.then(function (ent) {
+          return Promise.all([
+            haJson('/states/' + ent),
+            haJson('/states/sun.sun').catch(function () { return null; }),
+          ]);
+        }).then(function (parts) {
+          var w = parts[0] || {}, attrs = w.attributes || {};
+          var sun = (parts[1] || {}).attributes || {};
+          paintWeather(
+            attrs.temperature,
+            haCond(w.state),
+            sun.next_rising ? hhmm(sun.next_rising) : '',
+            sun.next_setting ? hhmm(sun.next_setting) : ''
+          );
+        });
+      };
+
+      // -- Source 2: BirdNET-Go. Metric at the source; wall.fahrenheit
+      // converts for display. HA values come already in HA's units.
+      var drawWeatherBG = function () {
+        return bgJson('/weather/latest').then(function (j) {
           var h = (j && j.hourly) || {};
           if (typeof h.temperature !== 'number') return;
           var t = WALL.fahrenheit ? (h.temperature * 9 / 5 + 32) : h.temperature;
-          tempEl.textContent = Math.round(t) + '°';
-          condEl.textContent = (h.weather_desc || h.weather_main || '').toLowerCase();
           var daily = j.daily || {};
-          var rise = daily.sunrise ? hhmm(daily.sunrise) : '';
-          var set = daily.sunset ? hhmm(daily.sunset) : '';
-          sunEl.textContent = (rise && set) ? ('sun ' + rise + ' – ' + set) : '';
-          wxEl.hidden = false;
-          var rule = document.getElementById('wwRule');
-          if (rule && showClock) rule.hidden = false;
-        }).catch(function () { /* weather disabled in BirdNET-Go - stay hidden */ });
+          paintWeather(
+            t,
+            h.weather_desc || h.weather_main || '',
+            daily.sunrise ? hhmm(daily.sunrise) : '',
+            daily.sunset ? hhmm(daily.sunset) : ''
+          );
+        });
+      };
+
+      var drawWeather = function () {
+        (WALL.haToken ? drawWeatherHA() : drawWeatherBG())
+          .catch(function () { /* source unavailable - widget stays hidden */ });
       };
       drawWeather();
       setInterval(drawWeather, 10 * 60 * 1000);
-    }
-
-    // ---- View cycling ----
-    // Rotates collage -> stats -> atlas every cycleSec seconds. Any
-    // touch/click/keypress postpones the next hop so a passerby can
-    // poke around without the screen yanking away mid-look.
-    if (cycleSec > 0) {
-      var cycleT = null;
-      var armCycle = function () {
-        clearTimeout(cycleT);
-        cycleT = setTimeout(function () {
-          go((currentView + 1) % 3);
-          armCycle();
-        }, cycleSec * 1000);
-      };
-      ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) {
-        document.addEventListener(ev, armCycle, { passive: true });
-      });
-      armCycle();
     }
 
     // ---- Idle cursor hiding ----

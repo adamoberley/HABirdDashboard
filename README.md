@@ -176,11 +176,13 @@ window.AV_CONFIG = {
 
   // Wall-mounted display extras - see the next section.
   wall: {
-    clock: false,        // time + date, top right
-    weather: false,      // current conditions + sunrise/sunset from BirdNET-Go
-    fahrenheit: false,   // convert BirdNET-Go's Celsius for display
-    cycleSeconds: 0,     // auto-rotate collage -> stats -> atlas (0 = off)
-    hideCursor: false,   // hide the mouse cursor after 8s idle
+    clock: false,           // time + date, in a corner of the collage
+    weather: false,         // current conditions + sunrise/sunset
+    corner: 'bottom-right', // which corner the block lives in
+    hideCursor: false,      // hide the mouse cursor after 8s idle
+    haToken: '',            // set to use Home Assistant's weather (see below)
+    weatherEntity: '',      // e.g. 'weather.forecast_home'; empty = auto
+    fahrenheit: false,      // BirdNET-Go source only; HA uses your HA units
   },
 };
 ```
@@ -197,22 +199,31 @@ TV. For a display that's *only* a bird dashboard, there are a few extras,
 styled to match the page (serif numerals over small letterspaced captions,
 following the light/dark theme):
 
-- **Clock** - time and date, top right.
-- **Weather** - current temperature, conditions, and sunrise/sunset, pulled
-  from BirdNET-Go's own weather support (yr.no by default, no API key, no
-  setup). If you've disabled weather in BirdNET-Go the widget just stays
-  hidden.
-- **View cycling** - rotate collage → stats → atlas every N seconds; any
-  touch pauses the rotation so passers-by can poke around.
+- **Clock + weather, inside the collage** - time, date, current
+  temperature, conditions, and sunrise/sunset sit quietly in a corner of
+  the collage itself. The bird-packing treats the block as one of the
+  flock: when enough birds show up to reach that corner, they nest around
+  the numerals with the same silhouette-mask spacing they use against each
+  other. Pick the corner with `wall.corner`.
 - **Cursor hiding** - the pointer disappears after 8 seconds idle.
 
-Turn them on for everyone in `config.js` (above), or - nicer - per display
-**from the URL**, so the same install serves your laptop plainly and the
-wall tablet fully dressed:
+**Weather sources.** By default conditions come from BirdNET-Go's built-in
+weather support (yr.no - no API key, no setup; if you've disabled it the
+widget stays hidden). To use **Home Assistant's weather instead** - your
+configured weather integration, in your HA units, with sunrise/sunset from
+HA's own `sun.sun` - set `wall.haToken` to a long-lived access token
+(HA profile → Security → Long-lived access tokens) and optionally
+`wall.weatherEntity`. One caution: files under `/config/www` are served
+without authentication, so anyone on your LAN could read that token - use
+a dedicated, non-administrator HA user for it.
+
+Turn it all on for everyone in `config.js` (above), or - nicer - per
+display **from the URL**, so the same install serves your laptop plainly
+and the wall tablet fully dressed:
 
 ```
-/local/habird/index.html?wall              clock + weather + cursor hiding
-/local/habird/index.html?wall&cycle=45     ...plus rotate views every 45s
+/local/habird/index.html?wall                    clock + weather + cursor hiding
+/local/habird/index.html?wall&corner=top-left    ...in a different corner
 ```
 
 Point your wall setup (a Webpage dashboard in kiosk mode, Fully Kiosk
