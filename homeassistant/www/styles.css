@@ -580,9 +580,13 @@
   /* Hover pill - surfaces the windowed count for the bird under the
      cursor. Confirms (Anna's-hummingbird-is-#1 paranoia) that the
      collage scaling reflects the selected window, not all-time. */
+  /* JS anchors the pill to the hovered bird (left/top set per-hover) and
+     keeps it clear of the bottom switcher, so it no longer hides behind
+     it. translateX(-50%) centres it on the supplied point; z-index sits
+     above the slider (30) as a backstop for any residual overlap. */
   .collage-tip {
-    position: absolute; left: 50%; bottom: 14px;
-    transform: translateX(-50%);
+    position: absolute; left: 0; top: 0;
+    transform: translate(0, 0) translateX(-50%);
     padding: 6px 14px;
     background: var(--paper);
     border-radius: 999px;
@@ -592,9 +596,10 @@
     color: var(--ink);
     letter-spacing: 0.02em;
     opacity: 0; pointer-events: none;
-    transition: opacity 150ms ease;
+    transition: opacity 150ms ease,
+                transform 200ms cubic-bezier(.3, 0, .2, 1);
     white-space: nowrap;
-    z-index: 4;
+    z-index: 31;
   }
   .collage-tip[aria-hidden="false"] { opacity: 1; }
   .collage-tip .ct-name { font-style: normal; font-weight: 600; }

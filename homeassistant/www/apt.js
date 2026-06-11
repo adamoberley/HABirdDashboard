@@ -1805,6 +1805,35 @@
     }
     return null;
   }
+  // Adaptive tip placement: anchor the pill above the hovered bird,
+  // centred on it; flip below if there's no room above; clamp to the
+  // collage box; and lift it clear of the bottom switcher only when the
+  // two would actually overlap. wasHidden suppresses the glide on first
+  // appearance so it doesn't slide in from the corner.
+  function positionCollageTip(tip, t, wasHidden) {
+    var box = collage.getBoundingClientRect();
+    var tipW = tip.offsetWidth, tipH = tip.offsetHeight;
+    var half = tipW / 2;
+    var cx = t.x + t.fullW / 2;
+    cx = Math.max(half + 4, Math.min(cx, box.width - half - 4));
+    var ty = t.y - tipH - 10;                 // prefer above the bird
+    if (ty < 4) ty = t.y + t.fullH + 10;      // no room above -> go below
+    ty = Math.max(4, Math.min(ty, box.height - tipH - 4));
+    // Keep clear of the bottom switcher, but only if it's on screen and
+    // the tip would actually land on top of it.
+    var sw = document.querySelector('.slider');
+    if (sw) {
+      var sr = sw.getBoundingClientRect();
+      var sLeft = sr.left - box.left, sRight = sr.right - box.left;
+      var sTop = sr.top - box.top, sBot = sr.bottom - box.top;
+      var overlaps = (cx - half) < sRight && (cx + half) > sLeft
+        && ty < sBot && (ty + tipH) > sTop;
+      if (overlaps) ty = Math.max(4, sTop - tipH - 8);
+    }
+    if (wasHidden) tip.style.transition = 'none';
+    tip.style.transform = 'translate(' + cx + 'px,' + ty + 'px) translateX(-50%)';
+    if (wasHidden) { void tip.offsetWidth; tip.style.transition = ''; }
+  }
   collage.addEventListener('mousemove', function (ev) {
     var hit = maskHitTest(ev.clientX, ev.clientY);
     if (hit === collageHovered) return;
@@ -1815,6 +1844,7 @@
     var tip = document.getElementById('collageTip');
     if (tip) {
       if (hit) {
+        var wasHidden = tip.getAttribute('aria-hidden') !== 'false';
         var s = hit.data;
         var n = +s.n || 0;
         var noun = (n === 1) ? 'call' : 'calls';
@@ -1822,6 +1852,7 @@
           + '<span class="ct-w"> - </span>'
           + '<span class="ct-n">' + fmtN(n) + '</span>'
           + '<span class="ct-w"> ' + noun + ' ' + windowLabel(currentHours) + '</span>';
+        positionCollageTip(tip, hit, wasHidden);
         tip.setAttribute('aria-hidden', 'false');
       } else {
         tip.setAttribute('aria-hidden', 'true');
