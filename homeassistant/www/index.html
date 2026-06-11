@@ -88,11 +88,10 @@
     <section class="view" id="v1" aria-label="Stats">
       <div class="stats-grid">
         <div class="stats-timeline" id="statsTimeline">
-          <!-- Editorial detection timeline. Each column = one species
-               from the current time window. The black square's vertical
-               position encodes detection count; the species name + sci
-               name sit rotated below. Vertical hairlines separate
-               columns. Hard-rendered by renderStatsTimeline(). -->
+          <!-- Activity heatmap. One row per species from the current
+               time window (most-heard first), one cell per hour of day;
+               a cell's tint deepens with its detection count and the
+               number prints inside. Hard-rendered by renderActivity(). -->
         </div>
         <aside class="stats-side">
           <div class="grp">

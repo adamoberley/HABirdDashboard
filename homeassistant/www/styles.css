@@ -97,8 +97,9 @@
     transition: transform 480ms cubic-bezier(.7,.05,.2,1);
   }
   .view  { flex: 0 0 100%; height: 100%; overflow: auto; padding: 8px 56px 132px; position: relative; }
-  /* Collage and stats views both fit the viewport (no scroll). Atlas
-     keeps normal scroll. */
+  /* The collage view fits the viewport (no scroll). Atlas keeps normal
+     scroll; stats scrolls when its grid outgrows the box (overridden at
+     the .stats-grid rules below). */
   .view#v0, .view#v1 { overflow: hidden; padding: 8px 32px 88px; }
   .view#v0 { display: flex; }
   .view#v1 { display: flex; flex-direction: column; }
@@ -523,19 +524,17 @@
     to   { opacity: 1; transform: none; }
   }
   .bird-card.entering { animation: bird-card-in 480ms cubic-bezier(.2,.7,.3,1) backwards; }
-  /* Stats: the WHOLE graph populates left-to-right - columns, gridlines and
-     x-axis ticks stagger by their x; the y-axis + side panel fade in just
-     behind. Opacity only (these elements use transform for layout, so
-     animating transform here would fight their positioning). */
+  /* Stats: the heatmap populates top-to-bottom - the hour header leads,
+     species rows stagger down the list; the side panel fades in just
+     behind. Opacity only (sticky cells reposition themselves, so
+     animating transform here would fight their layout). */
   @keyframes stats-fade-in { from { opacity: 0; } to { opacity: 1; } }
-  .stats-tl-col.entering, .stats-tl-gridline.entering,
-  .stats-tl-xtick.entering, .stats-tl-yaxis.entering,
+  .stats-hm-head.entering, .stats-hm-row.entering,
   .stats-side h3.entering, .stats-side small.entering, .stats-side li.entering {
     animation: stats-fade-in 340ms ease backwards;
   }
   @media (prefers-reduced-motion: reduce) {
-    .bird-card.entering, .stats-tl-col.entering, .stats-tl-gridline.entering,
-    .stats-tl-xtick.entering, .stats-tl-yaxis.entering,
+    .bird-card.entering, .stats-hm-head.entering, .stats-hm-row.entering,
     .stats-side h3.entering, .stats-side small.entering, .stats-side li.entering { animation: none; }
   }
   .gtile {
@@ -609,170 +608,140 @@
   }
 
   /* Page header is now shared at .stage > .static-head - see top of CSS. */
-  /* Stats grid: charts stack on the LEFT, text sections on the RIGHT.
-     Each chart is a full-bleed card; each text section is a list with
-     subtle separators. Sized to fit the viewport without scrolling. */
+  /* Stats grid: the activity heatmap on the LEFT, text sections on the
+     RIGHT. Each text section is a list with subtle separators. The
+     heatmap scrolls within its panel; the view itself can also scroll
+     if the whole grid outgrows the viewport. */
   .stats-grid {
     flex: 1 1 auto; min-height: 0;
-    display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 80px;
-    max-width: 1100px; margin: 0 auto; width: 100%;
+    display: grid; grid-template-columns: 1.55fr 1fr; gap: 56px;
+    max-width: 1280px; margin: 0 auto; width: 100%;
     align-items: stretch;
   }
+  /* Anything that doesn't fit (short desktop window, stacked mobile
+     layout) scrolls instead of clipping. */
+  .view#v1 { overflow-y: auto; overflow-x: hidden; }
   @media (max-width: 900px) {
     .stats-grid { grid-template-columns: 1fr; gap: 40px; }
-    /* Single-column: the timeline has no tall grid sibling to stretch
-       against, so pin it to a usable height instead of letting it
-       collapse to its (zero) intrinsic height. clamp() keeps it sane
-       on both short landscape phones and tall portrait ones. */
-    .stats-timeline { height: clamp(260px, 44vh, 420px); }
-    /* Stacked timeline + side panel is taller than the box - let the
-       stats view scroll instead of clipping First Detections. */
-    .view#v1 { overflow-y: auto; overflow-x: hidden; }
-    /* Stacked order: tables first, the chart underneath, and a buffer
-       below the chart so its bottom row scrolls clear of the floating
-       view switcher. */
+    /* Stacked order: tables first, the heatmap underneath, and a buffer
+       below it so its bottom row scrolls clear of the floating view
+       switcher. */
     .stats-side { order: 1; }
-    .stats-timeline { order: 2; margin-bottom: 64px; }
-  }
-  /* Phones: the timeline keeps its editorial form but uses fixed wider
-     columns (set in drawHistograms) and scrolls horizontally for the rest,
-     with larger labels/ticks so it's legible + tappable. */
-  @media (max-width: 700px) {
-    .stats-timeline { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
-    .stats-tl-label { font-size: 11px; }
-    .stats-tl-label .sci { font-size: 9px; }
-    .stats-tl-xtick { font-size: 8px; }
+    .stats-timeline { order: 2; margin-bottom: 64px; max-height: none; }
   }
   /* Desktop two-column: size the grid to the side panel's content height
-     (the timeline stretches to match it) and centre it vertically, so the
-     chart sits beside the text at the same height instead of stretching to
-     the full viewport. */
+     (the heatmap pane stretches to match it, scrolling internally) and
+     centre it vertically. */
   @media (min-width: 901px) {
     .stats-grid { flex: 0 1 auto; margin: auto; }
   }
 
-  /* Editorial detection timeline. One evenly-spaced column per species,
-     ordered by last-detection time (x = time). Black square fills its
-     column so neighbours touch at the gridline; its height up the column
-     encodes count. Small rotated label + per-column timestamp at the
-     bottom. Fits the viewport - never scrolls. */
+  /* Activity heatmap: one row per species (most-heard first), one cell
+     per hour of day, BirdNET-Go dashboard style. Cell tint deepens with
+     detection count - mixed from paper toward ink so both themes work -
+     and the count prints inside. The hour header sticks to the top of
+     the scroll; species names stick to the left edge when the plot
+     scrolls sideways on phones. */
   .stats-timeline {
     position: relative;
-    flex: 1 1 auto; min-height: 0;
-    padding: 0 0 28px 32px;   /* left = y-axis (quantity), bottom = timestamps */
+    flex: 1 1 auto; min-height: 120px;
+    max-height: min(68vh, 620px);
+    overflow: auto; -webkit-overflow-scrolling: touch;
   }
-  .stats-tl-yaxis {
-    position: absolute; left: 0; top: 0; bottom: 28px; width: 28px;
-    border-right: 1px solid var(--hairline);
+  .stats-hm {
+    --hm-name: 136px;
+    display: flex; flex-direction: column;
+    min-width: 100%;
   }
-  .stats-tl-ytick {
-    position: absolute; right: 5px;
-    font: 8px/1 "SF Mono", Menlo, monospace; color: var(--ink-soft);
-    transform: translateY(50%);
+  .stats-hm-head, .stats-hm-row {
+    display: grid;
+    grid-template-columns: var(--hm-name) repeat(24, minmax(17px, 1fr)) 42px;
+    gap: 2px;
+    padding: 1px 0;
   }
-  .stats-tl-ytick::after {
-    content: ''; position: absolute; right: -5px; top: 50%;
-    width: 4px; height: 1px; background: var(--hairline);
+  .stats-hm-head {
+    position: sticky; top: 0; z-index: 3;
+    background: var(--paper);
   }
-  .stats-tl-plot {
-    position: relative; height: 100%;
+  .stats-hm-hr {
+    font: 8px/1 var(--av-font-mono); color: var(--ink-soft);
+    letter-spacing: 0.04em;
+    text-align: center; padding: 3px 0 4px;
   }
-  /* Evenly-spaced cell, one per species. JS sets left (column centre)
-     and width (the column slot); the square and label centre within it. */
-  .stats-tl-col {
-    position: absolute; top: 0; bottom: 0;
-    transform: translateX(-50%);
-    cursor: pointer;
+  .stats-hm-name {
+    position: sticky; left: 0; z-index: 2;
+    background: var(--paper);
+    display: flex; align-items: center;
+    padding-right: 10px; overflow: hidden;
+    transition: background 140ms ease;
   }
-  /* Faint vertical hairlines at every x-axis tick - the "no detections
-     in this slice" period reads as the empty space between marks. */
-  .stats-tl-gridline {
-    position: absolute; top: 0; bottom: 0;
-    width: 1px;
-    background: var(--hairline);
-    pointer-events: none;
-  }
-  .stats-tl-square {
-    position: absolute; left: 50%;
-    transform: translateX(-50%);
-    background: var(--ink);
-    /* Paper-coloured side borders. box-sizing: border-box keeps the box
-       column-filling, so the fill just insets 1px each side. Where two
-       squares touch, the abutting borders read as a crisp white line
-       directly between them; on the cluster's outer edges they vanish
-       into the matching paper background. */
-    border-left: 1px solid var(--paper);
-    border-right: 1px solid var(--paper);
-    transition: background 140ms ease, transform 140ms ease;
-  }
-  .stats-tl-col { cursor: pointer; }
-  /* Cross-highlight: hovering a square or a table row lights up the
-     matching species on the other side - the square scales up and its
-     label scales + shifts to the accent ink, so the whole column reads
-     as selected. */
-  .stats-tl-col.sync-hi .stats-tl-square {
-    background: var(--accent);
-    transform: translateX(-50%) scale(1.18);
-  }
-  .stats-tl-col.sync-hi .stats-tl-label {
-    transform: rotate(-90deg) translateY(55%) scale(1.1);
-  }
-  .stats-tl-col.sync-hi .stats-tl-label .com,
-  .stats-tl-col.sync-hi .stats-tl-label .sci { color: var(--accent); }
-  /* Two-line species label, rotated to read bottom-to-top like the
-     reference exhibition checklist. Sits just above the square -
-     rotate(-90deg) then translateY(50%) re-centres the stack on the
-     column regardless of label height. Common name and scientific
-     name sit as two adjacent columns of vertical text. The sync-hi
-     scale uses translateY(55%) to stay centred while enlarged. */
-  .stats-tl-label {
-    position: absolute; left: 50%;
-    transform-origin: 0% 100%;
-    /* translateY(50%) becomes a horizontal shift after the -90deg turn
-       that re-centres the rotated label on the column (= on its square),
-       so the name reads up the middle of each block. */
-    transform: rotate(-90deg) translateY(50%);
-    white-space: nowrap;
-    font: 10px/1.15 var(--av-font-display);
-    color: var(--ink);
-    transition: transform 130ms ease;
-  }
-  .stats-tl-label .com {
-    display: block; font-weight: 600;
+  .stats-hm-name .com {
+    font: 600 11.5px/1.2 var(--av-font-display); color: var(--ink);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     transition: color 130ms ease;
   }
-  .stats-tl-label .sci {
-    display: block;
-    font-style: italic; color: var(--ink-soft); font-size: 8.5px;
-    transition: color 130ms ease;
+  .stats-hm-cell {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 19px;
+    border-radius: 2px;
+    background: var(--paper-2);
+    font: 8.5px/1 var(--av-font-mono); color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    overflow: hidden;
   }
-  /* Ticks live inside .stats-tl-plot so their left:% aligns with the
-     gridlines (both share the plot's content box). bottom is negative
-     to push the label into the x-axis gutter below the plot. */
-  .stats-tl-xtick {
-    position: absolute; bottom: -19px;
-    transform: translateX(-50%);
-    font: 7px/1 "SF Mono", Menlo, monospace; color: var(--ink-soft);
-    white-space: nowrap;
+  /* Hours outside the current sub-day window get no tray tint, so the
+     window's extent reads as the band of filled trays. */
+  .stats-hm-cell.off { background: transparent; box-shadow: inset 0 0 0 1px var(--paper-2); }
+  /* Five count steps (log scale, set in renderActivity), paper -> ink. */
+  .stats-hm-cell.l1 { background: color-mix(in srgb, var(--ink) 12%, var(--paper)); }
+  .stats-hm-cell.l2 { background: color-mix(in srgb, var(--ink) 26%, var(--paper)); }
+  .stats-hm-cell.l3 { background: color-mix(in srgb, var(--ink) 45%, var(--paper)); color: var(--paper); }
+  .stats-hm-cell.l4 { background: color-mix(in srgb, var(--ink) 68%, var(--paper)); color: var(--paper); }
+  .stats-hm-cell.l5 { background: var(--ink); color: var(--paper); }
+  .stats-hm-tot {
+    display: flex; align-items: center; justify-content: flex-end;
+    padding-right: 2px;
+    font: 10px/1 var(--av-font-mono); color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
   }
-  .stats-tl-empty {
+  .stats-hm-head .stats-hm-tot {
+    align-items: flex-start; padding-top: 3px;
+    font-size: 8px; letter-spacing: 0.04em;
+  }
+  /* Cross-highlight: hovering a heatmap row or a table row lights up the
+     matching species on the other side - the name shifts to the accent
+     ink. Click opens the species' detail modal (data-sci delegation). */
+  .stats-hm-row { cursor: pointer; }
+  .stats-hm-row:hover .stats-hm-name,
+  .stats-hm-row.sync-hi .stats-hm-name { background: var(--paper-2); }
+  .stats-hm-row:hover .com,
+  .stats-hm-row.sync-hi .com { color: var(--accent); }
+  .stats-hm-empty {
     position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
     font: 11px var(--av-font-mono); color: var(--ink-soft);
     text-transform: lowercase; letter-spacing: 0.18em;
   }
-  /* Trim note - shown when the plot can't fit every species column and
-     falls back to the most-heard subset. A paper background keeps it
-     legible even if a tall label reaches the corner behind it. */
-  .stats-tl-cap {
-    position: absolute; top: 0; right: 0; z-index: 2;
-    background: var(--paper); padding: 1px 0 3px 8px;
-    font: 8.5px/1 "SF Mono", Menlo, monospace; color: var(--ink-soft);
+  /* Caption under the matrix: what the columns cover (rolling window vs
+     last-7-days aggregate) and whether the rows were trimmed. Sticky so
+     it doesn't wander off when the plot scrolls sideways. */
+  .stats-hm-cap {
+    position: sticky; left: 0;
+    padding: 8px 0 2px;
+    font: 8.5px/1 var(--av-font-mono); color: var(--ink-soft);
     letter-spacing: 0.04em;
+  }
+  /* Phones: fixed-width cells -> the plot grows past the viewport and
+     scrolls horizontally under the sticky name column. */
+  @media (max-width: 700px) {
+    .stats-hm { --hm-name: 104px; min-width: max-content; }
+    .stats-hm-head, .stats-hm-row {
+      grid-template-columns: var(--hm-name) repeat(24, 26px) 40px;
+    }
   }
 
   /* (Old chart-card / .stats-charts CSS removed - replaced by the
-     editorial .stats-timeline above.) */
+     activity heatmap above.) */
 
   .stats-side {
     display: flex; flex-direction: column; justify-content: center;
