@@ -297,8 +297,10 @@ light up a lamp for an owl...).
    and restart the app. It injects HA's broker address and credentials
    into BirdNET-Go for you.
    (Manual alternative: BirdNET-Go web UI → **Settings → Integrations →
-   MQTT**: enable it, broker `tcp://core-mosquitto:1883`, an HA username
-   + password, topic `birdnet`.)
+   MQTT**: enable it, set the broker to **`mqtt://<your-HA-IP>:1883`** -
+   e.g. `mqtt://192.168.1.2:1883` - with an HA username + password and
+   topic `birdnet`. Use the real IP: container hostnames like
+   `core-mosquitto` often don't resolve from inside the BirdNET-Go app.)
 3. **Turn on Home Assistant discovery**: in BirdNET-Go's web UI →
    **Settings → Integrations → MQTT**, enable the **Home Assistant**
    (auto-discovery) option. This is a separate toggle from MQTT itself,
