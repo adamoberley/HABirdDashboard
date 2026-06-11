@@ -50,9 +50,65 @@
   var SIT_CONFIDENCE = (typeof AV_CFG.sitConfidence === 'number') ? AV_CFG.sitConfidence : 0.90;
 
   function bgUrl(path) { return BG_BASE + '/api/v2' + path; }
+
+  // ---- HTTPS / Nabu Casa: route the API through HA ingress ----
+  // Remote access tunnels only HA itself, and the browser blocks an
+  // https page from calling a plain-http LAN URL (mixed content) - so
+  // there is NO direct BirdNET-Go URL that works remotely. The add-on
+  // ships HA ingress though, which is same-origin with HA and rides the
+  // tunnel. When the page is https and a hass connection is available,
+  // discover the add-on's ingress endpoint, open an ingress session
+  // (cookie, renewed every 5 minutes), and rebase the API onto it -
+  // full functionality, audio included, from anywhere. Discovery needs
+  // an admin user (the supervisor API); anything failing here quietly
+  // leaves the LAN default in place and the MQTT fallback carries data.
+  var BG_READY = Promise.resolve();
+  if (!AV_CFG.birdnetGoUrl && location.protocol === 'https:' && AV_CFG.__getHass) {
+    BG_READY = (function () {
+      function ha(method, path, data) {
+        var hass = AV_CFG.__getHass();
+        if (!hass || !hass.callApi) return Promise.reject('no hass');
+        return Promise.resolve(hass.callApi(method, path, data));
+      }
+      function unwrap(res) { return (res && res.data) || res || {}; }
+      return ha('GET', 'hassio/addons').then(function (res) {
+        var addons = unwrap(res).addons || [];
+        var hit = addons.filter(function (a) {
+          return /birdnet/i.test(a.slug || '') || /birdnet/i.test(a.name || '');
+        })[0];
+        if (!hit) throw new Error('no birdnet add-on');
+        return ha('GET', 'hassio/addons/' + hit.slug + '/info');
+      }).then(function (res) {
+        var info = unwrap(res);
+        if (!info.ingress || !info.ingress_url) throw new Error('no ingress');
+        var base = String(info.ingress_url).replace(/\/+$/, '');
+        var session = null;
+        function newSession() {
+          return ha('POST', 'hassio/ingress/session').then(function (r) {
+            session = unwrap(r).session || null;
+            if (session) {
+              document.cookie = 'ingress_session=' + session +
+                ';path=/api/hassio_ingress/;SameSite=Strict;Secure';
+            }
+            return session;
+          });
+        }
+        return newSession().then(function (s) {
+          if (!s) throw new Error('no ingress session');
+          setInterval(function () {
+            ha('POST', 'hassio/ingress/validate_session', { session: session })
+              .catch(function () { newSession().catch(function () {}); });
+          }, 5 * 60 * 1000);
+          BG_BASE = base;
+        });
+      }).catch(function () { /* stay on the LAN default */ });
+    })();
+  }
+
   function bgJson(path) {
-    return fetch(bgUrl(path), { cache: 'no-store' })
-      .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); });
+    return BG_READY.then(function () {
+      return fetch(bgUrl(path), { cache: 'no-store' });
+    }).then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); });
   }
   // Short-TTL memo so one refreshAll() fan-out (stats + lifelist + recent +
   // firstseen all want the species summary) costs one HTTP request, while a

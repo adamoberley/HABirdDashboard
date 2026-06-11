@@ -295,11 +295,14 @@ params to dress up a specific display.
 - **Nothing loads / console shows CORS errors.** BirdNET-Go allows all
   origins by default. If you've restricted `allowedorigins` in its security
   settings, add your HA origin (e.g. `http://homeassistant.local:8123`).
-- **Card loads but no data over Nabu Casa / HTTPS remote access.** The
-  browser blocks an `https://` page from calling the BirdNET-Go app's
-  plain-`http` API (mixed content). On the LAN over `http://` everything
-  works; for remote use you'd need the BirdNET-Go API behind HTTPS too
-  (e.g. a reverse proxy).
+- **Nabu Casa / HTTPS remote access.** There is no direct BirdNET-Go URL
+  that works remotely - the tunnel only carries HA itself, and browsers
+  block an `https://` page from calling a plain-`http` LAN address. The
+  card handles this automatically: on an HTTPS page it discovers the
+  add-on's **HA ingress** endpoint and routes the full API (audio
+  included) through it. Ingress discovery needs an admin HA user and the
+  default `birdnet_url` (leave it empty); if it can't be set up, data
+  still flows via the MQTT sensors - only audio playback is lost.
 - **No bird pictures.** The default artwork source is a CDN
   (`cdn.jsdelivr.net`), so the *browser viewing the dashboard* needs
   internet access. For offline/local-only setups use the `image_base`
