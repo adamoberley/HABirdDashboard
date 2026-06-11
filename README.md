@@ -67,8 +67,11 @@ Home Assistant + BirdNET-Go.
   exist on these install types. Container/Core installs can still use the card; run
   [BirdNET-Go](https://github.com/tphakala/birdnet-go) yourself (e.g. in
   Docker) and skip to [Step 3](#step-3--install-the-card).
-- **A microphone** the Home Assistant machine can hear birds with - a cheap
-  USB lavalier mic in a window works great.
+- **Something that can hear birds.** If you already have an outdoor
+  camera with a microphone - a doorbell, a security cam, an NVR - you're
+  done: BirdNET-Go listens to RTSP streams, so the camera you own becomes
+  the bird mic for free (Step 2 has the details). Otherwise a cheap USB
+  lavalier mic in a window works great.
 - About **20 minutes**.
 
 The whole setup is: install the BirdNET-Go app (the thing that listens and
@@ -103,11 +106,43 @@ community repository, which you add once:
 
 1. Open the BirdNET-Go web UI at `http://<your-ha-host>:8080` (there's also
    an **Open Web UI** button on the app page).
-2. In BirdNET-Go's **Settings**, set your **latitude/longitude** (so it
-   knows which species are plausible) and pick your **audio capture
-   device** - your USB mic should be listed.
-3. Wait for a bird (or play birdsong from your phone near the mic) and
+2. In BirdNET-Go's **Settings**, set your **latitude/longitude** so it
+   knows which species are plausible.
+3. Give it ears - either works, and you can mix several:
+
+   **An outdoor camera you already own (recommended).** Doorbell and
+   security cameras have microphones, and BirdNET-Go listens to RTSP
+   streams directly - no new hardware. In BirdNET-Go's audio settings add
+   an **RTSP stream** per camera: give it a name (it becomes that mic's
+   device name in HA, e.g. "Door Bell") and the camera's RTSP URL. Two
+   things to check on the camera side: **audio recording must be enabled**
+   in the camera's own settings, and use the low-resolution **sub stream**
+   - BirdNET-Go only wants the audio, no point pulling main-stream video.
+
+   For Reolink cameras behind an NVR the URL template is:
+
+   ```
+   rtsp://admin:PASSWORD@NVR.IP.ADDRESS:554/h264Preview_01_sub
+   ```
+
+   (`_01_` is the camera's channel number on the NVR - `_02_`, `_03_`...
+   for the rest; standalone Reolink cameras use the camera's own IP.)
+   Other brands publish similar RTSP paths - search "<brand> RTSP URL".
+
+   **Or a USB microphone** plugged into the HA machine - pick it as the
+   audio capture device.
+
+4. Wait for a bird (or play birdsong from your phone near the mic) and
    confirm detections appear on BirdNET-Go's own dashboard.
+
+**Tuning detections** - defaults are conservative; a starting point that
+has worked well in practice is **Settings → Analysis**: Confidence
+Threshold **0.7**, with Dynamic Threshold enabled, Trigger **0.9** and
+Minimum **0.5**. (Dynamic threshold temporarily lowers the bar for a
+species right after a high-confidence detection of it, so the quieter
+follow-up calls of a bird that's clearly present still get logged without
+letting random noise in.) It pairs nicely with this card's sit/fly rule -
+confident detections perch, borderline ones fly past.
 
 Don't move on until BirdNET-Go is detecting - this card is only a prettier
 window onto that data.
