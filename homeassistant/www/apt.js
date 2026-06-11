@@ -34,6 +34,8 @@
   //                  the hourly_counts buckets that intersect the rolling window
   //   recent 7d   -> analytics/species/summary?start_date=<7d ago>
   //   recent ALL  -> analytics/species/summary
+  //   activity    -> analytics/species/daily per covered date (max 7 days back),
+  //                  keeping per-hour buckets for the stats heatmap
   //   timeseries  -> analytics/time/daily + analytics/species/diversity
   //                  + analytics/time/distribution/hourly
   //   firstseen   -> derived from the lifelist (sorted by first_heard desc)
@@ -377,6 +379,63 @@
     });
   }
 
+  // Per-species hourly activity for the stats heatmap: rows of
+  // { sci, com, n, byHour[24] } where byHour buckets are hour-of-day.
+  // Windows up to a day count only buckets inside the rolling window;
+  // longer windows (7D/ALL) aggregate hour-of-day over the last 7 days -
+  // the daily-summary endpoint is per-date, so wider spans would mean a
+  // fetch per day. Past days never change, so they memo on a long TTL
+  // and the steady-state poll only refetches today's summary.
+  function bgActivity(hours) {
+    var now = new Date();
+    var winHours = Math.min(hours, 7 * 24);
+    var windowStart = now.getTime() - winHours * 3600000;
+    var todayStr = bgDateStr(now);
+    var dates = [];
+    for (var off = 0; off < 8; off++) {
+      var base = new Date(now.getFullYear(), now.getMonth(), now.getDate() - off);
+      if (base.getTime() + 86400000 <= windowStart) break;
+      dates.push(bgDateStr(base));
+    }
+    return Promise.all(dates.map(function (d) {
+      // rows:null marks a FAILED fetch (vs an empty day) - see bgRecent.
+      return bgMemoJson('/analytics/species/daily?date=' + d, d === todayStr ? 10000 : 600000)
+        .then(function (rows) { return { date: d, rows: rows || [] }; },
+              function () { return { date: d, rows: null }; });
+    })).then(function (perDay) {
+      if (perDay.every(function (d) { return d.rows === null; })) {
+        return Promise.reject('daily summary unreachable');
+      }
+      var bySci = {};
+      perDay.forEach(function (day) {
+        var p = day.date.split('-');
+        var dayBase = new Date(+p[0], +p[1] - 1, +p[2]).getTime();
+        (day.rows || []).forEach(function (r) {
+          var counts = r.hourly_counts || [];
+          for (var h = 0; h < 24; h++) {
+            var n = +counts[h] || 0;
+            if (!n) continue;
+            // Count a bucket if any part of it lies inside [windowStart, now].
+            var bStart = dayBase + h * 3600000;
+            if (bStart + 3600000 <= windowStart || bStart > now.getTime()) continue;
+            var rec = bySci[r.scientific_name];
+            if (!rec) {
+              rec = bySci[r.scientific_name] = {
+                sci: r.scientific_name, com: r.common_name,
+                n: 0, byHour: new Array(24).fill(0),
+              };
+            }
+            rec.n += n;
+            rec.byHour[h] += n;
+          }
+        });
+      });
+      var species = Object.keys(bySci).map(function (k) { return bySci[k]; });
+      species.sort(function (a, b) { return b.n - a.n; });
+      return { hours: hours, win_hours: winHours, species: species, as_of: now.toISOString() };
+    });
+  }
+
   function bgStats() {
     var now = new Date();
     var weekStart = bgDateStr(new Date(now.getTime() - 7 * 86400000));
@@ -713,6 +772,27 @@
       var species = hhAgg(ev, since);
       species.sort(function (a, b) { return (b.last_seen || '').localeCompare(a.last_seen || ''); });
       return { hours: hours, species: species, as_of: new Date().toISOString() };
+    });
+  }
+
+  // Per-species hourly activity from the MQTT event stream - same shape
+  // and 7-day cap as bgActivity.
+  function hhActivity(hours) {
+    var winHours = Math.min(hours, 7 * 24);
+    var since = Date.now() - winHours * 3600000;
+    return hhEvents(hours <= 24 ? 'short' : 'long').then(function (ev) {
+      var by = {};
+      ev.forEach(function (e) {
+        if (e.t < since) return;
+        var r = by[e.sci];
+        if (!r) r = by[e.sci] = { sci: e.sci, com: e.com, n: 0, byHour: new Array(24).fill(0) };
+        r.n++;
+        r.byHour[new Date(e.t).getHours()]++;
+        r.com = e.com;
+      });
+      var species = Object.keys(by).map(function (k) { return by[k]; });
+      species.sort(function (a, b) { return b.n - a.n; });
+      return { hours: hours, win_hours: winHours, species: species, as_of: new Date().toISOString() };
     });
   }
 
@@ -1661,24 +1741,25 @@
     }, lead + MAX_ROW * PER_ROW + 540);
   }
 
-  // Stats entrance: timeline columns fade in left -> right (by their x
-  // position), with the side panel fading in just behind. Opacity only.
+  // Stats entrance: heatmap rows fade in top -> bottom, with the side
+  // panel fading in just behind. Opacity only.
   var statsEntranceT = null;
   // lead: see playAtlasEntrance. On a view switch the whole graph is held
-  // hidden until the slide settles, then populates left-to-right; in-place
+  // hidden until the slide settles, then populates top-to-bottom; in-place
   // re-renders (window-picker change) pass no lead and animate immediately.
   function playStatsEntrance(lead) {
     lead = lead || 0;
-    var plot = document.querySelector('.stats-tl-plot');
+    var plot = document.querySelector('.stats-hm');
     if (!plot) return;
     var SPREAD = 460;
-    // The whole graph populates left-to-right: columns, gridlines and
-    // x-ticks stagger by their x%; the y-axis leads (delay 0) and the side
-    // panel trails. animationDelay carries the per-element offset.
-    var items = [].slice.call(plot.querySelectorAll('.stats-tl-col, .stats-tl-gridline, .stats-tl-xtick'))
-      .map(function (el) { return { el: el, d: ((parseFloat(el.style.left) || 0) / 100) * SPREAD }; });
-    var yaxis = document.querySelector('.stats-tl-yaxis');
-    if (yaxis) items.push({ el: yaxis, d: 0 });
+    // The heatmap populates top-to-bottom: the hour header leads (delay
+    // 0), then the species rows stagger down the list. animationDelay
+    // carries the per-element offset.
+    var items = [];
+    var hmRows = [].slice.call(plot.querySelectorAll('.stats-hm-head, .stats-hm-row'));
+    hmRows.forEach(function (el, i) {
+      items.push({ el: el, d: (i / Math.max(1, hmRows.length - 1)) * SPREAD });
+    });
     // Side panel loads in tandem: section headers + captions lead, then
     // their rows populate top-to-bottom over the same window as the graph.
     var side = document.querySelector('.stats-side');
@@ -1796,8 +1877,8 @@
   window.addEventListener('resize', function () {
     clearTimeout(rTimer);
     rTimer = setTimeout(function () {
+      // (The activity heatmap reflows in pure CSS - no re-render needed.)
       renderCollageFromData();
-      drawHistograms();
     }, 120);
   });
 
@@ -1855,6 +1936,7 @@
     timeseries: null,   // ./avian/api/birdnet-api.php?action=timeseries (daily + hourly aggregates)
     firstseen: null,    // ./avian/api/birdnet-api.php?action=firstseen (newest lifelist additions)
     recent: null,       // ./avian/api/birdnet-api.php?action=recent&hours=N (refetched on picker change)
+    activity: null,     // ./avian/api/birdnet-api.php?action=activity&hours=N (per-species hourly heatmap)
   };
 
   // Derived chart arrays, backfilled so 30 buckets always exist.
@@ -1905,6 +1987,9 @@
           case 'recent':
             hours = Math.max(1, Math.min(1000000, +q.hours || 24));
             return pick(function () { return bgRecent(hours); }, function () { return hhRecent(hours); });
+          case 'activity':
+            hours = Math.max(1, Math.min(1000000, +q.hours || 24));
+            return pick(function () { return bgActivity(hours); }, function () { return hhActivity(hours); });
           case 'species':
             sci2 = q.sci || '';
             return pick(function () { return bgSpecies(sci2); }, function () { return hhSpecies(sci2); });
@@ -1953,118 +2038,80 @@
     (ll.species || []).forEach(function (s) { speciesTotals[s.sci] = +s.n; });
   }
 
-  // Editorial detection timeline. One evenly-spaced column per species,
-  // ordered oldest -> newest by last detection (x = time). Each species
-  // owns a cell, so the black squares never overlap and a square fills
-  // its column width - neighbours touch at the shared gridline. The
-  // square's height up the column encodes detection count; a small
-  // rotated label (common + scientific name) sits at the column's
-  // bottom, and each column carries its own timestamp on the x-axis.
-  function drawHistograms(animate) {
+  // Activity heatmap (BirdNET-Go dashboard style): one row per species
+  // (most-heard first), one cell per hour of day. A cell's tint deepens
+  // with its detection count (5 log steps) and the number prints inside.
+  // The panel scrolls vertically when there are many species and
+  // horizontally on narrow screens (fixed cell width, sticky name
+  // column). Windows longer than a day aggregate hour-of-day over the
+  // last 7 days - the caption says which.
+  function renderActivity(animate) {
     var tl = document.getElementById('statsTimeline');
     if (!tl) return;
-    var all = ((DATA.recent && DATA.recent.species) || []).slice();
-    if (!all.length) {
-      setHtml(tl, '<div class="stats-tl-empty">no detections in this window</div>');
+    var act = DATA.activity || {};
+    var species = (act.species || []).slice();
+    if (!species.length) {
+      setHtml(tl, '<div class="stats-hm-empty">no detections in this window</div>');
       return;
     }
+    var MAX_ROWS = 40;
+    var trimmed = species.length > MAX_ROWS;
+    if (trimmed) species = species.slice(0, MAX_ROWS);
 
-    // Discrete columns. On a phone the columns are fixed-width and wider
-    // (legible squares + labels for touch) and the plot grows past the
-    // viewport to scroll horizontally - so we show ALL species rather than
-    // trimming. On desktop, cap to whatever fits the available width.
-    // Container width, not window width - inside a narrow card on a
-    // desktop the compact layout must still kick in.
-    var isMobile = (tl.clientWidth || window.innerWidth || 800) <= 700;
-    var containerW = Math.max(140, (tl.clientWidth || window.innerWidth || 800) - 34);
-    var MIN_COL = isMobile ? 52 : 22;
-    var cap = isMobile ? all.length : Math.max(3, Math.floor(containerW / MIN_COL));
-    var trimmed = all.length > cap;
-    var species = all.slice();
-    if (trimmed) {
-      species.sort(function (a, b) { return (+b.n || 0) - (+a.n || 0); });
-      species = species.slice(0, cap);
-    }
-    // X-axis is time: order the chosen columns oldest -> newest.
-    function parseTs(s) { return s ? Date.parse(s.replace(' ', 'T')) : NaN; }
-    species.sort(function (a, b) {
-      var ta = parseTs(a.last_seen), tb = parseTs(b.last_seen);
-      if (isNaN(ta)) return 1;
-      if (isNaN(tb)) return -1;
-      return ta - tb;
+    var winHours = act.win_hours || Math.min(currentHours, 7 * 24);
+    var maxN = 1;
+    species.forEach(function (s) {
+      (s.byHour || []).forEach(function (n) { if (+n > maxN) maxN = +n; });
     });
-
-    var C = species.length;
-    var maxN = species.reduce(function (m, s) { return Math.max(m, +s.n || 0); }, 1);
-    // Mobile: fixed wide columns -> plot can exceed the viewport and scroll.
-    // Desktop: columns split the available width evenly.
-    var colW = isMobile ? MIN_COL : (containerW / C);
-    var plotW = isMobile ? Math.max(containerW, C * colW) : containerW;
-    // Square fills its column so adjacent squares touch at the shared
-    // gridline; capped so a few species don't render as giant blocks.
-    var sq = Math.max(6, Math.min(colW, isMobile ? 60 : 48));
-    var LABEL_GAP = 6;       // px between a square's top and its label
-    var SPAN = 0.55;         // squares occupy the bottom this fraction of
-                             // the plot by count (y = quantity); the
-                             // rotated label floats just above each square.
-
-    // Y-axis quantity ticks: 0..maxN, with maxN pinned on the top tick.
-    var ticks = [];
-    if (maxN <= 8) {
-      for (var v = 0; v <= maxN; v++) ticks.push(v);
-    } else {
-      var divs = 4;
-      for (var di = 0; di <= divs; di++) ticks.push(Math.round(maxN * di / divs));
-      ticks[ticks.length - 1] = maxN;
+    // 5 tint steps on a log scale, so one loud dawn chorus doesn't wash
+    // every other cell down to the faintest shade.
+    function shade(n) {
+      return Math.max(1, Math.min(5, Math.ceil(5 * Math.log(1 + n) / Math.log(1 + maxN))));
     }
-    var yaxis = ticks.map(function (v) {
-      return '<span class="stats-tl-ytick" style="bottom:' + ((v / maxN) * SPAN * 100).toFixed(1) + '%">' + v + '</span>';
+
+    // Hours of day inside the window: a rolling sub-day window covers a
+    // contiguous (midnight-wrapping) hour range ending now; cells outside
+    // it get .off so the window's extent reads at a glance.
+    var inWin = new Array(24).fill(true);
+    if (winHours < 24) {
+      inWin.fill(false);
+      var nowH = new Date().getHours();
+      for (var k = 0; k < Math.min(24, Math.ceil(winHours)); k++) {
+        inWin[(nowH - k + 24) % 24] = true;
+      }
+    }
+
+    var head = '<div class="stats-hm-head"><span class="stats-hm-name"></span>';
+    for (var hh = 0; hh < 24; hh++) head += '<span class="stats-hm-hr">' + pad(hh) + '</span>';
+    head += '<span class="stats-hm-tot">all</span></div>';
+
+    var rows = species.map(function (s) {
+      var cells = '';
+      for (var h = 0; h < 24; h++) {
+        var n = +((s.byHour || [])[h]) || 0;
+        cells += '<span class="stats-hm-cell' + (n ? ' l' + shade(n) : '') +
+          (inWin[h] ? '' : ' off') + '">' + (n ? fmtN(n) : '') + '</span>';
+      }
+      return '<div class="stats-hm-row" data-sci="' + esc(s.sci) + '">'
+        + '<span class="stats-hm-name"><span class="com">' + esc(s.com || s.sci) + '</span></span>'
+        + cells
+        + '<span class="stats-hm-tot">' + fmtN(s.n) + '</span></div>';
     }).join('');
 
-    // One timestamp under each column - format follows the window length.
-    function fmtTs(ms) {
-      if (isNaN(ms)) return '';
-      var d = new Date(ms);
-      var p2 = function (n) { return n < 10 ? '0' + n : '' + n; };
-      if (currentHours <= 36) return p2(d.getHours()) + ':' + p2(d.getMinutes());
-      if (currentHours <= 75 * 24) return (d.getMonth() + 1) + '/' + d.getDate();
-      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-    }
+    // Past the 7-day cap (the ALL window) the matrix only covers the
+    // last week - say so instead of implying all time.
+    var cap = currentHours > 7 * 24
+      ? 'detections by hour of day · last 7 days'
+      : 'detections by hour · ' + windowLabel(currentHours);
+    if (trimmed) cap += ' · ' + MAX_ROWS + ' most-heard of ' + act.species.length;
 
-    // Faint gridlines at every column boundary. Start at gi=1: the gi=0
-    // line would sit on top of the y-axis rule (double line), so skip it.
-    var gridlines = '';
-    for (var gi = 1; gi <= C; gi++) {
-      gridlines += '<i class="stats-tl-gridline" style="left:' + (gi / C * 100).toFixed(3) + '%"></i>';
-    }
-
-    var cols = '', xaxis = '';
-    species.forEach(function (s, i) {
-      var centerPct = (i + 0.5) / C * 100;
-      var n = +s.n || 0;
-      var bottomPct = (n / maxN) * SPAN * 100;   // square height = quantity
-      cols += ''
-        + '<div class="stats-tl-col" data-sci="' + esc(s.sci) + '" style="left:' + centerPct.toFixed(3) + '%;width:' + colW.toFixed(2) + 'px">'
-        +   '<div class="stats-tl-square" style="bottom:' + bottomPct.toFixed(1) + '%;width:' + sq.toFixed(1) + 'px;height:' + sq.toFixed(1) + 'px"></div>'
-        +   '<div class="stats-tl-label" style="bottom:calc(' + bottomPct.toFixed(1) + '% + ' + (sq + LABEL_GAP) + 'px)"><span class="com">' + esc(s.com || s.sci) + '</span><span class="sci">' + esc(s.sci) + '</span></div>'
-        + '</div>';
-      var lab = fmtTs(parseTs(s.last_seen));
-      if (lab) xaxis += '<span class="stats-tl-xtick" style="left:' + centerPct.toFixed(3) + '%">' + lab + '</span>';
-    });
-
-    var note = trimmed
-      ? '<div class="stats-tl-cap">' + C + ' most-heard of ' + all.length + '</div>'
-      : '';
     setHtml(tl,
-      '<div class="stats-tl-yaxis">' + yaxis + '</div>'
-      + '<div class="stats-tl-plot"' + (isMobile ? ' style="width:' + Math.round(plotW) + 'px"' : '') + '>'
-      +   gridlines + cols + xaxis
-      + '</div>'
-      + note);
+      '<div class="stats-hm">' + head + rows + '</div>'
+      + '<div class="stats-hm-cap">' + cap + '</div>');
     if (animate) playStatsEntrance();
   }
 
-  // Cross-highlight between the timeline squares and the right-side
+  // Cross-highlight between the heatmap rows and the right-side
   // species lists. Delegated off the stats view so it survives the
   // periodic re-render of both halves.
   (function wireStatsHighlight() {
@@ -2073,7 +2120,7 @@
     function setHi(sci, on) {
       if (!sci) return;
       var esc = sci.replace(/"/g, '\"');
-      v1.querySelectorAll('.stats-tl-col[data-sci="' + esc + '"], .stats-side li[data-sci="' + esc + '"]')
+      v1.querySelectorAll('.stats-hm-row[data-sci="' + esc + '"], .stats-side li[data-sci="' + esc + '"]')
         .forEach(function (el) { el.classList.toggle('sync-hi', on); });
     }
     v1.addEventListener('mouseover', function (ev) {
@@ -2427,18 +2474,18 @@
   }
 
   function renderWindowDependent(animate) {
-    // renderStatsLists runs BEFORE drawHistograms so the stats entrance
-    // (fired at the end of drawHistograms) can stagger the side-panel rows
-    // that were just built, in tandem with the graph populating.
+    // renderStatsLists runs BEFORE renderActivity so the stats entrance
+    // (fired at the end of renderActivity) can stagger the side-panel rows
+    // that were just built, in tandem with the heatmap populating.
     renderCollageFromData(animate);
     renderStatsLists();
-    drawHistograms(animate);
+    renderActivity(animate);
     renderAtlas(animate);
   }
   function renderTimeIndependent(animate) {
-    // Lists first, then the graph (see renderWindowDependent).
+    // Lists first, then the heatmap (see renderWindowDependent).
     renderStatsLists();
-    drawHistograms(animate);
+    renderActivity(animate);
     renderAtlas(animate);
   }
 
@@ -2448,10 +2495,15 @@
     // lands later - we discard the stale response so the collage
     // never reverts to a different window.
     var forHours = currentHours;
-    return fetchJson('./avian/api/birdnet-api.php?action=recent&hours=' + forHours)
-      .then(function (j) {
+    return Promise.all([
+      fetchJson('./avian/api/birdnet-api.php?action=recent&hours=' + forHours),
+      fetchJson('./avian/api/birdnet-api.php?action=activity&hours=' + forHours)
+        .catch(function () { return null; }),
+    ]).then(function (parts) {
         if (forHours !== currentHours) return; // window changed mid-flight
-        DATA.recent = j; renderWindowDependent(animate);
+        DATA.recent = parts[0];
+        DATA.activity = parts[1];
+        renderWindowDependent(animate);
       })
       .catch(function (e) { console.warn('recent fetch failed', e); });
   }
@@ -2463,14 +2515,18 @@
       fetchJson('./avian/api/birdnet-api.php?action=timeseries&days=30').catch(function () { return null; }),
       fetchJson('./avian/api/birdnet-api.php?action=firstseen&limit=10').catch(function () { return null; }),
       fetchJson('./avian/api/birdnet-api.php?action=recent&hours=' + forHours).catch(function () { return null; }),
+      fetchJson('./avian/api/birdnet-api.php?action=activity&hours=' + forHours).catch(function () { return null; }),
     ]).then(function (parts) {
       DATA.stats = parts[0];
       DATA.lifelist = parts[1];
       DATA.timeseries = parts[2];
       DATA.firstseen = parts[3];
-      // Only accept the recent slice if the window hasn't changed
+      // Only accept the window-scoped slices if the window hasn't changed
       // since this poll started - otherwise keep what's there.
-      if (forHours === currentHours && parts[4]) DATA.recent = parts[4];
+      if (forHours === currentHours) {
+        if (parts[4]) DATA.recent = parts[4];
+        if (parts[5]) DATA.activity = parts[5];
+      }
       recomputeDerived();
       renderTimeIndependent(animate);
       renderCollageFromData(animate);
@@ -4198,7 +4254,7 @@
 
   // Any element with data-sci is a "jump to that bird's atlas card"
   // affordance: atlas cards themselves, stats list rows (top species /
-  // first detections), stats timeline squares, and any future surface
+  // first detections), stats heatmap rows, and any future surface
   // that wants to point at a bird. Action chips inside cards stop
   // propagation themselves.
   function jumpToSci(sci) {
@@ -4217,8 +4273,8 @@
     }
     var row = ev.target.closest('li[data-sci]');
     if (row) return jumpToSci(row.dataset.sci);
-    var tlCol = ev.target.closest('.stats-tl-col[data-sci]');
-    if (tlCol) return jumpToSci(tlCol.dataset.sci);
+    var hmRow = ev.target.closest('.stats-hm-row[data-sci]');
+    if (hmRow) return jumpToSci(hmRow.dataset.sci);
   });
 
   // After the atlas re-renders (window change, fresh fetch), re-apply
