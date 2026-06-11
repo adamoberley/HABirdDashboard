@@ -628,6 +628,11 @@
     /* Stacked timeline + side panel is taller than the box - let the
        stats view scroll instead of clipping First Detections. */
     .view#v1 { overflow-y: auto; overflow-x: hidden; }
+    /* Stacked order: tables first, the chart underneath, and a buffer
+       below the chart so its bottom row scrolls clear of the floating
+       view switcher. */
+    .stats-side { order: 1; }
+    .stats-timeline { order: 2; margin-bottom: 64px; }
   }
   /* Phones: the timeline keeps its editorial form but uses fixed wider
      columns (set in drawHistograms) and scrolls horizontally for the rest,
@@ -1184,8 +1189,15 @@
     #detail-modal { padding: 12px; }
     .modal-card { padding: 18px; border-radius: 10px; }
     .modal-info h2 { font-size: 22px; }
-    .modal-img { aspect-ratio: 1 / 1; padding: 10px; }
+    .modal-img { height: 160px; padding: 10px; }
     .modal-grid { gap: 18px; }
+    /* Keep the description short so the recordings are in reach - the
+       full text is one tap away on the wiki link. */
+    .modal-info .desc {
+      font-size: 12px; line-height: 1.5;
+      display: -webkit-box; -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical; overflow: hidden;
+    }
     .rec-row .when { font-size: 10.5px; }
     .rec-row .when small { font-size: 8.5px; }
   }
@@ -1270,9 +1282,11 @@
     width: 100%;
     background: var(--paper);
     border-radius: 14px;
-    box-shadow:
-      inset 0 0 0 1px rgba(255,255,255,0.6),
-      0 30px 80px rgba(26,22,18,0.22);
+    /* A real border, not an inset shadow: borders paint outside the
+       scrolling content box, so scrolled images/spectrograms can never
+       slide over the card's outline. */
+    border: 1px solid var(--hairline);
+    box-shadow: 0 30px 80px rgba(26,22,18,0.22);
     padding: 30px 34px 26px;
     overflow: auto;
     /* The expand-from-card animation is driven by inline transform
@@ -1305,12 +1319,15 @@
     position: relative;
     background: var(--paper-2); border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
-    padding: 18px;
-    aspect-ratio: 4 / 3;
+    padding: 16px;
+    /* Fixed frame: the illustration fits INSIDE it (object-fit) instead
+       of the frame growing to the illustration's aspect. */
+    height: 230px;
     box-shadow: var(--recess);
   }
   .modal-img img {
     max-width: 100%; max-height: 100%;
+    width: auto; height: auto; object-fit: contain;
     filter: drop-shadow(0 2px 6px rgba(26,22,18,0.10));
     transition: opacity 220ms ease;
   }
@@ -1385,6 +1402,7 @@
   .modal-meta {
     display: flex; flex-wrap: wrap; gap: 16px;
     font: 9.5px var(--av-font-mono); color: var(--ink-soft);
+    margin: 8px 0 14px;
   }
   .modal-meta .k { letter-spacing: 0.12em; text-transform: uppercase; }
   .modal-meta .v { color: var(--ink); margin-left: 6px; }
@@ -1675,3 +1693,19 @@ body.av-title-overlay .view#v2 { padding-top: 96px; }
 body.av-picker-top .slider { top: 10px; bottom: auto; }
 body.av-picker-top .view { padding-bottom: 28px; }
 body.av-picker-top .view#v0, body.av-picker-top .view#v1 { padding-bottom: 24px; }
+
+/* ---- Recording-row review flag ("not it?") ---- */
+/* Writes a false-positive review back to BirdNET-Go. Two-tap arm/confirm
+   so a stray touch can't flag anything. */
+.rec-row .flag {
+  flex: 0 0 auto;
+  background: var(--paper-2); border: 0; border-radius: 999px;
+  font: 8.5px/1 var(--av-font-mono); letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ink-soft);
+  padding: 6px 9px; cursor: pointer;
+  box-shadow: var(--recess);
+}
+.rec-row .flag:hover { color: var(--ink); }
+.rec-row .flag[data-armed="true"] { color: var(--paper); background: var(--accent-2); }
+.rec-row .flag:disabled { cursor: default; opacity: 0.7; }
+.rec-row.flagged .when, .rec-row.flagged .conf { text-decoration: line-through; opacity: 0.55; }

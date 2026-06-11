@@ -24,6 +24,10 @@ window.AV_CONFIG = {
   dataSource: 'auto',
   historyDays: 10,
 
+  // Recording playback boost in dB (0 = off). Routed through a
+  // compressor so louder doesn't mean clipped.
+  audioBoostDb: 24,
+
   // Sitting-or-flying rule. A species shows its perched ("sitting")
   // illustration when its best detection confidence in the current
   // time window is at or above this value; below it, the bird renders

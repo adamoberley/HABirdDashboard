@@ -253,8 +253,14 @@ var HABIRD_EDITOR_SCHEMA = [
       { name: 'hide_cursor', selector: { boolean: {} } },
     ] },
   ] },
-  { name: 'birds', type: 'expandable', flatten: true, title: 'Birds & artwork', schema: [
+  { name: 'birds', type: 'expandable', flatten: true, title: 'Birds & audio', schema: [
     { name: 'sit_confidence', selector: { number: { min: 0, max: 1.01, step: 0.01, mode: 'slider' } } },
+    { name: 'audio_boost', selector: { select: { mode: 'dropdown', options: [
+      { value: '0', label: 'Off' },
+      { value: '6', label: '+6 dB' },
+      { value: '12', label: '+12 dB' },
+      { value: '24', label: '+24 dB (default)' },
+    ] } } },
     { name: 'image_base', selector: { text: {} } },
   ] },
   { name: 'connection', type: 'expandable', flatten: true, title: 'Connection & data', schema: [
@@ -286,6 +292,7 @@ var HABIRD_LABELS = {
   corner: 'Corner',
   hide_cursor: 'Hide idle cursor',
   sit_confidence: 'Sit confidence',
+  audio_boost: 'Recording volume boost',
   image_base: 'Artwork base URL',
   birdnet_url: 'BirdNET-Go URL',
   data_source: 'Data source',
@@ -300,6 +307,7 @@ var HABIRD_HELPERS = {
   weather_entity: 'Empty auto-detects your first weather entity.',
   hide_cursor: 'For wall displays: pointer disappears after 8 s idle.',
   sit_confidence: 'Birds perch at or above this detection confidence and fly below it. 0 = always perched, 1.01 = always flying.',
+  audio_boost: 'Detection clips are quiet. The boost is compressed so it gets louder without clipping.',
   image_base: 'Empty loads artwork from the CDN. Use /local/habird-art/ for an offline copy.',
   birdnet_url: 'Empty uses this host on port 8080, or HA ingress when remote.',
   data_source: 'Automatic uses the API and falls back to the MQTT sensors.',
@@ -403,6 +411,7 @@ class HABirdCard extends HTMLElement {
       // timer is just a safety net - much longer than the page's 30s.
       pollSeconds: c.poll_seconds || 60,
       __budgetScale: 1.3,   // birds command a card harder than a full page
+      audioBoostDb: (c.audio_boost == null ? 24 : +c.audio_boost),
       __exposeRefresh: function (fn) { self._refresh = fn; },
       sitConfidence: (typeof c.sit_confidence === 'number') ? c.sit_confidence : 0.90,
       wall: {
