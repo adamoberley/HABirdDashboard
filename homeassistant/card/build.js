@@ -49,6 +49,7 @@ let css = cssSrc
   .replace(/body\.ww-cursor-hidden/g, '.av-shell.ww-cursor-hidden')
   .replace(/body\.av-title-overlay/g, '.av-shell.av-title-overlay')
   .replace(/body\.av-picker-top/g, '.av-shell.av-picker-top')
+  .replace(/body\.av-no-picker/g, '.av-shell.av-no-picker')
   // app chrome pinned to the app frame, not the browser viewport
   .replace(/position: fixed/g, 'position: absolute')
   // Responsiveness must track the CARD's box, not the browser window: a
@@ -84,6 +85,19 @@ css += `
 }
 /* The view picker hugs the card's bottom edge (the page floats it higher). */
 .slider { bottom: 10px; }
+/* The collage owns the card: page-era gutters shrink to a whisker, and
+   the bottom clearance is exactly the picker's footprint - reclaimed
+   entirely when the picker is hidden or moved to the top. */
+.view#v0 { padding: 10px 14px 52px; }
+.av-shell.av-no-picker .view#v0 { padding-bottom: 12px; }
+.av-shell.av-picker-top .view#v0 { padding-top: 52px; padding-bottom: 12px; }
+/* Clock/weather sit a finger's width off the card's true corners. */
+.wall-widgets[data-corner$="right"] { right: 18px; }
+.wall-widgets[data-corner$="left"]  { left: 18px; }
+.wall-widgets[data-corner^="top"]   { top: 12px; }
+.wall-widgets[data-corner^="bottom"] { bottom: 50px; }
+.av-shell.av-no-picker .wall-widgets[data-corner^="bottom"],
+.av-shell.av-picker-top .wall-widgets[data-corner^="bottom"] { bottom: 16px; }
 /* In system-font mode the picker drops the editorial small-caps treatment
    and reads like native HA tabs. */
 .av-shell.av-font-system .slider button {
@@ -388,6 +402,7 @@ class HABirdCard extends HTMLElement {
       // MQTT sensor updates push refreshes (see _watchDetections), so the
       // timer is just a safety net - much longer than the page's 30s.
       pollSeconds: c.poll_seconds || 60,
+      __budgetScale: 1.3,   // birds command a card harder than a full page
       __exposeRefresh: function (fn) { self._refresh = fn; },
       sitConfidence: (typeof c.sit_confidence === 'number') ? c.sit_confidence : 0.90,
       wall: {

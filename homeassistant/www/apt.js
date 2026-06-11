@@ -862,6 +862,9 @@
   }
   if (AV_CFG && AV_CFG.viewSelector === false && slider) {
     slider.style.display = 'none';
+    // Lets the CSS reclaim the picker's clearance (paddings, wall
+    // widget insets) when there's no picker to clear.
+    document.body.classList.add('av-no-picker');
   }
   if (AV_CFG && AV_CFG.selectorPosition === 'top') {
     document.body.classList.add('av-picker-top');
@@ -1192,7 +1195,10 @@
     // pack densities for 6 vs 48 birds.
     var T = tuning(items.length);
     var vpArea = W * H;
-    var budget  = vpArea * T.packingBudgetFrac;
+    // Card builds scale the area budget up (__budgetScale) - inside a
+    // dashboard card the flock should command the box; the shrink-to-fit
+    // loop still guarantees everything lands on screen.
+    var budget  = vpArea * T.packingBudgetFrac * (+AV_CFG.__budgetScale || 1);
     var minArea = vpArea * T.minTileAreaFrac;
 
     // Step 1: build tiles + assign each a count-weighted SCORE (not a
@@ -1289,15 +1295,33 @@
       b = clusterBounds(placed);
     }
 
-    // Re-centre the cluster in the viewport so a small cluster doesn't
-    // drift to one side from the spiral's center-of-mass bias. Skipped
-    // when obstacles are stamped - a blind translation could shove a
-    // bird back over the clock/title the packer just avoided.
-    if (!obstacles.length) {
-      var dx = W / 2 - (b.L + b.R) / 2;
-      var dy = H / 2 - (b.T + b.B) / 2;
-      if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
-        placed.forEach(function (t) { if (t.x > -1000) { t.x += dx; t.y += dy; } });
+    // Re-centre the cluster in the FULL box so it doesn't drift to one
+    // side from the spiral's center-of-mass bias. With obstacles (clock /
+    // title) stamped, the shift is validated first - tried at full size,
+    // then backed off by halves - and only applied when no bird's box
+    // would land on an obstacle. So the flock centres in the whole card
+    // and simply declines the shift in layouts where it can't.
+    var dx = W / 2 - (b.L + b.R) / 2;
+    var dy = H / 2 - (b.T + b.B) / 2;
+    if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+      var shiftHits = function (sx, sy) {
+        for (var oi = 0; oi < obstacles.length; oi++) {
+          var ob = obstacles[oi];
+          for (var ti = 0; ti < placed.length; ti++) {
+            var t = placed[ti];
+            if (t.x < -1000) continue;
+            if (t.x + sx < ob.x + ob.w && t.x + sx + t.fullW > ob.x &&
+                t.y + sy < ob.y + ob.h && t.y + sy + t.fullH > ob.y) return true;
+          }
+        }
+        return false;
+      };
+      var scale = 1;
+      while (scale > 0.12 && shiftHits(dx * scale, dy * scale)) scale /= 2;
+      if (scale > 0.12) {
+        placed.forEach(function (t) {
+          if (t.x > -1000) { t.x += dx * scale; t.y += dy * scale; }
+        });
       }
     }
 
