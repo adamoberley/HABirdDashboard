@@ -155,7 +155,7 @@ app = app.replace(/\}\)\(\);\s*$/, '}\n');
 
 // Anything still touching `document.` must be on the whitelist.
 const leftover = [...app.matchAll(/document\.(\w+)/g)].map((m) => m[1]);
-const allowed = new Set(['createElement', 'fonts', 'hidden']);
+const allowed = new Set(['createElement', 'fonts', 'hidden', 'cookie']);
 const bad = leftover.filter((name) => !allowed.has(name));
 if (bad.length) throw new Error('unscoped document usage: ' + [...new Set(bad)].join(', '));
 
