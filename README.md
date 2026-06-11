@@ -1,6 +1,8 @@
+<p align="center"><img src="docs/logo.png" alt="Bird Card" width="140"></p>
+
 # HABirdDashboard
 
-*A live bird collage card for Home Assistant, fed by BirdNET-Go.*
+*Bird Card: a live bird collage for Home Assistant, fed by BirdNET-Go.*
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC_BY--NC--SA_4.0-lightgrey.svg)](LICENSE)
@@ -198,6 +200,7 @@ birdnet_url: ""              # empty = this host, port 8080 (the stock app)
 data_source: auto            # auto | api | ha (see Data sources below)
 history_days: 10             # ha-source span; bounded by recorder retention
 sit_confidence: 0.90         # perched at/above, flying below
+collage_scale: 1.5           # how much of the card the flock claims (0.5-3)
                              #   (0 = always perched, 1.01 = always flying)
 clock: true                  # time + date in a corner of the collage
 weather: true                # conditions + sunrise/sunset from HA
