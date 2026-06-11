@@ -61,9 +61,11 @@
   // full functionality, audio included, from anywhere. Discovery needs
   // an admin user (the supervisor API); anything failing here quietly
   // leaves the LAN default in place and the MQTT fallback carries data.
-  var BG_READY = Promise.resolve();
-  if (!AV_CFG.birdnetGoUrl && location.protocol === 'https:' && AV_CFG.__getHass) {
-    BG_READY = (function () {
+  var _ingressP = null;
+  function ingressApiBase() {
+    if (_ingressP) return _ingressP;
+    if (!AV_CFG.__getHass) return (_ingressP = Promise.resolve(null));
+    _ingressP = (function () {
       function ha(method, path, data) {
         var hass = AV_CFG.__getHass();
         if (!hass || !hass.callApi) return Promise.reject('no hass');
@@ -98,10 +100,83 @@
             ha('POST', 'hassio/ingress/validate_session', { session: session })
               .catch(function () { newSession().catch(function () {}); });
           }, 5 * 60 * 1000);
-          BG_BASE = base;
+          return base;
         });
-      }).catch(function () { /* stay on the LAN default */ });
+      }).catch(function () { return null; });
     })();
+    return _ingressP;
+  }
+  // On an HTTPS page the LAN default is dead on arrival (mixed content) -
+  // rebase ALL reads onto ingress. On plain http the direct LAN base is
+  // faster and stays; ingress is still resolved on demand for writes.
+  var BG_READY = Promise.resolve();
+  if (!AV_CFG.birdnetGoUrl && location.protocol === 'https:' && AV_CFG.__getHass) {
+    BG_READY = ingressApiBase().then(function (b) { if (b) BG_BASE = b; });
+  }
+
+  function getCookie(name) {
+    var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+    return m ? decodeURIComponent(m[1]) : null;
+  }
+  // Write-back: review a detection ('correct' | 'false_positive').
+  // BirdNET-Go guards this with CSRF (a JS-readable cookie echoed in a
+  // header) and its auth middleware - both want a SAME-ORIGIN request, so
+  // writes prefer HA ingress whenever it's available, falling back to the
+  // direct base. With BirdNET-Go auth disabled (the add-on default) the
+  // write is accepted; otherwise it fails and the UI says so.
+  function bgReview(id, verified) {
+    return ingressApiBase().then(function (ib) {
+      var base = ib || BG_BASE;
+      function post() {
+        return fetch(base + '/api/v2/detections/' + encodeURIComponent(id) + '/review', {
+          method: 'POST',
+          credentials: 'same-origin',
+          cache: 'no-store',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': getCookie('csrf') || '',
+          },
+          body: JSON.stringify({ verified: verified }),
+        }).then(function (r) { return r.ok ? r : Promise.reject(r.status); });
+      }
+      if (getCookie('csrf')) return post();
+      // No CSRF cookie yet: prime it with one same-origin GET, then post.
+      return fetch(base + '/api/v2/detections/' + encodeURIComponent(id), {
+        cache: 'no-store',
+        credentials: 'same-origin',
+      }).then(post, post);
+    });
+  }
+
+  // ---- Audio boost ----
+  // Detection clips are quiet; an HTMLAudio element caps at 1.0, so the
+  // boost routes playback through WebAudio: gain (configurable dB) into a
+  // compressor so the louder signal limits instead of clipping. Needs
+  // CORS-clean audio (crossOrigin=anonymous; BirdNET-Go's media endpoints
+  // send permissive CORS, and ingress is same-origin anyway).
+  var _boostCtx = null;
+  function makeAudio(url) {
+    var audio = new Audio();
+    var db = +AV_CFG.audioBoostDb || 0;
+    if (db > 0) audio.crossOrigin = 'anonymous';
+    audio.src = url;
+    if (db > 0) {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (Ctx) {
+        try {
+          if (!_boostCtx) _boostCtx = new Ctx();
+          if (_boostCtx.state === 'suspended') _boostCtx.resume();
+          var srcNode = _boostCtx.createMediaElementSource(audio);
+          var gain = _boostCtx.createGain();
+          gain.gain.value = Math.pow(10, db / 20);
+          var comp = _boostCtx.createDynamicsCompressor();
+          srcNode.connect(gain);
+          gain.connect(comp);
+          comp.connect(_boostCtx.destination);
+        } catch (e) { /* boost is best-effort; the element still plays */ }
+      }
+    }
+    return audio;
   }
 
   function bgJson(path) {
@@ -2081,7 +2156,7 @@
           + '<div><span class="n">' + fmtN(total) + '</span><span class="lbl-inline">all time</span></div>';
       return ''
         + '<article class="bird-card" data-sci="' + esc(s.sci) + '">'
-        +   (isLifer ? '<span class="lifer-badge" title="new to the life list in this window">lifer</span>' : '')
+        +   (isLifer ? '<span class="lifer-badge" title="first time this species has ever been heard here">new</span>' : '')
         +   '<div class="stat">' + statRows + '</div>'
         +   '<div class="img-wrap">'
         +     '<img loading="lazy" decoding="async" src="' + sketchSrc + '" alt="' + esc(s.com) + '"' + birdImgAttrs(s.sci, 1) + '>'
@@ -2202,7 +2277,7 @@
           }
         }
         // Start audio.
-        var audio = new Audio(card.dataset.audio);
+        var audio = makeAudio(card.dataset.audio);
         audio.addEventListener('canplay', function () {
           if (currentBtn !== btn) return; // user clicked away
           setBtnState(btn, 'playing');
@@ -3040,6 +3115,9 @@
               + '<button class="play" type="button" aria-label="play">' + ICON_PLAY + '</button>'
               + '<span class="when">' + esc(fmtRecTime(d.d, d.t)) + '<small>' + esc(fmtDateLine(d.d, d.t)) + '</small></span>'
               + '<span class="conf">' + ((+d.conf || 0) * 100).toFixed(0) + '%</span>'
+              // Review write-back needs a detection id - present with the
+              // API data source, absent over MQTT history.
+              + (d.file ? '<button class="flag" type="button" data-armed="false" title="report as a false positive">not it?</button>' : '')
               + '<div class="rec-spectro" aria-hidden="true">'
               +   '<div class="rec-spectro-loading">loading spectrogram...</div>'
               +   '<div class="rec-spectro-played"></div>'
@@ -3840,6 +3918,43 @@
     // Scrub-region clicks are handled by the mousedown wiring below.
     if (ev.target.closest('.rec-spectro-scrub')) return;
 
+    // "not it?" - write a false-positive review back to BirdNET-Go.
+    // Two-tap arm/confirm so a stray touch can't flag a detection.
+    var flagBtn = ev.target.closest('.flag');
+    if (flagBtn) {
+      var frow = flagBtn.closest('.rec-row');
+      var fid = frow && frow.getAttribute('data-file');
+      if (!fid || flagBtn.disabled) return;
+      if (flagBtn.getAttribute('data-armed') !== 'true') {
+        flagBtn.setAttribute('data-armed', 'true');
+        flagBtn.textContent = 'sure?';
+        setTimeout(function () {
+          if (flagBtn.getAttribute('data-armed') === 'true') {
+            flagBtn.setAttribute('data-armed', 'false');
+            flagBtn.textContent = 'not it?';
+          }
+        }, 3500);
+        return;
+      }
+      flagBtn.setAttribute('data-armed', 'false');
+      flagBtn.disabled = true;
+      flagBtn.textContent = 'saving...';
+      bgReview(fid, 'false_positive').then(function () {
+        frow.classList.add('flagged');
+        flagBtn.textContent = 'flagged';
+        // BirdNET-Go's analytics fold reviews in - refetch so the
+        // collage/counts follow the correction.
+        _bgMemo = {};
+        _haMemo = {};
+        refreshAll();
+      }).catch(function () {
+        flagBtn.disabled = false;
+        flagBtn.textContent = 'failed';
+        setTimeout(function () { flagBtn.textContent = 'not it?'; }, 2500);
+      });
+      return;
+    }
+
     var playBtn = ev.target.closest('.play');
     if (playBtn) {
       // Play / pause toggle. Three cases:
@@ -3876,7 +3991,7 @@
       prow.classList.add('expanded');
       ensureSpectroImage(prow);
       var strip = prow.querySelector('.rec-spectro');
-      var audio = new Audio(bgAudioUrl(pfile));
+      var audio = makeAudio(bgAudioUrl(pfile));
       modalAudio = audio;
       audio.addEventListener('loadedmetadata', function () {
         strip.classList.add('armed');
