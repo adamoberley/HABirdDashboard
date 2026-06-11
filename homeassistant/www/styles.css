@@ -1,5 +1,9 @@
   :root {
     color-scheme: light;
+    /* Type is variable-driven so the card build can swap the editorial
+       serif/mono pairing for the Home Assistant system font. */
+    --av-font-display: ui-serif, "Iowan Old Style", "Apple Garamond", "Bookman Old Style", Georgia, serif;
+    --av-font-mono: ui-monospace, "SF Mono", Menlo, monospace;
     --paper:    #fcfcfb;   /* near-pure white, faintest warm undertone */
     --paper-2:  #f3f2ee;   /* recessed track */
     --paper-3:  #e8e6df;   /* placeholder fill */
@@ -43,11 +47,11 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; height: 100%; background: var(--paper); color: var(--ink); }
   body {
-    font-family: ui-serif, "Iowan Old Style", "Apple Garamond", Georgia, serif;
+    font-family: var(--av-font-display);
     -webkit-font-smoothing: antialiased;
     overflow: hidden;
   }
-  .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: 0.02em; }
+  .mono { font-family: var(--av-font-mono); letter-spacing: 0.02em; }
 
   /* ============ Stage / views ============
      Stage is a flex column: a static title block sits on top, the views
@@ -66,7 +70,7 @@
   .static-head .pre {
     display: inline-block;
     background: none; border: 0; padding: 0;
-    font: italic 400 clamp(13px, 1.4vw, 18px)/1 ui-serif, "Iowan Old Style", Georgia, serif;
+    font: italic 400 clamp(13px, 1.4vw, 18px)/1 var(--av-font-display);
     color: var(--ink-2); letter-spacing: 0.06em; margin-bottom: 6px;
     cursor: pointer; transition: color 140ms ease;
   }
@@ -77,7 +81,7 @@
   }
   .static-head h1 {
     margin: 0; padding: 0;
-    font: 700 clamp(24px, 3.2vw, 40px)/1 ui-serif, "Iowan Old Style", "Bookman Old Style", Georgia, serif;
+    font: 700 clamp(24px, 3.2vw, 40px)/1 var(--av-font-display);
     letter-spacing: 0.06em; color: var(--ink); text-transform: uppercase;
     font-style: normal;
     transition: opacity 240ms cubic-bezier(.7,.05,.2,1);
@@ -116,7 +120,7 @@
   }
   .top .window-pick button {
     background: transparent; border: 0; color: var(--ink-soft);
-    font: 10px/1 ui-monospace, Menlo, monospace; letter-spacing: 0.18em;
+    font: 10px/1 var(--av-font-mono); letter-spacing: 0.18em;
     padding: 9px 16px; border-radius: 999px; cursor: pointer; text-transform: uppercase;
     transition: color 200ms ease;
     position: relative; z-index: 1;
@@ -125,7 +129,7 @@
   .top .window-pick button[aria-current="true"] { color: var(--ink); }
   .menu-btn {
     background: var(--paper); border: 0; color: var(--ink);
-    font: 11px/1 ui-monospace, Menlo, monospace; padding: 9px 14px 8px;
+    font: 11px/1 var(--av-font-mono); padding: 9px 14px 8px;
     border-radius: 999px; cursor: pointer; letter-spacing: 0.18em; text-transform: lowercase;
     box-shadow: var(--raised);
     transition: transform 160ms ease;
@@ -157,7 +161,7 @@
   }
   .slider button {
     background: transparent; border: 0; color: var(--ink-soft);
-    font: 10px/1 ui-monospace, Menlo, monospace; letter-spacing: 0.2em;
+    font: 10px/1 var(--av-font-mono); letter-spacing: 0.2em;
     padding: 11px 24px; border-radius: 999px; cursor: pointer; text-transform: uppercase;
     transition: color 200ms ease;
     position: relative; z-index: 1;
@@ -198,19 +202,19 @@
   .lock-row input {
     flex: 1; background: transparent; border: 0; outline: 0;
     color: var(--ink); padding: 8px 10px;
-    font: 13px ui-monospace, Menlo, monospace;
+    font: 13px var(--av-font-mono);
   }
   .lock-row input::placeholder { color: var(--ink-soft); }
   .lock-row button {
     background: var(--paper); border: 0; color: var(--ink);
     width: 32px; padding: 0; border-radius: 6px; cursor: pointer;
-    font: 14px/1 ui-monospace, Menlo, monospace;
+    font: 14px/1 var(--av-font-mono);
     box-shadow: var(--raised);
     display: flex; align-items: center; justify-content: center;
   }
   .lock-row button:hover { color: var(--accent); }
   .lock-hint {
-    margin: 8px 4px 0; font: 10px ui-monospace, Menlo, monospace;
+    margin: 8px 4px 0; font: 10px var(--av-font-mono);
     color: var(--ink-soft); letter-spacing: 0.04em;
   }
   .lock-err { color: var(--accent); }
@@ -219,7 +223,7 @@
      micro-type used by .lock-hint so the two contexts read consistent. */
   .built-by {
     margin: 14px 4px 0;
-    font: 10px ui-monospace, Menlo, monospace;
+    font: 10px var(--av-font-mono);
     color: var(--ink-soft);
     letter-spacing: 0.04em;
   }
@@ -234,12 +238,12 @@
   .menu-items { padding: 4px 4px; display: none; }
   .menu-items.show { display: block; }
   .menu-items h3 {
-    font: 9px/1 ui-monospace, Menlo, monospace; letter-spacing: 0.24em;
+    font: 9px/1 var(--av-font-mono); letter-spacing: 0.24em;
     color: var(--ink-soft); text-transform: uppercase; margin: 12px 4px 4px;
   }
   .menu-items a {
     display: block; padding: 9px 8px; color: var(--ink); text-decoration: none;
-    font: 14px ui-serif, Georgia, serif; border-radius: 6px;
+    font: 14px var(--av-font-display); border-radius: 6px;
     transition: background 120ms ease;
   }
   .menu-items a:hover { background: var(--paper-2); color: var(--accent); }
@@ -254,7 +258,7 @@
   }
   .menu-section:first-of-type { margin-top: 6px; border-top: 0; padding-top: 0; }
   .menu-section h3 {
-    font: 700 9px ui-monospace, Menlo, monospace; letter-spacing: 0.20em;
+    font: 700 9px var(--av-font-mono); letter-spacing: 0.20em;
     color: var(--ink); text-transform: uppercase;
     margin: 0 0 8px 4px;
   }
@@ -287,11 +291,11 @@
   }
   .menu-row + .menu-row { box-shadow: inset 0 1px 0 rgba(26,22,18,0.06); }
   .menu-row .label {
-    font: 12.5px ui-serif, Georgia, serif; color: var(--ink);
+    font: 12.5px var(--av-font-display); color: var(--ink);
   }
   .hint {
     display: block;
-    font: 9px ui-monospace, Menlo, monospace;
+    font: 9px var(--av-font-mono);
     color: var(--ink-soft); letter-spacing: 0.04em; margin-top: 1px;
   }
 
@@ -331,11 +335,11 @@
   }
   .slider-row .head .label-block { flex: 1; min-width: 0; }
   .slider-row .label {
-    font: 12.5px ui-serif, Georgia, serif; color: var(--ink);
+    font: 12.5px var(--av-font-display); color: var(--ink);
   }
   .slider-row .value {
     flex: 0 0 auto;
-    font: 11px ui-monospace, Menlo, monospace;
+    font: 11px var(--av-font-mono);
     color: var(--ink); font-variant-numeric: tabular-nums;
     background: var(--paper-2); padding: 3px 10px; border-radius: 4px;
     box-shadow: var(--recess);
@@ -379,7 +383,7 @@
   }
   .seg button {
     background: transparent; border: 0; color: var(--ink-soft);
-    font: 9.5px ui-monospace, Menlo, monospace;
+    font: 9.5px var(--av-font-mono);
     letter-spacing: 0.16em; text-transform: uppercase;
     padding: 6px 12px; border-radius: 999px; cursor: pointer;
     position: relative; z-index: 1;
@@ -413,16 +417,16 @@
     50%      { opacity: 1;   transform: scale(1.25); }
   }
   .live-audio .label {
-    flex: 1; font: 12.5px ui-serif, Georgia, serif; color: var(--ink);
+    flex: 1; font: 12.5px var(--av-font-display); color: var(--ink);
   }
   .live-audio .label .hint {
-    font: 9px ui-monospace, Menlo, monospace; color: var(--ink-soft);
+    font: 9px var(--av-font-mono); color: var(--ink-soft);
     letter-spacing: 0.04em;
   }
   .live-audio button {
     background: var(--paper); border: 0; color: var(--ink);
     padding: 6px 12px; border-radius: 4px;
-    font: 9.5px ui-monospace, Menlo, monospace;
+    font: 9.5px var(--av-font-mono);
     letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer;
     box-shadow: var(--raised);
     display: inline-flex; align-items: center; gap: 6px;
@@ -443,14 +447,14 @@
     height: 70px; margin: 0 0 8px;
   }
   .live-status {
-    font: 9.5px ui-monospace, Menlo, monospace; color: var(--ink-soft);
+    font: 9.5px var(--av-font-mono); color: var(--ink-soft);
     letter-spacing: 0.04em; text-transform: lowercase;
     margin: -4px 0 6px 0; padding: 0 4px;
     min-height: 13px;
   }
   .live-status.err { color: #a83a2d; }
   .menu-links a .l-hint {
-    display: block; font: 8.5px ui-serif, Georgia, serif; text-transform: none;
+    display: block; font: 8.5px var(--av-font-display); text-transform: none;
     letter-spacing: 0; color: var(--ink-soft); margin-top: 2px;
   }
   .menu-links a.full { grid-column: 1 / -1; }
@@ -465,7 +469,7 @@
     padding: 9px 10px;
     background: var(--paper-2);
     color: var(--ink); text-decoration: none;
-    font: 10.5px ui-monospace, Menlo, monospace;
+    font: 10.5px var(--av-font-mono);
     letter-spacing: 0.10em; text-transform: lowercase;
     border-radius: 6px;
     box-shadow: var(--raised);
@@ -477,7 +481,7 @@
     margin-top: 10px; padding: 0 4px;
   }
   .menu-save-row .save-state {
-    flex: 1; font: 9px ui-monospace, Menlo, monospace;
+    flex: 1; font: 9px var(--av-font-mono);
     color: var(--ink-soft); letter-spacing: 0.04em;
   }
   .menu-save-row .save-state.ok    { color: #2d5d3a; }
@@ -485,7 +489,7 @@
   .menu-save-row button {
     background: var(--ink); color: var(--paper); border: 0;
     padding: 7px 14px; border-radius: 6px;
-    font: 10px ui-monospace, Menlo, monospace; letter-spacing: 0.14em;
+    font: 10px var(--av-font-mono); letter-spacing: 0.14em;
     text-transform: uppercase; cursor: pointer;
     box-shadow: var(--raised);
   }
@@ -572,7 +576,7 @@
     border-radius: 999px;
     box-shadow: 0 6px 18px rgba(26,22,18,0.12),
                 inset 0 0 0 1px rgba(255,255,255,0.6);
-    font: italic 13px/1.3 ui-serif, "Iowan Old Style", Georgia, serif;
+    font: italic 13px/1.3 var(--av-font-display);
     color: var(--ink);
     letter-spacing: 0.02em;
     opacity: 0; pointer-events: none;
@@ -586,7 +590,7 @@
   .collage-tip .ct-w { color: var(--ink-soft); }
 
   .empty {
-    color: var(--ink-soft); font: 10px ui-monospace, Menlo, monospace;
+    color: var(--ink-soft); font: 10px var(--av-font-mono);
     padding: 120px 0; text-align: center; letter-spacing: 0.18em;
     text-transform: uppercase;
   }
@@ -708,7 +712,7 @@
        so the name reads up the middle of each block. */
     transform: rotate(-90deg) translateY(50%);
     white-space: nowrap;
-    font: 10px/1.15 ui-serif, "Iowan Old Style", Georgia, serif;
+    font: 10px/1.15 var(--av-font-display);
     color: var(--ink);
     transition: transform 130ms ease;
   }
@@ -733,7 +737,7 @@
   .stats-tl-empty {
     position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
-    font: 11px ui-monospace, Menlo, monospace; color: var(--ink-soft);
+    font: 11px var(--av-font-mono); color: var(--ink-soft);
     text-transform: lowercase; letter-spacing: 0.18em;
   }
   /* Trim note - shown when the plot can't fit every species column and
@@ -755,7 +759,7 @@
     padding: 6px 0;
   }
   .stats-side h3 {
-    font: 700 10px ui-monospace, Menlo, monospace; color: var(--ink);
+    font: 700 10px var(--av-font-mono); color: var(--ink);
     letter-spacing: 0.18em; text-transform: uppercase; margin: 0 0 1px;
     border-left: 2px solid var(--accent); padding-left: 10px;
   }
@@ -764,7 +768,7 @@
   .stats-side .grp { flex: 0 0 auto; }
   .stats-side .grp + .grp { margin-top: 22px; }
   .stats-side .grp small {
-    display: block; font: 9px ui-monospace, Menlo, monospace; color: var(--ink-soft);
+    display: block; font: 9px var(--av-font-mono); color: var(--ink-soft);
     letter-spacing: 0.06em; margin: 0 0 3px 12px;
   }
   .stats-side ol { list-style: none; padding: 0; margin: 0; }
@@ -772,7 +776,7 @@
     display: grid; grid-template-columns: 44px 1fr auto; gap: 10px;
     padding: 2px 0;
     box-shadow: inset 0 -1px 0 rgba(26,22,18,0.05);
-    font: 12.5px/1.25 ui-serif, Georgia, serif; color: var(--ink);
+    font: 12.5px/1.25 var(--av-font-display); color: var(--ink);
     align-items: baseline;
     transition: background 140ms ease, color 140ms ease;
   }
@@ -781,8 +785,8 @@
   /* Cross-highlight from a hovered timeline square. */
   .stats-side li.sync-hi { background: var(--paper-2); }
   .stats-side li.sync-hi span:not(.yr):not(.ct) { color: var(--accent); }
-  .stats-side li .yr { font: 9.5px ui-monospace, Menlo, monospace; color: var(--accent-2); letter-spacing: 0.04em; }
-  .stats-side li .ct { font: 11px ui-monospace, Menlo, monospace; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .stats-side li .yr { font: 9.5px var(--av-font-mono); color: var(--accent-2); letter-spacing: 0.04em; }
+  .stats-side li .ct { font: 11px var(--av-font-mono); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 
   /* (Histogram strip removed - charts moved into the stats-grid LEFT
      column as full-bleed chart cards. See .stats-charts above.) */
@@ -813,7 +817,7 @@
   .atlas-sort button .tip {
     position: absolute; top: calc(100% + 6px); left: 50%;
     transform: translateX(-50%); white-space: nowrap;
-    font: 9px ui-monospace, Menlo, monospace; letter-spacing: 0.14em;
+    font: 9px var(--av-font-mono); letter-spacing: 0.14em;
     text-transform: lowercase; color: var(--ink-soft);
     background: var(--paper); padding: 3px 8px; border-radius: 4px;
     box-shadow: var(--raised);
@@ -862,7 +866,7 @@
   .bird-card .actions button, .bird-card .actions a { cursor: pointer; }
   .bird-card .stat {
     position: absolute; top: 14px; left: 16px;
-    font: 9px/1.5 ui-monospace, Menlo, monospace;
+    font: 9px/1.5 var(--av-font-mono);
     color: var(--ink-soft); letter-spacing: 0.04em;
   }
   /* "lifer" badge - shown top-right when a species' first-ever detection
@@ -870,7 +874,7 @@
      off so it never blocks the card's click-to-open. */
   .lifer-badge {
     position: absolute; top: 12px; right: 12px; z-index: 2;
-    font: 700 8px/1 ui-monospace, Menlo, monospace;
+    font: 700 8px/1 var(--av-font-mono);
     letter-spacing: 0.14em; text-transform: uppercase;
     color: var(--paper); background: var(--accent);
     padding: 4px 7px; border-radius: 999px;
@@ -878,7 +882,7 @@
     pointer-events: none;
   }
   .bird-card .stat .n {
-    color: var(--ink); font: 700 13px/1 ui-serif, Georgia, serif;
+    color: var(--ink); font: 700 13px/1 var(--av-font-display);
     font-variant-numeric: tabular-nums; margin-right: 4px;
     letter-spacing: 0;
   }
@@ -895,11 +899,11 @@
   }
   .bird-card h3 {
     margin: 0;
-    font: 700 14.5px/1.15 ui-serif, "Iowan Old Style", Georgia, serif;
+    font: 700 14.5px/1.15 var(--av-font-display);
     color: var(--ink); letter-spacing: 0.01em;
   }
   .bird-card .sci {
-    font: italic 11px/1.2 ui-serif, Georgia, serif;
+    font: italic 11px/1.2 var(--av-font-display);
     color: var(--ink-2); margin: 2px 0 0;
   }
   .bird-card .actions {
@@ -913,7 +917,7 @@
     border: 0; color: var(--ink);
     padding: 5px 9px;
     border-radius: 4px;
-    font: 9.5px/1 ui-monospace, Menlo, monospace;
+    font: 9.5px/1 var(--av-font-mono);
     text-transform: lowercase; letter-spacing: 0.10em;
     text-decoration: none;
     cursor: pointer;
@@ -959,11 +963,11 @@
   .atlas-empty {
     grid-column: 1 / -1;
     padding: 80px 16px; text-align: center;
-    font: 12px/1.6 ui-serif, Georgia, serif; color: var(--ink-2);
+    font: 12px/1.6 var(--av-font-display); color: var(--ink-2);
   }
   .atlas-empty p { margin: 0 0 4px; }
   .atlas-empty p.hint {
-    font: 10px ui-monospace, Menlo, monospace; color: var(--ink-soft);
+    font: 10px var(--av-font-mono); color: var(--ink-soft);
     letter-spacing: 0.06em;
   }
 
@@ -988,7 +992,7 @@
   }
   .admin-title h1 {
     margin: 0;
-    font: 32px/1.1 ui-serif, "Iowan Old Style", Georgia, serif;
+    font: 32px/1.1 var(--av-font-display);
     color: var(--ink); letter-spacing: 0.005em;
   }
   /* Return-to-atlas pill in the same slot the time-window pill
@@ -999,7 +1003,7 @@
     padding: 7px 14px; border-radius: 999px;
     background: var(--paper-2);
     color: var(--ink-soft);
-    font: 10px ui-monospace, Menlo, monospace; letter-spacing: 0.18em;
+    font: 10px var(--av-font-mono); letter-spacing: 0.18em;
     text-transform: lowercase; cursor: pointer;
     text-decoration: none;
     box-shadow: var(--recess);
@@ -1024,25 +1028,25 @@
     padding: 14px 16px; box-shadow: var(--edge);
   }
   .admin-card h3 {
-    margin: 0 0 6px; font: 10px ui-monospace, Menlo, monospace;
+    margin: 0 0 6px; font: 10px var(--av-font-mono);
     letter-spacing: 0.18em; text-transform: uppercase;
     color: var(--ink-soft); font-weight: 500;
   }
-  .admin-card .v { font: 20px ui-serif, Georgia, serif; color: var(--ink); }
-  .admin-card .sub { font: 11px ui-monospace, Menlo, monospace; color: var(--ink-soft); margin-top: 4px; }
+  .admin-card .v { font: 20px var(--av-font-display); color: var(--ink); }
+  .admin-card .sub { font: 11px var(--av-font-mono); color: var(--ink-soft); margin-top: 4px; }
   .admin-card.alert { box-shadow: 0 0 0 1px var(--accent), var(--edge); }
   .admin-card.alert h3 { color: var(--accent); }
   .admin-card.warn { box-shadow: 0 0 0 1px #c47a1f, var(--edge); }
   .admin-card.warn h3 { color: #c47a1f; }
   .admin-section-head {
-    font: 700 11px ui-monospace, Menlo, monospace;
+    font: 700 11px var(--av-font-mono);
     letter-spacing: 0.18em; text-transform: uppercase;
     color: var(--ink); margin: 24px 0 10px;
     border-left: 2px solid var(--accent-2); padding-left: 10px;
   }
   table.admin-tbl {
     width: 100%; border-collapse: collapse;
-    font: 12px ui-monospace, Menlo, monospace;
+    font: 12px var(--av-font-mono);
     background: var(--paper); border-radius: 8px; overflow: hidden;
     box-shadow: var(--edge);
   }
@@ -1063,7 +1067,7 @@
   table.admin-tbl .pill.inactive { background: rgba(168,52,29,.18); color: var(--accent); }
   table.admin-tbl .pill.failed { background: rgba(168,52,29,.18); color: var(--accent); }
   table.admin-tbl button.restart {
-    font: 9.5px ui-monospace, Menlo, monospace;
+    font: 9.5px var(--av-font-mono);
     letter-spacing: 0.04em; text-transform: lowercase;
     padding: 4px 10px; border: 0; background: var(--paper-2);
     border-radius: 4px; cursor: pointer; color: var(--ink-soft);
@@ -1075,17 +1079,17 @@
     display: flex; gap: 8px; align-items: center; margin-bottom: 14px;
   }
   .admin-logs-toolbar select, .admin-logs-toolbar input[type="number"] {
-    font: 12px ui-monospace, Menlo, monospace;
+    font: 12px var(--av-font-mono);
     padding: 6px 10px; border: 1px solid var(--rule, #c8bfae);
     border-radius: 4px; background: var(--paper); color: var(--ink);
   }
   .admin-logs-toolbar label {
-    font: 9.5px ui-monospace, Menlo, monospace; letter-spacing: 0.14em;
+    font: 9.5px var(--av-font-mono); letter-spacing: 0.14em;
     text-transform: uppercase; color: var(--ink-soft);
   }
   .admin-logs-pane {
     background: #1c1a14; color: #d7cba8;
-    font: 12px/1.5 ui-monospace, Menlo, monospace;
+    font: 12px/1.5 var(--av-font-mono);
     padding: 14px 16px; border-radius: 8px;
     max-height: 65vh; overflow: auto; white-space: pre-wrap;
   }
@@ -1097,28 +1101,28 @@
     background: var(--paper); border-radius: 8px;
     padding: 14px 16px; box-shadow: var(--edge);
   }
-  .admin-action h4 { margin: 0 0 6px; font: 15px ui-serif, Georgia, serif; color: var(--ink); }
-  .admin-action p { margin: 0 0 10px; font: 12.5px ui-serif, Georgia, serif; color: var(--ink-soft); }
+  .admin-action h4 { margin: 0 0 6px; font: 15px var(--av-font-display); color: var(--ink); }
+  .admin-action p { margin: 0 0 10px; font: 12.5px var(--av-font-display); color: var(--ink-soft); }
   .admin-action button.run {
-    font: 9.5px ui-monospace, Menlo, monospace; letter-spacing: 0.14em;
+    font: 9.5px var(--av-font-mono); letter-spacing: 0.14em;
     text-transform: lowercase; padding: 6px 12px; border: 0;
     background: var(--ink); color: var(--paper); border-radius: 999px;
     cursor: pointer;
   }
   .admin-action button.run[disabled] { opacity: .5; cursor: wait; }
   .admin-action .out {
-    margin-top: 10px; font: 10.5px ui-monospace, Menlo, monospace;
+    margin-top: 10px; font: 10.5px var(--av-font-mono);
     color: var(--ink-soft); white-space: pre-wrap;
   }
   .admin-action.deploy pre {
     background: #1c1a14; color: #d7cba8;
-    font: 11px ui-monospace, Menlo, monospace;
+    font: 11px var(--av-font-mono);
     padding: 12px 14px; border-radius: 6px;
     overflow: auto; white-space: pre-wrap; word-break: break-all;
     margin: 0;
   }
   .admin-action.deploy button.copy {
-    font: 9.5px ui-monospace, Menlo, monospace; letter-spacing: 0.06em;
+    font: 9.5px var(--av-font-mono); letter-spacing: 0.06em;
     text-transform: lowercase; padding: 5px 10px;
     background: var(--paper-2); color: var(--ink-soft);
     border: 0; border-radius: 4px; cursor: pointer; box-shadow: var(--raised);
@@ -1128,7 +1132,7 @@
   .admin-unreachable {
     background: var(--paper); border-radius: 8px;
     padding: 14px 16px; color: var(--accent);
-    font: 12px ui-monospace, Menlo, monospace;
+    font: 12px var(--av-font-mono);
     margin-bottom: 18px; box-shadow: 0 0 0 1px var(--accent), var(--edge);
   }
   /* When admin screen is shown, the slider underneath is hidden so it
@@ -1199,17 +1203,17 @@
   #about-modal[aria-hidden="false"] .about-card { transform: none; }
   .about-card .about-eyebrow {
     margin: 0 0 7px;
-    font: italic 400 13px/1 ui-serif, "Iowan Old Style", Georgia, serif;
+    font: italic 400 13px/1 var(--av-font-display);
     color: var(--ink-2); letter-spacing: 0.06em;
   }
   .about-card h2 {
     margin: 0 0 13px;
-    font: 700 22px/1.25 ui-serif, "Iowan Old Style", Georgia, serif;
+    font: 700 22px/1.25 var(--av-font-display);
     letter-spacing: 0.01em; color: var(--ink);
   }
   .about-card .about-body {
     margin: 0;
-    font: 400 14.5px/1.62 ui-serif, "Iowan Old Style", Georgia, serif;
+    font: 400 14.5px/1.62 var(--av-font-display);
     color: var(--ink-2);
   }
   /* Plain inline link - same ink as the prose, a simple underline, no
@@ -1222,7 +1226,7 @@
   .about-card .about-explore {
     margin-top: 20px;
     background: none; border: 0; padding: 0;
-    font: 700 11px/1 ui-monospace, Menlo, monospace;
+    font: 700 11px/1 var(--av-font-mono);
     letter-spacing: 0.08em; text-transform: lowercase;
     color: var(--ink-soft); cursor: pointer;
     transition: color 140ms ease;
@@ -1268,7 +1272,7 @@
     position: absolute; top: 16px; right: 16px;
     background: var(--paper-2); border: 0;
     width: 30px; height: 30px; border-radius: 999px;
-    font: 16px/1 ui-monospace, Menlo, monospace; color: var(--ink);
+    font: 16px/1 var(--av-font-mono); color: var(--ink);
     box-shadow: var(--raised);
     cursor: pointer; z-index: 1;
   }
@@ -1319,7 +1323,7 @@
   .pose-toggle button .tip {
     position: absolute; bottom: calc(100% + 6px); left: 50%;
     transform: translateX(-50%); white-space: nowrap;
-    font: 9px ui-monospace, Menlo, monospace; letter-spacing: 0.14em;
+    font: 9px var(--av-font-mono); letter-spacing: 0.14em;
     text-transform: lowercase; color: var(--ink-soft);
     background: var(--paper); padding: 3px 8px; border-radius: 4px;
     box-shadow: var(--raised);
@@ -1330,11 +1334,11 @@
   .pose-toggle button[data-unavailable="true"] { display: none; }
   .modal-info h2 {
     margin: 4px 36px 0 0;
-    font: 700 26px/1.1 ui-serif, "Iowan Old Style", "Bookman Old Style", Georgia, serif;
+    font: 700 26px/1.1 var(--av-font-display);
     color: var(--ink); letter-spacing: 0.01em;
   }
   .modal-info .sci {
-    font: italic 13.5px/1.3 ui-serif, Georgia, serif;
+    font: italic 13.5px/1.3 var(--av-font-display);
     color: var(--ink-2); margin: 5px 0 18px;
   }
   .modal-stats {
@@ -1348,23 +1352,23 @@
   }
   .modal-stats .n {
     display: block;
-    font: 800 17px/1 ui-serif, Georgia, serif;
+    font: 800 17px/1 var(--av-font-display);
     color: var(--ink); font-variant-numeric: tabular-nums;
   }
   .modal-stats .lbl {
     display: block; margin-top: 4px;
-    font: 8.5px ui-monospace, Menlo, monospace;
+    font: 8.5px var(--av-font-mono);
     color: var(--ink-soft); letter-spacing: 0.12em;
     text-transform: uppercase;
   }
   .modal-info .desc {
-    font: 13px/1.55 ui-serif, Georgia, serif;
+    font: 13px/1.55 var(--av-font-display);
     color: var(--ink); margin: 0 0 14px;
   }
   .modal-info .desc.placeholder { color: var(--ink-soft); font-style: italic; }
   .modal-meta {
     display: flex; flex-wrap: wrap; gap: 16px;
-    font: 9.5px ui-monospace, Menlo, monospace; color: var(--ink-soft);
+    font: 9.5px var(--av-font-mono); color: var(--ink-soft);
   }
   .modal-meta .k { letter-spacing: 0.12em; text-transform: uppercase; }
   .modal-meta .v { color: var(--ink); margin-left: 6px; }
@@ -1378,13 +1382,13 @@
     margin-bottom: 8px;
   }
   .modal-recordings h3 {
-    font: 700 10px ui-monospace, Menlo, monospace;
+    font: 700 10px var(--av-font-mono);
     letter-spacing: 0.18em; text-transform: uppercase;
     color: var(--ink); margin: 0;
     border-left: 2px solid var(--accent-2); padding-left: 10px;
   }
   .modal-recordings .rec-count {
-    font: 9px ui-monospace, Menlo, monospace; color: var(--ink-soft);
+    font: 9px var(--av-font-mono); color: var(--ink-soft);
     letter-spacing: 0.06em;
   }
   .modal-recordings ol {
@@ -1433,7 +1437,7 @@
     position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
     color: var(--ink-soft);
-    font: 9px ui-monospace, Menlo, monospace; letter-spacing: 0.14em;
+    font: 9px var(--av-font-mono); letter-spacing: 0.14em;
     text-transform: lowercase;
     pointer-events: none;
   }
@@ -1491,20 +1495,20 @@
     background: var(--ink); color: var(--paper);
   }
   .rec-row .when {
-    font: 11px/1.2 ui-monospace, Menlo, monospace; color: var(--ink);
+    font: 11px/1.2 var(--av-font-mono); color: var(--ink);
   }
   .rec-row .when small {
     display: block; font-size: 9px; color: var(--ink-soft);
     letter-spacing: 0.06em; margin-top: 1px;
   }
   .rec-row .conf {
-    font: 10px ui-monospace, Menlo, monospace;
+    font: 10px var(--av-font-mono);
     color: var(--ink-soft); letter-spacing: 0.06em;
     font-variant-numeric: tabular-nums;
   }
   .rec-empty {
     padding: 14px;
-    font: 11px/1.5 ui-serif, Georgia, serif; color: var(--ink-soft);
+    font: 11px/1.5 var(--av-font-display); color: var(--ink-soft);
     text-align: center;
   }
   .modal-actions {
@@ -1516,7 +1520,7 @@
     border: 0; color: var(--ink);
     padding: 7px 12px;
     border-radius: 4px;
-    font: 10px/1 ui-monospace, Menlo, monospace;
+    font: 10px/1 var(--av-font-mono);
     text-transform: lowercase; letter-spacing: 0.12em;
     text-decoration: none;
     display: inline-flex; align-items: center; gap: 5px;
@@ -1608,13 +1612,13 @@ body.av-local #dd-items  { display: block; }
 .wall-widgets[data-corner$="left"] .ww-block { align-items: flex-start; }
 .ww-block[hidden] { display: none; }
 .ww-big {
-  font: 600 clamp(26px, 3vw, 40px)/1 ui-serif, "Iowan Old Style", "Bookman Old Style", Georgia, serif;
+  font: 600 clamp(26px, 3vw, 40px)/1 var(--av-font-display);
   color: var(--ink);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.01em;
 }
 .ww-cap {
-  font: 9.5px/1.45 ui-monospace, Menlo, monospace;
+  font: 9.5px/1.45 var(--av-font-mono);
   letter-spacing: 0.16em; text-transform: uppercase;
   color: var(--ink-soft);
 }

@@ -59,6 +59,16 @@ css += `
   border-radius: var(--ha-card-border-radius, 12px);
 }
 .av-shell { position: absolute; inset: 0; overflow: hidden; }
+/* Card default: transparent, so the collage sits directly on the HA
+   dashboard. background: paper restores the page's warm ground. */
+.av-shell { background: transparent; }
+.av-shell.av-bg-paper { background: var(--paper); }
+/* font: system swaps the editorial serif/mono pairing for HA's own
+   typeface (set per-theme by HA; Roboto stock). */
+.av-shell.av-font-system {
+  --av-font-display: var(--ha-font-family-body, var(--mdc-typography-font-family, Roboto, "Segoe UI", sans-serif));
+  --av-font-mono: var(--ha-font-family-body, var(--mdc-typography-font-family, Roboto, "Segoe UI", sans-serif));
+}
 /* BirdNET-Pi admin chrome has no backend here (same as the static HA build). */
 #menuBtn, #menu-dd, #returnToAtlas, #adminScreen { display: none !important; }
 `;
@@ -146,6 +156,25 @@ const wrapper = `
 var HABIRD_CDN_ASSETS = 'https://cdn.jsdelivr.net/gh/adamoberley/HABirdDashboard@HABirdDashboard/avian/assets/';
 
 var HABIRD_EDITOR_SCHEMA = [
+  { name: 'title', selector: { text: {} } },
+  { name: 'window', selector: { select: { mode: 'dropdown', options: [
+    { value: '1', label: 'Last hour' },
+    { value: '12', label: 'Last 12 hours' },
+    { value: '24', label: 'Last 24 hours' },
+    { value: '72', label: 'Last 3 days' },
+    { value: '168', label: 'Last 7 days' },
+    { value: '336', label: 'Last 14 days' },
+    { value: '720', label: 'Last 30 days' },
+    { value: 'all', label: 'All time' },
+  ] } } },
+  { name: 'background', selector: { select: { mode: 'dropdown', options: [
+    { value: 'transparent', label: 'Transparent (blend with dashboard)' },
+    { value: 'paper', label: 'Paper (the collage\\'s own ground)' },
+  ] } } },
+  { name: 'font', selector: { select: { mode: 'dropdown', options: [
+    { value: 'system', label: 'Home Assistant font' },
+    { value: 'serif', label: 'Editorial serif (the original look)' },
+  ] } } },
   { name: 'birdnet_url', selector: { text: {} } },
   { name: 'data_source', selector: { select: { mode: 'dropdown', options: [
     { value: 'auto', label: 'Auto (BirdNET-Go API, fall back to MQTT history)' },
@@ -173,6 +202,10 @@ var HABIRD_EDITOR_SCHEMA = [
   { name: 'height', selector: { number: { min: 300, max: 2000, step: 10, mode: 'box', unit_of_measurement: 'px' } } },
 ];
 var HABIRD_LABELS = {
+  title: 'Title (empty = none)',
+  window: 'Time window',
+  background: 'Background',
+  font: 'Font',
   birdnet_url: 'BirdNET-Go URL (empty = this host, port 8080)',
   data_source: 'Data source',
   history_days: 'MQTT history span (bounded by recorder retention)',
@@ -224,8 +257,12 @@ class HABirdCard extends HTMLElement {
     var root = this.shadowRoot || this.attachShadow({ mode: 'open' });
     root.innerHTML = HABIRD_TEMPLATE + '<style>' + HABIRD_CSS + '</style>';
     var shell = root.querySelector('.av-shell');
+    if ((c.font || 'system') !== 'serif') shell.classList.add('av-font-system');
+    if ((c.background || 'transparent') === 'paper') shell.classList.add('av-bg-paper');
     var self = this;
     var avConfig = {
+      title: c.title || '',                  // '' = no title block
+      windowHours: c.window || 24,           // hours, or 'all'
       birdnetGoUrl: c.birdnet_url || '',
       dataSource: c.data_source || 'auto',
       historyDays: c.history_days,
