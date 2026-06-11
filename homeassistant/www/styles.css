@@ -1377,7 +1377,7 @@
   }
   .modal-info .sci {
     font: italic 13.5px/1.3 var(--av-font-display);
-    color: var(--ink-2); margin: 5px 0 18px;
+    color: var(--ink-2); margin: 4px 0 6px;
   }
   .modal-stats {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
@@ -1401,19 +1401,19 @@
   }
   .modal-info .desc {
     font: 13px/1.55 var(--av-font-display);
-    color: var(--ink); margin: 0 0 18px;
+    color: var(--ink); margin: 0 0 10px;
   }
   .modal-info .desc.placeholder { color: var(--ink-soft); font-style: italic; }
   .modal-meta {
     display: flex; flex-wrap: wrap; gap: 16px;
     font: 9.5px var(--av-font-mono); color: var(--ink-soft);
-    margin: 8px 0 18px;
+    margin: 0 0 14px;
   }
   .modal-meta .k { letter-spacing: 0.12em; text-transform: uppercase; }
   .modal-meta .v { color: var(--ink); margin-left: 6px; }
   .modal-meta .v.rare { color: var(--accent-2); }
   .modal-recordings {
-    margin-top: 24px; padding-top: 16px;
+    margin-top: 14px; padding-top: 14px;
     box-shadow: inset 0 1px 0 rgba(26,22,18,0.07);
   }
   .modal-recordings .rec-head {
@@ -1720,6 +1720,9 @@ body.av-picker-top .view#v0, body.av-picker-top .view#v1 { padding-bottom: 24px;
   padding: 0 9px;
 }
 .rec-row .flag[data-state="done"] { color: var(--ink); cursor: default; }
-.rec-row .flag[data-state="failed"] { color: var(--accent-2); font-weight: 700; }
+.rec-row .flag[data-state="failed"] {
+  color: var(--accent-2); font-weight: 700;
+  font-size: 8.5px; letter-spacing: 0.06em; text-transform: uppercase;
+}
 .rec-row .flag:disabled { cursor: default; }
 .rec-row.flagged .when, .rec-row.flagged .conf { text-decoration: line-through; opacity: 0.55; }

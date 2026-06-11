@@ -88,8 +88,13 @@
           return ha('POST', 'hassio/ingress/session').then(function (r) {
             session = unwrap(r).session || null;
             if (session) {
+              // NOTE: ';Secure' only over https - browsers silently DROP
+              // JS-set Secure cookies on http pages, which would leave
+              // every ingress request without its session (the
+              // exclamation-mark flag failure on LAN installs).
               document.cookie = 'ingress_session=' + session +
-                ';path=/api/hassio_ingress/;SameSite=Strict;Secure';
+                ';path=/api/hassio_ingress/;SameSite=Strict' +
+                (location.protocol === 'https:' ? ';Secure' : '');
             }
             return session;
           });
@@ -102,7 +107,12 @@
           }, 5 * 60 * 1000);
           return base;
         });
-      }).catch(function () { return null; });
+      }).catch(function () {
+        // Transient failure (supervisor busy, hass not ready yet): don't
+        // poison the cache - let the next caller try again.
+        _ingressP = null;
+        return null;
+      });
     })();
     return _ingressP;
   }
@@ -143,16 +153,25 @@
         document.cookie = 'csrf=' + tok + ';path=/;SameSite=Lax' +
           (location.protocol === 'https:' ? ';Secure' : '');
       }
-      return fetch(base + '/api/v2/detections/' + encodeURIComponent(id) + '/review', {
-        method: 'POST',
-        credentials: 'same-origin',
-        cache: 'no-store',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': tok,
-        },
-        body: JSON.stringify({ verified: verified }),
-      }).then(function (r) { return r.ok ? r : Promise.reject(r.status); });
+      function post() {
+        return fetch(base + '/api/v2/detections/' + encodeURIComponent(id) + '/review', {
+          method: 'POST',
+          credentials: 'same-origin',
+          cache: 'no-store',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': tok,
+          },
+          body: JSON.stringify({ verified: verified }),
+        }).then(function (r) { return r.ok ? r : Promise.reject(r.status); });
+      }
+      return post().catch(function (status) {
+        // 401 usually means the ingress session lapsed - mint a fresh
+        // one and retry once.
+        if (status !== 401 || !ib) return Promise.reject(status);
+        _ingressP = null;
+        return ingressApiBase().then(function () { return post(); });
+      });
     });
   }
 
@@ -3999,13 +4018,17 @@
         refreshAll();
       }).catch(function (err) {
         flagBtn.disabled = false;
+        // Tooltips don't exist on touch - put a short reason IN the pill.
+        var label = err === 'needs-ingress' ? 'no path'
+          : (typeof err === 'number' ? 'err ' + err : 'failed');
         var why = err === 'needs-ingress'
           ? 'needs the HA ingress connection (admin user)'
           : 'BirdNET-Go refused (' + err + ')';
-        setFlag('failed', '!', 'could not save: ' + why);
+        try { console.warn('[bird-card] review write failed:', err); } catch (e) {}
+        setFlag('failed', label, 'could not save: ' + why);
         setTimeout(function () {
           if (flagBtn.getAttribute('data-state') === 'failed') setFlag('idle', '\u2715', 'report as a false positive');
-        }, 4000);
+        }, 5000);
       });
       return;
     }
