@@ -4506,7 +4506,7 @@ class HABirdCardEditor extends HTMLElement {
 }
 
 console.info(
-  '%c HABIRD-CARD %c v' + HABIRD_VERSION + ' ',
+  '%c BIRD CARD %c v' + HABIRD_VERSION + ' ',
   'background:#1a1612;color:#ece8e1;font-weight:700;border-radius:4px 0 0 4px;padding:2px 6px',
   'background:#4a3f31;color:#ece8e1;border-radius:0 4px 4px 0;padding:2px 6px'
 );
@@ -4516,7 +4516,7 @@ window.customCards = window.customCards || [];
 if (!window.customCards.some(function (c) { return c.type === 'habird-card'; })) {
   window.customCards.push({
     type: 'habird-card',
-    name: 'HABird Card',
+    name: 'Bird Card',
     description: 'Live bird collage from your BirdNET-Go detections, with optional clock and weather.',
     documentationURL: 'https://github.com/adamoberley/HABirdDashboard',
   });
