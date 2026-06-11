@@ -863,6 +863,9 @@
   if (AV_CFG && AV_CFG.viewSelector === false && slider) {
     slider.style.display = 'none';
   }
+  if (AV_CFG && AV_CFG.selectorPosition === 'top') {
+    document.body.classList.add('av-picker-top');
+  }
   winBtns.forEach(function (b) {
     b.setAttribute('aria-current', (+b.dataset.h === currentHours) ? 'true' : 'false');
   });
