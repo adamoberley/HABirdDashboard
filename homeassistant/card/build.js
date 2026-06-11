@@ -249,6 +249,7 @@ var HABIRD_EDITOR_SCHEMA = [
   ] },
   { name: 'birds', type: 'expandable', flatten: true, title: 'Birds & audio', schema: [
     { name: 'sit_confidence', selector: { number: { min: 0, max: 1.01, step: 0.01, mode: 'slider' } } },
+    { name: 'collage_scale', selector: { number: { min: 0.5, max: 3, step: 0.1, mode: 'slider' } } },
     { name: 'audio_boost', selector: { select: { mode: 'dropdown', options: [
       { value: '0', label: 'Off' },
       { value: '6', label: '+6 dB' },
@@ -287,6 +288,7 @@ var HABIRD_LABELS = {
   hide_cursor: 'Hide idle cursor',
   sit_confidence: 'Sit confidence',
   audio_boost: 'Recording volume boost',
+  collage_scale: 'Collage scale',
   image_base: 'Artwork base URL',
   birdnet_url: 'BirdNET-Go URL',
   data_source: 'Data source',
@@ -302,6 +304,7 @@ var HABIRD_HELPERS = {
   hide_cursor: 'For wall displays: pointer disappears after 8 s idle.',
   sit_confidence: 'Birds perch at or above this detection confidence and fly below it. 0 = always perched, 1.01 = always flying.',
   audio_boost: 'Detection clips are quiet. The boost is compressed so it gets louder without clipping.',
+  collage_scale: 'How much of the card the flock claims. Birds always shrink to fit, so bigger is safe.',
   image_base: 'Empty loads artwork from the CDN. Use /local/habird-art/ for an offline copy.',
   birdnet_url: 'Empty uses this host on port 8080, or HA ingress when remote.',
   data_source: 'Automatic uses the API and falls back to the MQTT sensors.',
@@ -404,7 +407,9 @@ class HABirdCard extends HTMLElement {
       // MQTT sensor updates push refreshes (see _watchDetections), so the
       // timer is just a safety net - much longer than the page's 30s.
       pollSeconds: c.poll_seconds || 60,
-      __budgetScale: 1.5,   // birds command a card harder than a full page
+      __budgetScale: (typeof c.collage_scale === 'number' && c.collage_scale > 0)
+        ? c.collage_scale
+        : 1.5,   // birds command a card harder than a full page
       audioBoostDb: (c.audio_boost == null ? 24 : +c.audio_boost),
       __exposeRefresh: function (fn) { self._refresh = fn; },
       sitConfidence: (typeof c.sit_confidence === 'number') ? c.sit_confidence : 0.90,
@@ -471,7 +476,7 @@ class HABirdCardEditor extends HTMLElement {
       this.appendChild(this._form);
     }
     this._form.schema = HABIRD_EDITOR_SCHEMA;
-    this._form.data = Object.assign({ theme: 'auto', corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom' }, this._config);
+    this._form.data = Object.assign({ theme: 'auto', corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', collage_scale: 1.5, audio_boost: '24' }, this._config);
     this._form.hass = this._hass;
   }
 }
