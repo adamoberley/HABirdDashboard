@@ -97,31 +97,53 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
   // an admin user (the supervisor API); anything failing here quietly
   // leaves the LAN default in place and the MQTT fallback carries data.
   var _ingressP = null;
+  var _ingressWhy = '';
   function ingressApiBase() {
     if (_ingressP) return _ingressP;
-    if (!AV_CFG.__getHass) return (_ingressP = Promise.resolve(null));
+    if (!AV_CFG.__getHass) {
+      _ingressWhy = 'no hass connection';
+      return (_ingressP = Promise.resolve(null));
+    }
     _ingressP = (function () {
-      function ha(method, path, data) {
-        var hass = AV_CFG.__getHass();
-        if (!hass || !hass.callApi) return Promise.reject('no hass');
-        return Promise.resolve(hass.callApi(method, path, data));
-      }
       function unwrap(res) { return (res && res.data) || res || {}; }
-      return ha('GET', 'hassio/addons').then(function (res) {
-        var addons = unwrap(res).addons || [];
+      // Supervisor access, two channels: the REST proxy (/api/hassio/*)
+      // and, where that's unavailable, the WebSocket supervisor/api
+      // command modern frontends use.
+      function sup(method, path, data) {
+        var hass = AV_CFG.__getHass();
+        if (!hass) return Promise.reject('no hass');
+        var rest = hass.callApi
+          ? Promise.resolve(hass.callApi(method, 'hassio/' + path, data)).then(unwrap)
+          : Promise.reject('no callApi');
+        return rest.catch(function () {
+          if (!hass.callWS) return Promise.reject('no supervisor access');
+          return hass.callWS({
+            type: 'supervisor/api',
+            endpoint: '/' + path,
+            method: method.toLowerCase(),
+            data: data,
+          }).then(unwrap);
+        });
+      }
+      return sup('GET', 'addons').then(function (res) {
+        var addons = (res && res.addons) || [];
         var hit = addons.filter(function (a) {
           return /birdnet/i.test(a.slug || '') || /birdnet/i.test(a.name || '');
         })[0];
-        if (!hit) throw new Error('no birdnet add-on');
-        return ha('GET', 'hassio/addons/' + hit.slug + '/info');
-      }).then(function (res) {
-        var info = unwrap(res);
-        if (!info.ingress || !info.ingress_url) throw new Error('no ingress');
+        if (!hit) throw new Error('no birdnet add-on in the list');
+        return sup('GET', 'addons/' + hit.slug + '/info');
+      }, function () {
+        // Listing failed (older proxies restrict it) - probe the
+        // alexbelgium add-on's well-known slug directly; the repo hash
+        // prefix is stable across installs.
+        return sup('GET', 'addons/db21ed7f_birdnet-go/info');
+      }).then(function (info) {
+        if (!info.ingress || !info.ingress_url) throw new Error('add-on has no ingress');
         var base = String(info.ingress_url).replace(/\/+$/, '');
         var session = null;
         function newSession() {
-          return ha('POST', 'hassio/ingress/session').then(function (r) {
-            session = unwrap(r).session || null;
+          return sup('POST', 'ingress/session').then(function (r) {
+            session = (r && r.session) || null;
             if (session) {
               // NOTE: ';Secure' only over https - browsers silently DROP
               // JS-set Secure cookies on http pages, which would leave
@@ -137,14 +159,17 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
         return newSession().then(function (s) {
           if (!s) throw new Error('no ingress session');
           setInterval(function () {
-            ha('POST', 'hassio/ingress/validate_session', { session: session })
+            sup('POST', 'ingress/validate_session', { session: session })
               .catch(function () { newSession().catch(function () {}); });
           }, 5 * 60 * 1000);
+          _ingressWhy = '';
           return base;
         });
-      }).catch(function () {
-        // Transient failure (supervisor busy, hass not ready yet): don't
-        // poison the cache - let the next caller try again.
+      }).catch(function (e) {
+        // Remember WHY for the flag's error surface, and don't poison
+        // the cache - the next caller tries again.
+        _ingressWhy = (e && e.message) || String(e);
+        try { console.warn('[bird-card] ingress unavailable:', _ingressWhy); } catch (e2) {}
         _ingressP = null;
         return null;
       });
@@ -178,7 +203,7 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
       if (!sameOrigin) {
         // Cross-origin (direct LAN URL from the HA page): the browser
         // won't carry cookies, so CSRF can never pass. Needs ingress.
-        return Promise.reject('needs-ingress');
+        return Promise.reject('needs-ingress: ' + (_ingressWhy || 'unavailable'));
       }
       var base = ib || BG_BASE;
       var tok = getCookie('csrf');
@@ -4054,10 +4079,11 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
       }).catch(function (err) {
         flagBtn.disabled = false;
         // Tooltips don't exist on touch - put a short reason IN the pill.
-        var label = err === 'needs-ingress' ? 'no path'
+        var isPath = typeof err === 'string' && err.indexOf('needs-ingress') === 0;
+        var label = isPath ? 'no path'
           : (typeof err === 'number' ? 'err ' + err : 'failed');
-        var why = err === 'needs-ingress'
-          ? 'needs the HA ingress connection (admin user)'
+        var why = isPath
+          ? 'needs the HA ingress connection - ' + err.slice('needs-ingress: '.length)
           : 'BirdNET-Go refused (' + err + ')';
         try { console.warn('[bird-card] review write failed:', err); } catch (e) {}
         setFlag('failed', label, 'could not save: ' + why);
