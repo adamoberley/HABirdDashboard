@@ -47,6 +47,7 @@ let css = cssSrc
   .replace(/body\.av-local/g, '.av-shell.av-local')
   .replace(/body\.admin-on/g, '.av-shell.admin-on')
   .replace(/body\.ww-cursor-hidden/g, '.av-shell.ww-cursor-hidden')
+  .replace(/body\.av-title-overlay/g, '.av-shell.av-title-overlay')
   // app chrome pinned to the app frame, not the browser viewport
   .replace(/position: fixed/g, 'position: absolute');
 
@@ -238,6 +239,37 @@ class HABirdCard extends HTMLElement {
   set hass(hass) {
     this._hass = hass;
     this._applyHassTheme();
+    this._watchDetections(hass);
+  }
+  // Push-driven data: HA hands the card a fresh hass object on every
+  // state change. When a BirdNET-Go MQTT sensor (scientific name /
+  // confidence) advances, refresh the collage right away (debounced for
+  // the burst of sibling sensor updates) instead of waiting for the
+  // safety-net poll.
+  _watchDetections(hass) {
+    if (!hass || !hass.states || !this._refresh) return;
+    if (!this._watchIds) {
+      var ids = [];
+      Object.keys(hass.states).forEach(function (id) {
+        if (/_scientific_name$/.test(id)) {
+          ids.push(id, id.replace(/_scientific_name$/, '_confidence'));
+        }
+      });
+      this._watchIds = ids;
+    }
+    if (!this._watchIds.length) return;
+    var stamp = this._watchIds.map(function (id) {
+      var st = hass.states[id];
+      return st ? (st.last_updated || st.last_changed || st.state) : '';
+    }).join('|');
+    if (this._lastStamp != null && stamp !== this._lastStamp) {
+      clearTimeout(this._refreshT);
+      var self = this;
+      this._refreshT = setTimeout(function () {
+        if (self._refresh) self._refresh();
+      }, 1200);
+    }
+    this._lastStamp = stamp;
   }
   // Follow HA's light/dark unless the card pins a theme. Re-applied after
   // boot too: the app applies its own saved theme while initialising,
@@ -267,7 +299,11 @@ class HABirdCard extends HTMLElement {
       dataSource: c.data_source || 'auto',
       historyDays: c.history_days,
       haSensors: c.ha_sensors,   // YAML-only: explicit *_scientific_name entity ids
-      sitConfidence: (typeof c.sit_confidence === 'number') ? c.sit_confidence : 0.96,
+      // MQTT sensor updates push refreshes (see _watchDetections), so the
+      // timer is just a safety net - much longer than the page's 30s.
+      pollSeconds: c.poll_seconds || 60,
+      __exposeRefresh: function (fn) { self._refresh = fn; },
+      sitConfidence: (typeof c.sit_confidence === 'number') ? c.sit_confidence : 0.90,
       wall: {
         clock: !!c.clock,
         weather: !!c.weather,
@@ -281,6 +317,11 @@ class HABirdCard extends HTMLElement {
     var imgBase = (c.image_base || HABIRD_CDN_ASSETS).replace(/\\/?$/, '/');
     runHABirdApp(root, shell, avConfig, imgBase);
     this._applyHassTheme();
+    // Prime the MQTT watch against the current hass so the very next
+    // sensor update (not the one after) triggers a push refresh.
+    this._watchIds = null;
+    this._lastStamp = null;
+    this._watchDetections(this._hass);
     if (window.ResizeObserver) {
       this._ro = new ResizeObserver(function () {
         if (root.__fireResize) root.__fireResize();
@@ -321,7 +362,7 @@ class HABirdCardEditor extends HTMLElement {
       this.appendChild(this._form);
     }
     this._form.schema = HABIRD_EDITOR_SCHEMA;
-    this._form.data = Object.assign({ theme: 'auto', corner: 'bottom-right', sit_confidence: 0.96 }, this._config);
+    this._form.data = Object.assign({ theme: 'auto', corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto' }, this._config);
     this._form.hass = this._hass;
   }
 }

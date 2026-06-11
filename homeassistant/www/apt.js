@@ -47,7 +47,7 @@
   var BG_BASE = (AV_CFG.birdnetGoUrl || '').replace(/\/+$/, '') ||
     (location.protocol + '//' + location.hostname + ':8080');
   // Perched at/above this best-in-window confidence, flying below it.
-  var SIT_CONFIDENCE = (typeof AV_CFG.sitConfidence === 'number') ? AV_CFG.sitConfidence : 0.96;
+  var SIT_CONFIDENCE = (typeof AV_CFG.sitConfidence === 'number') ? AV_CFG.sitConfidence : 0.90;
 
   function bgUrl(path) { return BG_BASE + '/api/v2' + path; }
   function bgJson(path) {
@@ -684,6 +684,10 @@
       if (staticTitle) staticTitle.textContent = AV_CFG.title;
       var __pre = staticHead && staticHead.querySelector('.pre');
       if (__pre) __pre.style.display = 'none';
+      // Float the heading over the collage and let the packer treat it
+      // as an obstacle - birds nest around the words like they do
+      // around the clock (renderCollage measures the h1).
+      document.body.classList.add('av-title-overlay');
     }
   }
   function setTitleForView(i) {
@@ -924,24 +928,24 @@
 
   // Mask-aware nester. tiles: { fullW, fullH, mask, data }. Returns the
   // same tiles with .x, .y assigned (top-left in viewport coords).
-  // `obstacle` (optional, {x,y,w,h} in the same coords) is stamped into
-  // the occupancy grid before any bird is placed, so the flock packs
-  // around it exactly as it packs around another bird - used for the
-  // wall-display clock/weather block sitting inside the collage.
-  function maskPack(tiles, W, H, xBias, yBias, pad, obstacle) {
+  // `obstacles` ([{x,y,w,h}] in the same coords) are stamped into the
+  // occupancy grid before any bird is placed, so the flock packs around
+  // them exactly as it packs around another bird - used for the wall
+  // clock/weather block and the card's configured title.
+  function maskPack(tiles, W, H, xBias, yBias, pad, obstacles) {
     var GW = Math.ceil(W / GRID_STRIDE) + 2;
     var GH = Math.ceil(H / GRID_STRIDE) + 2;
     var grid = new Uint8Array(GW * GH);
-    if (obstacle) {
-      var ox0 = Math.max(0, obstacle.x / GRID_STRIDE | 0);
-      var oy0 = Math.max(0, obstacle.y / GRID_STRIDE | 0);
-      var ox1 = Math.min(GW - 1, (obstacle.x + obstacle.w) / GRID_STRIDE | 0);
-      var oy1 = Math.min(GH - 1, (obstacle.y + obstacle.h) / GRID_STRIDE | 0);
+    (obstacles || []).forEach(function (ob) {
+      var ox0 = Math.max(0, ob.x / GRID_STRIDE | 0);
+      var oy0 = Math.max(0, ob.y / GRID_STRIDE | 0);
+      var ox1 = Math.min(GW - 1, (ob.x + ob.w) / GRID_STRIDE | 0);
+      var oy1 = Math.min(GH - 1, (ob.y + ob.h) / GRID_STRIDE | 0);
       for (var ogy = oy0; ogy <= oy1; ogy++) {
         var ooff = ogy * GW;
         for (var ogx = ox0; ogx <= ox1; ogx++) grid[ooff + ogx] = 1;
       }
-    }
+    });
 
     function cellRange(tile, tx, ty, c) {
       // For mask cell (c[0], c[1]), return [gx0, gy0, gx1, gy1] (inclusive)
@@ -1003,9 +1007,9 @@
       var t = tiles[i];
       var tx, ty;
       // Anchor bird goes dead-centre - unless an obstacle (the wall
-      // clock on a small screen) reaches that far, in which case it
-      // falls through to the spiral search like everyone else.
-      if (i === 0 && !(obstacle && collides(t, cx - t.fullW / 2, cy - t.fullH / 2))) {
+      // clock or title on a small screen) reaches that far, in which
+      // case it falls through to the spiral search like everyone else.
+      if (i === 0 && !(obstacles && obstacles.length && collides(t, cx - t.fullW / 2, cy - t.fullH / 2))) {
         tx = cx - t.fullW / 2;
         ty = cy - t.fullH / 2;
         t.x = tx; t.y = ty;
@@ -1067,14 +1071,43 @@
     return placed;
   }
 
+  var _collageSig = null;
   function renderCollage(items, animate) {
-    collage.innerHTML = '';
     if (!items.length) {
       collage.innerHTML = '<p class="empty">no birds heard in this window.</p>';
+      collagePlaced = [];
+      _collageSig = 'empty';
       return;
     }
     var W = collage.clientWidth, H = collage.clientHeight;
     if (!W || !H) { setTimeout(function () { renderCollage(items, animate); }, 80); return; }
+
+    // Obstacles the flock packs around: the wall clock/weather block and
+    // (card builds) a configured title floated over the collage. Each box
+    // gets a little air so birds don't kiss the letterforms.
+    var obstacles = [];
+    function addObstacle(el) {
+      if (!el) return;
+      var b = el.getBoundingClientRect();
+      if (!b.width || !b.height) return;
+      var cb = collage.getBoundingClientRect();
+      var M = 12;
+      obstacles.push({ x: b.left - cb.left - M, y: b.top - cb.top - M,
+                       w: b.width + 2 * M, h: b.height + 2 * M });
+    }
+    var wwEl = document.getElementById('wallWidgets');
+    if (wwEl && !wwEl.hidden) addObstacle(wwEl);
+    if (document.body.classList.contains('av-title-overlay') && staticTitle) addObstacle(staticTitle);
+
+    // The silent poll mostly returns identical data - skip the whole
+    // pack/render when nothing that affects layout changed, so the DOM
+    // is left completely untouched (no flicker, no work).
+    var sig = W + 'x' + H + '|' + JSON.stringify(obstacles) + '|' +
+      items.map(function (s) {
+        return s.sci + ':' + (+s.n || 0) + ':' + (((+s.best_conf || 0) >= SIT_CONFIDENCE) ? 'p' : 'f');
+      }).join(',');
+    if (!animate && sig === _collageSig) return;
+    _collageSig = sig;
 
     // Tuning depends on bird count - same viewport, very different
     // pack densities for 6 vs 48 birds.
@@ -1140,20 +1173,7 @@
     var yBias = narrow ? 1.7 : 1;   // gentler than the desktop bias so the
                                     // portrait cluster stays a bit wider / less tall
     var pad = narrow ? Math.max(1, COLLAGE_PAD - 1) : COLLAGE_PAD;
-    // Wall-display clock/weather block: when visible, its box (plus a
-    // little air so birds don't kiss the numerals) becomes a pre-stamped
-    // obstacle in the packing grid - the flock flows around it.
-    var obstacle = (function () {
-      var wEl = document.getElementById('wallWidgets');
-      if (!wEl || wEl.hidden) return null;
-      var wb = wEl.getBoundingClientRect();
-      if (!wb.width || !wb.height) return null;
-      var cb = collage.getBoundingClientRect();
-      var M = 12;
-      return { x: wb.left - cb.left - M, y: wb.top - cb.top - M,
-               w: wb.width + 2 * M, h: wb.height + 2 * M };
-    })();
-    var placed = maskPack(tiles, W, H, xBias, yBias, pad, obstacle);
+    var placed = maskPack(tiles, W, H, xBias, yBias, pad, obstacles);
 
     // Scale-to-fit: iterate shrink + repack until every tile lands on
     // screen. The old single-pass version dropped birds when one pass
@@ -1186,15 +1206,15 @@
         scale = Math.min(scale, sx, sy);
       }
       tiles.forEach(function (t) { t.fullW *= scale; t.fullH *= scale; });
-      placed = maskPack(tiles, W, H, xBias, yBias, pad, obstacle);
+      placed = maskPack(tiles, W, H, xBias, yBias, pad, obstacles);
       b = clusterBounds(placed);
     }
 
     // Re-centre the cluster in the viewport so a small cluster doesn't
     // drift to one side from the spiral's center-of-mass bias. Skipped
-    // when an obstacle is stamped - a blind translation could shove a
-    // bird back over the clock the packer just avoided.
-    if (!obstacle) {
+    // when obstacles are stamped - a blind translation could shove a
+    // bird back over the clock/title the packer just avoided.
+    if (!obstacles.length) {
       var dx = W / 2 - (b.L + b.R) / 2;
       var dy = H / 2 - (b.T + b.B) / 2;
       if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
@@ -1202,15 +1222,38 @@
       }
     }
 
+    // ---- Incremental DOM reconciliation ----
+    // Tiles are keyed by species and REUSED across renders, so a poll
+    // never tears the DOM down: an unchanged bird's styles are set to
+    // identical values (a browser no-op - zero repaint), a moved or
+    // resized bird glides on the .gtile CSS transition, a departed bird
+    // fades out, and a new arrival blooms in on its own.
+    var emptyMsg = collage.querySelector('.empty');
+    if (emptyMsg) collage.removeChild(emptyMsg);
+    var existing = {};
+    [].slice.call(collage.querySelectorAll('.gtile')).forEach(function (el) {
+      if (el.classList.contains('leaving')) {
+        // A previous exit still mid-fade: finish it instantly so a
+        // returning species gets a fresh entrance.
+        if (el.parentNode) el.parentNode.removeChild(el);
+        return;
+      }
+      existing[el.getAttribute('data-sci')] = el;
+    });
+    var hadTiles = Object.keys(existing).length > 0;
+    var used = {};
     placed.forEach(function (r) {
       var s = r.data;
-      // Static bundled illustration; __birdImgErr walks the fallback
-      // chain (flight -> perched -> photo cutout) if a file is missing.
-      var img = assetSrc(s.sci, r.pose) + '?v=' + IMG_VERSION;
-      var btn = document.createElement('button');
-      btn.className = 'gtile';
-      btn.type = 'button';
-      btn.setAttribute('data-sci', s.sci);
+      var btn = existing[s.sci];
+      var fresh = !btn;
+      if (fresh) {
+        btn = document.createElement('button');
+        btn.className = 'gtile';
+        btn.type = 'button';
+        btn.setAttribute('data-sci', s.sci);
+        btn.innerHTML = '<img loading="lazy" decoding="async" alt="">';
+      }
+      used[s.sci] = 1;
       btn.setAttribute('aria-label', s.com);
       // Fallback for keyboard / screen-reader users - the visible hover
       // pill below is the primary affordance for sighted mouse users.
@@ -1223,20 +1266,54 @@
       btn.style.top    = r.y + 'px';
       btn.style.width  = r.fullW + 'px';
       btn.style.height = r.fullH + 'px';
-      btn.innerHTML = '<img loading="lazy" decoding="async" src="' + img + '" alt="' + s.com + '"' +
-        birdImgAttrs(s.sci, r.pose) + '>';
+      // Static bundled illustration; __birdImgErr walks the fallback
+      // chain (flight -> perched -> photo cutout) if a file is missing.
+      // Only touched when it actually changes (pose flip / new bird) -
+      // re-assigning an identical src can restart the load in some
+      // browsers, which is exactly the flash this avoids.
+      var imgEl = btn.querySelector('img');
+      var src = assetSrc(s.sci, r.pose) + '?v=' + IMG_VERSION;
+      if (imgEl.getAttribute('src') !== src) {
+        imgEl.setAttribute('alt', s.com);
+        imgEl.setAttribute('data-slug', slugify(s.sci));
+        imgEl.setAttribute('data-fb', r.pose === 2 ? '0' : '1');
+        imgEl.style.visibility = '';
+        imgEl.onerror = function () { window.__birdImgErr(imgEl); };
+        imgEl.setAttribute('src', src);
+      }
+      if (fresh) {
+        collage.appendChild(btn);
+        // A mid-session arrival blooms in by itself; the full staggered
+        // entrance (first load / window change / view switch) is handled
+        // by playCollageEntrance below instead.
+        if (!animate && hadTiles) {
+          btn.style.animationDelay = '0ms';
+          btn.classList.add('entering');
+          setTimeout(function () {
+            btn.classList.remove('entering');
+            btn.style.animationDelay = '';
+          }, 700);
+        }
+      }
       r.el = btn;
-      collage.appendChild(btn);
     });
-    // Hover pill - created once per render so collage.innerHTML='' at
-    // the top of this function doesn't strand a stale node. mousemove
-    // populates its text from hit.data so the count is whatever the
-    // current window's data says.
-    var tip = document.createElement('div');
-    tip.id = 'collageTip';
-    tip.className = 'collage-tip';
-    tip.setAttribute('aria-hidden', 'true');
-    collage.appendChild(tip);
+    // Departures fade + shrink away, then leave the DOM.
+    Object.keys(existing).forEach(function (sci) {
+      if (used[sci]) return;
+      var el = existing[sci];
+      el.classList.add('leaving');
+      setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 560);
+    });
+    // Hover pill - one persistent node; mousemove populates its text
+    // from hit.data so the count is whatever the current window says.
+    var tip = collage.querySelector('.collage-tip');
+    if (!tip) {
+      tip = document.createElement('div');
+      tip.id = 'collageTip';
+      tip.className = 'collage-tip';
+      tip.setAttribute('aria-hidden', 'true');
+      collage.appendChild(tip);
+    }
     // Stash the placed tiles so the alpha-mask hit-tester (below) can
     // resolve which silhouette the cursor is actually over.
     collagePlaced = placed.filter(function (t) { return t.x > -1000; });
@@ -1457,6 +1534,15 @@
   });
 
   // ---- Stats / Atlas data ----
+  // innerHTML setter that skips identical content - re-assigning the
+  // same markup still recreates every node (a visible flash on the 30s
+  // poll); comparing first makes the no-change case a true no-op.
+  function setHtml(el, html) {
+    if (!el || el.__lastHtml === html) return false;
+    el.__lastHtml = html;
+    el.innerHTML = html;
+    return true;
+  }
   function setRow(id, label, val) {
     var el = document.getElementById(id);
     if (el) el.innerHTML = '<span>' + label + '</span><span>' + (val == null || val === '' ? '-' : val) + '</span>';
@@ -1602,7 +1688,7 @@
     if (!tl) return;
     var all = ((DATA.recent && DATA.recent.species) || []).slice();
     if (!all.length) {
-      tl.innerHTML = '<div class="stats-tl-empty">no detections in this window</div>';
+      setHtml(tl, '<div class="stats-tl-empty">no detections in this window</div>');
       return;
     }
 
@@ -1690,12 +1776,12 @@
     var note = trimmed
       ? '<div class="stats-tl-cap">' + C + ' most-heard of ' + all.length + '</div>'
       : '';
-    tl.innerHTML =
+    setHtml(tl,
       '<div class="stats-tl-yaxis">' + yaxis + '</div>'
       + '<div class="stats-tl-plot"' + (isMobile ? ' style="width:' + Math.round(plotW) + 'px"' : '') + '>'
       +   gridlines + cols + xaxis
       + '</div>'
-      + note;
+      + note);
     if (animate) playStatsEntrance();
   }
 
@@ -1739,11 +1825,11 @@
     var today_det = (stats.today && stats.today.detections) || 0;
     var week_det = (stats.week && stats.week.detections) || 0;
     var all_det = (stats.totals && stats.totals.detections) || 0;
-    document.getElementById('statsByPeriod').innerHTML =
+    setHtml(document.getElementById('statsByPeriod'),
         liRow('NOW',   'last hour',   fmtN(last_hour))
       + liRow('TODAY', 'today',       fmtN(today_det))
       + liRow('WEEK',  'last 7 days', fmtN(week_det))
-      + liRow('ALL',   'all time',    fmtN(all_det));
+      + liRow('ALL',   'all time',    fmtN(all_det)));
 
     // Top Species - top 5 species in the current window. ./avian/api/birdnet-api.php?action=recent
     // already returns species sorted by last_seen DESC; re-sort by count.
@@ -1751,9 +1837,9 @@
       .slice()
       .sort(function (a, b) { return (+b.n) - (+a.n); })
       .slice(0, 5);
-    document.getElementById('statsTopSpec').innerHTML = ranked.length
+    setHtml(document.getElementById('statsTopSpec'), ranked.length
       ? ranked.map(function (s, i) { return liRow(pad(i + 1), s.com, fmtN(+s.n), s.sci); }).join('')
-      : liRow('-', 'no detections in window', '');
+      : liRow('-', 'no detections in window', ''));
     document.getElementById('statsTopSpecCap').textContent =
       'most-heard, ' + windowLabel(currentHours);
 
@@ -1761,7 +1847,7 @@
     // "Xd ago" label computed from first_seen.
     var fs = (firstseen.species || []).slice(0, 5);
     var now = Date.now();
-    document.getElementById('statsFirstSeen').innerHTML = fs.length
+    setHtml(document.getElementById('statsFirstSeen'), fs.length
       ? fs.map(function (s) {
           var t = Date.parse((s.first_seen || '').replace(' ', 'T'));
           var label = '-';
@@ -1771,7 +1857,7 @@
           }
           return liRow(label, s.com, '', s.sci);
         }).join('')
-      : liRow('-', 'no detections yet', '');
+      : liRow('-', 'no detections yet', ''));
   }
 
   // ---- Atlas: field-guide card grid ----
@@ -1817,10 +1903,10 @@
     recent.forEach(function (s) { winBySci[s.sci] = +s.n; });
 
     if (!lifelist.length) {
-      grid.innerHTML = '<div class="atlas-empty">' +
+      setHtml(grid, '<div class="atlas-empty">' +
         '<p>No birds detected yet.</p>' +
-        '<p class="hint">The atlas fills up as BirdNET-Pi identifies new species.</p>' +
-        '</div>';
+        '<p class="hint">The atlas fills up as new species are identified.</p>' +
+        '</div>');
       return;
     }
 
@@ -1831,10 +1917,10 @@
       ? lifelist
       : lifelist.filter(function (s) { return (winBySci[s.sci] || 0) > 0; });
     if (!filtered.length) {
-      grid.innerHTML = '<div class="atlas-empty">' +
+      setHtml(grid, '<div class="atlas-empty">' +
         '<p>No detections in this window.</p>' +
-        '<p class="hint">Try a longer time window - the lifelist is still here under ALL.</p>' +
-        '</div>';
+        '<p class="hint">Try a longer time window.</p>' +
+        '</div>');
       return;
     }
 
@@ -1860,7 +1946,7 @@
     // window (every species would qualify against an open-ended span).
     var now = Date.now();
     var windowStartMs = now - currentHours * 3600000;
-    grid.innerHTML = species.map(function (s) {
+    var atlasHtml = species.map(function (s) {
       var total = +s.n || 0;
       var win = winBySci[s.sci] || 0;
       var firstMs = Date.parse((s.first_seen || '').replace(' ', 'T'));
@@ -1892,6 +1978,13 @@
         +   '</div>'
         + '</article>';
     }).join('');
+    // Unchanged markup: leave the DOM (and its wired listeners) alone -
+    // no flash on the silent poll. The entrance replay still runs when
+    // a view switch asks for it.
+    if (!setHtml(grid, atlasHtml)) {
+      if (animate) playAtlasEntrance();
+      return;
+    }
 
     // Wire audio playback + spectrogram load.
     // - Only one card plays at a time. Clicking play on a different card
@@ -2114,7 +2207,9 @@
   // We use refreshAll() (cheap: 5 small JSON fetches) so the dependent
   // text/charts update too. Polling pauses when the tab is hidden and
   // resumes (with an immediate fetch) when it becomes visible again.
-  var POLL_MS = 30 * 1000;
+  // Card builds lengthen this (MQTT sensor updates push refreshes there,
+  // so the timer is just a safety net); the static page keeps 30s.
+  var POLL_MS = Math.max(10, +AV_CFG.pollSeconds || 30) * 1000;
   var pollTimer = null;
   function startPolling() {
     stopPolling();
@@ -2135,6 +2230,17 @@
     }
   });
   startPolling();
+
+  // Card builds call this when a BirdNET-Go MQTT sensor updates: clear
+  // the short-TTL response memos (they'd otherwise serve the pre-event
+  // answer) and refresh immediately. No-op on the static page.
+  if (AV_CFG.__exposeRefresh) {
+    AV_CFG.__exposeRefresh(function () {
+      _bgMemo = {};
+      _haMemo = {};
+      refreshAll();
+    });
+  }
 
   // ---- Menu dropdown ----
   var dd = document.getElementById('menu-dd');

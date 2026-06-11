@@ -30,7 +30,7 @@ window.AV_CONFIG = {
   // in its flight pose (when a flight illustration exists). The idea:
   // a loud, unmistakable bird is probably settled nearby - a faint,
   // uncertain one is just passing through.
-  sitConfidence: 0.96,
+  sitConfidence: 0.90,
 
   // Wall-mounted display extras. All off by default for desk browsing.
   //
