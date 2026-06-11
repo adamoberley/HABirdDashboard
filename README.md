@@ -23,11 +23,13 @@ file), reads BirdNET-Go's API directly, gets weather and theme from Home
 Assistant natively, and lazy-loads bird artwork per species - nothing else
 to set up.
 
-The artwork and the silhouette-masking collage layout come from
+Bird Card began life as a fork of
 [AvianVisitors](https://github.com/Twarner491/AvianVisitors) (a BirdNET-Pi
-project for a dedicated Raspberry Pi); everything else here - the data
-layer, the confidence-based poses, the Home Assistant card - is built for
-Home Assistant + BirdNET-Go.
+project for a dedicated Raspberry Pi) and is now maintained as an
+independent project. The illustrations and the silhouette-masking collage
+layout are AvianVisitors' work, used and adapted with attribution under
+CC-BY-NC-SA; everything else - the data layer, the confidence-based poses,
+the Home Assistant card - was built here for Home Assistant + BirdNET-Go.
 
 ---
 
@@ -234,7 +236,7 @@ each, cached by the browser. For a fully offline install, copy
 The bundled library is 249 (mostly North American) species, so other
 regions will have gaps. (Plain photos are deliberately not used as a
 stand-in - they'd break the kachō-e style and have no silhouette masks
-for the collage packing.) Two remedies, no fork required:
+for the collage packing.) Two remedies, neither needs code changes:
 
 1. **Generate illustrations for exactly YOUR birds.** The art pipeline
    (the same one that made the bundled library - see
@@ -254,10 +256,10 @@ for the collage packing.) Two remedies, no fork required:
 
    Host the PNGs at `/config/www/habird-art/` (set `image_base`) and add
    the rebuilt `dist/habird-card.js` as your dashboard resource.
-2. **Send them upstream.** PRs that add species PNGs (and regenerated
-   masks) are very welcome - every merged region makes the CDN cover the
-   next person's backyard out of the box. Or just open an issue with your
-   eBird region code.
+2. **Send them here.** Pull requests to this repo that add species PNGs
+   (and regenerated masks) are very welcome - every merged region makes
+   the CDN cover the next person's backyard out of the box. Or just open
+   an issue with your eBird region code.
 
 ---
 
@@ -450,14 +452,26 @@ After editing anything in `homeassistant/www/`, regenerate the card with
 
 ## Credits & license
 
-- Original [AvianVisitors](https://github.com/Twarner491/AvianVisitors)
-  collage, illustrations, and layout by
-  [Teddy Warner](https://theodore.net).
-- [BirdNET-Go](https://github.com/tphakala/birdnet-go) by Tomi P. Hakala,
-  packaged for Home Assistant by
-  [alexbelgium](https://github.com/alexbelgium/hassio-addons).
-- Bird identification by [BirdNET](https://birdnet.cornell.edu/) (Cornell
-  Lab of Ornithology / Chemnitz University of Technology).
+This project stands on excellent prior work, and the credit lines below
+are load-bearing, not polite:
 
-License: [CC-BY-NC-SA-4.0](LICENSE), inherited from AvianVisitors /
-BirdNET-Pi. Non-commercial use only.
+- **[AvianVisitors](https://github.com/Twarner491/AvianVisitors)** by
+  [Teddy Warner](https://theodore.net) - the kachō-e illustration library
+  (`avian/assets/`), the generation pipeline (`avian/scripts/`), the
+  silhouette-mask collage layout, and the visual design originate there.
+  This repo adapts them (Home Assistant card packaging, BirdNET-Go data
+  layer, confidence-based poses, and the changes described in the commit
+  history) under the terms below.
+- **[BirdNET-Go](https://github.com/tphakala/birdnet-go)** by Tomi P.
+  Hakala - the detection engine this card displays - packaged for Home
+  Assistant by [alexbelgium](https://github.com/alexbelgium/hassio-addons).
+- **[BirdNET](https://birdnet.cornell.edu/)** (Cornell Lab of Ornithology /
+  Chemnitz University of Technology) - the bird-identification model
+  underneath it all.
+
+**License:
+[CC-BY-NC-SA-4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)**
+(see [LICENSE](LICENSE)), carried forward from AvianVisitors / BirdNET-Pi
+under share-alike. The whole repo - artwork and code - is non-commercial
+use only, and anything built on it must keep this license and these
+credits.
