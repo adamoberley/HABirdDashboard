@@ -1,0 +1,17 @@
+name: Artwork request
+description: Birds in your area are missing illustrations
+labels: [artwork]
+body:
+  - type: input
+    id: region
+    attributes:
+      label: Your eBird region code
+      description: e.g. US-NY, GB, DE-BY - find yours at https://ebird.org/explore
+      placeholder: US-NY
+    validations:
+      required: true
+  - type: textarea
+    id: species
+    attributes:
+      label: Species you're missing (optional)
+      description: Scientific or common names. Or generate them yourself - see "Missing artwork for your area?" in the README - and open a PR instead!
