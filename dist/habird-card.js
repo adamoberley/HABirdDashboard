@@ -138,8 +138,14 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
         // prefix is stable across installs.
         return sup('GET', 'addons/db21ed7f_birdnet-go/info');
       }).then(function (info) {
-        if (!info.ingress || !info.ingress_url) throw new Error('add-on has no ingress');
-        var base = String(info.ingress_url).replace(/\/+$/, '');
+        if (!info.ingress || !(info.ingress_url || info.ingress_entry)) throw new Error('add-on has no ingress');
+        // ingress_url may include the add-on's landing subpath (this one
+        // declares ingress_entry: ui/dashboard) - POSTing under that hits
+        // the UI's GET-only catch-all and 405s. The API lives at the bare
+        // token mount, so strip everything after the token.
+        var raw = String(info.ingress_url || info.ingress_entry);
+        var m = raw.match(/^(\/api\/hassio_ingress\/[^\/]+)/);
+        var base = m ? m[1] : raw.replace(/\/+$/, '');
         var session = null;
         function newSession() {
           return sup('POST', 'ingress/session').then(function (r) {
