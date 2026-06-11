@@ -7,7 +7,7 @@
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC_BY--NC--SA_4.0-lightgrey.svg)](LICENSE)
 
-<img alt="HABirdDashboard collage" src="https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/thumb.png" />
+<img alt="HABirdDashboard collage" src="https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/thumbnail.png" />
 
 **The idea in one paragraph:** your Home Assistant machine can identify
 every bird outside your window by sound alone. A free app called
