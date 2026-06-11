@@ -209,6 +209,36 @@ The card can feed from two places:
    life list / ALL window reach back only as far as your recorder
    retention (default ~10 days; `history_days` caps the query).
 
+### Enabling MQTT (recommended)
+
+MQTT is worth the five minutes even when the API works: detections **push**
+to the card instantly (instead of waiting for the refresh timer), the data
+keeps flowing anywhere the API can't be reached, and every microphone
+becomes a real HA device you can use in automations (announce rare birds,
+light up a lamp for an owl...).
+
+1. **Broker**: install the official **Mosquitto broker** app (Settings →
+   Add-ons → Add-on Store - it's in the official store, no custom repo)
+   and start it. HA will then offer the discovered **MQTT integration**
+   under Settings → Devices & Services - add it.
+2. **Wire BirdNET-Go to the broker** - easiest way: on the BirdNET-Go
+   app's **Configuration** tab, switch on **`mqtt_auto_config`**, save,
+   and restart the app. It injects HA's broker address and credentials
+   into BirdNET-Go for you.
+   (Manual alternative: BirdNET-Go web UI → **Settings → Integrations →
+   MQTT**: enable it, broker `tcp://core-mosquitto:1883`, an HA username
+   + password, topic `birdnet`.)
+3. **Turn on Home Assistant discovery**: in BirdNET-Go's web UI →
+   **Settings → Integrations → MQTT**, enable the **Home Assistant**
+   (auto-discovery) option. This is a separate toggle from MQTT itself,
+   off by default - and it's the one that creates the per-microphone
+   device with the *Scientific Name* / *Last Species* / *Confidence*
+   sensors this card uses.
+4. **Verify**: Settings → Devices & Services → MQTT should show a
+   "BirdNET-Go <your mic>" device whose sensors update on each
+   detection. The card picks them up automatically - nothing to
+   configure on the card side.
+
 `data_source: auto` (the default) uses the API and falls back to MQTT
 history automatically whenever the API isn't reachable from your browser -
 so if the direct connection is blocked, the collage keeps working and
