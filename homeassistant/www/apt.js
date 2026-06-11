@@ -752,7 +752,10 @@
       img.src = './assets/cutouts/' + slug + '.png';
     } else {
       // Nothing bundled for this species - hide rather than show the
-      // browser's broken-image glyph.
+      // browser's broken-image glyph. (Deliberately NOT falling back to
+      // BirdNET-Go's photo proxy: photos break the kachō-e style and
+      // have no silhouette masks. The pipeline in avian/scripts
+      // generates style-matched art for any species instead.)
       img.onerror = null;
       img.style.visibility = 'hidden';
     }
@@ -761,8 +764,8 @@
   // pose 1 starts at fallback step 1 (its first candidate IS the perched
   // illustration, so a failure should go straight to the photo cutout).
   function birdImgAttrs(sci, pose) {
-    return ' data-slug="' + slugify(sci) + '" data-fb="' + (pose === 2 ? 0 : 1) +
-      '" onerror="__birdImgErr(this)"';
+    return ' data-slug="' + slugify(sci) + '" data-sci="' + esc(sci) +
+      '" data-fb="' + (pose === 2 ? 0 : 1) + '" onerror="__birdImgErr(this)"';
   }
   // ======================= end BirdNET-Go adapter ==========================
 
@@ -1255,6 +1258,11 @@
     var wwEl = document.getElementById('wallWidgets');
     if (wwEl && !wwEl.hidden) addObstacle(wwEl);
     if (document.body.classList.contains('av-title-overlay') && staticTitle) addObstacle(staticTitle);
+    // The view picker too: the collage view keeps no reserved band for
+    // it (the box is the whole card, so the flock centres truly), and
+    // birds simply pack around the pill.
+    var slEl = document.getElementById('slider');
+    if (slEl && slEl.style.display !== 'none') addObstacle(slEl);
 
     // The silent poll mostly returns identical data - skip the whole
     // pack/render when nothing that affects layout changed, so the DOM
@@ -1454,6 +1462,7 @@
       if (imgEl.getAttribute('src') !== src) {
         imgEl.setAttribute('alt', s.com);
         imgEl.setAttribute('data-slug', slugify(s.sci));
+        imgEl.setAttribute('data-sci', s.sci);
         imgEl.setAttribute('data-fb', r.pose === 2 ? '0' : '1');
         imgEl.style.visibility = '';
         imgEl.onerror = function () { window.__birdImgErr(imgEl); };
@@ -3015,6 +3024,7 @@
     // and a previous species may have ended hidden at the chain's end.
     img.style.visibility = '';
     img.setAttribute('data-slug', slugify(sci));
+    img.setAttribute('data-sci', sci);
     img.setAttribute('data-fb', '1');   // perched start: next stop is the photo cutout
     img.onerror = function () { window.__birdImgErr(img); };
     img.src = sketchSrc(sci, 1);

@@ -1187,7 +1187,10 @@
   @media (max-width: 700px) {
     /* Detail-modal: full-screen on small screens. */
     #detail-modal { padding: 12px; }
-    .modal-card { padding: 18px; border-radius: 10px; }
+    /* Extra top padding = a clear strip for the close button, so the X
+       sits in its own corner instead of on the artwork. */
+    .modal-card { padding: 44px 18px 18px; border-radius: 10px; }
+    .modal-close { top: 10px; right: 10px; }
     .modal-info h2 { font-size: 22px; }
     .modal-img { height: 160px; padding: 10px; }
     .modal-grid { gap: 18px; }

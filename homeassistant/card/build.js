@@ -85,19 +85,15 @@ css += `
 }
 /* The view picker hugs the card's bottom edge (the page floats it higher). */
 .slider { bottom: 10px; }
-/* The collage owns the card: page-era gutters shrink to a whisker, and
-   the bottom clearance is exactly the picker's footprint - reclaimed
-   entirely when the picker is hidden or moved to the top. */
-.view#v0 { padding: 10px 14px 52px; }
-.av-shell.av-no-picker .view#v0 { padding-bottom: 12px; }
-.av-shell.av-picker-top .view#v0 { padding-top: 52px; padding-bottom: 12px; }
+/* The collage owns the WHOLE card - no reserved band for the picker
+   (it's stamped into the packing grid as an obstacle instead), so the
+   flock centres in the true middle of the card. */
+.view#v0 { padding: 12px 14px; }
 /* Clock/weather sit a finger's width off the card's true corners. */
-.wall-widgets[data-corner$="right"] { right: 18px; }
-.wall-widgets[data-corner$="left"]  { left: 18px; }
+.wall-widgets[data-corner$="right"] { right: 16px; }
+.wall-widgets[data-corner$="left"]  { left: 16px; }
 .wall-widgets[data-corner^="top"]   { top: 12px; }
-.wall-widgets[data-corner^="bottom"] { bottom: 50px; }
-.av-shell.av-no-picker .wall-widgets[data-corner^="bottom"],
-.av-shell.av-picker-top .wall-widgets[data-corner^="bottom"] { bottom: 16px; }
+.wall-widgets[data-corner^="bottom"] { bottom: 14px; }
 /* In system-font mode the picker drops the editorial small-caps treatment
    and reads like native HA tabs. */
 .av-shell.av-font-system .slider button {
@@ -200,6 +196,11 @@ var HABIRD_EDITOR_SCHEMA = [
       { value: 'stats', label: 'Stats' },
       { value: 'atlas', label: 'Atlas' },
     ] } } },
+    { name: 'view_selector', selector: { boolean: {} } },
+    { name: 'selector_position', selector: { select: { mode: 'dropdown', options: [
+      { value: 'bottom', label: 'Bottom' },
+      { value: 'top', label: 'Top' },
+    ] } } },
     { name: 'window', selector: { select: { mode: 'dropdown', options: [
       { value: '1', label: 'Last hour' },
       { value: '12', label: 'Last 12 hours' },
@@ -212,13 +213,6 @@ var HABIRD_EDITOR_SCHEMA = [
     ] } } },
   ] },
   { name: 'title', selector: { text: {} } },
-  { name: '', type: 'grid', schema: [
-    { name: 'view_selector', selector: { boolean: {} } },
-    { name: 'selector_position', selector: { select: { mode: 'dropdown', options: [
-      { value: 'bottom', label: 'Bottom' },
-      { value: 'top', label: 'Top' },
-    ] } } },
-  ] },
   { name: 'appearance', type: 'expandable', flatten: true, title: 'Appearance', schema: [
     { name: '', type: 'grid', schema: [
       { name: 'background', selector: { select: { mode: 'dropdown', options: [
@@ -410,7 +404,7 @@ class HABirdCard extends HTMLElement {
       // MQTT sensor updates push refreshes (see _watchDetections), so the
       // timer is just a safety net - much longer than the page's 30s.
       pollSeconds: c.poll_seconds || 60,
-      __budgetScale: 1.3,   // birds command a card harder than a full page
+      __budgetScale: 1.5,   // birds command a card harder than a full page
       audioBoostDb: (c.audio_boost == null ? 24 : +c.audio_boost),
       __exposeRefresh: function (fn) { self._refresh = fn; },
       sitConfidence: (typeof c.sit_confidence === 'number') ? c.sit_confidence : 0.90,
