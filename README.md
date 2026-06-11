@@ -146,7 +146,12 @@ All editable in the visual editor; YAML equivalents:
 
 ```yaml
 type: custom:habird-card
+view: collage                # collage | stats | atlas - what this card shows
+view_selector: true          # false hides the switcher (single-view cards;
+                             #   put a collage card, a stats card and an
+                             #   atlas card on one dashboard if you like)
 title: ""                    # empty = no title; set any text for a heading
+                             #   (birds pack around it, clock-style)
 window: "24"                 # time window in hours, or "all" - the card has
                              #   no on-screen picker; this is the window
 background: transparent      # transparent (blend with dashboard) | paper
@@ -169,6 +174,12 @@ height: ""                   # px; empty = fill the space (560px minimum)
 the card's own connection - no access token, in your HA units, with
 sunrise/sunset from HA's `sun.sun`. If HA has no weather entity, the card
 quietly falls back to BirdNET-Go's built-in weather (yr.no).
+
+**Bird details open in place**: clicking any bird - in the collage, the
+stats lists, or the atlas - pops its detail card (recordings, description,
+stats) over the current view. The card's layout is responsive to its own
+box via container queries, so a narrow column card gets the compact
+layouts even on a wide desktop.
 
 **Artwork** lazy-loads per species from a CDN view of this repo
 (jsDelivr) - only birds you've actually heard are ever fetched, one PNG
