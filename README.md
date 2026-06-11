@@ -1,4 +1,4 @@
-<p align="center"><img src="https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/logo.png" alt="Bird Card" width="140"></p>
+<p align="left"><img src="https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/logo.png" alt="Bird Card" width="140"></p>
 
 # HABirdDashboard
 
