@@ -787,6 +787,16 @@
       : Math.max(1, +AV_CFG.windowHours || 24);
     if (winPick) winPick.style.display = 'none';
   }
+  // Card builds: pin the starting view, and optionally hide the
+  // collage/stats/atlas selector so a card can BE a single view (one
+  // dashboard can then mix a collage card, a stats card, an atlas card).
+  if (AV_CFG && AV_CFG.view) {
+    var __vi = { collage: 0, stats: 1, atlas: 2 }[AV_CFG.view];
+    if (__vi) go(__vi);
+  }
+  if (AV_CFG && AV_CFG.viewSelector === false && slider) {
+    slider.style.display = 'none';
+  }
   winBtns.forEach(function (b) {
     b.setAttribute('aria-current', (+b.dataset.h === currentHours) ? 'true' : 'false');
   });
@@ -1489,8 +1499,9 @@
   collage.addEventListener('click', function (ev) {
     var hit = maskHitTest(ev.clientX, ev.clientY);
     if (!hit) return;
-    location.hash = '#sci=' + encodeURIComponent(hit.data.sci);
-    go(2);
+    // Open the detail modal right here, over the collage - no detour
+    // through the atlas view.
+    openDetailModal(hit.data.sci);
   });
 
   // Debug hook - call __layout({ slugs, weights, n }) from devtools to
@@ -1696,7 +1707,9 @@
     // (legible squares + labels for touch) and the plot grows past the
     // viewport to scroll horizontally - so we show ALL species rather than
     // trimming. On desktop, cap to whatever fits the available width.
-    var isMobile = (window.innerWidth || 800) <= 700;
+    // Container width, not window width - inside a narrow card on a
+    // desktop the compact layout must still kick in.
+    var isMobile = (tl.clientWidth || window.innerWidth || 800) <= 700;
     var containerW = Math.max(140, (tl.clientWidth || window.innerWidth || 800) - 34);
     var MIN_COL = isMobile ? 52 : 22;
     var cap = isMobile ? all.length : Math.max(3, Math.floor(containerW / MIN_COL));
@@ -3854,12 +3867,10 @@
   // propagation themselves.
   function jumpToSci(sci) {
     if (!sci) return;
-    if (location.hash !== '#sci=' + encodeURIComponent(sci)) {
-      location.hash = '#sci=' + encodeURIComponent(sci);
-    } else {
-      // Same hash -> still re-highlight (the user clicked it again).
-      go(2); highlightAtlas(sci);
-    }
+    // Open the detail modal over whatever view is showing. (This used
+    // to navigate to the atlas first; with single-view cards the
+    // current view must stay put, and in-place feels better anyway.)
+    openDetailModal(sci);
   }
   document.addEventListener('click', function (ev) {
     if (!ev.target.closest) return;

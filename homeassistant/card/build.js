@@ -49,7 +49,15 @@ let css = cssSrc
   .replace(/body\.ww-cursor-hidden/g, '.av-shell.ww-cursor-hidden')
   .replace(/body\.av-title-overlay/g, '.av-shell.av-title-overlay')
   // app chrome pinned to the app frame, not the browser viewport
-  .replace(/position: fixed/g, 'position: absolute');
+  .replace(/position: fixed/g, 'position: absolute')
+  // Responsiveness must track the CARD's box, not the browser window: a
+  // narrow card on a wide desktop needs the compact layouts. The :host
+  // is declared a size container below; width media queries become
+  // container queries and viewport units become container units.
+  .replace(/@media \(max-width: (\d+)px\)/g, '@container av-card (max-width: $1px)')
+  .replace(/@media \(min-width: (\d+)px\)/g, '@container av-card (min-width: $1px)')
+  .replace(/(\d+(?:\.\d+)?)vh/g, '$1cqh')
+  .replace(/(\d+(?:\.\d+)?)vw/g, '$1cqw');
 
 css += `
 /* ---- card-build additions ---- */
@@ -58,6 +66,9 @@ css += `
   width: 100%; height: 100%; min-height: 560px;
   overflow: hidden;
   border-radius: var(--ha-card-border-radius, 12px);
+  /* The card box is the responsive container all @container rules and
+     cq units resolve against. */
+  container: av-card / size;
 }
 .av-shell { position: absolute; inset: 0; overflow: hidden; }
 /* Card default: transparent, so the collage sits directly on the HA
@@ -157,6 +168,12 @@ const wrapper = `
 var HABIRD_CDN_ASSETS = 'https://cdn.jsdelivr.net/gh/adamoberley/HABirdDashboard@HABirdDashboard/avian/assets/';
 
 var HABIRD_EDITOR_SCHEMA = [
+  { name: 'view', selector: { select: { mode: 'dropdown', options: [
+    { value: 'collage', label: 'Collage' },
+    { value: 'stats', label: 'Stats' },
+    { value: 'atlas', label: 'Atlas' },
+  ] } } },
+  { name: 'view_selector', selector: { boolean: {} } },
   { name: 'title', selector: { text: {} } },
   { name: 'window', selector: { select: { mode: 'dropdown', options: [
     { value: '1', label: 'Last hour' },
@@ -203,6 +220,8 @@ var HABIRD_EDITOR_SCHEMA = [
   { name: 'height', selector: { number: { min: 300, max: 2000, step: 10, mode: 'box', unit_of_measurement: 'px' } } },
 ];
 var HABIRD_LABELS = {
+  view: 'View this card shows',
+  view_selector: 'Show the collage/stats/atlas switcher',
   title: 'Title (empty = none)',
   window: 'Time window',
   background: 'Background',
@@ -294,6 +313,8 @@ class HABirdCard extends HTMLElement {
     var self = this;
     var avConfig = {
       title: c.title || '',                  // '' = no title block
+      view: c.view || 'collage',             // which view this card shows
+      viewSelector: c.view_selector !== false,
       windowHours: c.window || 24,           // hours, or 'all'
       birdnetGoUrl: c.birdnet_url || '',
       dataSource: c.data_source || 'auto',
@@ -362,7 +383,7 @@ class HABirdCardEditor extends HTMLElement {
       this.appendChild(this._form);
     }
     this._form.schema = HABIRD_EDITOR_SCHEMA;
-    this._form.data = Object.assign({ theme: 'auto', corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto' }, this._config);
+    this._form.data = Object.assign({ theme: 'auto', corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true }, this._config);
     this._form.hass = this._hass;
   }
 }
