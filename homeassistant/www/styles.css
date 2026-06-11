@@ -542,7 +542,14 @@
     position: absolute;
     background: transparent; border: 0; padding: 0; margin: 0;
     overflow: visible; /* let drop-shadow extend past the bbox */
-    transition: transform 130ms ease;
+    /* transform stays quick for hover; the layout box glides so a
+       repack (new bird, count change, resize) reads as the flock
+       settling rather than a redraw. */
+    transition: transform 130ms ease,
+                left 760ms cubic-bezier(.3, 0, .2, 1),
+                top 760ms cubic-bezier(.3, 0, .2, 1),
+                width 760ms cubic-bezier(.3, 0, .2, 1),
+                height 760ms cubic-bezier(.3, 0, .2, 1);
     /* Events are handled at the .collage level via alpha-mask
        hit-testing - the tile rectangles must not intercept them. */
     pointer-events: none;
@@ -553,6 +560,12 @@
      ever sits on the one tile whose silhouette is actually under the
      cursor. */
   .gtile.is-hover { transform: scale(1.04); z-index: 3; }
+  /* A bird leaving the window fades + shrinks away; renderCollage
+     removes the node when the exit finishes. */
+  .gtile.leaving {
+    opacity: 0; transform: scale(.85);
+    transition: opacity 520ms ease, transform 520ms ease;
+  }
   .gtile img {
     width: 100%; height: 100%; object-fit: contain; display: block;
     /* Cutouts arrive as alpha-bbox-cropped transparent-bg PNGs, so
@@ -1641,3 +1654,16 @@ body.av-local #dd-items  { display: block; }
 /* Kiosk cursor hiding - applied to <body> by apt.js after idle when the
    wall options ask for it. */
 body.ww-cursor-hidden, body.ww-cursor-hidden * { cursor: none !important; }
+
+/* ---- Card build: configured title floats over the collage ---- */
+/* When a card sets a custom title, the heading is lifted out of the
+   flex flow and overlaid on the collage top; renderCollage stamps the
+   h1's box into the packing grid so birds nest around the words,
+   clock-style. Stats/atlas keep headroom so their content doesn't
+   slide under it. */
+body.av-title-overlay .static-head {
+  position: absolute; top: 6px; left: 0; right: 0; z-index: 6;
+  pointer-events: none; padding: 26px 32px 0;
+}
+body.av-title-overlay .view#v1,
+body.av-title-overlay .view#v2 { padding-top: 96px; }

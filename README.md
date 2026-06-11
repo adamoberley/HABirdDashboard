@@ -32,7 +32,7 @@ Home Assistant + BirdNET-Go.
   24H / 7D / ALL), nested by silhouette masks with no overlaps, area scaled
   to call count. Hover for counts, click a bird for its detail card.
 - **Sitting or flying** - a species shows its perched illustration when its
-  best detection confidence in the window is ≥ 96% (configurable), and its
+  best detection confidence in the window is ≥ 90% (configurable), and its
   flight pose otherwise. A clear, close bird has settled in; a faint maybe is
   just passing through. Birds visibly "land" when a confident detection
   arrives.
@@ -154,7 +154,7 @@ font: system                 # system (HA's font) | serif (the original look)
 birdnet_url: ""              # empty = this host, port 8080 (the stock app)
 data_source: auto            # auto | api | ha (see Data sources below)
 history_days: 10             # ha-source span; bounded by recorder retention
-sit_confidence: 0.96         # perched at/above, flying below
+sit_confidence: 0.90         # perched at/above, flying below
 clock: true                  # time + date in a corner of the collage
 weather: true                # conditions + sunrise/sunset from HA
 weather_entity: ""           # empty = first weather.* entity found
