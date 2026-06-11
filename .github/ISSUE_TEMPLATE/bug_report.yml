@@ -1,0 +1,54 @@
+name: Bug report
+description: Something in Bird Card isn't working right
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, what happened instead? A screenshot is worth a hundred words here.
+    validations:
+      required: true
+  - type: dropdown
+    id: view
+    attributes:
+      label: Where?
+      options: [Collage, Stats, Atlas, Detail popup, Card editor, Setup/install]
+    validations:
+      required: true
+  - type: dropdown
+    id: access
+    attributes:
+      label: How do you open Home Assistant?
+      description: This matters a lot - several features route differently on HTTP vs HTTPS.
+      options: ["http:// on the LAN", "https:// (Nabu Casa / reverse proxy)", "Companion app", "Mix / not sure"]
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Data source (card option)
+      options: [auto (default), api, ha (MQTT history), not sure]
+  - type: input
+    id: card_version
+    attributes:
+      label: Bird Card version
+      description: Shown in the browser console as "BIRD CARD vX.Y.Z" when a dashboard loads.
+      placeholder: v1.0.0
+  - type: input
+    id: ha_version
+    attributes:
+      label: Home Assistant version
+      placeholder: "2026.6"
+  - type: input
+    id: bg_version
+    attributes:
+      label: BirdNET-Go app version
+      description: From the app's page in Settings → Apps.
+      placeholder: nightly-20260601
+  - type: textarea
+    id: console
+    attributes:
+      label: Console errors (if any)
+      description: Browser devtools console output, especially lines mentioning bird-card.
+      render: text

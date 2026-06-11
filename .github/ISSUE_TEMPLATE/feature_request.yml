@@ -1,0 +1,11 @@
+name: Feature request
+description: An idea for Bird Card
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: What would you like, and what's the situation where you'd use it?
+    validations:
+      required: true
