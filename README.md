@@ -147,6 +147,8 @@ All editable in the visual editor; YAML equivalents:
 ```yaml
 type: custom:habird-card
 birdnet_url: ""              # empty = this host, port 8080 (the stock app)
+data_source: auto            # auto | api | ha (see Data sources below)
+history_days: 10             # ha-source span; bounded by recorder retention
 sit_confidence: 0.96         # perched at/above, flying below
 clock: true                  # time + date in a corner of the collage
 weather: true                # conditions + sunrise/sunset from HA
@@ -168,6 +170,40 @@ quietly falls back to BirdNET-Go's built-in weather (yr.no).
 each, cached by the browser. For a fully offline install, copy
 `avian/assets/` to `/config/www/habird-art/` and set
 `image_base: /local/habird-art/`.
+
+---
+
+## Data sources
+
+The card can feed from two places:
+
+1. **BirdNET-Go's REST API** (the default, and the most capable): full
+   all-time history, exact counts, and audio - the atlas play buttons and
+   the recordings in each species' detail modal come from here.
+2. **Home Assistant's history of the BirdNET-Go MQTT sensors.** Enable
+   MQTT in BirdNET-Go's integration settings (the alexbelgium app can
+   auto-configure HA's broker) and each microphone appears in HA as a
+   device with *Scientific Name* / *Last Species* / *Confidence* sensors.
+   Those sensors only hold the latest detection, but HA's recorder keeps
+   their history - the card rebuilds the full detection stream (time,
+   species, confidence per detection) from it through its own HA
+   connection. No extra URL, no port, no token. The trade-offs: audio
+   clips can't travel over MQTT (play buttons show "no audio"), and the
+   life list / ALL window reach back only as far as your recorder
+   retention (default ~10 days; `history_days` caps the query).
+
+`data_source: auto` (the default) uses the API and falls back to MQTT
+history automatically whenever the API isn't reachable from your browser -
+so if the direct connection is blocked, the collage keeps working and
+quietly upgrades itself once the API is reachable again. Force one or the
+other with `api` / `ha`. Multiple microphones are auto-discovered and
+summed; to pin specific ones, list their scientific-name sensors in YAML:
+
+```yaml
+ha_sensors:
+  - sensor.birdnet_go_door_bell_scientific_name
+  - sensor.birdnet_go_garden_scientific_name
+```
 
 ---
 
@@ -229,6 +265,16 @@ params to dress up a specific display.
 
 ## Troubleshooting
 
+- **The direct API connection doesn't work** (with MQTT enabled the card
+  still shows birds via history, but audio stays unavailable). Check, in
+  order: (1) the BirdNET-Go app's **Configuration → Network** section in
+  HA - the `8080` port must be exposed (not blank/disabled); (2) open
+  `http://<the-host-in-your-address-bar>:8080` in a new tab - the card
+  derives its default URL from the host you're browsing HA on, so if that
+  tab fails, set `birdnet_url` to a URL that works (e.g.
+  `http://192.168.1.50:8080`); (3) if you browse HA over **https://**, the
+  browser blocks the plain-http API (mixed content) - use http on the LAN
+  or put the API behind HTTPS.
 - **Nothing loads / console shows CORS errors.** BirdNET-Go allows all
   origins by default. If you've restricted `allowedorigins` in its security
   settings, add your HA origin (e.g. `http://homeassistant.local:8123`).

@@ -143,10 +143,16 @@ const wrapper = `
 // actually heard are ever fetched (one PNG per species+pose, cached by
 // the browser). Point image_base at '/local/habird/assets/' instead if
 // you copied the artwork locally (homeassistant/install.sh layout).
-var HABIRD_CDN_ASSETS = 'https://cdn.jsdelivr.net/gh/adamoberley/HABirdDashboard@main/avian/assets/';
+var HABIRD_CDN_ASSETS = 'https://cdn.jsdelivr.net/gh/adamoberley/HABirdDashboard@HABirdDashboard/avian/assets/';
 
 var HABIRD_EDITOR_SCHEMA = [
   { name: 'birdnet_url', selector: { text: {} } },
+  { name: 'data_source', selector: { select: { mode: 'dropdown', options: [
+    { value: 'auto', label: 'Auto (BirdNET-Go API, fall back to MQTT history)' },
+    { value: 'api', label: 'BirdNET-Go API only' },
+    { value: 'ha', label: 'MQTT sensor history only' },
+  ] } } },
+  { name: 'history_days', selector: { number: { min: 1, max: 365, step: 1, mode: 'box', unit_of_measurement: 'days' } } },
   { name: 'sit_confidence', selector: { number: { min: 0.5, max: 1, step: 0.01, mode: 'slider' } } },
   { name: 'clock', selector: { boolean: {} } },
   { name: 'weather', selector: { boolean: {} } },
@@ -168,6 +174,8 @@ var HABIRD_EDITOR_SCHEMA = [
 ];
 var HABIRD_LABELS = {
   birdnet_url: 'BirdNET-Go URL (empty = this host, port 8080)',
+  data_source: 'Data source',
+  history_days: 'MQTT history span (bounded by recorder retention)',
   sit_confidence: 'Sit confidence (perched at/above, flying below)',
   clock: 'Clock',
   weather: 'Weather (from your HA weather integration)',
@@ -219,6 +227,9 @@ class HABirdCard extends HTMLElement {
     var self = this;
     var avConfig = {
       birdnetGoUrl: c.birdnet_url || '',
+      dataSource: c.data_source || 'auto',
+      historyDays: c.history_days,
+      haSensors: c.ha_sensors,   // YAML-only: explicit *_scientific_name entity ids
       sitConfidence: (typeof c.sit_confidence === 'number') ? c.sit_confidence : 0.96,
       wall: {
         clock: !!c.clock,

@@ -159,16 +159,22 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     var dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
     if (windowStart < dayStart) days.push(bgDateStr(new Date(now.getTime() - 86400000)));
     return Promise.all(days.map(function (d) {
+      // rows:null marks a FAILED fetch (vs an empty day) - if every day
+      // failed the API is unreachable and the whole call must reject so
+      // the 'auto' data-source routing can fall back to HA history.
       return bgMemoJson('/analytics/species/daily?date=' + d)
-        .catch(function () { return []; })
-        .then(function (rows) { return { date: d, rows: rows || [] }; });
+        .then(function (rows) { return { date: d, rows: rows || [] }; },
+              function () { return { date: d, rows: null }; });
     })).then(function (perDay) {
+      if (perDay.every(function (d) { return d.rows === null; })) {
+        return Promise.reject('daily summary unreachable');
+      }
       var bySci = {};
       perDay.forEach(function (day) {
         // Hour buckets for this date, as ms epochs, to test window overlap.
         var p = day.date.split('-');
         var dayBase = new Date(+p[0], +p[1] - 1, +p[2]).getTime();
-        day.rows.forEach(function (r) {
+        (day.rows || []).forEach(function (r) {
           var inWin = 0;
           var counts = r.hourly_counts || [];
           for (var h = 0; h < 24; h++) {
@@ -260,6 +266,11 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
       bgMemoJson('/analytics/species/diversity' + range).catch(function () { return null; }),
       bgMemoJson('/analytics/time/distribution/hourly' + range).catch(function () { return null; }),
     ]).then(function (parts) {
+      // All three null = the API is unreachable (not just sparse data):
+      // reject so 'auto' routing can fall back to HA history.
+      if (!parts[0] && !parts[1] && !parts[2]) {
+        return Promise.reject('analytics unreachable');
+      }
       var byDate = {};
       (((parts[0] || {}).data) || []).forEach(function (r) {
         byDate[r.date] = { date: r.date, detections: +r.count || 0, species: 0 };
@@ -337,6 +348,281 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
       if (_speciesAudioCache[sci] === p) delete _speciesAudioCache[sci];
     });
     return (_speciesAudioCache[sci] = p);
+  }
+
+  // ---- Fallback data source: HA history of the BirdNET-Go MQTT sensors ----
+  // BirdNET-Go's MQTT support gives each microphone a Home Assistant device
+  // with "Scientific Name" / "Last Species" / "Confidence" sensors that
+  // update on every detection. The sensors only hold the LATEST detection,
+  // but HA's recorder keeps their state history - so the detection stream
+  // (time + species + confidence) can be rebuilt from /api/history and
+  // aggregated client-side into everything the views need. Used when
+  // BirdNET-Go's REST API isn't reachable from the browser (dataSource
+  // 'auto', the default) or when forced with dataSource 'ha'.
+  //
+  // Limits vs the REST API: no audio clips (recordings never travel over
+  // MQTT), and history only reaches back as far as HA's recorder retention
+  // (default ~10 days) - the ALL window and life list show that span.
+
+  function haAvailable() {
+    var hass = AV_CFG.__getHass && AV_CFG.__getHass();
+    return !!((hass && hass.callApi) || AV_CFG.haToken || (AV_CFG.wall || {}).haToken);
+  }
+  // GET against HA's REST API ('states', 'history/period/...') - through
+  // the card's authenticated hass connection when present, else a
+  // long-lived token (static-page install).
+  function haApi(path) {
+    var hass = AV_CFG.__getHass && AV_CFG.__getHass();
+    if (hass && hass.callApi) return Promise.resolve(hass.callApi('GET', path));
+    var token = AV_CFG.haToken || (AV_CFG.wall || {}).haToken;
+    if (!token) return Promise.reject('no HA access');
+    return fetch('/api/' + path, {
+      cache: 'no-store',
+      headers: { 'Authorization': 'Bearer ' + token },
+    }).then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); });
+  }
+  var _haMemo = {};
+  function haMemo(key, ttlMs, make) {
+    var hit = _haMemo[key];
+    var now = Date.now();
+    if (hit && (now - hit.t) < ttlMs) return hit.p;
+    var p = make();
+    _haMemo[key] = { t: now, p: p };
+    p.catch(function () { if (_haMemo[key] && _haMemo[key].p === p) delete _haMemo[key]; });
+    return p;
+  }
+
+  // How far back history-mode data reaches (bounded by HA's recorder
+  // retention, default 10 days - fetching further just returns less).
+  function hhDays() { return Math.max(1, +AV_CFG.historyDays || 10); }
+
+  // The MQTT sensor trios, one per microphone. Explicit via AV_CFG.haSensors
+  // (a list of *_scientific_name entity ids) or discovered by suffix.
+  function hhSensorSets() {
+    function fromIds(ids) {
+      return ids.filter(function (id) { return /_scientific_name$/.test(id); })
+        .map(function (id) {
+          return {
+            sci: id,
+            conf: id.replace(/_scientific_name$/, '_confidence'),
+            com: id.replace(/_scientific_name$/, '_last_species'),
+          };
+        });
+    }
+    if (AV_CFG.haSensors && AV_CFG.haSensors.length) {
+      return Promise.resolve(fromIds(AV_CFG.haSensors));
+    }
+    var hass = AV_CFG.__getHass && AV_CFG.__getHass();
+    if (hass && hass.states) return Promise.resolve(fromIds(Object.keys(hass.states)));
+    return haMemo('states', 60000, function () { return haApi('states'); })
+      .then(function (all) {
+        return fromIds((all || []).map(function (e) { return e.entity_id; }));
+      });
+  }
+
+  function hhFmtTs(ms) {
+    var d = new Date(ms);
+    var p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) +
+      ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  }
+
+  // Detection events, oldest first: [{t(ms), sci, com, conf(0..1)}].
+  // 'short' covers the rolling-24h windows on a fresh TTL; 'long' covers
+  // lifelist/stats/charts on a slower one. One event per confidence-sensor
+  // update (confidence differs detection to detection, so back-to-back
+  // detections of the SAME species still register as separate events),
+  // joined with the species names in force at that moment; species changes
+  // the confidence stream missed count too.
+  function hhEvents(kind) {
+    var ttl = kind === 'short' ? 10000 : 240000;
+    return haMemo('events:' + kind, ttl, function () {
+      var sinceMs = kind === 'short'
+        ? Date.now() - 25 * 3600000
+        : Date.now() - hhDays() * 86400000;
+      return hhSensorSets().then(function (sets) {
+        if (!sets.length) return Promise.reject('no BirdNET-Go MQTT sensors found');
+        var ids = [];
+        sets.forEach(function (s) { ids.push(s.sci, s.conf, s.com); });
+        var path = 'history/period/' + new Date(sinceMs).toISOString() +
+          '?filter_entity_id=' + encodeURIComponent(ids.join(',')) +
+          '&end_time=' + encodeURIComponent(new Date().toISOString()) +
+          '&minimal_response&no_attributes';
+        return haApi(path).then(function (hist) {
+          // hist: one array per entity; its first row carries entity_id,
+          // later rows are minimal {state, last_changed}.
+          var byId = {};
+          (hist || []).forEach(function (rows) {
+            if (rows && rows.length) byId[rows[0].entity_id] = rows;
+          });
+          function timeline(id) {
+            var out = [];
+            (byId[id] || []).forEach(function (r) {
+              var st = r.state;
+              if (st == null || st === '' || st === 'unknown' || st === 'unavailable' || st === 'None') return;
+              var t = Date.parse(r.last_changed || r.last_updated);
+              if (!isNaN(t)) out.push({ t: t, v: st });
+            });
+            out.sort(function (a, b) { return a.t - b.t; });
+            return out;
+          }
+          // Latest value at (or just after - MQTT fan-out jitter) time t.
+          function valueAt(tl, t) {
+            var v = null;
+            for (var i = 0; i < tl.length; i++) {
+              if (tl[i].t <= t + 2000) v = tl[i].v; else break;
+            }
+            return v;
+          }
+          function toConf(v) {
+            var n = parseFloat(v);
+            if (isNaN(n)) return 0;
+            return n > 1 ? n / 100 : n;   // sensor publishes percent
+          }
+          var events = [];
+          sets.forEach(function (s) {
+            var confs = timeline(s.conf);
+            var scis = timeline(s.sci);
+            var coms = timeline(s.com);
+            confs.forEach(function (c) {
+              var sci = valueAt(scis, c.t);
+              if (!sci) return;
+              events.push({ t: c.t, sci: sci, com: valueAt(coms, c.t) || sci, conf: toConf(c.v) });
+            });
+            scis.forEach(function (sc) {
+              var seen = events.some(function (e) {
+                return e.sci === sc.v && Math.abs(e.t - sc.t) < 2000;
+              });
+              if (seen) return;
+              events.push({ t: sc.t, sci: sc.v, com: valueAt(coms, sc.t) || sc.v,
+                conf: toConf(valueAt(confs, sc.t)) });
+            });
+          });
+          events.sort(function (a, b) { return a.t - b.t; });
+          return events;
+        });
+      });
+    });
+  }
+
+  // Collapse events at/after sinceMs into the species rows the views expect.
+  function hhAgg(events, sinceMs) {
+    var by = {};
+    events.forEach(function (e) {
+      if (e.t < sinceMs) return;
+      var r = by[e.sci];
+      if (!r) r = by[e.sci] = { sci: e.sci, com: e.com, n: 0, best_conf: 0, _f: e.t, _l: e.t };
+      r.n++;
+      if (e.conf > r.best_conf) r.best_conf = e.conf;
+      if (e.t < r._f) r._f = e.t;
+      if (e.t >= r._l) { r._l = e.t; r.com = e.com; }
+    });
+    return Object.keys(by).map(function (k) {
+      var r = by[k];
+      r.first_seen = hhFmtTs(r._f);
+      r.last_seen = hhFmtTs(r._l);
+      delete r._f; delete r._l;
+      return r;
+    });
+  }
+
+  function hhRecent(hours) {
+    var kind = hours <= 24 ? 'short' : 'long';
+    var since = hours >= 1000000 ? 0 : Date.now() - hours * 3600000;
+    return hhEvents(kind).then(function (ev) {
+      var species = hhAgg(ev, since);
+      species.sort(function (a, b) { return (b.last_seen || '').localeCompare(a.last_seen || ''); });
+      return { hours: hours, species: species, as_of: new Date().toISOString() };
+    });
+  }
+
+  function hhLifelist() {
+    return hhEvents('long').then(function (ev) {
+      var species = hhAgg(ev, 0);
+      species.sort(function (a, b) { return (a.first_seen || '').localeCompare(b.first_seen || ''); });
+      return { species: species, as_of: new Date().toISOString() };
+    });
+  }
+
+  function hhFirstseen(limit) {
+    return hhLifelist().then(function (j) {
+      var rows = j.species.slice().sort(function (a, b) {
+        return (b.first_seen || '').localeCompare(a.first_seen || '');
+      }).slice(0, limit || 10).map(function (s) {
+        return { sci: s.sci, com: s.com, first_seen: s.first_seen, total: s.n };
+      });
+      return { species: rows, as_of: new Date().toISOString() };
+    });
+  }
+
+  function hhStats() {
+    return hhEvents('long').then(function (ev) {
+      var now = new Date();
+      var dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      function tally(since) {
+        var n = 0, sp = {};
+        ev.forEach(function (e) { if (e.t >= since) { n++; sp[e.sci] = 1; } });
+        return { detections: n, species: Object.keys(sp).length };
+      }
+      var all = tally(0), today = tally(dayStart), week = tally(now.getTime() - 7 * 86400000);
+      return {
+        totals: all,
+        today: today,
+        last_hour: { detections: tally(now.getTime() - 3600000).detections },
+        week: week,
+        started: ev.length ? hhFmtTs(ev[0].t).slice(0, 10) : null,
+        as_of: now.toISOString(),
+      };
+    });
+  }
+
+  function hhTimeseries(days) {
+    days = days || 30;
+    return hhEvents('long').then(function (ev) {
+      var byDate = {}, byHour = new Array(24).fill(0);
+      ev.forEach(function (e) {
+        var key = hhFmtTs(e.t).slice(0, 10);
+        var d = byDate[key];
+        if (!d) d = byDate[key] = { date: key, detections: 0, _sp: {} };
+        d.detections++;
+        d._sp[e.sci] = 1;
+        byHour[new Date(e.t).getHours()]++;
+      });
+      var daily = Object.keys(byDate).sort().map(function (k) {
+        var d = byDate[k];
+        return { date: d.date, detections: d.detections, species: Object.keys(d._sp).length };
+      });
+      return {
+        days: days,
+        daily: daily,
+        by_hour: byHour.map(function (n, h) { return { hour: h, detections: n }; }),
+        as_of: new Date().toISOString(),
+      };
+    });
+  }
+
+  function hhSpecies(sci) {
+    return hhEvents('long').then(function (ev) {
+      var mine = ev.filter(function (e) { return e.sci === sci; });
+      var agg = hhAgg(mine, 0)[0] || {};
+      var dets = mine.slice().reverse().slice(0, 100).map(function (e) {
+        var ts = hhFmtTs(e.t);
+        // file:'' - audio clips don't travel over MQTT; the modal's play
+        // buttons no-op and the rows still show time + confidence.
+        return { d: ts.slice(0, 10), t: ts.slice(11), file: '', conf: e.conf };
+      });
+      return {
+        sci: sci,
+        summary: {
+          com: agg.com || null,
+          total: agg.n || 0,
+          first_seen: agg.first_seen || null,
+          last_seen: agg.last_seen || null,
+          best_conf: agg.best_conf || null,
+        },
+        detections: dets,
+      };
+    });
   }
 
   // ---- Static illustration resolver ----
@@ -1246,13 +1532,36 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
       });
       if (m[1] === 'wiki') return bgWiki(q.sci || '');
       if (m[1] === 'birdnet-api') {
+        // Data-source routing: 'api' = BirdNET-Go REST only, 'ha' = HA
+        // history of the MQTT sensors only, 'auto' (default) = REST first,
+        // falling back to HA history when the REST call fails (e.g. the
+        // add-on's port isn't reachable from this browser).
+        var mode = AV_CFG.dataSource || 'auto';
+        var pick = function (api, ha) {
+          if (mode === 'ha') return haAvailable() ? ha() : Promise.reject('HA data source needs the card (hass) or a haToken');
+          if (mode === 'api' || !haAvailable()) return api();
+          return api().catch(function (apiErr) {
+            return ha().catch(function () { return Promise.reject(apiErr); });
+          });
+        };
+        var hours, sci2, days2, lim;
         switch (q.action || 'stats') {
-          case 'stats':      return bgStats();
-          case 'lifelist':   return bgLifelist();
-          case 'recent':     return bgRecent(Math.max(1, Math.min(1000000, +q.hours || 24)));
-          case 'species':    return bgSpecies(q.sci || '');
-          case 'timeseries': return bgTimeseries(Math.max(1, Math.min(90, +q.days || 30)));
-          case 'firstseen':  return bgFirstseen(Math.max(1, Math.min(50, +q.limit || 10)));
+          case 'stats':
+            return pick(bgStats, hhStats);
+          case 'lifelist':
+            return pick(bgLifelist, hhLifelist);
+          case 'recent':
+            hours = Math.max(1, Math.min(1000000, +q.hours || 24));
+            return pick(function () { return bgRecent(hours); }, function () { return hhRecent(hours); });
+          case 'species':
+            sci2 = q.sci || '';
+            return pick(function () { return bgSpecies(sci2); }, function () { return hhSpecies(sci2); });
+          case 'timeseries':
+            days2 = Math.max(1, Math.min(90, +q.days || 30));
+            return pick(function () { return bgTimeseries(days2); }, function () { return hhTimeseries(days2); });
+          case 'firstseen':
+            lim = Math.max(1, Math.min(50, +q.limit || 10));
+            return pick(function () { return bgFirstseen(lim); }, function () { return hhFirstseen(lim); });
         }
       }
       return Promise.reject(404);
@@ -3698,10 +4007,16 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
 // actually heard are ever fetched (one PNG per species+pose, cached by
 // the browser). Point image_base at '/local/habird/assets/' instead if
 // you copied the artwork locally (homeassistant/install.sh layout).
-var HABIRD_CDN_ASSETS = 'https://cdn.jsdelivr.net/gh/adamoberley/HABirdDashboard@main/avian/assets/';
+var HABIRD_CDN_ASSETS = 'https://cdn.jsdelivr.net/gh/adamoberley/HABirdDashboard@HABirdDashboard/avian/assets/';
 
 var HABIRD_EDITOR_SCHEMA = [
   { name: 'birdnet_url', selector: { text: {} } },
+  { name: 'data_source', selector: { select: { mode: 'dropdown', options: [
+    { value: 'auto', label: 'Auto (BirdNET-Go API, fall back to MQTT history)' },
+    { value: 'api', label: 'BirdNET-Go API only' },
+    { value: 'ha', label: 'MQTT sensor history only' },
+  ] } } },
+  { name: 'history_days', selector: { number: { min: 1, max: 365, step: 1, mode: 'box', unit_of_measurement: 'days' } } },
   { name: 'sit_confidence', selector: { number: { min: 0.5, max: 1, step: 0.01, mode: 'slider' } } },
   { name: 'clock', selector: { boolean: {} } },
   { name: 'weather', selector: { boolean: {} } },
@@ -3723,6 +4038,8 @@ var HABIRD_EDITOR_SCHEMA = [
 ];
 var HABIRD_LABELS = {
   birdnet_url: 'BirdNET-Go URL (empty = this host, port 8080)',
+  data_source: 'Data source',
+  history_days: 'MQTT history span (bounded by recorder retention)',
   sit_confidence: 'Sit confidence (perched at/above, flying below)',
   clock: 'Clock',
   weather: 'Weather (from your HA weather integration)',
@@ -3774,6 +4091,9 @@ class HABirdCard extends HTMLElement {
     var self = this;
     var avConfig = {
       birdnetGoUrl: c.birdnet_url || '',
+      dataSource: c.data_source || 'auto',
+      historyDays: c.history_days,
+      haSensors: c.ha_sensors,   // YAML-only: explicit *_scientific_name entity ids
       sitConfidence: (typeof c.sit_confidence === 'number') ? c.sit_confidence : 0.96,
       wall: {
         clock: !!c.clock,

@@ -13,6 +13,17 @@ window.AV_CONFIG = {
   // e.g. 'http://192.168.1.50:8080'.
   birdnetGoUrl: '',
 
+  // Data source. 'auto' (default) reads BirdNET-Go's REST API and, if
+  // that's unreachable from this browser, falls back to rebuilding the
+  // detection stream from Home Assistant's history of the BirdNET-Go
+  // MQTT sensors (enable MQTT in BirdNET-Go's integration settings).
+  // 'api' / 'ha' force one source. The HA source needs wall.haToken set
+  // (or the custom-card build, which uses its own HA connection), can't
+  // play audio clips, and reaches back only as far as HA's recorder
+  // keeps history (historyDays, default 10).
+  dataSource: 'auto',
+  historyDays: 10,
+
   // Sitting-or-flying rule. A species shows its perched ("sitting")
   // illustration when its best detection confidence in the current
   // time window is at or above this value; below it, the bird renders
