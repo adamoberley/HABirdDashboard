@@ -750,9 +750,14 @@
     } else if (step === 1) {
       // No illustration at all -> background-removed photo cutout.
       img.src = './assets/cutouts/' + slug + '.png';
+    } else if (step === 2 && img.getAttribute('data-sci')) {
+      // Nothing bundled for this species: BirdNET-Go proxies a real
+      // photo of every species for its own UI - use it so unbundled
+      // birds still get a face in the atlas and detail modal.
+      img.src = bgUrl('/media/image/' + encodeURIComponent(img.getAttribute('data-sci')));
     } else {
-      // Nothing bundled for this species - hide rather than show the
-      // browser's broken-image glyph.
+      // Even the photo failed - hide rather than show the browser's
+      // broken-image glyph.
       img.onerror = null;
       img.style.visibility = 'hidden';
     }
@@ -761,8 +766,8 @@
   // pose 1 starts at fallback step 1 (its first candidate IS the perched
   // illustration, so a failure should go straight to the photo cutout).
   function birdImgAttrs(sci, pose) {
-    return ' data-slug="' + slugify(sci) + '" data-fb="' + (pose === 2 ? 0 : 1) +
-      '" onerror="__birdImgErr(this)"';
+    return ' data-slug="' + slugify(sci) + '" data-sci="' + esc(sci) +
+      '" data-fb="' + (pose === 2 ? 0 : 1) + '" onerror="__birdImgErr(this)"';
   }
   // ======================= end BirdNET-Go adapter ==========================
 
@@ -1454,6 +1459,7 @@
       if (imgEl.getAttribute('src') !== src) {
         imgEl.setAttribute('alt', s.com);
         imgEl.setAttribute('data-slug', slugify(s.sci));
+        imgEl.setAttribute('data-sci', s.sci);
         imgEl.setAttribute('data-fb', r.pose === 2 ? '0' : '1');
         imgEl.style.visibility = '';
         imgEl.onerror = function () { window.__birdImgErr(imgEl); };
@@ -3015,6 +3021,7 @@
     // and a previous species may have ended hidden at the chain's end.
     img.style.visibility = '';
     img.setAttribute('data-slug', slugify(sci));
+    img.setAttribute('data-sci', sci);
     img.setAttribute('data-fb', '1');   // perched start: next stop is the photo cutout
     img.onerror = function () { window.__birdImgErr(img); };
     img.src = sketchSrc(sci, 1);

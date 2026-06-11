@@ -541,6 +541,9 @@ def main() -> int:
     src.add_argument("--species", action="append", default=[],
                      help="Manual 'Sci|Com' (repeatable)")
     src.add_argument("--stdin", action="store_true", help="Read Sci|Com lines from stdin")
+    src.add_argument("--from-birdnet", metavar="URL",
+                     help="BirdNET-Go base URL (e.g. http://homeassistant.local:8080): "
+                          "generate for exactly the species your station has detected")
     ap.add_argument("--ebird-region", help="eBird region code (e.g. US-CA, US-CA-085) to filter labels")
     ap.add_argument("--ebird-key", help="eBird API key (or EBIRD_API_KEY env)")
     ap.add_argument("--gemini-key", help="Gemini API key (or GEMINI_API_KEY env)")
@@ -576,7 +579,17 @@ def main() -> int:
         return 2
 
     # Build species list
-    if args.labels:
+    if args.from_birdnet:
+        url = args.from_birdnet.rstrip("/") + "/api/v2/analytics/species/summary"
+        print(f"[birdnet] fetching life list from {url}...")
+        req = urllib.request.Request(url, headers={"Accept": "application/json"})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            rows = json.loads(r.read())
+        species = [(row["scientific_name"], row.get("common_name") or row["scientific_name"])
+                   for row in rows if row.get("scientific_name")]
+        skipped = 0
+        print(f"[birdnet] {len(species)} species detected by your station")
+    elif args.labels:
         species, skipped = parse_species_list(args.labels.read_text().splitlines())
     elif args.stdin:
         species, skipped = parse_species_list(sys.stdin.read().splitlines())

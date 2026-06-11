@@ -200,6 +200,11 @@ var HABIRD_EDITOR_SCHEMA = [
       { value: 'stats', label: 'Stats' },
       { value: 'atlas', label: 'Atlas' },
     ] } } },
+    { name: 'view_selector', selector: { boolean: {} } },
+    { name: 'selector_position', selector: { select: { mode: 'dropdown', options: [
+      { value: 'bottom', label: 'Bottom' },
+      { value: 'top', label: 'Top' },
+    ] } } },
     { name: 'window', selector: { select: { mode: 'dropdown', options: [
       { value: '1', label: 'Last hour' },
       { value: '12', label: 'Last 12 hours' },
@@ -212,13 +217,6 @@ var HABIRD_EDITOR_SCHEMA = [
     ] } } },
   ] },
   { name: 'title', selector: { text: {} } },
-  { name: '', type: 'grid', schema: [
-    { name: 'view_selector', selector: { boolean: {} } },
-    { name: 'selector_position', selector: { select: { mode: 'dropdown', options: [
-      { value: 'bottom', label: 'Bottom' },
-      { value: 'top', label: 'Top' },
-    ] } } },
-  ] },
   { name: 'appearance', type: 'expandable', flatten: true, title: 'Appearance', schema: [
     { name: '', type: 'grid', schema: [
       { name: 'background', selector: { select: { mode: 'dropdown', options: [

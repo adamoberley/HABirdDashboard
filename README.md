@@ -226,6 +226,35 @@ each, cached by the browser. For a fully offline install, copy
 `avian/assets/` to `/config/www/habird-art/` and set
 `image_base: /local/habird-art/`.
 
+### Missing artwork for your area?
+
+The bundled library is 249 (mostly North American) species, so other
+regions will have gaps. Three remedies, no fork required:
+
+1. **Automatic photo fallback** - any species without bundled art shows a
+   real photo in the atlas and detail views, served by BirdNET-Go's own
+   image proxy. Zero setup. (The collage needs silhouette masks, so only
+   illustrated species appear there.)
+2. **Generate illustrations for exactly YOUR birds.** The art pipeline
+   can read your station's life list straight from BirdNET-Go and render
+   only those species:
+
+   ```bash
+   pip install -r avian/scripts/requirements.txt
+   export GEMINI_API_KEY='your-key'
+   python3 avian/scripts/pregen.py --from-birdnet http://homeassistant.local:8080
+   python3 avian/scripts/cutout.py
+   python3 avian/scripts/build_masks.py     # rebuilds the collage masks
+   node homeassistant/card/build.js         # bakes the masks into the card
+   ```
+
+   Host the PNGs at `/config/www/habird-art/` (set `image_base`) and add
+   the rebuilt `dist/habird-card.js` as your dashboard resource.
+3. **Send them upstream.** PRs that add species PNGs (and regenerated
+   masks) are very welcome - every merged region makes the CDN cover the
+   next person's backyard out of the box. Or just open an issue with your
+   eBird region code.
+
 ---
 
 ## Data sources
