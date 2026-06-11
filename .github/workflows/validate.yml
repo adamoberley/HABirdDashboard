@@ -20,3 +20,19 @@ jobs:
         uses: hacs/action@main
         with:
           category: plugin
+
+  build-and-test:
+    name: Build sync & tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build
+      # The committed dist/ is what HACS ships - an edit to the www
+      # sources without a rebuild would silently serve a stale card.
+      - name: dist matches source
+        run: git diff --exit-code dist/
+      - run: npm test

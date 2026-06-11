@@ -28,7 +28,7 @@ mkdir -p "$TARGET/assets"
 # Frontend (index.html, apt.js, styles.css, config.js, favicon).
 # Don't clobber an existing config.js - the user may have set their
 # BirdNET-Go URL or confidence threshold there.
-for f in index.html apt.js styles.css favicon.png; do
+for f in index.html apt.js masks.js styles.css favicon.png; do
   cp "$REPO_ROOT/homeassistant/www/$f" "$TARGET/$f"
 done
 if [ -f "$TARGET/config.js" ]; then
