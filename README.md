@@ -153,7 +153,7 @@ window onto that data.
 
 1. In HACS: **⋮ menu (top-right) → Custom repositories**, add
    `https://github.com/adamoberley/HABirdDashboard` with type **Dashboard**.
-2. Search HACS for **HABird Card** and **Download** it.
+2. Search HACS for **Bird Card** and **Download** it.
 3. Reload your browser when prompted.
 
 **Without HACS:** download
@@ -163,7 +163,7 @@ the Terminal & SSH app), then **Settings → Dashboards → ⋮ → Resources �
 
 ## Step 4 — Add the card to a dashboard
 
-1. Edit any dashboard → **+ Add card** → search **HABird**.
+1. Edit any dashboard → **+ Add card** → search **Bird Card**.
 2. The visual editor has everything: BirdNET-Go URL (leave empty for the
    stock app on the same host), the sit/fly confidence slider, and toggles
    for the clock, weather, corner, theme, and cursor hiding.
