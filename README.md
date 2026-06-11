@@ -160,6 +160,7 @@ birdnet_url: ""              # empty = this host, port 8080 (the stock app)
 data_source: auto            # auto | api | ha (see Data sources below)
 history_days: 10             # ha-source span; bounded by recorder retention
 sit_confidence: 0.90         # perched at/above, flying below
+                             #   (0 = always perched, 1.01 = always flying)
 clock: true                  # time + date in a corner of the collage
 weather: true                # conditions + sunrise/sunset from HA
 weather_entity: ""           # empty = first weather.* entity found
