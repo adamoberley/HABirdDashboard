@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/logo.png" alt="Bird Card" width="140"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/logo.png" alt="Bird Card" width="140"></p>
 
 # HABirdDashboard
 
@@ -7,7 +7,7 @@
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC_BY--NC--SA_4.0-lightgrey.svg)](LICENSE)
 
-<img alt="HABirdDashboard collage" src="docs/thumb.png" />
+<img alt="HABirdDashboard collage" src="https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/thumb.png" />
 
 A custom dashboard card for the data the
 [BirdNET-Go Home Assistant app](https://github.com/alexbelgium/hassio-addons/tree/master/birdnet-go)
