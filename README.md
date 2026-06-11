@@ -9,19 +9,24 @@
 
 <img alt="HABirdDashboard collage" src="https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/thumb.png" />
 
-A custom dashboard card for the data the
-[BirdNET-Go Home Assistant app](https://github.com/alexbelgium/hassio-addons/tree/master/birdnet-go)
-collects. BirdNET-Go identifies every bird your microphone hears; this card
-turns those detections into a living collage. Each species appears as a
-kachō-e style illustration, sized by how often it's been heard, packed by
-its actual silhouette so wings cradle tails. Confident detections perch;
-uncertain ones fly past.
+**The idea in one paragraph:** your Home Assistant machine can identify
+every bird outside your window by sound alone. A free app called
+[BirdNET-Go](https://github.com/tphakala/birdnet-go) listens to any
+microphone - including the one already in your doorbell or security
+camera - and names each species it hears using Cornell's BirdNET model.
+Bird Card turns that stream of detections into the living collage above:
+every species you've heard appears as a woodblock-print style
+illustration (kachō-e, the Japanese bird-and-flower tradition), sized by
+how often it calls, packed together by its actual silhouette so wings
+cradle tails. Birds the AI heard clearly sit perched; faint, uncertain
+ones fly past. Tap any bird for its recordings, description, and stats.
 
-**You need BirdNET-Go running** - this card is the display layer, not the
-detector. The card itself installs like any other custom card (HACS, one
-file), reads BirdNET-Go's API directly, gets weather and theme from Home
-Assistant natively, and lazy-loads bird artwork per species - nothing else
-to set up.
+No bird knowledge needed, no extra hardware if you own a camera with a
+mic, and nothing to maintain: the card installs like any other HACS card,
+finds BirdNET-Go on its own, gets weather and theme from Home Assistant,
+and fetches each bird's artwork on demand. **You do need the BirdNET-Go
+app running** - this card is the display, not the detector - and Step 1
+below covers installing it from scratch.
 
 Bird Card began life as a fork of
 [AvianVisitors](https://github.com/Twarner491/AvianVisitors) (a BirdNET-Pi
@@ -387,6 +392,22 @@ params to dress up a specific display.
 
 ## Troubleshooting
 
+- **Some birds have no picture.** The most common question, and usually
+  not a bug: the bundled library covers **249 mostly North American
+  species**, so detections outside it simply have no illustration yet
+  (the bird still counts everywhere - it just isn't drawn in the
+  collage). Three checks, then the fix:
+  1. *Is it just certain species?* That's coverage, not breakage - see
+     [Missing artwork for your area?](#missing-artwork-for-your-area)
+     to generate matching art for exactly your station's birds, or open
+     an [artwork request](../../issues/new/choose) with your eBird
+     region code.
+  2. *Is it ALL species?* The artwork loads from a CDN
+     (`cdn.jsdelivr.net`), so the browser viewing the dashboard needs
+     internet access - on an isolated/offline network, host the art
+     locally and point the `image_base` option at it (see Card options).
+  3. *Did you set `image_base` yourself?* Re-check the path serves PNGs
+     at `<image_base>/illustrations/<slug>.png`.
 - **The direct API connection doesn't work** (with MQTT enabled the card
   still shows birds via history, but audio stays unavailable). Check, in
   order: (1) the BirdNET-Go app's **Configuration → Network** section in
@@ -395,11 +416,8 @@ params to dress up a specific display.
   derives its default URL from the host you're browsing HA on, so if that
   tab fails, set `birdnet_url` to a URL that works (e.g.
   `http://192.168.1.50:8080`); (3) if you browse HA over **https://**, the
-  browser blocks the plain-http API (mixed content) - use http on the LAN
-  or put the API behind HTTPS.
-- **Nothing loads / console shows CORS errors.** BirdNET-Go allows all
-  origins by default. If you've restricted `allowedorigins` in its security
-  settings, add your HA origin (e.g. `http://homeassistant.local:8123`).
+  browser blocks the plain-http API (mixed content) - leave `birdnet_url`
+  empty and the card routes through HA ingress instead (next item).
 - **Nabu Casa / HTTPS remote access.** There is no direct BirdNET-Go URL
   that works remotely - the tunnel only carries HA itself, and browsers
   block an `https://` page from calling a plain-`http` LAN address. The
@@ -408,19 +426,18 @@ params to dress up a specific display.
   included) through it. Ingress discovery needs an admin HA user and the
   default `birdnet_url` (leave it empty); if it can't be set up, data
   still flows via the MQTT sensors - only audio playback is lost.
-- **No bird pictures.** The default artwork source is a CDN
-  (`cdn.jsdelivr.net`), so the *browser viewing the dashboard* needs
-  internet access. For offline/local-only setups use the `image_base`
-  option (see Card options).
+- **The "not it?" flag fails.** The pill shows a short reason: `no path`
+  means the card couldn't reach HA ingress (writes need it - check
+  you're an admin user); `err 401/403/405` means BirdNET-Go refused -
+  the browser console (`[bird-card] ...`) carries the detail.
 - **Counts look shifted by a day.** Make sure the BirdNET-Go app's `TZ`
   option matches your actual timezone - the card aligns its rolling windows
   with BirdNET-Go's local dates.
-- **A species shows no picture.** The repo bundles 249 (mostly North
-  American) species. Missing ones fall back to a photo cutout when bundled,
-  otherwise the image is hidden. To generate illustrations for your region,
-  see [`avian/scripts/README.md`](avian/scripts/README.md).
-- **BirdNET-Go auth.** Only public BirdNET-Go routes are used, so the card
-  works even with the BirdNET-Go app's authentication enabled.
+- **Nothing loads / console shows CORS errors.** BirdNET-Go allows all
+  origins by default. If you've restricted `allowedorigins` in its security
+  settings, add your HA origin (e.g. `http://homeassistant.local:8123`).
+- **BirdNET-Go auth.** Only public BirdNET-Go routes are used for reading,
+  so the card works even with the BirdNET-Go app's authentication enabled.
 
 ---
 
