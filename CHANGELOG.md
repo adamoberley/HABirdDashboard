@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.1 — 2026-06-11
+
+- Reliability of the "not it?" false-positive flag on every access path
+  (http LAN, HTTPS/Nabu Casa): ingress session cookies, WebSocket
+  supervisor fallback with known-slug probe, and the ingress base
+  normalized to the token mount (fixes 405s; also restores full-API
+  remote routing with audio).
+- HACS validation workflow (green), My-link install badge, newcomer-first
+  README with pictures-first troubleshooting, issue forms.
+
 ## v1.0.0 — 2026-06-11
 
 First public release of **Bird Card** (`custom:habird-card`), a live bird
