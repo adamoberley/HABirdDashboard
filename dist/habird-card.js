@@ -34,7 +34,6 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     __resizeFns.forEach(function (fn) { try { fn(); } catch (e) {} });
   };
 
-  var PLACEHOLDER = [{"sci":"Calypte anna","com":"Anna's Hummingbird","featured":true},{"sci":"Passer domesticus","com":"House Sparrow"},{"sci":"Haemorhous mexicanus","com":"House Finch"},{"sci":"Turdus migratorius","com":"American Robin"},{"sci":"Zenaida macroura","com":"Mourning Dove"},{"sci":"Spinus psaltria","com":"Lesser Goldfinch"},{"sci":"Zonotrichia leucophrys","com":"White-crowned Sparrow"},{"sci":"Aphelocoma californica","com":"California Scrub-Jay"},{"sci":"Mimus polyglottos","com":"Northern Mockingbird"},{"sci":"Sayornis nigricans","com":"Black Phoebe"},{"sci":"Larus occidentalis","com":"Western Gull"},{"sci":"Corvus brachyrhynchos","com":"American Crow"}];
   // Bumped whenever the offline sketch build changes, so the browser
   // doesn't keep a stale cache after we regenerate the sketches.
   var SKETCH_VERSION = 'r10'; // full library restyle: every species
@@ -522,13 +521,16 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
             out.sort(function (a, b) { return a.t - b.t; });
             return out;
           }
-          // Latest value at (or just after - MQTT fan-out jitter) time t.
-          function valueAt(tl, t) {
-            var v = null;
-            for (var i = 0; i < tl.length; i++) {
-              if (tl[i].t <= t + 2000) v = tl[i].v; else break;
-            }
-            return v;
+          // Monotonic "latest value at time t (+2s MQTT fan-out jitter)"
+          // walker: the event streams are processed in ascending time, so
+          // a single advancing pointer replaces the old O(n^2) rescans -
+          // a 10-day busy-station history joins in linear time.
+          function walker(tl) {
+            var i = 0, last = null;
+            return function (t) {
+              while (i < tl.length && tl[i].t <= t + 2000) { last = tl[i].v; i++; }
+              return last;
+            };
           }
           function toConf(v) {
             var n = parseFloat(v);
@@ -539,19 +541,27 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
           sets.forEach(function (s) {
             var confs = timeline(s.conf);
             var scis = timeline(s.sci);
-            var coms = timeline(s.com);
+            var comAtA = walker(timeline(s.com));
+            var comAtB = walker(timeline(s.com));
+            var sciAt = walker(scis);
+            var confAt = walker(confs);
+            // 2-second buckets of (species, time) already emitted via the
+            // confidence stream, so the species pass can skip duplicates
+            // without scanning the whole event list per entry.
+            var seen = {};
             confs.forEach(function (c) {
-              var sci = valueAt(scis, c.t);
+              var sci = sciAt(c.t);
               if (!sci) return;
-              events.push({ t: c.t, sci: sci, com: valueAt(coms, c.t) || sci, conf: toConf(c.v) });
+              var b = Math.round(c.t / 2000);
+              seen[sci + '|' + (b - 1)] = 1;
+              seen[sci + '|' + b] = 1;
+              seen[sci + '|' + (b + 1)] = 1;
+              events.push({ t: c.t, sci: sci, com: comAtA(c.t) || sci, conf: toConf(c.v) });
             });
             scis.forEach(function (sc) {
-              var seen = events.some(function (e) {
-                return e.sci === sc.v && Math.abs(e.t - sc.t) < 2000;
-              });
-              if (seen) return;
-              events.push({ t: sc.t, sci: sc.v, com: valueAt(coms, sc.t) || sc.v,
-                conf: toConf(valueAt(confs, sc.t)) });
+              if (seen[sc.v + '|' + Math.round(sc.t / 2000)]) return;
+              events.push({ t: sc.t, sci: sc.v, com: comAtB(sc.t) || sc.v,
+                conf: toConf(confAt(sc.t)) });
             });
           });
           events.sort(function (a, b) { return a.t - b.t; });
@@ -1571,7 +1581,7 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
         var s = hit.data;
         var n = +s.n || 0;
         var noun = (n === 1) ? 'call' : 'calls';
-        tip.innerHTML = '<span class="ct-name">' + (s.com || s.sci) + '</span>'
+        tip.innerHTML = '<span class="ct-name">' + esc(s.com || s.sci) + '</span>'
           + '<span class="ct-w"> - </span>'
           + '<span class="ct-n">' + fmtN(n) + '</span>'
           + '<span class="ct-w"> ' + noun + ' ' + windowLabel(currentHours) + '</span>';
@@ -1650,10 +1660,19 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     if (el) el.innerHTML = '<span>' + label + '</span><span>' + (val == null || val === '' ? '-' : val) + '</span>';
   }
   function liRow(yr, label, ct, sci) {
-    var attr = sci ? ' data-sci="' + sci.replace(/"/g, '&quot;') + '"' : '';
-    return '<li' + attr + '><span class="yr">' + yr + '</span><span>' + label + '</span><span class="ct">' + (ct == null ? '-' : ct) + '</span></li>';
+    var attr = sci ? ' data-sci="' + esc(sci) + '"' : '';
+    return '<li' + attr + '><span class="yr">' + esc(yr) + '</span><span>' + esc(label) +
+      '</span><span class="ct">' + (ct == null ? '-' : esc(ct)) + '</span></li>';
   }
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  // HTML-escape for every string interpolated into markup. Species names
+  // arrive from the BirdNET-Go API or MQTT sensor states - external data
+  // rendered inside the HA frontend, so it must never carry markup.
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
   function fmtN(n) {
     if (n == null) return '-';
     if (n >= 10000) return (n / 1000).toFixed(1) + 'k';
@@ -1869,9 +1888,9 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
       var n = +s.n || 0;
       var bottomPct = (n / maxN) * SPAN * 100;   // square height = quantity
       cols += ''
-        + '<div class="stats-tl-col" data-sci="' + s.sci + '" style="left:' + centerPct.toFixed(3) + '%;width:' + colW.toFixed(2) + 'px">'
+        + '<div class="stats-tl-col" data-sci="' + esc(s.sci) + '" style="left:' + centerPct.toFixed(3) + '%;width:' + colW.toFixed(2) + 'px">'
         +   '<div class="stats-tl-square" style="bottom:' + bottomPct.toFixed(1) + '%;width:' + sq.toFixed(1) + 'px;height:' + sq.toFixed(1) + 'px"></div>'
-        +   '<div class="stats-tl-label" style="bottom:calc(' + bottomPct.toFixed(1) + '% + ' + (sq + LABEL_GAP) + 'px)"><span class="com">' + (s.com || s.sci) + '</span><span class="sci">' + s.sci + '</span></div>'
+        +   '<div class="stats-tl-label" style="bottom:calc(' + bottomPct.toFixed(1) + '% + ' + (sq + LABEL_GAP) + 'px)"><span class="com">' + esc(s.com || s.sci) + '</span><span class="sci">' + esc(s.sci) + '</span></div>'
         + '</div>';
       var lab = fmtTs(parseTs(s.last_seen));
       if (lab) xaxis += '<span class="stats-tl-xtick" style="left:' + centerPct.toFixed(3) + '%">' + lab + '</span>';
@@ -1996,6 +2015,11 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
   var ICON_PLAY = '<svg viewBox="0 0 12 12" fill="currentColor"><path d="M3 2 L10 6 L3 10 Z"/></svg>';
   var ICON_PAUSE = '<svg viewBox="0 0 12 12" fill="currentColor"><rect x="3" y="2" width="2.5" height="8"/><rect x="6.5" y="2" width="2.5" height="8"/></svg>';
 
+  // Atlas playback state lives at module level: the grid is rebuilt when
+  // its data changes, and a per-render state would strand a playing clip
+  // (and stack duplicate grid-level listeners).
+  var currentAudio = null;
+  var currentBtn = null;
   function renderAtlas(animate) {
     var grid = __root.getElementById('atlasGrid');
     if (!grid) return;
@@ -2064,14 +2088,14 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
         : '<div><span class="n">' + fmtN(win) + '</span><span class="lbl-inline">' + windowLabel(currentHours) + '</span></div>'
           + '<div><span class="n">' + fmtN(total) + '</span><span class="lbl-inline">all time</span></div>';
       return ''
-        + '<article class="bird-card" data-sci="' + s.sci + '">'
+        + '<article class="bird-card" data-sci="' + esc(s.sci) + '">'
         +   (isLifer ? '<span class="lifer-badge" title="new to the life list in this window">lifer</span>' : '')
         +   '<div class="stat">' + statRows + '</div>'
         +   '<div class="img-wrap">'
-        +     '<img loading="lazy" decoding="async" src="' + sketchSrc + '" alt="' + s.com + '"' + birdImgAttrs(s.sci, 1) + '>'
+        +     '<img loading="lazy" decoding="async" src="' + sketchSrc + '" alt="' + esc(s.com) + '"' + birdImgAttrs(s.sci, 1) + '>'
         +   '</div>'
-        +   '<h3>' + s.com + '</h3>'
-        +   '<div class="sci">' + s.sci + '</div>'
+        +   '<h3>' + esc(s.com) + '</h3>'
+        +   '<div class="sci">' + esc(s.sci) + '</div>'
         +   '<div class="spectro-wrap" aria-hidden="true"></div>'
         +   '<div class="actions">'
         +     '<button type="button" class="chip play" data-action="play" aria-label="play recording">'
@@ -2097,8 +2121,6 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     //   for every card visible on initial render).
     // - If the recording endpoint 404s (no detection yet for this
     //   species), the button reverts and shows "no audio".
-    var currentAudio = null;
-    var currentBtn = null;
     function setBtnState(btn, state) {
       btn.setAttribute('data-state', state);
       if (state === 'playing') {
@@ -2225,6 +2247,10 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     });
 
     // Spectrogram click = scrub to that position (if playing) or restart.
+    // Wired once - the listener lives on the grid (which survives
+    // rebuilds) and reads the module-level playback state.
+    if (!grid.__scrubWired) {
+    grid.__scrubWired = true;
     grid.addEventListener('click', function (ev) {
       var sw = ev.target.closest && ev.target.closest('.spectro-wrap');
       if (!sw || !sw.firstChild) return;
@@ -2240,6 +2266,7 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
         btn.click();
       }
     });
+    }
     if (animate) playAtlasEntrance();
   }
 
@@ -3017,9 +3044,9 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
       __root.getElementById('modalRecCount').textContent = dets.length + ' captured';
       __root.getElementById('modalRecordings').innerHTML = dets.length
         ? dets.map(function (d) {
-            return '<li class="rec-row" data-file="' + (d.file || '') + '" data-date="' + (d.d || '') + '">'
+            return '<li class="rec-row" data-file="' + esc(d.file || '') + '" data-date="' + esc(d.d || '') + '">'
               + '<button class="play" type="button" aria-label="play">' + ICON_PLAY + '</button>'
-              + '<span class="when">' + fmtRecTime(d.d, d.t) + '<small>' + fmtDateLine(d.d, d.t) + '</small></span>'
+              + '<span class="when">' + esc(fmtRecTime(d.d, d.t)) + '<small>' + esc(fmtDateLine(d.d, d.t)) + '</small></span>'
               + '<span class="conf">' + ((+d.conf || 0) * 100).toFixed(0) + '%</span>'
               + '<div class="rec-spectro" aria-hidden="true">'
               +   '<div class="rec-spectro-loading">loading spectrogram...</div>'
@@ -4206,82 +4233,128 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
 // you copied the artwork locally (homeassistant/install.sh layout).
 var HABIRD_CDN_ASSETS = 'https://cdn.jsdelivr.net/gh/adamoberley/HABirdDashboard@HABirdDashboard/avian/assets/';
 
+var HABIRD_VERSION = '1.0.0';
+
 var HABIRD_EDITOR_SCHEMA = [
-  { name: 'view', selector: { select: { mode: 'dropdown', options: [
-    { value: 'collage', label: 'Collage' },
-    { value: 'stats', label: 'Stats' },
-    { value: 'atlas', label: 'Atlas' },
-  ] } } },
-  { name: 'view_selector', selector: { boolean: {} } },
+  { name: '', type: 'grid', schema: [
+    { name: 'view', selector: { select: { mode: 'dropdown', options: [
+      { value: 'collage', label: 'Collage' },
+      { value: 'stats', label: 'Stats' },
+      { value: 'atlas', label: 'Atlas' },
+    ] } } },
+    { name: 'window', selector: { select: { mode: 'dropdown', options: [
+      { value: '1', label: 'Last hour' },
+      { value: '12', label: 'Last 12 hours' },
+      { value: '24', label: 'Last 24 hours' },
+      { value: '72', label: 'Last 3 days' },
+      { value: '168', label: 'Last 7 days' },
+      { value: '336', label: 'Last 14 days' },
+      { value: '720', label: 'Last 30 days' },
+      { value: 'all', label: 'All time' },
+    ] } } },
+  ] },
   { name: 'title', selector: { text: {} } },
-  { name: 'window', selector: { select: { mode: 'dropdown', options: [
-    { value: '1', label: 'Last hour' },
-    { value: '12', label: 'Last 12 hours' },
-    { value: '24', label: 'Last 24 hours' },
-    { value: '72', label: 'Last 3 days' },
-    { value: '168', label: 'Last 7 days' },
-    { value: '336', label: 'Last 14 days' },
-    { value: '720', label: 'Last 30 days' },
-    { value: 'all', label: 'All time' },
-  ] } } },
-  { name: 'background', selector: { select: { mode: 'dropdown', options: [
-    { value: 'transparent', label: 'Transparent (blend with dashboard)' },
-    { value: 'paper', label: 'Paper (the collage\'s own ground)' },
-  ] } } },
-  { name: 'font', selector: { select: { mode: 'dropdown', options: [
-    { value: 'system', label: 'Home Assistant font' },
-    { value: 'serif', label: 'Editorial serif (the original look)' },
-  ] } } },
-  { name: 'birdnet_url', selector: { text: {} } },
-  { name: 'data_source', selector: { select: { mode: 'dropdown', options: [
-    { value: 'auto', label: 'Auto (BirdNET-Go API, fall back to MQTT history)' },
-    { value: 'api', label: 'BirdNET-Go API only' },
-    { value: 'ha', label: 'MQTT sensor history only' },
-  ] } } },
-  { name: 'history_days', selector: { number: { min: 1, max: 365, step: 1, mode: 'box', unit_of_measurement: 'days' } } },
-  { name: 'sit_confidence', selector: { number: { min: 0, max: 1.01, step: 0.01, mode: 'slider' } } },
-  { name: 'clock', selector: { boolean: {} } },
-  { name: 'weather', selector: { boolean: {} } },
-  { name: 'weather_entity', selector: { entity: { domain: 'weather' } } },
-  { name: 'corner', selector: { select: { mode: 'dropdown', options: [
-    { value: 'bottom-right', label: 'Bottom right' },
-    { value: 'bottom-left', label: 'Bottom left' },
-    { value: 'top-right', label: 'Top right' },
-    { value: 'top-left', label: 'Top left' },
-  ] } } },
-  { name: 'hide_cursor', selector: { boolean: {} } },
-  { name: 'theme', selector: { select: { mode: 'dropdown', options: [
-    { value: 'auto', label: 'Follow Home Assistant' },
-    { value: 'light', label: 'Light' },
-    { value: 'dark', label: 'Dark' },
-  ] } } },
-  { name: 'image_base', selector: { text: {} } },
-  { name: 'height', selector: { number: { min: 300, max: 2000, step: 10, mode: 'box', unit_of_measurement: 'px' } } },
+  { name: 'view_selector', selector: { boolean: {} } },
+  { name: 'appearance', type: 'expandable', flatten: true, title: 'Appearance', schema: [
+    { name: '', type: 'grid', schema: [
+      { name: 'background', selector: { select: { mode: 'dropdown', options: [
+        { value: 'transparent', label: 'Transparent' },
+        { value: 'paper', label: 'Paper' },
+      ] } } },
+      { name: 'font', selector: { select: { mode: 'dropdown', options: [
+        { value: 'system', label: 'Home Assistant' },
+        { value: 'serif', label: 'Editorial serif' },
+      ] } } },
+      { name: 'theme', selector: { select: { mode: 'dropdown', options: [
+        { value: 'auto', label: 'Follow Home Assistant' },
+        { value: 'light', label: 'Light' },
+        { value: 'dark', label: 'Dark' },
+      ] } } },
+      { name: 'height', selector: { number: { min: 300, max: 2000, step: 10, mode: 'box', unit_of_measurement: 'px' } } },
+    ] },
+  ] },
+  { name: 'clockweather', type: 'expandable', flatten: true, title: 'Clock & weather', schema: [
+    { name: '', type: 'grid', schema: [
+      { name: 'clock', selector: { boolean: {} } },
+      { name: 'weather', selector: { boolean: {} } },
+    ] },
+    { name: 'weather_entity', selector: { entity: { domain: 'weather' } } },
+    { name: '', type: 'grid', schema: [
+      { name: 'corner', selector: { select: { mode: 'dropdown', options: [
+        { value: 'bottom-right', label: 'Bottom right' },
+        { value: 'bottom-left', label: 'Bottom left' },
+        { value: 'top-right', label: 'Top right' },
+        { value: 'top-left', label: 'Top left' },
+      ] } } },
+      { name: 'hide_cursor', selector: { boolean: {} } },
+    ] },
+  ] },
+  { name: 'birds', type: 'expandable', flatten: true, title: 'Birds & artwork', schema: [
+    { name: 'sit_confidence', selector: { number: { min: 0, max: 1.01, step: 0.01, mode: 'slider' } } },
+    { name: 'image_base', selector: { text: {} } },
+  ] },
+  { name: 'connection', type: 'expandable', flatten: true, title: 'Connection & data', schema: [
+    { name: 'birdnet_url', selector: { text: {} } },
+    { name: '', type: 'grid', schema: [
+      { name: 'data_source', selector: { select: { mode: 'dropdown', options: [
+        { value: 'auto', label: 'Automatic' },
+        { value: 'api', label: 'BirdNET-Go API only' },
+        { value: 'ha', label: 'MQTT history only' },
+      ] } } },
+      { name: 'history_days', selector: { number: { min: 1, max: 365, step: 1, mode: 'box', unit_of_measurement: 'days' } } },
+    ] },
+    { name: 'poll_seconds', selector: { number: { min: 10, max: 3600, step: 10, mode: 'box', unit_of_measurement: 's' } } },
+  ] },
 ];
 var HABIRD_LABELS = {
-  view: 'View this card shows',
-  view_selector: 'Show the collage/stats/atlas switcher',
-  title: 'Title (empty = none)',
+  view: 'View',
   window: 'Time window',
+  title: 'Title',
+  view_selector: 'Show the view switcher',
   background: 'Background',
   font: 'Font',
-  birdnet_url: 'BirdNET-Go URL (empty = this host, port 8080)',
-  data_source: 'Data source',
-  history_days: 'MQTT history span (bounded by recorder retention)',
-  sit_confidence: 'Sit confidence (perched at/above, flying below; 0 = always perched, 1.01 = always flying)',
-  clock: 'Clock',
-  weather: 'Weather (from your HA weather integration)',
-  weather_entity: 'Weather entity (empty = auto-detect)',
-  corner: 'Clock/weather corner',
-  hide_cursor: 'Hide cursor when idle (wall displays)',
   theme: 'Theme',
-  image_base: 'Artwork base URL (empty = CDN)',
-  height: 'Card height (empty = fill / 560px min)',
+  height: 'Height',
+  clock: 'Clock',
+  weather: 'Weather',
+  weather_entity: 'Weather entity',
+  corner: 'Corner',
+  hide_cursor: 'Hide idle cursor',
+  sit_confidence: 'Sit confidence',
+  image_base: 'Artwork base URL',
+  birdnet_url: 'BirdNET-Go URL',
+  data_source: 'Data source',
+  history_days: 'History span',
+  poll_seconds: 'Refresh interval',
+};
+var HABIRD_HELPERS = {
+  title: 'Optional heading. Birds pack around it, clock-style.',
+  view_selector: 'Turn off to lock this card to one view.',
+  height: 'Empty fills the available space (560 px minimum).',
+  weather_entity: 'Empty auto-detects your first weather entity.',
+  hide_cursor: 'For wall displays: pointer disappears after 8 s idle.',
+  sit_confidence: 'Birds perch at or above this detection confidence and fly below it. 0 = always perched, 1.01 = always flying.',
+  image_base: 'Empty loads artwork from the CDN. Use /local/habird-art/ for an offline copy.',
+  birdnet_url: 'Empty uses this host on port 8080, or HA ingress when remote.',
+  data_source: 'Automatic uses the API and falls back to the MQTT sensors.',
+  history_days: 'How far MQTT history reaches; bounded by recorder retention.',
+  poll_seconds: 'Safety-net refresh. MQTT pushes new detections instantly.',
 };
 
 class HABirdCard extends HTMLElement {
   setConfig(config) {
-    this._config = config || {};
+    config = config || {};
+    if (config.view && ['collage', 'stats', 'atlas'].indexOf(config.view) < 0) {
+      throw new Error("view must be 'collage', 'stats' or 'atlas'");
+    }
+    if (config.window && config.window !== 'all' && !(+config.window > 0)) {
+      throw new Error("window must be a positive number of hours or 'all'");
+    }
+    if (config.sit_confidence != null &&
+        (typeof config.sit_confidence !== 'number' || config.sit_confidence < 0 || config.sit_confidence > 1.01)) {
+      throw new Error('sit_confidence must be a number from 0 to 1.01');
+    }
+    this._config = config;
     if (this._config.height) this.style.height = Number(this._config.height) + 'px';
     else this.style.removeProperty('height');
     if (this._config.theme === 'dark') this.setAttribute('data-theme', 'dark');
@@ -4393,6 +4466,10 @@ class HABirdCard extends HTMLElement {
     if (this._ro) { this._ro.disconnect(); this._ro = null; }
   }
   getCardSize() { return 8; }
+  // Sections-view sizing: full width, tall by default, never crushed.
+  getGridOptions() {
+    return { columns: 'full', rows: 8, min_rows: 4 };
+  }
   static getStubConfig() {
     return { clock: true, weather: true, corner: 'bottom-right' };
   }
@@ -4412,6 +4489,7 @@ class HABirdCardEditor extends HTMLElement {
       // YAML editor still works.
       this._form = document.createElement('ha-form');
       this._form.computeLabel = function (s) { return HABIRD_LABELS[s.name] || s.name; };
+      this._form.computeHelper = function (s) { return HABIRD_HELPERS[s.name]; };
       var self = this;
       this._form.addEventListener('value-changed', function (ev) {
         var config = Object.assign({}, self._config, ev.detail.value);
@@ -4427,6 +4505,11 @@ class HABirdCardEditor extends HTMLElement {
   }
 }
 
+console.info(
+  '%c HABIRD-CARD %c v' + HABIRD_VERSION + ' ',
+  'background:#1a1612;color:#ece8e1;font-weight:700;border-radius:4px 0 0 4px;padding:2px 6px',
+  'background:#4a3f31;color:#ece8e1;border-radius:0 4px 4px 0;padding:2px 6px'
+);
 if (!customElements.get('habird-card')) customElements.define('habird-card', HABirdCard);
 if (!customElements.get('habird-card-editor')) customElements.define('habird-card-editor', HABirdCardEditor);
 window.customCards = window.customCards || [];

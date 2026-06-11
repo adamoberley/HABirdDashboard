@@ -1,5 +1,4 @@
 (function () {
-  var PLACEHOLDER = [{"sci":"Calypte anna","com":"Anna's Hummingbird","featured":true},{"sci":"Passer domesticus","com":"House Sparrow"},{"sci":"Haemorhous mexicanus","com":"House Finch"},{"sci":"Turdus migratorius","com":"American Robin"},{"sci":"Zenaida macroura","com":"Mourning Dove"},{"sci":"Spinus psaltria","com":"Lesser Goldfinch"},{"sci":"Zonotrichia leucophrys","com":"White-crowned Sparrow"},{"sci":"Aphelocoma californica","com":"California Scrub-Jay"},{"sci":"Mimus polyglottos","com":"Northern Mockingbird"},{"sci":"Sayornis nigricans","com":"Black Phoebe"},{"sci":"Larus occidentalis","com":"Western Gull"},{"sci":"Corvus brachyrhynchos","com":"American Crow"}];
   // Bumped whenever the offline sketch build changes, so the browser
   // doesn't keep a stale cache after we regenerate the sketches.
   var SKETCH_VERSION = 'r10'; // full library restyle: every species
@@ -487,13 +486,16 @@
             out.sort(function (a, b) { return a.t - b.t; });
             return out;
           }
-          // Latest value at (or just after - MQTT fan-out jitter) time t.
-          function valueAt(tl, t) {
-            var v = null;
-            for (var i = 0; i < tl.length; i++) {
-              if (tl[i].t <= t + 2000) v = tl[i].v; else break;
-            }
-            return v;
+          // Monotonic "latest value at time t (+2s MQTT fan-out jitter)"
+          // walker: the event streams are processed in ascending time, so
+          // a single advancing pointer replaces the old O(n^2) rescans -
+          // a 10-day busy-station history joins in linear time.
+          function walker(tl) {
+            var i = 0, last = null;
+            return function (t) {
+              while (i < tl.length && tl[i].t <= t + 2000) { last = tl[i].v; i++; }
+              return last;
+            };
           }
           function toConf(v) {
             var n = parseFloat(v);
@@ -504,19 +506,27 @@
           sets.forEach(function (s) {
             var confs = timeline(s.conf);
             var scis = timeline(s.sci);
-            var coms = timeline(s.com);
+            var comAtA = walker(timeline(s.com));
+            var comAtB = walker(timeline(s.com));
+            var sciAt = walker(scis);
+            var confAt = walker(confs);
+            // 2-second buckets of (species, time) already emitted via the
+            // confidence stream, so the species pass can skip duplicates
+            // without scanning the whole event list per entry.
+            var seen = {};
             confs.forEach(function (c) {
-              var sci = valueAt(scis, c.t);
+              var sci = sciAt(c.t);
               if (!sci) return;
-              events.push({ t: c.t, sci: sci, com: valueAt(coms, c.t) || sci, conf: toConf(c.v) });
+              var b = Math.round(c.t / 2000);
+              seen[sci + '|' + (b - 1)] = 1;
+              seen[sci + '|' + b] = 1;
+              seen[sci + '|' + (b + 1)] = 1;
+              events.push({ t: c.t, sci: sci, com: comAtA(c.t) || sci, conf: toConf(c.v) });
             });
             scis.forEach(function (sc) {
-              var seen = events.some(function (e) {
-                return e.sci === sc.v && Math.abs(e.t - sc.t) < 2000;
-              });
-              if (seen) return;
-              events.push({ t: sc.t, sci: sc.v, com: valueAt(coms, sc.t) || sc.v,
-                conf: toConf(valueAt(confs, sc.t)) });
+              if (seen[sc.v + '|' + Math.round(sc.t / 2000)]) return;
+              events.push({ t: sc.t, sci: sc.v, com: comAtB(sc.t) || sc.v,
+                conf: toConf(confAt(sc.t)) });
             });
           });
           events.sort(function (a, b) { return a.t - b.t; });
@@ -1536,7 +1546,7 @@
         var s = hit.data;
         var n = +s.n || 0;
         var noun = (n === 1) ? 'call' : 'calls';
-        tip.innerHTML = '<span class="ct-name">' + (s.com || s.sci) + '</span>'
+        tip.innerHTML = '<span class="ct-name">' + esc(s.com || s.sci) + '</span>'
           + '<span class="ct-w"> - </span>'
           + '<span class="ct-n">' + fmtN(n) + '</span>'
           + '<span class="ct-w"> ' + noun + ' ' + windowLabel(currentHours) + '</span>';
@@ -1615,10 +1625,19 @@
     if (el) el.innerHTML = '<span>' + label + '</span><span>' + (val == null || val === '' ? '-' : val) + '</span>';
   }
   function liRow(yr, label, ct, sci) {
-    var attr = sci ? ' data-sci="' + sci.replace(/"/g, '&quot;') + '"' : '';
-    return '<li' + attr + '><span class="yr">' + yr + '</span><span>' + label + '</span><span class="ct">' + (ct == null ? '-' : ct) + '</span></li>';
+    var attr = sci ? ' data-sci="' + esc(sci) + '"' : '';
+    return '<li' + attr + '><span class="yr">' + esc(yr) + '</span><span>' + esc(label) +
+      '</span><span class="ct">' + (ct == null ? '-' : esc(ct)) + '</span></li>';
   }
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  // HTML-escape for every string interpolated into markup. Species names
+  // arrive from the BirdNET-Go API or MQTT sensor states - external data
+  // rendered inside the HA frontend, so it must never carry markup.
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
   function fmtN(n) {
     if (n == null) return '-';
     if (n >= 10000) return (n / 1000).toFixed(1) + 'k';
@@ -1834,9 +1853,9 @@
       var n = +s.n || 0;
       var bottomPct = (n / maxN) * SPAN * 100;   // square height = quantity
       cols += ''
-        + '<div class="stats-tl-col" data-sci="' + s.sci + '" style="left:' + centerPct.toFixed(3) + '%;width:' + colW.toFixed(2) + 'px">'
+        + '<div class="stats-tl-col" data-sci="' + esc(s.sci) + '" style="left:' + centerPct.toFixed(3) + '%;width:' + colW.toFixed(2) + 'px">'
         +   '<div class="stats-tl-square" style="bottom:' + bottomPct.toFixed(1) + '%;width:' + sq.toFixed(1) + 'px;height:' + sq.toFixed(1) + 'px"></div>'
-        +   '<div class="stats-tl-label" style="bottom:calc(' + bottomPct.toFixed(1) + '% + ' + (sq + LABEL_GAP) + 'px)"><span class="com">' + (s.com || s.sci) + '</span><span class="sci">' + s.sci + '</span></div>'
+        +   '<div class="stats-tl-label" style="bottom:calc(' + bottomPct.toFixed(1) + '% + ' + (sq + LABEL_GAP) + 'px)"><span class="com">' + esc(s.com || s.sci) + '</span><span class="sci">' + esc(s.sci) + '</span></div>'
         + '</div>';
       var lab = fmtTs(parseTs(s.last_seen));
       if (lab) xaxis += '<span class="stats-tl-xtick" style="left:' + centerPct.toFixed(3) + '%">' + lab + '</span>';
@@ -1961,6 +1980,11 @@
   var ICON_PLAY = '<svg viewBox="0 0 12 12" fill="currentColor"><path d="M3 2 L10 6 L3 10 Z"/></svg>';
   var ICON_PAUSE = '<svg viewBox="0 0 12 12" fill="currentColor"><rect x="3" y="2" width="2.5" height="8"/><rect x="6.5" y="2" width="2.5" height="8"/></svg>';
 
+  // Atlas playback state lives at module level: the grid is rebuilt when
+  // its data changes, and a per-render state would strand a playing clip
+  // (and stack duplicate grid-level listeners).
+  var currentAudio = null;
+  var currentBtn = null;
   function renderAtlas(animate) {
     var grid = document.getElementById('atlasGrid');
     if (!grid) return;
@@ -2029,14 +2053,14 @@
         : '<div><span class="n">' + fmtN(win) + '</span><span class="lbl-inline">' + windowLabel(currentHours) + '</span></div>'
           + '<div><span class="n">' + fmtN(total) + '</span><span class="lbl-inline">all time</span></div>';
       return ''
-        + '<article class="bird-card" data-sci="' + s.sci + '">'
+        + '<article class="bird-card" data-sci="' + esc(s.sci) + '">'
         +   (isLifer ? '<span class="lifer-badge" title="new to the life list in this window">lifer</span>' : '')
         +   '<div class="stat">' + statRows + '</div>'
         +   '<div class="img-wrap">'
-        +     '<img loading="lazy" decoding="async" src="' + sketchSrc + '" alt="' + s.com + '"' + birdImgAttrs(s.sci, 1) + '>'
+        +     '<img loading="lazy" decoding="async" src="' + sketchSrc + '" alt="' + esc(s.com) + '"' + birdImgAttrs(s.sci, 1) + '>'
         +   '</div>'
-        +   '<h3>' + s.com + '</h3>'
-        +   '<div class="sci">' + s.sci + '</div>'
+        +   '<h3>' + esc(s.com) + '</h3>'
+        +   '<div class="sci">' + esc(s.sci) + '</div>'
         +   '<div class="spectro-wrap" aria-hidden="true"></div>'
         +   '<div class="actions">'
         +     '<button type="button" class="chip play" data-action="play" aria-label="play recording">'
@@ -2062,8 +2086,6 @@
     //   for every card visible on initial render).
     // - If the recording endpoint 404s (no detection yet for this
     //   species), the button reverts and shows "no audio".
-    var currentAudio = null;
-    var currentBtn = null;
     function setBtnState(btn, state) {
       btn.setAttribute('data-state', state);
       if (state === 'playing') {
@@ -2190,6 +2212,10 @@
     });
 
     // Spectrogram click = scrub to that position (if playing) or restart.
+    // Wired once - the listener lives on the grid (which survives
+    // rebuilds) and reads the module-level playback state.
+    if (!grid.__scrubWired) {
+    grid.__scrubWired = true;
     grid.addEventListener('click', function (ev) {
       var sw = ev.target.closest && ev.target.closest('.spectro-wrap');
       if (!sw || !sw.firstChild) return;
@@ -2205,6 +2231,7 @@
         btn.click();
       }
     });
+    }
     if (animate) playAtlasEntrance();
   }
 
@@ -2982,9 +3009,9 @@
       document.getElementById('modalRecCount').textContent = dets.length + ' captured';
       document.getElementById('modalRecordings').innerHTML = dets.length
         ? dets.map(function (d) {
-            return '<li class="rec-row" data-file="' + (d.file || '') + '" data-date="' + (d.d || '') + '">'
+            return '<li class="rec-row" data-file="' + esc(d.file || '') + '" data-date="' + esc(d.d || '') + '">'
               + '<button class="play" type="button" aria-label="play">' + ICON_PLAY + '</button>'
-              + '<span class="when">' + fmtRecTime(d.d, d.t) + '<small>' + fmtDateLine(d.d, d.t) + '</small></span>'
+              + '<span class="when">' + esc(fmtRecTime(d.d, d.t)) + '<small>' + esc(fmtDateLine(d.d, d.t)) + '</small></span>'
               + '<span class="conf">' + ((+d.conf || 0) * 100).toFixed(0) + '%</span>'
               + '<div class="rec-spectro" aria-hidden="true">'
               +   '<div class="rec-spectro-loading">loading spectrogram...</div>'

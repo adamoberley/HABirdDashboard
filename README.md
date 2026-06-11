@@ -2,6 +2,9 @@
 
 *A live bird collage card for Home Assistant, fed by BirdNET-Go.*
 
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC_BY--NC--SA_4.0-lightgrey.svg)](LICENSE)
+
 <img alt="HABirdDashboard collage" src="docs/thumb.png" />
 
 A custom dashboard card for the data the
@@ -60,8 +63,8 @@ Home Assistant + BirdNET-Go.
 
 ## What you need
 
-- **Home Assistant OS or Supervised** - apps (add-ons) only exist on these
-  install types. Container/Core installs can still use the card; run
+- **Home Assistant OS or Supervised** - apps (formerly add-ons) only
+  exist on these install types. Container/Core installs can still use the card; run
   [BirdNET-Go](https://github.com/tphakala/birdnet-go) yourself (e.g. in
   Docker) and skip to [Step 3](#step-3--install-the-card).
 - **A microphone** the Home Assistant machine can hear birds with - a cheap
@@ -84,12 +87,12 @@ community repository, which you add once:
 
    [![Open your Home Assistant instance and add the alexbelgium repository.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Falexbelgium%2Fhassio-addons)
 
-   Or by hand: **Settings → Add-ons → Add-on Store** (HA is renaming these
-   "Apps") → **⋮ menu (top-right) → Repositories** → paste
+   Or by hand: **Settings → Apps** (called *Add-ons* before 2025) →
+   **⋮ menu (top-right) → Repositories** → paste
    `https://github.com/alexbelgium/hassio-addons` → **Add** → **Close**.
 
-2. Back in the store, search for **BirdNET-Go** (refresh the page if it
-   doesn't show up yet - it's under "Alexbelgium's Hass.io Add-ons").
+2. Back in the app store, search for **BirdNET-Go** (refresh the page if
+   it doesn't show up yet - it's under "Alexbelgium's Hass.io Add-ons").
 3. Open it and click **Install**. It's a large image; give it a few minutes.
 4. On the app's **Configuration** tab, set `TZ` to your timezone (this
    matters - the dashboard's time windows follow it), then **Save**.
@@ -218,7 +221,7 @@ becomes a real HA device you can use in automations (announce rare birds,
 light up a lamp for an owl...).
 
 1. **Broker**: install the official **Mosquitto broker** app (Settings →
-   Add-ons → Add-on Store - it's in the official store, no custom repo)
+   Apps - it's in the official catalog, no custom repository needed)
    and start it. HA will then offer the discovered **MQTT integration**
    under Settings → Devices & Services - add it.
 2. **Wire BirdNET-Go to the broker** - easiest way: on the BirdNET-Go
@@ -329,7 +332,7 @@ params to dress up a specific display.
   that works remotely - the tunnel only carries HA itself, and browsers
   block an `https://` page from calling a plain-`http` LAN address. The
   card handles this automatically: on an HTTPS page it discovers the
-  add-on's **HA ingress** endpoint and routes the full API (audio
+  app's **HA ingress** endpoint and routes the full API (audio
   included) through it. Ingress discovery needs an admin HA user and the
   default `birdnet_url` (leave it empty); if it can't be set up, data
   still flows via the MQTT sensors - only audio playback is lost.
