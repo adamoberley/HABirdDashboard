@@ -158,7 +158,12 @@ window onto that data.
 
 ## Step 3 — Install the card
 
-**With HACS (recommended):**
+**With HACS (recommended):** click this to open the repository directly in
+your HACS:
+
+[![Open your Home Assistant instance and open this repository inside HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=adamoberley&repository=HABirdDashboard&category=plugin)
+
+Or by hand:
 
 1. In HACS: **⋮ menu (top-right) → Custom repositories**, add
    `https://github.com/adamoberley/HABirdDashboard` with type **Dashboard**.

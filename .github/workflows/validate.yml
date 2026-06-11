@@ -1,0 +1,22 @@
+# HACS validation - the same checks the default-store inclusion runs.
+# Required to pass (no errors, no ignores) before submitting to
+# hacs/default; the schedule keeps catching regressions after.
+name: Validate
+
+on:
+  push:
+    branches: [HABirdDashboard]
+  pull_request:
+  schedule:
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+jobs:
+  hacs:
+    name: HACS validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: HACS Action
+        uses: hacs/action@main
+        with:
+          category: plugin
