@@ -167,82 +167,128 @@ const wrapper = `
 // you copied the artwork locally (homeassistant/install.sh layout).
 var HABIRD_CDN_ASSETS = 'https://cdn.jsdelivr.net/gh/adamoberley/HABirdDashboard@HABirdDashboard/avian/assets/';
 
+var HABIRD_VERSION = '1.0.0';
+
 var HABIRD_EDITOR_SCHEMA = [
-  { name: 'view', selector: { select: { mode: 'dropdown', options: [
-    { value: 'collage', label: 'Collage' },
-    { value: 'stats', label: 'Stats' },
-    { value: 'atlas', label: 'Atlas' },
-  ] } } },
-  { name: 'view_selector', selector: { boolean: {} } },
+  { name: '', type: 'grid', schema: [
+    { name: 'view', selector: { select: { mode: 'dropdown', options: [
+      { value: 'collage', label: 'Collage' },
+      { value: 'stats', label: 'Stats' },
+      { value: 'atlas', label: 'Atlas' },
+    ] } } },
+    { name: 'window', selector: { select: { mode: 'dropdown', options: [
+      { value: '1', label: 'Last hour' },
+      { value: '12', label: 'Last 12 hours' },
+      { value: '24', label: 'Last 24 hours' },
+      { value: '72', label: 'Last 3 days' },
+      { value: '168', label: 'Last 7 days' },
+      { value: '336', label: 'Last 14 days' },
+      { value: '720', label: 'Last 30 days' },
+      { value: 'all', label: 'All time' },
+    ] } } },
+  ] },
   { name: 'title', selector: { text: {} } },
-  { name: 'window', selector: { select: { mode: 'dropdown', options: [
-    { value: '1', label: 'Last hour' },
-    { value: '12', label: 'Last 12 hours' },
-    { value: '24', label: 'Last 24 hours' },
-    { value: '72', label: 'Last 3 days' },
-    { value: '168', label: 'Last 7 days' },
-    { value: '336', label: 'Last 14 days' },
-    { value: '720', label: 'Last 30 days' },
-    { value: 'all', label: 'All time' },
-  ] } } },
-  { name: 'background', selector: { select: { mode: 'dropdown', options: [
-    { value: 'transparent', label: 'Transparent (blend with dashboard)' },
-    { value: 'paper', label: 'Paper (the collage\\'s own ground)' },
-  ] } } },
-  { name: 'font', selector: { select: { mode: 'dropdown', options: [
-    { value: 'system', label: 'Home Assistant font' },
-    { value: 'serif', label: 'Editorial serif (the original look)' },
-  ] } } },
-  { name: 'birdnet_url', selector: { text: {} } },
-  { name: 'data_source', selector: { select: { mode: 'dropdown', options: [
-    { value: 'auto', label: 'Auto (BirdNET-Go API, fall back to MQTT history)' },
-    { value: 'api', label: 'BirdNET-Go API only' },
-    { value: 'ha', label: 'MQTT sensor history only' },
-  ] } } },
-  { name: 'history_days', selector: { number: { min: 1, max: 365, step: 1, mode: 'box', unit_of_measurement: 'days' } } },
-  { name: 'sit_confidence', selector: { number: { min: 0, max: 1.01, step: 0.01, mode: 'slider' } } },
-  { name: 'clock', selector: { boolean: {} } },
-  { name: 'weather', selector: { boolean: {} } },
-  { name: 'weather_entity', selector: { entity: { domain: 'weather' } } },
-  { name: 'corner', selector: { select: { mode: 'dropdown', options: [
-    { value: 'bottom-right', label: 'Bottom right' },
-    { value: 'bottom-left', label: 'Bottom left' },
-    { value: 'top-right', label: 'Top right' },
-    { value: 'top-left', label: 'Top left' },
-  ] } } },
-  { name: 'hide_cursor', selector: { boolean: {} } },
-  { name: 'theme', selector: { select: { mode: 'dropdown', options: [
-    { value: 'auto', label: 'Follow Home Assistant' },
-    { value: 'light', label: 'Light' },
-    { value: 'dark', label: 'Dark' },
-  ] } } },
-  { name: 'image_base', selector: { text: {} } },
-  { name: 'height', selector: { number: { min: 300, max: 2000, step: 10, mode: 'box', unit_of_measurement: 'px' } } },
+  { name: 'view_selector', selector: { boolean: {} } },
+  { name: 'appearance', type: 'expandable', flatten: true, title: 'Appearance', schema: [
+    { name: '', type: 'grid', schema: [
+      { name: 'background', selector: { select: { mode: 'dropdown', options: [
+        { value: 'transparent', label: 'Transparent' },
+        { value: 'paper', label: 'Paper' },
+      ] } } },
+      { name: 'font', selector: { select: { mode: 'dropdown', options: [
+        { value: 'system', label: 'Home Assistant' },
+        { value: 'serif', label: 'Editorial serif' },
+      ] } } },
+      { name: 'theme', selector: { select: { mode: 'dropdown', options: [
+        { value: 'auto', label: 'Follow Home Assistant' },
+        { value: 'light', label: 'Light' },
+        { value: 'dark', label: 'Dark' },
+      ] } } },
+      { name: 'height', selector: { number: { min: 300, max: 2000, step: 10, mode: 'box', unit_of_measurement: 'px' } } },
+    ] },
+  ] },
+  { name: 'clockweather', type: 'expandable', flatten: true, title: 'Clock & weather', schema: [
+    { name: '', type: 'grid', schema: [
+      { name: 'clock', selector: { boolean: {} } },
+      { name: 'weather', selector: { boolean: {} } },
+    ] },
+    { name: 'weather_entity', selector: { entity: { domain: 'weather' } } },
+    { name: '', type: 'grid', schema: [
+      { name: 'corner', selector: { select: { mode: 'dropdown', options: [
+        { value: 'bottom-right', label: 'Bottom right' },
+        { value: 'bottom-left', label: 'Bottom left' },
+        { value: 'top-right', label: 'Top right' },
+        { value: 'top-left', label: 'Top left' },
+      ] } } },
+      { name: 'hide_cursor', selector: { boolean: {} } },
+    ] },
+  ] },
+  { name: 'birds', type: 'expandable', flatten: true, title: 'Birds & artwork', schema: [
+    { name: 'sit_confidence', selector: { number: { min: 0, max: 1.01, step: 0.01, mode: 'slider' } } },
+    { name: 'image_base', selector: { text: {} } },
+  ] },
+  { name: 'connection', type: 'expandable', flatten: true, title: 'Connection & data', schema: [
+    { name: 'birdnet_url', selector: { text: {} } },
+    { name: '', type: 'grid', schema: [
+      { name: 'data_source', selector: { select: { mode: 'dropdown', options: [
+        { value: 'auto', label: 'Automatic' },
+        { value: 'api', label: 'BirdNET-Go API only' },
+        { value: 'ha', label: 'MQTT history only' },
+      ] } } },
+      { name: 'history_days', selector: { number: { min: 1, max: 365, step: 1, mode: 'box', unit_of_measurement: 'days' } } },
+    ] },
+    { name: 'poll_seconds', selector: { number: { min: 10, max: 3600, step: 10, mode: 'box', unit_of_measurement: 's' } } },
+  ] },
 ];
 var HABIRD_LABELS = {
-  view: 'View this card shows',
-  view_selector: 'Show the collage/stats/atlas switcher',
-  title: 'Title (empty = none)',
+  view: 'View',
   window: 'Time window',
+  title: 'Title',
+  view_selector: 'Show the view switcher',
   background: 'Background',
   font: 'Font',
-  birdnet_url: 'BirdNET-Go URL (empty = this host, port 8080)',
-  data_source: 'Data source',
-  history_days: 'MQTT history span (bounded by recorder retention)',
-  sit_confidence: 'Sit confidence (perched at/above, flying below; 0 = always perched, 1.01 = always flying)',
-  clock: 'Clock',
-  weather: 'Weather (from your HA weather integration)',
-  weather_entity: 'Weather entity (empty = auto-detect)',
-  corner: 'Clock/weather corner',
-  hide_cursor: 'Hide cursor when idle (wall displays)',
   theme: 'Theme',
-  image_base: 'Artwork base URL (empty = CDN)',
-  height: 'Card height (empty = fill / 560px min)',
+  height: 'Height',
+  clock: 'Clock',
+  weather: 'Weather',
+  weather_entity: 'Weather entity',
+  corner: 'Corner',
+  hide_cursor: 'Hide idle cursor',
+  sit_confidence: 'Sit confidence',
+  image_base: 'Artwork base URL',
+  birdnet_url: 'BirdNET-Go URL',
+  data_source: 'Data source',
+  history_days: 'History span',
+  poll_seconds: 'Refresh interval',
+};
+var HABIRD_HELPERS = {
+  title: 'Optional heading. Birds pack around it, clock-style.',
+  view_selector: 'Turn off to lock this card to one view.',
+  height: 'Empty fills the available space (560 px minimum).',
+  weather_entity: 'Empty auto-detects your first weather entity.',
+  hide_cursor: 'For wall displays: pointer disappears after 8 s idle.',
+  sit_confidence: 'Birds perch at or above this detection confidence and fly below it. 0 = always perched, 1.01 = always flying.',
+  image_base: 'Empty loads artwork from the CDN. Use /local/habird-art/ for an offline copy.',
+  birdnet_url: 'Empty uses this host on port 8080, or HA ingress when remote.',
+  data_source: 'Automatic uses the API and falls back to the MQTT sensors.',
+  history_days: 'How far MQTT history reaches; bounded by recorder retention.',
+  poll_seconds: 'Safety-net refresh. MQTT pushes new detections instantly.',
 };
 
 class HABirdCard extends HTMLElement {
   setConfig(config) {
-    this._config = config || {};
+    config = config || {};
+    if (config.view && ['collage', 'stats', 'atlas'].indexOf(config.view) < 0) {
+      throw new Error("view must be 'collage', 'stats' or 'atlas'");
+    }
+    if (config.window && config.window !== 'all' && !(+config.window > 0)) {
+      throw new Error("window must be a positive number of hours or 'all'");
+    }
+    if (config.sit_confidence != null &&
+        (typeof config.sit_confidence !== 'number' || config.sit_confidence < 0 || config.sit_confidence > 1.01)) {
+      throw new Error('sit_confidence must be a number from 0 to 1.01');
+    }
+    this._config = config;
     if (this._config.height) this.style.height = Number(this._config.height) + 'px';
     else this.style.removeProperty('height');
     if (this._config.theme === 'dark') this.setAttribute('data-theme', 'dark');
@@ -354,6 +400,10 @@ class HABirdCard extends HTMLElement {
     if (this._ro) { this._ro.disconnect(); this._ro = null; }
   }
   getCardSize() { return 8; }
+  // Sections-view sizing: full width, tall by default, never crushed.
+  getGridOptions() {
+    return { columns: 'full', rows: 8, min_rows: 4 };
+  }
   static getStubConfig() {
     return { clock: true, weather: true, corner: 'bottom-right' };
   }
@@ -373,6 +423,7 @@ class HABirdCardEditor extends HTMLElement {
       // YAML editor still works.
       this._form = document.createElement('ha-form');
       this._form.computeLabel = function (s) { return HABIRD_LABELS[s.name] || s.name; };
+      this._form.computeHelper = function (s) { return HABIRD_HELPERS[s.name]; };
       var self = this;
       this._form.addEventListener('value-changed', function (ev) {
         var config = Object.assign({}, self._config, ev.detail.value);
@@ -388,6 +439,11 @@ class HABirdCardEditor extends HTMLElement {
   }
 }
 
+console.info(
+  '%c HABIRD-CARD %c v' + HABIRD_VERSION + ' ',
+  'background:#1a1612;color:#ece8e1;font-weight:700;border-radius:4px 0 0 4px;padding:2px 6px',
+  'background:#4a3f31;color:#ece8e1;border-radius:0 4px 4px 0;padding:2px 6px'
+);
 if (!customElements.get('habird-card')) customElements.define('habird-card', HABirdCard);
 if (!customElements.get('habird-card-editor')) customElements.define('habird-card-editor', HABirdCardEditor);
 window.customCards = window.customCards || [];
