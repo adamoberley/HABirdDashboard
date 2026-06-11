@@ -1308,7 +1308,7 @@
   var _collageSig = null;
   function renderCollage(items, animate) {
     if (!items.length) {
-      collage.innerHTML = '<p class="empty">no birds heard in this window.</p>';
+      collage.innerHTML = '<p class="empty">No birds heard outside.</p>';
       collagePlaced = [];
       _collageSig = 'empty';
       return;

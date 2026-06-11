@@ -94,6 +94,12 @@ css += `
 .wall-widgets[data-corner$="left"]  { left: 16px; }
 .wall-widgets[data-corner^="top"]   { top: 12px; }
 .wall-widgets[data-corner^="bottom"] { bottom: 14px; }
+/* In system-font mode the empty state reads as a normal sentence in the
+   configured font instead of editorial letterspaced small-caps. */
+.av-shell.av-font-system .empty {
+  font: 14px/1.5 var(--av-font-mono);
+  text-transform: none; letter-spacing: 0;
+}
 /* In system-font mode the picker drops the editorial small-caps treatment
    and reads like native HA tabs. */
 .av-shell.av-font-system .slider button {
