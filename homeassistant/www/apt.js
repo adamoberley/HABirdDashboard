@@ -119,32 +119,40 @@
     return m ? decodeURIComponent(m[1]) : null;
   }
   // Write-back: review a detection ('correct' | 'false_positive').
-  // BirdNET-Go guards this with CSRF (a JS-readable cookie echoed in a
-  // header) and its auth middleware - both want a SAME-ORIGIN request, so
-  // writes prefer HA ingress whenever it's available, falling back to the
-  // direct base. With BirdNET-Go auth disabled (the add-on default) the
-  // write is accepted; otherwise it fails and the UI says so.
+  // BirdNET-Go's CSRF guard is the stateless double-submit pattern: the
+  // X-CSRF-Token header must equal the `csrf` cookie. Cookies only flow on
+  // SAME-ORIGIN requests, so writes ride HA ingress (the cookie travels to
+  // BirdNET-Go through the proxy). The token itself can be self-minted -
+  // that's the nature of double-submit; the protection is that cross-site
+  // JS can't set this origin's cookies, and we're legitimately same-origin.
   function bgReview(id, verified) {
     return ingressApiBase().then(function (ib) {
-      var base = ib || BG_BASE;
-      function post() {
-        return fetch(base + '/api/v2/detections/' + encodeURIComponent(id) + '/review', {
-          method: 'POST',
-          credentials: 'same-origin',
-          cache: 'no-store',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-Token': getCookie('csrf') || '',
-          },
-          body: JSON.stringify({ verified: verified }),
-        }).then(function (r) { return r.ok ? r : Promise.reject(r.status); });
+      var sameOrigin = !!ib ||
+        BG_BASE.indexOf(location.protocol + '//' + location.host) === 0 ||
+        BG_BASE.charAt(0) === '/';
+      if (!sameOrigin) {
+        // Cross-origin (direct LAN URL from the HA page): the browser
+        // won't carry cookies, so CSRF can never pass. Needs ingress.
+        return Promise.reject('needs-ingress');
       }
-      if (getCookie('csrf')) return post();
-      // No CSRF cookie yet: prime it with one same-origin GET, then post.
-      return fetch(base + '/api/v2/detections/' + encodeURIComponent(id), {
-        cache: 'no-store',
+      var base = ib || BG_BASE;
+      var tok = getCookie('csrf');
+      if (!tok) {
+        tok = String(Date.now()) + Math.random().toString(36).slice(2) +
+          Math.random().toString(36).slice(2);
+        document.cookie = 'csrf=' + tok + ';path=/;SameSite=Lax' +
+          (location.protocol === 'https:' ? ';Secure' : '');
+      }
+      return fetch(base + '/api/v2/detections/' + encodeURIComponent(id) + '/review', {
+        method: 'POST',
         credentials: 'same-origin',
-      }).then(post, post);
+        cache: 'no-store',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': tok,
+        },
+        body: JSON.stringify({ verified: verified }),
+      }).then(function (r) { return r.ok ? r : Promise.reject(r.status); });
     });
   }
 
@@ -299,6 +307,22 @@
       });
       var species = Object.keys(bySci).map(function (k) { return bySci[k]; });
       species.sort(function (a, b) { return (b.last_seen || '').localeCompare(a.last_seen || ''); });
+      // Older BirdNET-Go builds omit max_confidence from the daily
+      // summary; backfill from the all-time species summary (memoized -
+      // stats/lifelist fetch it anyway) so the sit/fly rule has a real
+      // best-in-window... best-available confidence to work with.
+      if (species.some(function (s) { return !s.best_conf; })) {
+        return bgMemoJson('/analytics/species/summary').then(function (rows) {
+          var bySci2 = {};
+          (rows || []).forEach(function (r) { bySci2[r.scientific_name] = +r.max_confidence || 0; });
+          species.forEach(function (s) {
+            if (!s.best_conf && bySci2[s.sci]) s.best_conf = bySci2[s.sci];
+          });
+          return { hours: hours, species: species, as_of: now.toISOString() };
+        }).catch(function () {
+          return { hours: hours, species: species, as_of: now.toISOString() };
+        });
+      }
       return { hours: hours, species: species, as_of: now.toISOString() };
     });
   }
@@ -1269,7 +1293,8 @@
     // is left completely untouched (no flicker, no work).
     var sig = W + 'x' + H + '|' + JSON.stringify(obstacles) + '|' +
       items.map(function (s) {
-        return s.sci + ':' + (+s.n || 0) + ':' + (((+s.best_conf || 0) >= SIT_CONFIDENCE) ? 'p' : 'f');
+        var c0 = +s.best_conf || 0;
+        return s.sci + ':' + (+s.n || 0) + ':' + ((c0 === 0 || c0 >= SIT_CONFIDENCE) ? 'p' : 'f');
       }).join(',');
     if (!animate && sig === _collageSig) return;
     _collageSig = sig;
@@ -1294,7 +1319,11 @@
       // SIT_CONFIDENCE bar, flying otherwise - and flight only if a flight
       // render exists. Flight uses the <slug>-2 mask/aspect/image so the
       // wings-spread silhouette nests correctly.
-      var pose = (DIMS[base + '-2'] && (+s.best_conf || 0) < SIT_CONFIDENCE) ? 2 : 1;
+      // Flight needs a KNOWN low confidence: older BirdNET-Go builds omit
+      // max_confidence from some analytics responses, and an unknown
+      // (0) confidence must not read as "uncertain bird" - perch it.
+      var __conf = +s.best_conf || 0;
+      var pose = (DIMS[base + '-2'] && __conf > 0 && __conf < SIT_CONFIDENCE) ? 2 : 1;
       var slug = pose === 2 ? base + '-2' : base;
       var mask = loadMask(slug);
       if (!mask && pose === 2) { pose = 1; slug = base; mask = loadMask(slug); }
@@ -3124,10 +3153,11 @@
             return '<li class="rec-row" data-file="' + esc(d.file || '') + '" data-date="' + esc(d.d || '') + '">'
               + '<button class="play" type="button" aria-label="play">' + ICON_PLAY + '</button>'
               + '<span class="when">' + esc(fmtRecTime(d.d, d.t)) + '<small>' + esc(fmtDateLine(d.d, d.t)) + '</small></span>'
-              + '<span class="conf">' + ((+d.conf || 0) * 100).toFixed(0) + '%</span>'
               // Review write-back needs a detection id - present with the
-              // API data source, absent over MQTT history.
-              + (d.file ? '<button class="flag" type="button" data-armed="false" title="report as a false positive">not it?</button>' : '')
+              // API data source, absent over MQTT history. Sits just left
+              // of the confidence; a ghost x that arms on first tap.
+              + (d.file ? '<button class="flag" type="button" data-state="idle" title="report as a false positive" aria-label="report as a false positive">\u2715</button>' : '')
+              + '<span class="conf">' + ((+d.conf || 0) * 100).toFixed(0) + '%</span>'
               + '<div class="rec-spectro" aria-hidden="true">'
               +   '<div class="rec-spectro-loading">loading spectrogram...</div>'
               +   '<div class="rec-spectro-played"></div>'
@@ -3262,6 +3292,15 @@
       // No morph -> let the container opacity fade run, then hide.
       setTimeout(finish, 280);
     }
+  }
+
+  // The narrow-layout description is clamped to a few lines - tapping
+  // it toggles the full text.
+  var __descEl = document.getElementById('modalDesc');
+  if (__descEl) {
+    __descEl.addEventListener('click', function () {
+      __descEl.classList.toggle('expanded');
+    });
   }
 
   // Pose toggle inside the modal - swaps the sketch between perched
@@ -3935,32 +3974,38 @@
       var frow = flagBtn.closest('.rec-row');
       var fid = frow && frow.getAttribute('data-file');
       if (!fid || flagBtn.disabled) return;
-      if (flagBtn.getAttribute('data-armed') !== 'true') {
-        flagBtn.setAttribute('data-armed', 'true');
-        flagBtn.textContent = 'sure?';
+      var setFlag = function (state, text, title) {
+        flagBtn.setAttribute('data-state', state);
+        flagBtn.textContent = text;
+        if (title) flagBtn.title = title;
+      };
+      if (flagBtn.getAttribute('data-state') === 'idle') {
+        setFlag('armed', 'not it?', 'tap again to report as a false positive');
         setTimeout(function () {
-          if (flagBtn.getAttribute('data-armed') === 'true') {
-            flagBtn.setAttribute('data-armed', 'false');
-            flagBtn.textContent = 'not it?';
-          }
+          if (flagBtn.getAttribute('data-state') === 'armed') setFlag('idle', '\u2715', 'report as a false positive');
         }, 3500);
         return;
       }
-      flagBtn.setAttribute('data-armed', 'false');
+      if (flagBtn.getAttribute('data-state') !== 'armed') return;
       flagBtn.disabled = true;
-      flagBtn.textContent = 'saving...';
+      setFlag('saving', '\u22ef');
       bgReview(fid, 'false_positive').then(function () {
         frow.classList.add('flagged');
-        flagBtn.textContent = 'flagged';
+        setFlag('done', '\u2713', 'reported as a false positive');
         // BirdNET-Go's analytics fold reviews in - refetch so the
         // collage/counts follow the correction.
         _bgMemo = {};
         _haMemo = {};
         refreshAll();
-      }).catch(function () {
+      }).catch(function (err) {
         flagBtn.disabled = false;
-        flagBtn.textContent = 'failed';
-        setTimeout(function () { flagBtn.textContent = 'not it?'; }, 2500);
+        var why = err === 'needs-ingress'
+          ? 'needs the HA ingress connection (admin user)'
+          : 'BirdNET-Go refused (' + err + ')';
+        setFlag('failed', '!', 'could not save: ' + why);
+        setTimeout(function () {
+          if (flagBtn.getAttribute('data-state') === 'failed') setFlag('idle', '\u2715', 'report as a false positive');
+        }, 4000);
       });
       return;
     }

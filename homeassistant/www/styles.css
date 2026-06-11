@@ -1200,7 +1200,9 @@
       font-size: 12px; line-height: 1.5;
       display: -webkit-box; -webkit-line-clamp: 4;
       -webkit-box-orient: vertical; overflow: hidden;
+      cursor: pointer;
     }
+    .modal-info .desc.expanded { -webkit-line-clamp: unset; display: block; }
     .rec-row .when { font-size: 10.5px; }
     .rec-row .when small { font-size: 8.5px; }
   }
@@ -1399,13 +1401,13 @@
   }
   .modal-info .desc {
     font: 13px/1.55 var(--av-font-display);
-    color: var(--ink); margin: 0 0 14px;
+    color: var(--ink); margin: 0 0 18px;
   }
   .modal-info .desc.placeholder { color: var(--ink-soft); font-style: italic; }
   .modal-meta {
     display: flex; flex-wrap: wrap; gap: 16px;
     font: 9.5px var(--av-font-mono); color: var(--ink-soft);
-    margin: 8px 0 14px;
+    margin: 8px 0 18px;
   }
   .modal-meta .k { letter-spacing: 0.12em; text-transform: uppercase; }
   .modal-meta .v { color: var(--ink); margin-left: 6px; }
@@ -1435,7 +1437,7 @@
     padding-right: 4px;
   }
   .rec-row {
-    display: grid; grid-template-columns: 30px 1fr auto; gap: 10px;
+    display: grid; grid-template-columns: 30px 1fr auto auto; gap: 10px;
     align-items: center;
     padding: 6px 10px; border-radius: 6px;
     background: var(--paper);
@@ -1697,18 +1699,27 @@ body.av-picker-top .slider { top: 10px; bottom: auto; }
 body.av-picker-top .view { padding-bottom: 28px; }
 body.av-picker-top .view#v0, body.av-picker-top .view#v1 { padding-bottom: 24px; }
 
-/* ---- Recording-row review flag ("not it?") ---- */
-/* Writes a false-positive review back to BirdNET-Go. Two-tap arm/confirm
-   so a stray touch can't flag anything. */
+/* ---- Recording-row review flag ---- */
+/* Writes a false-positive review back to BirdNET-Go. A quiet ghost x
+   beside the confidence; first tap arms it into a labelled pill, second
+   tap confirms - a stray touch can't flag anything. */
 .rec-row .flag {
-  flex: 0 0 auto;
-  background: var(--paper-2); border: 0; border-radius: 999px;
-  font: 8.5px/1 var(--av-font-mono); letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--ink-soft);
-  padding: 6px 9px; cursor: pointer;
-  box-shadow: var(--recess);
+  justify-self: end;
+  min-width: 22px; height: 22px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent; border: 0; border-radius: 999px;
+  font: 10px/1 var(--av-font-mono); letter-spacing: 0;
+  color: var(--ink-soft);
+  padding: 0 6px; cursor: pointer; white-space: nowrap;
+  transition: color 140ms ease, background 140ms ease;
 }
-.rec-row .flag:hover { color: var(--ink); }
-.rec-row .flag[data-armed="true"] { color: var(--paper); background: var(--accent-2); }
-.rec-row .flag:disabled { cursor: default; opacity: 0.7; }
+.rec-row .flag:hover { color: var(--ink); background: var(--paper-2); }
+.rec-row .flag[data-state="armed"] {
+  background: var(--accent-2); color: var(--paper);
+  font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0 9px;
+}
+.rec-row .flag[data-state="done"] { color: var(--ink); cursor: default; }
+.rec-row .flag[data-state="failed"] { color: var(--accent-2); font-weight: 700; }
+.rec-row .flag:disabled { cursor: default; }
 .rec-row.flagged .when, .rec-row.flagged .conf { text-decoration: line-through; opacity: 0.55; }
