@@ -750,14 +750,12 @@
     } else if (step === 1) {
       // No illustration at all -> background-removed photo cutout.
       img.src = './assets/cutouts/' + slug + '.png';
-    } else if (step === 2 && img.getAttribute('data-sci')) {
-      // Nothing bundled for this species: BirdNET-Go proxies a real
-      // photo of every species for its own UI - use it so unbundled
-      // birds still get a face in the atlas and detail modal.
-      img.src = bgUrl('/media/image/' + encodeURIComponent(img.getAttribute('data-sci')));
     } else {
-      // Even the photo failed - hide rather than show the browser's
-      // broken-image glyph.
+      // Nothing bundled for this species - hide rather than show the
+      // browser's broken-image glyph. (Deliberately NOT falling back to
+      // BirdNET-Go's photo proxy: photos break the kachō-e style and
+      // have no silhouette masks. The pipeline in avian/scripts
+      // generates style-matched art for any species instead.)
       img.onerror = null;
       img.style.visibility = 'hidden';
     }
@@ -1260,6 +1258,11 @@
     var wwEl = document.getElementById('wallWidgets');
     if (wwEl && !wwEl.hidden) addObstacle(wwEl);
     if (document.body.classList.contains('av-title-overlay') && staticTitle) addObstacle(staticTitle);
+    // The view picker too: the collage view keeps no reserved band for
+    // it (the box is the whole card, so the flock centres truly), and
+    // birds simply pack around the pill.
+    var slEl = document.getElementById('slider');
+    if (slEl && slEl.style.display !== 'none') addObstacle(slEl);
 
     // The silent poll mostly returns identical data - skip the whole
     // pack/render when nothing that affects layout changed, so the DOM
