@@ -625,6 +625,9 @@
        collapse to its (zero) intrinsic height. clamp() keeps it sane
        on both short landscape phones and tall portrait ones. */
     .stats-timeline { height: clamp(260px, 44vh, 420px); }
+    /* Stacked timeline + side panel is taller than the box - let the
+       stats view scroll instead of clipping First Detections. */
+    .view#v1 { overflow-y: auto; overflow-x: hidden; }
   }
   /* Phones: the timeline keeps its editorial form but uses fixed wider
      columns (set in drawHistograms) and scrolls horizontally for the rest,
@@ -1667,3 +1670,8 @@ body.av-title-overlay .static-head {
 }
 body.av-title-overlay .view#v1,
 body.av-title-overlay .view#v2 { padding-top: 96px; }
+
+/* Card option: view picker pinned to the top edge instead of bottom. */
+body.av-picker-top .slider { top: 10px; bottom: auto; }
+body.av-picker-top .view { padding-bottom: 28px; }
+body.av-picker-top .view#v0, body.av-picker-top .view#v1 { padding-bottom: 24px; }

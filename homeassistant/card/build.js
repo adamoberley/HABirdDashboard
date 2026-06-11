@@ -48,6 +48,7 @@ let css = cssSrc
   .replace(/body\.admin-on/g, '.av-shell.admin-on')
   .replace(/body\.ww-cursor-hidden/g, '.av-shell.ww-cursor-hidden')
   .replace(/body\.av-title-overlay/g, '.av-shell.av-title-overlay')
+  .replace(/body\.av-picker-top/g, '.av-shell.av-picker-top')
   // app chrome pinned to the app frame, not the browser viewport
   .replace(/position: fixed/g, 'position: absolute')
   // Responsiveness must track the CARD's box, not the browser window: a
@@ -80,6 +81,15 @@ css += `
 .av-shell.av-font-system {
   --av-font-display: var(--ha-font-family-body, var(--mdc-typography-font-family, Roboto, "Segoe UI", sans-serif));
   --av-font-mono: var(--ha-font-family-body, var(--mdc-typography-font-family, Roboto, "Segoe UI", sans-serif));
+}
+/* The view picker hugs the card's bottom edge (the page floats it higher). */
+.slider { bottom: 10px; }
+/* In system-font mode the picker drops the editorial small-caps treatment
+   and reads like native HA tabs. */
+.av-shell.av-font-system .slider button {
+  font: 500 13px/1 var(--av-font-mono);
+  letter-spacing: 0; text-transform: capitalize;
+  padding: 9px 16px;
 }
 /* BirdNET-Pi admin chrome has no backend here (same as the static HA build). */
 #menuBtn, #menu-dd, #returnToAtlas, #adminScreen { display: none !important; }
@@ -188,7 +198,13 @@ var HABIRD_EDITOR_SCHEMA = [
     ] } } },
   ] },
   { name: 'title', selector: { text: {} } },
-  { name: 'view_selector', selector: { boolean: {} } },
+  { name: '', type: 'grid', schema: [
+    { name: 'view_selector', selector: { boolean: {} } },
+    { name: 'selector_position', selector: { select: { mode: 'dropdown', options: [
+      { value: 'bottom', label: 'Bottom' },
+      { value: 'top', label: 'Top' },
+    ] } } },
+  ] },
   { name: 'appearance', type: 'expandable', flatten: true, title: 'Appearance', schema: [
     { name: '', type: 'grid', schema: [
       { name: 'background', selector: { select: { mode: 'dropdown', options: [
@@ -245,6 +261,7 @@ var HABIRD_LABELS = {
   window: 'Time window',
   title: 'Title',
   view_selector: 'Show the view switcher',
+  selector_position: 'Switcher position',
   background: 'Background',
   font: 'Font',
   theme: 'Theme',
@@ -264,6 +281,7 @@ var HABIRD_LABELS = {
 var HABIRD_HELPERS = {
   title: 'Optional heading. Birds pack around it, clock-style.',
   view_selector: 'Turn off to lock this card to one view.',
+  selector_position: 'Top pairs poorly with a title - both sit centred up top.',
   height: 'Empty fills the available space (560 px minimum).',
   weather_entity: 'Empty auto-detects your first weather entity.',
   hide_cursor: 'For wall displays: pointer disappears after 8 s idle.',
@@ -361,6 +379,7 @@ class HABirdCard extends HTMLElement {
       title: c.title || '',                  // '' = no title block
       view: c.view || 'collage',             // which view this card shows
       viewSelector: c.view_selector !== false,
+      selectorPosition: c.selector_position || 'bottom',
       windowHours: c.window || 24,           // hours, or 'all'
       birdnetGoUrl: c.birdnet_url || '',
       dataSource: c.data_source || 'auto',
@@ -434,7 +453,7 @@ class HABirdCardEditor extends HTMLElement {
       this.appendChild(this._form);
     }
     this._form.schema = HABIRD_EDITOR_SCHEMA;
-    this._form.data = Object.assign({ theme: 'auto', corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true }, this._config);
+    this._form.data = Object.assign({ theme: 'auto', corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom' }, this._config);
     this._form.hass = this._hass;
   }
 }
