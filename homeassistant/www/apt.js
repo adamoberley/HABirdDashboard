@@ -671,6 +671,21 @@
   var VIEW_TITLES = ['Heard Recently', 'Heard Recently', 'Avian Visitors'];
   var staticHead = document.querySelector('.static-head');
   var staticTitle = document.getElementById('staticTitle');
+  // Card builds pass a `title` key: '' hides the whole title block, a
+  // non-empty value pins that custom title across every view (and hides
+  // the "your birds" eyebrow - it's an About affordance, not part of a
+  // user's chosen heading). Absent key (the static page) keeps the
+  // original per-view titles.
+  if (AV_CFG && 'title' in AV_CFG) {
+    if (!AV_CFG.title) {
+      if (staticHead) staticHead.style.display = 'none';
+    } else {
+      VIEW_TITLES = [AV_CFG.title, AV_CFG.title, AV_CFG.title];
+      if (staticTitle) staticTitle.textContent = AV_CFG.title;
+      var __pre = staticHead && staticHead.querySelector('.pre');
+      if (__pre) __pre.style.display = 'none';
+    }
+  }
   function setTitleForView(i) {
     var next = VIEW_TITLES[i];
     if (!staticTitle || staticTitle.textContent === next) return;
@@ -759,6 +774,15 @@
   applyTheme(readLS('bird:theme', 'light'));
   var winBtns = [].slice.call(winPick.querySelectorAll('button'));
   var currentHours = +readLS('bird:window', '24') || 24;
+  // Card builds fix the time window from card config and hide the
+  // segmented picker - the window is a card setting there, not an
+  // on-screen control. 'all' or any hour count works.
+  if (AV_CFG && AV_CFG.windowHours != null && AV_CFG.windowHours !== '') {
+    currentHours = AV_CFG.windowHours === 'all'
+      ? 1000000
+      : Math.max(1, +AV_CFG.windowHours || 24);
+    if (winPick) winPick.style.display = 'none';
+  }
   winBtns.forEach(function (b) {
     b.setAttribute('aria-current', (+b.dataset.h === currentHours) ? 'true' : 'false');
   });

@@ -146,6 +146,11 @@ All editable in the visual editor; YAML equivalents:
 
 ```yaml
 type: custom:habird-card
+title: ""                    # empty = no title; set any text for a heading
+window: "24"                 # time window in hours, or "all" - the card has
+                             #   no on-screen picker; this is the window
+background: transparent      # transparent (blend with dashboard) | paper
+font: system                 # system (HA's font) | serif (the original look)
 birdnet_url: ""              # empty = this host, port 8080 (the stock app)
 data_source: auto            # auto | api | ha (see Data sources below)
 history_days: 10             # ha-source span; bounded by recorder retention
