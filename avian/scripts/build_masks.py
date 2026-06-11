@@ -6,7 +6,7 @@ Step 3 of the illustration pipeline (after pregen.py and cutout.py).
 The collage packs birds by their actual silhouette, not bounding boxes,
 so the frontend ships a tiny 1-bit mask per illustration inlined in
 apt.js. This reads every cutout in avian/assets/illustrations/ and
-rewrites the DIMS and MASKS tables in homeassistant/www/apt.js:
+rewrites the DIMS and MASKS tables in homeassistant/www/masks.js:
 
     DIMS[slug]  = [w, h]  aspect, scaled so the long side is 560
     MASKS[slug] = {w, h, bits}  silhouette downscaled to <=93px, 1-bit
@@ -77,8 +77,8 @@ def main() -> int:
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--illustrations", type=Path, default=here / "assets" / "illustrations",
                     help="Cutout directory (default: avian/assets/illustrations/)")
-    ap.add_argument("--apt", type=Path, default=here.parent / "homeassistant" / "www" / "apt.js",
-                    help="Frontend file to patch (default: homeassistant/www/apt.js)")
+    ap.add_argument("--apt", type=Path, default=here.parent / "homeassistant" / "www" / "masks.js",
+                    help="Generated mask-table file to rewrite (default: homeassistant/www/masks.js)")
     ap.add_argument("--check", action="store_true",
                     help="Report counts and don't write apt.js")
     args = ap.parse_args()

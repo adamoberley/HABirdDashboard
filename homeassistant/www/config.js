@@ -63,7 +63,10 @@ window.AV_CONFIG = {
     //
     // SECURITY NOTE: /config/www files are served without authentication,
     // so this token is readable by anyone who can reach your HA on the
-    // LAN. Use a token from a dedicated, non-administrator HA user.
+    // LAN. Treat it as a LAST RESORT: the HACS card needs no token at
+    // all (it rides HA's own connection), and BirdNET-Go's built-in
+    // weather needs no token either. If you do set one, use a token
+    // from a dedicated, non-administrator HA user.
     //
     // Left empty, weather falls back to BirdNET-Go's built-in support
     // (yr.no by default - zero setup; hides itself if you disabled it).
