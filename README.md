@@ -1,5 +1,3 @@
-<p align="left"><img src="https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/logo.png" alt="Bird Card" width="140"></p>
-
 # HABirdDashboard
 
 *Bird Card: a live bird collage for Home Assistant, fed by BirdNET-Go.*
