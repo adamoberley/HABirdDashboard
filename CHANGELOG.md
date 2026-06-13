@@ -46,6 +46,11 @@
   right beside their labels). Stays centred in the view.
 
 ### Fixed
+- Reference calls: a remembered recording that later goes unplayable no
+  longer wedges playback - it falls through (and times out if it just
+  hangs) to other recordings, the candidate pool is wider (15), and a
+  fresh working pick is re-saved. Fixes high-volume species (e.g. House
+  Sparrow) breaking after a previously-good recording went bad.
 - `build_masks.py` silently skipped rewriting `masks.js` (its patch regex
   assumed a two-space indent the file no longer uses); it now tolerates
   and preserves any indentation.

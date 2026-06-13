@@ -689,9 +689,11 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
           return (a.pref - b.pref) || (a.shortish - b.shortish)
             || (a.qual < b.qual ? -1 : a.qual > b.qual ? 1 : 0);
         });
-        // Return a ranked CANDIDATE LIST (top few) so playback can fall
-        // through to the next recording if one won't play in the browser.
-        var cands = scored.slice(0, 5).map(function (s) {
+        // Return a ranked CANDIDATE LIST so playback can fall through to
+        // the next recording if one won't play in the browser. Kept wide
+        // (15) because high-volume species can have many in-browser-
+        // unplayable files before a good one.
+        var cands = scored.slice(0, 15).map(function (s) {
           var r = s.r;
           return {
             url: _xcHttps(r.file), page: _xcHttps(r.url), rec: r.rec || '',
@@ -3315,16 +3317,30 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     var info = cands[idx];
     var audio = new Audio(info.url);
     refAudio = audio;
+    var moved = false;
+    function advance() {
+      if (moved || refAudio !== audio) return;   // already moved / superseded
+      moved = true;
+      clearTimeout(stallT);
+      try { audio.pause(); } catch (e) {}
+      _playRefCandidates(cands, idx + 1, onPlaying, onAllFail);
+    }
+    // A dead URL usually fires 'error' (we move on), but some hang or
+    // return non-audio with no event at all - so also move on if nothing
+    // has started playing within a few seconds. Short reference calls
+    // start well under this, so a real one is never skipped.
+    var stallT = setTimeout(advance, 6000);
     audio.addEventListener('ended', stopRefCall);
     // Credit the recording that ACTUALLY plays - not each one we skip
     // past - so the attribution never flickers through dead candidates.
     audio.addEventListener('playing', function () {
+      clearTimeout(stallT);
       if (refAudio === audio && onPlaying) onPlaying(info);
     });
     audio.addEventListener('error', function () {
       if (refAudio !== audio) return;   // superseded by a newer play
       try { console.warn('[bird-card] ref call would not play, trying next:', info.url); } catch (e) {}
-      _playRefCandidates(cands, idx + 1, onPlaying, onAllFail);
+      advance();
     });
     audio.play().catch(function () { /* autoplay policy: needs a gesture */ });
   }
