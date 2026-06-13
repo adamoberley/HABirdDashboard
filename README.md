@@ -5,7 +5,7 @@
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/license-CC_BY_NC_SA_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
-<img alt="HABirdDashboard collage" src="https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/thumbnail.png" />
+<img alt="HABirdDashboard collage" src="https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-collage.png" />
 
 **The idea in one paragraph:** your Home Assistant machine can identify
 every bird outside your window by sound alone. A free app called
@@ -74,15 +74,10 @@ the Home Assistant card - was built here for Home Assistant + BirdNET-Go.
 
 | | |
 |:--:|:--:|
-| [![Collage view](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-collage.png)](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-collage.png) | [![Stats view](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-stats.png)](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-stats.png) |
-| **Collage** — the live flock, with an optional clock + weather corner | **Stats** — an hourly activity heatmap, by-period counts, and top species |
-| [![Atlas view](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-atlas.png)](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-atlas.png) | [![Detail modal](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-detail.png)](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-detail.png) |
-| **Atlas** — a field-guide grid of every species heard | **Detail** — recordings, description, and a Xeno-Canto **reference call** to compare against your own |
-
-<p align="center">
-  <img alt="Hover tooltip" src="https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-hover.png" width="340"><br>
-  <em>Hover (or tap) any bird for its name and today's count.</em>
-</p>
+| [![Stats view](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-stats.png)](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-stats.png) | [![Atlas view](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-atlas.png)](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-atlas.png) |
+| **Stats** — an hourly activity heatmap, by-period counts, and top species | **Atlas** — a field-guide grid of every species heard |
+| [![Detail modal](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-detail.png)](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-detail.png) | [![Hover tooltip](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-hover.png)](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-hover.png) |
+| **Detail** — recordings, description, and a Xeno-Canto **reference call** to compare against your own | **Hover** — any bird shows its name and today's count |
 
 ---
 
