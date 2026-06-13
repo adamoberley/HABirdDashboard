@@ -77,8 +77,7 @@ the Home Assistant card - was built here for Home Assistant + BirdNET-Go.
 | [![Stats view](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-stats.png)](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-stats.png) | [![Atlas view](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-atlas.png)](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-atlas.png) |
 | **Stats** — an hourly activity heatmap, by-period counts, and top species | **Atlas** — a field-guide grid of every species heard |
 | [![Detail modal](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-detail.png)](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-detail.png) | [![Hover tooltip](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-hover.png)](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-hover.png) |
-| **Detail** — recordings, description, and a Xeno-Canto **reference call** to compare against your own | **Hover** — any bird shows its name and today's count 
-**Click** — any bird plays a reference call |
+| **Detail** — recordings, description, and a Xeno-Canto **reference call** to compare against your own | **Hover and Click** — any bird shows its name, today's count and plays it's refence bird call **** |
 
 ---
 
