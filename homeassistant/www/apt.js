@@ -1107,6 +1107,9 @@
     // while already on the atlas - that must not retrigger the load-in.
     var switching = (i !== currentView);
     currentView = i;
+    // Stats + atlas drop the shared title so their content gets the full height.
+    document.body.classList.toggle('av-view-stats', i === 1);
+    document.body.classList.toggle('av-view-atlas', i === 2);
     views.style.transform = 'translateX(-' + (i * 100) + '%)';
     btns.forEach(function (b, j) { b.setAttribute('aria-current', j === i ? 'true' : 'false'); });
     syncPill(slider);

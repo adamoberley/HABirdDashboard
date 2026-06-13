@@ -87,6 +87,9 @@
     transition: opacity 240ms cubic-bezier(.7,.05,.2,1);
   }
   .static-head.swap-out h1 { opacity: 0; }
+  /* Stats + Atlas hide the shared title so their content uses the full
+     height (the collage keeps it). */
+  body.av-view-stats .static-head, body.av-view-atlas .static-head { display: none; }
   @media (max-width: 700px) {
     .static-head { padding: 96px 18px 22px; }
   }
@@ -650,7 +653,7 @@
   .stats-timeline {
     position: relative;
     flex: 1 1 auto; min-height: 120px;
-    max-height: min(82vh, 1100px);
+    max-height: min(88vh, 1600px);
     overflow: auto; -webkit-overflow-scrolling: touch;
   }
   .stats-hm {

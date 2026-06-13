@@ -20,6 +20,9 @@
   species.
 
 ### Changed
+- **Stats & Atlas** drop the page title, and the stats heatmap now uses
+  nearly the full height before it scrolls - many more species rows show
+  at once.
 - **Card editor reorganized**: a single **Dashboard** section (view, time
   window, view switcher + position, collage scale, clock/weather); **Birds
   & audio** reordered (tap action → Xeno-Canto key → sit confidence →
