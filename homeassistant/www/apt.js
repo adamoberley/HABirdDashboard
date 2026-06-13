@@ -1,16 +1,16 @@
 (function () {
   // Bumped whenever the offline sketch build changes, so the browser
   // doesn't keep a stale cache after we regenerate the sketches.
-  var SKETCH_VERSION = 'r10'; // full library restyle: every species
-                              // re-rendered (perched + flight) with clean cutouts.
+  var SKETCH_VERSION = 'r11'; // r10 + 84 region species (E-US warblers,
+                              // vireos, flycatchers, shorebirds) added.
   // Cache-bust for /api/img - bump whenever a bird gets re-rendered via
   // /api/regen or whenever you need every CF DC to drop its cached copy.
   // Cloudflare keys on the full URL incl. query, so bumping this is
   // equivalent to a global cache purge for /api/img. (caches.default
   // .delete() in the worker only affects ONE colo at a time, so a
   // versioned URL is the only reliable way to invalidate everywhere.)
-  var IMG_VERSION = 'r10'; // full library restyle: every species re-rendered
-                           // with clean cutouts, so drop every cached copy.
+  var IMG_VERSION = 'r11'; // r10 + 84 region species added, so drop every
+                           // cached copy.
 
   // ===========================================================================
   // BirdNET-Go adapter (Home Assistant build)

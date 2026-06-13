@@ -14,3 +14,12 @@ node_modules/
 # Illustration pipeline: large source / reference imagery kept on disk
 avian/assets/references/
 avian/assets/_legacy/
+
+# Illustration pipeline: local venv + API keys (never commit secrets)
+.venv/
+avian/scripts/.gemini_key
+avian/scripts/.ebird_key
+avian/scripts/my-species*.txt
+avian/scripts/missing-species.txt
+avian/scripts/verify-results.csv
+avian/scripts/_diff_missing.py

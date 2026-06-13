@@ -62,12 +62,14 @@ def build_tables(illus_dir: Path):
 
 
 def replace_decl(src: str, name: str, value: str) -> str:
-    """Replace `var <name> = {...};` (single line) with the new value."""
-    pat = re.compile(r"  var " + name + r" = \{.*?\};")
-    repl = f"  var {name} = {value};"
-    new, n = pat.subn(lambda _m: repl, src, count=1)
+    """Replace `var <name> = {...};` (single line) with the new value.
+    Tolerates any leading indentation (masks.js declares at column 0; the
+    older inlined-in-apt.js form was indented two spaces) and preserves
+    whatever indentation it finds."""
+    pat = re.compile(r"^([ \t]*)var " + name + r" = \{.*?\};", re.MULTILINE)
+    new, n = pat.subn(lambda m: f"{m.group(1)}var {name} = {value};", src, count=1)
     if n != 1:
-        raise SystemExit(f"error: could not find `var {name} = {{...}};` in apt.js")
+        raise SystemExit(f"error: could not find `var {name} = {{...}};` in the masks file")
     return new
 
 
