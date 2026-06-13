@@ -14,10 +14,10 @@
   plays the reference call** by default (`both`); or `info` for
   details-only (the classic behavior), or `call` for sound only.
   Reference-call modes fall back to details when no key is set.
-- **+84 region species** (168 kachō-e illustrations) — Eastern-US
-  warblers, vireos, flycatchers, shorebirds and more — generated through
-  the `avian/scripts` pipeline, lifting the bundled library to 333
-  species.
+- **+86 region species** (172 kachō-e illustrations) — Eastern-US
+  warblers, vireos, flycatchers, shorebirds, rails, terns and more —
+  generated through the `avian/scripts` pipeline, lifting the bundled
+  library to 335 species.
 
 ### Changed
 - **Stats & Atlas** drop the page title, and the stats heatmap now uses

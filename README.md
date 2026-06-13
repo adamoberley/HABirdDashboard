@@ -60,7 +60,7 @@ the Home Assistant card - was built here for Home Assistant + BirdNET-Go.
   and eBird, plus an optional **reference call** (from Xeno-Canto) to
   compare against your own recordings. A tap can open the details, play
   the call, or both.
-- **666 illustrations** - 333 (mostly North American) species, a perched
+- **670 illustrations** - 335 (mostly North American) species, a perched
   and a flight pose each, lazy-loaded per detected species (no bulk
   download). A [regeneration pipeline](avian/scripts/README.md) builds sets
   for other regions.
@@ -258,7 +258,7 @@ each, cached by the browser. For a fully offline install, copy
 
 ### Missing artwork for your area?
 
-The bundled library is 333 (mostly North American) species, so other
+The bundled library is 335 (mostly North American) species, so other
 regions will have gaps. (Plain photos are deliberately not used as a
 stand-in - they'd break the kachō-e style and have no silhouette masks
 for the collage packing.) Two remedies, neither needs code changes:
@@ -413,7 +413,7 @@ params to dress up a specific display.
 ## Troubleshooting
 
 - **Some birds have no picture.** The most common question, and usually
-  not a bug: the bundled library covers **333 mostly North American
+  not a bug: the bundled library covers **335 mostly North American
   species**, so detections outside it simply have no illustration yet
   (the bird still counts everywhere - it just isn't drawn in the
   collage). Three checks, then the fix:
@@ -476,7 +476,7 @@ homeassistant/
     ├── styles.css
     └── favicon.png
 avian/
-├── assets/          # 666 bundled illustrations + photo-cutout fallbacks
+├── assets/          # 670 bundled illustrations + photo-cutout fallbacks
 └── scripts/         # generate -> cutout -> masks pipeline (Gemini + BiRefNet)
 docs/                # screenshot
 hacs.json            # HACS metadata
