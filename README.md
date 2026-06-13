@@ -70,6 +70,22 @@ the Home Assistant card - was built here for Home Assistant + BirdNET-Go.
 
 ---
 
+## See it in action
+
+| | |
+|:--:|:--:|
+| [![Collage view](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-collage.png)](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-collage.png) | [![Stats view](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-stats.png)](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-stats.png) |
+| **Collage** — the live flock, with an optional clock + weather corner | **Stats** — an hourly activity heatmap, by-period counts, and top species |
+| [![Atlas view](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-atlas.png)](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-atlas.png) | [![Detail modal](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-detail.png)](https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-detail.png) |
+| **Atlas** — a field-guide grid of every species heard | **Detail** — recordings, description, and a Xeno-Canto **reference call** to compare against your own |
+
+<p align="center">
+  <img alt="Hover tooltip" src="https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-hover.png" width="340"><br>
+  <em>Hover (or tap) any bird for its name and today's count.</em>
+</p>
+
+---
+
 ## What you need
 
 - **Home Assistant OS or Supervised** - apps (formerly add-ons) only
