@@ -20,6 +20,15 @@
   species.
 
 ### Changed
+- **Card editor reorganized**: a single **Dashboard** section (view, time
+  window, view switcher + position, collage scale, clock/weather); **Birds
+  & audio** reordered (tap action → Xeno-Canto key → sit confidence →
+  volume boost → artwork) with the **volume boost now a slider**;
+  **Connection & data** laid out data source → BirdNET-Go URL →
+  history/refresh; and clearer "blank = default" hints on optional fields.
+- **Stats side panel**: detection counts realigned into a single column
+  again, but pulled in tight beside the names instead of stretched to the
+  far edge.
 - **Dark mode is now neutral** — removed the blue tint from the page,
   the view switcher, and the stats heatmap (charcoal greys, no saturation).
 - The card **always follows Home Assistant's light/dark theme** — the

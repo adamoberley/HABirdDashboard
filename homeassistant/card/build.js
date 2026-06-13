@@ -197,31 +197,9 @@ const wrapper = `
 // you copied the artwork locally (homeassistant/install.sh layout).
 var HABIRD_CDN_ASSETS = 'https://cdn.jsdelivr.net/gh/adamoberley/HABirdDashboard@HABirdDashboard/avian/assets/';
 
-var HABIRD_VERSION = '1.0.1';
+var HABIRD_VERSION = '1.1.0';
 
 var HABIRD_EDITOR_SCHEMA = [
-  { name: '', type: 'grid', schema: [
-    { name: 'view', selector: { select: { mode: 'dropdown', options: [
-      { value: 'collage', label: 'Collage' },
-      { value: 'stats', label: 'Stats' },
-      { value: 'atlas', label: 'Atlas' },
-    ] } } },
-    { name: 'view_selector', selector: { boolean: {} } },
-    { name: 'selector_position', selector: { select: { mode: 'dropdown', options: [
-      { value: 'bottom', label: 'Bottom' },
-      { value: 'top', label: 'Top' },
-    ] } } },
-    { name: 'window', selector: { select: { mode: 'dropdown', options: [
-      { value: '1', label: 'Last hour' },
-      { value: '12', label: 'Last 12 hours' },
-      { value: '24', label: 'Last 24 hours' },
-      { value: '72', label: 'Last 3 days' },
-      { value: '168', label: 'Last 7 days' },
-      { value: '336', label: 'Last 14 days' },
-      { value: '720', label: 'Last 30 days' },
-      { value: 'all', label: 'All time' },
-    ] } } },
-  ] },
   { name: 'title', selector: { text: {} } },
   { name: '', type: 'grid', schema: [
     { name: 'background', selector: { select: { mode: 'dropdown', options: [
@@ -233,7 +211,32 @@ var HABIRD_EDITOR_SCHEMA = [
       { value: 'serif', label: 'Editorial serif' },
     ] } } },
   ] },
-  { name: 'clockweather', type: 'expandable', flatten: true, title: 'Clock & weather', schema: [
+  { name: 'dashboard', type: 'expandable', flatten: true, title: 'Dashboard', schema: [
+    { name: '', type: 'grid', schema: [
+      { name: 'view', selector: { select: { mode: 'dropdown', options: [
+        { value: 'collage', label: 'Collage' },
+        { value: 'stats', label: 'Stats' },
+        { value: 'atlas', label: 'Atlas' },
+      ] } } },
+      { name: 'window', selector: { select: { mode: 'dropdown', options: [
+        { value: '1', label: 'Last hour' },
+        { value: '12', label: 'Last 12 hours' },
+        { value: '24', label: 'Last 24 hours' },
+        { value: '72', label: 'Last 3 days' },
+        { value: '168', label: 'Last 7 days' },
+        { value: '336', label: 'Last 14 days' },
+        { value: '720', label: 'Last 30 days' },
+        { value: 'all', label: 'All time' },
+      ] } } },
+    ] },
+    { name: '', type: 'grid', schema: [
+      { name: 'view_selector', selector: { boolean: {} } },
+      { name: 'selector_position', selector: { select: { mode: 'dropdown', options: [
+        { value: 'bottom', label: 'Bottom' },
+        { value: 'top', label: 'Top' },
+      ] } } },
+    ] },
+    { name: 'collage_scale', selector: { number: { min: 0.5, max: 3, step: 0.1, mode: 'slider' } } },
     { name: '', type: 'grid', schema: [
       { name: 'clock', selector: { boolean: {} } },
       { name: 'weather', selector: { boolean: {} } },
@@ -250,33 +253,27 @@ var HABIRD_EDITOR_SCHEMA = [
     ] },
   ] },
   { name: 'birds', type: 'expandable', flatten: true, title: 'Birds & audio', schema: [
-    { name: 'sit_confidence', selector: { number: { min: 0, max: 1.01, step: 0.01, mode: 'slider' } } },
-    { name: 'collage_scale', selector: { number: { min: 0.5, max: 3, step: 0.1, mode: 'slider' } } },
-    { name: 'audio_boost', selector: { select: { mode: 'dropdown', options: [
-      { value: '0', label: 'Off' },
-      { value: '6', label: '+6 dB' },
-      { value: '12', label: '+12 dB' },
-      { value: '24', label: '+24 dB (default)' },
-    ] } } },
     { name: 'tap_action', selector: { select: { mode: 'dropdown', options: [
       { value: 'both', label: 'Open info + play call (default)' },
       { value: 'info', label: 'Open info only' },
       { value: 'call', label: 'Play reference call only' },
     ] } } },
     { name: 'xeno_canto_key', selector: { text: {} } },
+    { name: 'sit_confidence', selector: { number: { min: 0, max: 1.01, step: 0.01, mode: 'slider' } } },
+    { name: 'audio_boost', selector: { number: { min: 0, max: 24, step: 6, mode: 'slider', unit_of_measurement: 'dB' } } },
     { name: 'image_base', selector: { text: {} } },
   ] },
   { name: 'connection', type: 'expandable', flatten: true, title: 'Connection & data', schema: [
+    { name: 'data_source', selector: { select: { mode: 'dropdown', options: [
+      { value: 'auto', label: 'Automatic' },
+      { value: 'api', label: 'BirdNET-Go API only' },
+      { value: 'ha', label: 'MQTT history only' },
+    ] } } },
     { name: 'birdnet_url', selector: { text: {} } },
     { name: '', type: 'grid', schema: [
-      { name: 'data_source', selector: { select: { mode: 'dropdown', options: [
-        { value: 'auto', label: 'Automatic' },
-        { value: 'api', label: 'BirdNET-Go API only' },
-        { value: 'ha', label: 'MQTT history only' },
-      ] } } },
       { name: 'history_days', selector: { number: { min: 1, max: 365, step: 1, mode: 'box', unit_of_measurement: 'days' } } },
+      { name: 'poll_seconds', selector: { number: { min: 10, max: 3600, step: 10, mode: 'box', unit_of_measurement: 's' } } },
     ] },
-    { name: 'poll_seconds', selector: { number: { min: 10, max: 3600, step: 10, mode: 'box', unit_of_measurement: 's' } } },
   ] },
 ];
 var HABIRD_LABELS = {
@@ -304,18 +301,18 @@ var HABIRD_LABELS = {
   poll_seconds: 'Refresh interval',
 };
 var HABIRD_HELPERS = {
-  title: 'Optional heading. Birds pack around it, clock-style.',
+  title: 'Default (blank): no heading. Any text adds a title the birds pack around, clock-style.',
   view_selector: 'Turn off to lock this card to one view.',
   selector_position: 'Top pairs poorly with a title - both sit centred up top.',
-  weather_entity: 'Empty auto-detects your first weather entity.',
+  weather_entity: 'Default (blank): the first weather.* entity found.',
   hide_cursor: 'For wall displays: pointer disappears after 8 s idle.',
   sit_confidence: 'Birds perch at or above this detection confidence and fly below it. 0 = always perched, 1.01 = always flying.',
-  audio_boost: 'Detection clips are quiet. The boost is compressed so it gets louder without clipping.',
+  audio_boost: "Detection clips are quiet; the boost is compressed so louder doesn't clip. 0 dB = off.",
   tap_action: "What tapping a bird does. Default opens the info modal and plays the reference call. Call/both need a Xeno-Canto key; without one they fall back to just opening info.",
-  xeno_canto_key: "Free key from xeno-canto.org/account. Adds a reference call (a clean example) to compare against your station's own captures.",
+  xeno_canto_key: "Default (blank): reference calls off. A free key from xeno-canto.org/account turns them on - a clean example call to compare against your station's own captures.",
   collage_scale: 'How much of the card the flock claims. Birds always shrink to fit, so bigger is safe.',
-  image_base: 'Empty loads artwork from the CDN. Use /local/habird-art/ for an offline copy.',
-  birdnet_url: 'Empty uses this host on port 8080, or HA ingress when remote.',
+  image_base: 'Default (blank): artwork from the CDN. Use /local/habird-art/ for an offline copy.',
+  birdnet_url: 'Default (blank): this host on port 8080, or HA ingress when remote.',
   data_source: 'Automatic uses the API and falls back to the MQTT sensors.',
   history_days: 'How far MQTT history reaches; bounded by recorder retention.',
   poll_seconds: 'Safety-net refresh. MQTT pushes new detections instantly.',
@@ -484,7 +481,7 @@ class HABirdCardEditor extends HTMLElement {
       this.appendChild(this._form);
     }
     this._form.schema = HABIRD_EDITOR_SCHEMA;
-    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', collage_scale: 1.5, audio_boost: '24' }, this._config);
+    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', collage_scale: 1.5, audio_boost: 24 }, this._config);
     this._form.hass = this._hass;
   }
 }
