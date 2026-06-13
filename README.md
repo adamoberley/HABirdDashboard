@@ -146,8 +146,8 @@ community repository, which you add once:
 
 **Tuning detections** - defaults are conservative; a starting point that
 has worked well in practice is **Settings → Analysis**: Confidence
-Threshold **0.7**, with Dynamic Threshold enabled, Trigger **0.9** and
-Minimum **0.5**. (Dynamic threshold temporarily lowers the bar for a
+Threshold **0.8**, with Dynamic Threshold enabled, Trigger **0.9** and
+Minimum **0.7**. (Dynamic threshold temporarily lowers the bar for a
 species right after a high-confidence detection of it, so the quieter
 follow-up calls of a bird that's clearly present still get logged without
 letting random noise in.) It pairs nicely with this card's sit/fly rule -
