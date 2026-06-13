@@ -645,6 +645,22 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     if (!u) return '';
     return u.indexOf('//') === 0 ? 'https:' + u : u;
   }
+  // Fetch the XC API with bounded retry on 429 (rate limit) + transient
+  // 5xx, honoring Retry-After. XC throttles free keys, so without this a
+  // burst of taps makes some calls fail with a bare "unavailable".
+  function _xcFetchWithRetry(url, attempt) {
+    attempt = attempt || 0;
+    return fetch(url).then(function (r) {
+      if ((r.status === 429 || (r.status >= 500 && r.status < 600)) && attempt < 3) {
+        var ra = parseFloat(r.headers.get('Retry-After'));
+        var wait = (ra > 0 ? ra : Math.pow(2, attempt)) * 1000;  // ~1s, 2s, 4s
+        return new Promise(function (res) { setTimeout(res, wait); })
+          .then(function () { return _xcFetchWithRetry(url, attempt + 1); });
+      }
+      if (!r.ok) throw new Error('xc-http-' + r.status);
+      return r.json();
+    });
+  }
   function resolveReferenceCall(sci) {
     if (!refCallEnabled()) return Promise.reject(new Error('no key'));
     if (_refCallCache[sci]) return _refCallCache[sci];
@@ -654,41 +670,36 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     if (parts[1]) q += ' sp:"' + parts[1] + '"';
     var url = 'https://xeno-canto.org/api/3/recordings?query='
       + encodeURIComponent(q) + '&key=' + encodeURIComponent(AV_CFG.xenoCantoKey);
-    var p = fetch(url)
-      .then(function (r) {
-        if (!r.ok) throw new Error('xc-http-' + r.status);
-        return r.json();
-      })
+    var p = _xcFetchWithRetry(url, 0)
       .then(function (j) {
         var recs = (j && j.recordings) || [];
         // Rank: real audio file first, then call/song over other types,
         // then short clips (<=30s), then best quality (q 'A' beats 'E').
         var scored = recs.filter(function (r) { return r && r.file; }).map(function (r) {
           var t = (r.type || '').toLowerCase();
-          var qual = (r.q || 'E').charAt(0).toUpperCase();
           var len = _xcLenSeconds(r.length);
           return {
             r: r,
             pref: /\b(call|song)\b/.test(t) ? 0 : 1,
             shortish: (len > 0 && len <= 30) ? 0 : 1,
-            qual: qual
+            qual: (r.q || 'E').charAt(0).toUpperCase()
           };
         });
         scored.sort(function (a, b) {
           return (a.pref - b.pref) || (a.shortish - b.shortish)
             || (a.qual < b.qual ? -1 : a.qual > b.qual ? 1 : 0);
         });
-        var best = scored[0] && scored[0].r;
-        if (!best) throw new Error('no recording');
-        return {
-          url: _xcHttps(best.file),
-          page: _xcHttps(best.url),
-          rec: best.rec || '',
-          lic: _xcHttps(best.lic),
-          type: best.type || '',
-          q: best.q || '',
-          id: best.id || ''
-        };
+        // Return a ranked CANDIDATE LIST (top few) so playback can fall
+        // through to the next recording if one won't play in the browser.
+        var cands = scored.slice(0, 5).map(function (s) {
+          var r = s.r;
+          return {
+            url: _xcHttps(r.file), page: _xcHttps(r.url), rec: r.rec || '',
+            lic: _xcHttps(r.lic), type: r.type || '', q: r.q || '', id: r.id || ''
+          };
+        });
+        if (!cands.length) throw new Error('no recording');
+        return cands;
       });
     // Don't cache failures - a later open should retry (transient/quota).
     p.catch(function () { if (_refCallCache[sci] === p) delete _refCallCache[sci]; });
@@ -3301,14 +3312,33 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     }
     __refSci = null;
   }
-  function _startRefAudio(info, onFail) {
-    // Plain <audio> (no boost / no crossOrigin): XC media plays fine
-    // direct, and this avoids any CORS requirement on their CDN.
+  // Play the first candidate that loads; fall through to the next if one
+  // won't play in the browser. onCredit(info) fires for the candidate
+  // being attempted; onAllFail() when none of them play. Plain <audio>
+  // (no boost / no crossOrigin): XC media plays fine direct.
+  function _playRefCandidates(cands, idx, onCredit, onAllFail) {
+    idx = idx || 0;
+    if (!cands || idx >= cands.length) { if (onAllFail) onAllFail(); return; }
+    var info = cands[idx];
     var audio = new Audio(info.url);
     refAudio = audio;
     audio.addEventListener('ended', stopRefCall);
-    audio.addEventListener('error', function () { if (onFail) onFail(); });
+    audio.addEventListener('error', function () {
+      if (refAudio !== audio) return;   // superseded by a newer play
+      try { console.warn('[bird-card] ref call would not play, trying next:', info.url); } catch (e) {}
+      _playRefCandidates(cands, idx + 1, onCredit, onAllFail);
+    });
+    if (onCredit) onCredit(info);
     audio.play().catch(function () { /* autoplay policy: needs a gesture */ });
+  }
+  // Map a resolve error to a user-facing line - distinguishes "none
+  // exist", rate-limit, and other HTTP errors so the cause is obvious.
+  function _refErrMsg(err) {
+    var m = String((err && err.message) || err || '');
+    if (/no recording/.test(m)) return 'no reference call on Xeno-Canto for this species';
+    if (/xc-http-429/.test(m)) return 'Xeno-Canto is busy (rate limit) — try again in a moment';
+    var code = (m.match(/xc-http-(\d+)/) || [])[1];
+    return code ? ('reference call unavailable (Xeno-Canto ' + code + ')') : 'reference call unavailable';
   }
   // Modal button: full play / pause toggle, with attribution credit.
   function toggleModalRefCall(btn, sci) {
@@ -3334,19 +3364,16 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     btn.setAttribute('data-active', 'true');
     btn.innerHTML = _refBtnLabel(ICON_PAUSE);
     setRefCredit('');
-    resolveReferenceCall(sci).then(function (info) {
+    resolveReferenceCall(sci).then(function (cands) {
       if (refBtn !== btn) return;  // user moved on
       btn.classList.remove('loading');
-      _startRefAudio(info, function () {
-        if (refBtn === btn) { stopRefCall(); setRefCredit('reference call unavailable'); }
-      });
-      setRefCredit(info, true);
+      _playRefCandidates(cands, 0,
+        function (info) { if (refBtn === btn) setRefCredit(info, true); },
+        function () { if (refBtn === btn) { stopRefCall(); setRefCredit('couldn’t play this reference call'); } });
     }).catch(function (err) {
       if (refBtn !== btn) return;
       stopRefCall();
-      setRefCredit(/no recording/.test(String((err && err.message) || err))
-        ? 'no reference call on Xeno-Canto for this species'
-        : 'reference call unavailable');
+      setRefCredit(_refErrMsg(err));
     });
   }
   // Tap-to-play (tap_action='call'): no modal, just play. Tapping the
@@ -3356,14 +3383,14 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     stopModalAudio();
     audioClaim(stopRefCall);
     __refSci = sci;
-    resolveReferenceCall(sci).then(function (info) {
+    resolveReferenceCall(sci).then(function (cands) {
       if (__refSci !== sci) return;
-      _startRefAudio(info, function () {
-        try { console.warn('[bird-card] reference call media error:', info.url); } catch (e) {}
+      _playRefCandidates(cands, 0, null, function () {
+        try { console.warn('[bird-card] reference call: no candidate would play for', sci); } catch (e) {}
       });
     }).catch(function (err) {
       if (__refSci !== sci) return;
-      try { console.warn('[bird-card] reference call:', (err && err.message) || err); } catch (e) {}
+      try { console.warn('[bird-card] reference call:', _refErrMsg(err)); } catch (e) {}
     });
   }
   // Attribution line under the Recordings header. Xeno-Canto's CC
