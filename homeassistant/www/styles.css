@@ -775,7 +775,7 @@
      so it still gets its own hover background + separator. */
   .stats-side ol {
     list-style: none; padding: 0; margin: 0;
-    display: grid; grid-template-columns: 40px max-content auto;
+    display: grid; grid-template-columns: 40px max-content 1fr;
     column-gap: 14px; align-content: start;
   }
   .stats-side li {
@@ -791,7 +791,7 @@
   .stats-side li.sync-hi { background: var(--paper-2); }
   .stats-side li.sync-hi span:not(.yr):not(.ct) { color: var(--accent); }
   .stats-side li .yr { font: 11px var(--av-font-mono); color: var(--accent-2); letter-spacing: 0.04em; }
-  .stats-side li .ct { font: 13px var(--av-font-mono); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .stats-side li .ct { font: 13px var(--av-font-mono); color: var(--ink-soft); font-variant-numeric: tabular-nums; justify-self: end; }
 
   /* (Histogram strip removed - charts moved into the stats-grid LEFT
      column as full-bleed chart cards. See .stats-charts above.) */

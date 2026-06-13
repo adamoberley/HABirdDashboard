@@ -29,9 +29,9 @@
   volume boost → artwork) with the **volume boost now a slider**;
   **Connection & data** laid out data source → BirdNET-Go URL →
   history/refresh; and clearer "blank = default" hints on optional fields.
-- **Stats side panel**: detection counts realigned into a single column
-  again, but pulled in tight beside the names instead of stretched to the
-  far edge.
+- **Stats side panel**: detection counts sit in a single aligned column
+  at the panel's right edge (lined up with the group subtitles), with the
+  names kept tight on the left - no longer stretched far from the names.
 - **Dark mode is now neutral** — removed the blue tint from the page,
   the view switcher, and the stats heatmap (charcoal greys, no saturation).
 - The card **always follows Home Assistant's light/dark theme** — the
