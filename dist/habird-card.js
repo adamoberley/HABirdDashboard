@@ -1517,7 +1517,7 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
   var _collageSig = null;
   function renderCollage(items, animate) {
     if (!items.length) {
-      collage.innerHTML = '<p class="empty">No birds heard outside.</p>';
+      collage.innerHTML = '';   // blank, rather than an empty-state message
       collagePlaced = [];
       _collageSig = 'empty';
       return;

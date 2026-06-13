@@ -20,6 +20,8 @@
   species.
 
 ### Changed
+- The collage shows a **blank panel** when no birds are in the window,
+  instead of a "No birds heard outside" message.
 - **Stats view** now fills the screen and aligns to the top (was capped
   at 1280px and floated in the middle), with a wider species-name column
   and taller heatmap so fewer names truncate and more rows show at once.
