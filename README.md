@@ -92,7 +92,7 @@ the Home Assistant card - was built here for Home Assistant + BirdNET-Go.
   done: BirdNET-Go listens to RTSP streams, so the camera you own becomes
   the bird mic for free (Step 2 has the details). Otherwise a cheap USB
   lavalier mic in a window works great.
-- About **20 minutes**.
+- About **10 minutes**.
 
 The whole setup is: install the BirdNET-Go app (the thing that listens and
 identifies) → confirm it's detecting → install the card → add it to a
