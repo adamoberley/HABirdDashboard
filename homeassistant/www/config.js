@@ -29,11 +29,11 @@ window.AV_CONFIG = {
   audioBoostDb: 24,
 
   // What a TAP on a bird does:
-  //   'info' (default) - open the detail modal (counts, captures, info)
-  //   'call'           - play the species' reference call (needs
-  //                      xenoCantoKey; falls back to 'info' without one)
-  //   'both'           - open the modal AND auto-play the reference call
-  tapAction: 'info',
+  //   'both' (default) - open the detail modal AND play the reference call
+  //   'info'           - just open the detail modal (counts, captures, info)
+  //   'call'           - just play the species' reference call (no modal)
+  // 'call'/'both' need xenoCantoKey; without one they fall back to 'info'.
+  tapAction: 'both',
 
   // Free Xeno-Canto API key for the "reference call" feature: a clean
   // example call/song per species, separate from the recordings YOUR

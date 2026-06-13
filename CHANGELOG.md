@@ -8,15 +8,21 @@
   call** button — a clean example call/song for the species, to A/B
   against the recordings your own station captured. Credited to the
   recordist per Xeno-Canto's license; falls through to another recording
-  if one won't play, and retries on rate-limit.
-- **Configurable tap** (`tap_action`): tapping a bird can open its
-  details (`info`, default — unchanged), play its reference call
-  (`call`), or both. Reference-call modes fall back to the details when
-  no key is set.
+  if one won't play, retries on rate-limit, and remembers the recording
+  that worked per species so repeat presses are instant.
+- **Configurable tap** (`tap_action`): a tap opens the details **and
+  plays the reference call** by default (`both`); or `info` for
+  details-only (the classic behavior), or `call` for sound only.
+  Reference-call modes fall back to details when no key is set.
 - **+84 region species** (168 kachō-e illustrations) — Eastern-US
   warblers, vireos, flycatchers, shorebirds and more — generated through
   the `avian/scripts` pipeline, lifting the bundled library to 333
   species.
+
+### Changed
+- **Stats view** now fills the screen and aligns to the top (was capped
+  at 1280px and floated in the middle), with a wider species-name column
+  and taller heatmap so fewer names truncate and more rows show at once.
 
 ### Fixed
 - `build_masks.py` silently skipped rewriting `masks.js` (its patch regex

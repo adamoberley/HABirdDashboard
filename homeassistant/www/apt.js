@@ -3303,6 +3303,23 @@
     var code = (m.match(/xc-http-(\d+)/) || [])[1];
     return code ? ('reference call unavailable (Xeno-Canto ' + code + ')') : 'reference call unavailable';
   }
+  // Per-species memory of the recording that actually played, so repeat
+  // presses (and later sessions) skip straight to it instead of falling
+  // through the dead candidates again. Stored in localStorage by slug.
+  function _refSaveWorking(sci, info) {
+    if (info && info.url) writeLS('bird:refcall:' + slugify(sci), JSON.stringify(info));
+  }
+  function _refCallOrder(sci, cands) {
+    var raw = readLS('bird:refcall:' + slugify(sci), '');
+    if (!raw) return cands;
+    var saved;
+    try { saved = JSON.parse(raw); } catch (e) { return cands; }
+    if (!saved || !saved.url) return cands;
+    // Known-good recording first; drop its duplicate from the fetched
+    // list. If it 404s later, playback falls through as usual and the
+    // next winner overwrites the memory.
+    return [saved].concat(cands.filter(function (c) { return c.url !== saved.url; }));
+  }
   // Modal button: full play / pause toggle, with attribution credit.
   function toggleModalRefCall(btn, sci) {
     if (refBtn === btn && refAudio) {           // same button -> pause/resume
@@ -3331,8 +3348,8 @@
       if (refBtn !== btn) return;  // user moved on
       // Keep the loading state through any fall-through; clear it only
       // when a recording actually starts playing.
-      _playRefCandidates(cands, 0,
-        function (info) { if (refBtn === btn) { btn.classList.remove('loading'); setRefCredit(info, true); } },
+      _playRefCandidates(_refCallOrder(sci, cands), 0,
+        function (info) { if (refBtn === btn) { btn.classList.remove('loading'); setRefCredit(info, true); _refSaveWorking(sci, info); } },
         function () { if (refBtn === btn) { stopRefCall(); setRefCredit('couldn’t play this reference call'); } });
     }).catch(function (err) {
       if (refBtn !== btn) return;
@@ -3349,9 +3366,9 @@
     __refSci = sci;
     resolveReferenceCall(sci).then(function (cands) {
       if (__refSci !== sci) return;
-      _playRefCandidates(cands, 0, null, function () {
-        try { console.warn('[bird-card] reference call: no candidate would play for', sci); } catch (e) {}
-      });
+      _playRefCandidates(_refCallOrder(sci, cands), 0,
+        function (info) { _refSaveWorking(sci, info); },
+        function () { try { console.warn('[bird-card] reference call: no candidate would play for', sci); } catch (e) {} });
     }).catch(function (err) {
       if (__refSci !== sci) return;
       try { console.warn('[bird-card] reference call:', _refErrMsg(err)); } catch (e) {}

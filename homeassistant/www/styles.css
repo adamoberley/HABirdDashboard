@@ -619,8 +619,8 @@
      if the whole grid outgrows the viewport. */
   .stats-grid {
     flex: 1 1 auto; min-height: 0;
-    display: grid; grid-template-columns: 1.55fr 1fr; gap: 56px;
-    max-width: 1280px; margin: 0 auto; width: 100%;
+    display: grid; grid-template-columns: 1.7fr minmax(300px, 0.85fr); gap: 56px;
+    max-width: none; margin: 0 auto; width: 100%;
     align-items: stretch;
   }
   /* Anything that doesn't fit (short desktop window, stacked mobile
@@ -636,9 +636,10 @@
   }
   /* Desktop two-column: size the grid to the side panel's content height
      (the heatmap pane stretches to match it, scrolling internally) and
-     centre it vertically. */
+     align it to the top so it fills the screen instead of floating in
+     the middle. */
   @media (min-width: 901px) {
-    .stats-grid { flex: 0 1 auto; margin: auto; }
+    .stats-grid { flex: 0 1 auto; }
   }
 
   /* Activity heatmap: one row per species (most-heard first), one cell
@@ -650,11 +651,11 @@
   .stats-timeline {
     position: relative;
     flex: 1 1 auto; min-height: 120px;
-    max-height: min(68vh, 620px);
+    max-height: min(82vh, 1100px);
     overflow: auto; -webkit-overflow-scrolling: touch;
   }
   .stats-hm {
-    --hm-name: 136px;
+    --hm-name: 190px;
     display: flex; flex-direction: column;
     min-width: 100%;
   }

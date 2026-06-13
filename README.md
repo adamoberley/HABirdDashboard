@@ -214,8 +214,8 @@ history_days: 10             # ha-source span; bounded by recorder retention
 sit_confidence: 0.90         # perched at/above, flying below
 collage_scale: 1.5           # how much of the card the flock claims (0.5-3)
                              #   (0 = always perched, 1.01 = always flying)
-tap_action: info             # info (open details) | call (play the species'
-                             #   reference call) | both - what tapping a bird does
+tap_action: both             # both (open details + play call, default) |
+                             #   info (details only) | call (reference call only)
 xeno_canto_key: ""           # free key from xeno-canto.org/account; enables the
                              #   reference-call feature below (empty = off)
 clock: true                  # time + date in a corner of the collage
@@ -237,8 +237,9 @@ quietly falls back to BirdNET-Go's built-in weather (yr.no).
 stats lists, or the atlas - pops its detail card (recordings, description,
 stats) over the current view. The card's layout is responsive to its own
 box via container queries, so a narrow column card gets the compact
-layouts even on a wide desktop. Prefer sound to stats? `tap_action: call`
-makes a tap play the bird's reference call instead; `both` does both at once.
+layouts even on a wide desktop. By default a tap **also plays the bird's
+reference call** (`tap_action: both`); set `info` for details-only (the
+classic behavior), or `call` for sound only.
 
 **Reference calls** (optional): drop a free [Xeno-Canto](https://xeno-canto.org/account)
 API key into `xeno_canto_key` and a **reference call** button appears in each

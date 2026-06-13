@@ -267,9 +267,9 @@ var HABIRD_EDITOR_SCHEMA = [
       { value: '24', label: '+24 dB (default)' },
     ] } } },
     { name: 'tap_action', selector: { select: { mode: 'dropdown', options: [
-      { value: 'info', label: 'Open info (default)' },
-      { value: 'call', label: 'Play reference call' },
-      { value: 'both', label: 'Open info + play call' },
+      { value: 'both', label: 'Open info + play call (default)' },
+      { value: 'info', label: 'Open info only' },
+      { value: 'call', label: 'Play reference call only' },
     ] } } },
     { name: 'xeno_canto_key', selector: { text: {} } },
     { name: 'image_base', selector: { text: {} } },
@@ -322,7 +322,7 @@ var HABIRD_HELPERS = {
   hide_cursor: 'For wall displays: pointer disappears after 8 s idle.',
   sit_confidence: 'Birds perch at or above this detection confidence and fly below it. 0 = always perched, 1.01 = always flying.',
   audio_boost: 'Detection clips are quiet. The boost is compressed so it gets louder without clipping.',
-  tap_action: "What tapping a bird does. 'Play call' and 'both' need a Xeno-Canto key; without one they just open the info modal.",
+  tap_action: "What tapping a bird does. Default opens the info modal and plays the reference call. Call/both need a Xeno-Canto key; without one they fall back to just opening info.",
   xeno_canto_key: "Free key from xeno-canto.org/account. Adds a reference call (a clean example) to compare against your station's own captures.",
   collage_scale: 'How much of the card the flock claims. Birds always shrink to fit, so bigger is safe.',
   image_base: 'Empty loads artwork from the CDN. Use /local/habird-art/ for an offline copy.',
@@ -431,7 +431,7 @@ class HABirdCard extends HTMLElement {
         ? c.collage_scale
         : 1.5,   // birds command a card harder than a full page
       audioBoostDb: (c.audio_boost == null ? 24 : +c.audio_boost),
-      tapAction: c.tap_action || 'info',          // info | call | both
+      tapAction: c.tap_action || 'both',          // both | info | call
       xenoCantoKey: c.xeno_canto_key || '',        // enables reference calls
       __exposeRefresh: function (fn) { self._refresh = fn; },
       sitConfidence: (typeof c.sit_confidence === 'number') ? c.sit_confidence : 0.90,
