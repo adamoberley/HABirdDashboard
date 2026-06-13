@@ -266,6 +266,12 @@ var HABIRD_EDITOR_SCHEMA = [
       { value: '12', label: '+12 dB' },
       { value: '24', label: '+24 dB (default)' },
     ] } } },
+    { name: 'tap_action', selector: { select: { mode: 'dropdown', options: [
+      { value: 'info', label: 'Open info (default)' },
+      { value: 'call', label: 'Play reference call' },
+      { value: 'both', label: 'Open info + play call' },
+    ] } } },
+    { name: 'xeno_canto_key', selector: { text: {} } },
     { name: 'image_base', selector: { text: {} } },
   ] },
   { name: 'connection', type: 'expandable', flatten: true, title: 'Connection & data', schema: [
@@ -298,6 +304,8 @@ var HABIRD_LABELS = {
   hide_cursor: 'Hide idle cursor',
   sit_confidence: 'Sit confidence',
   audio_boost: 'Recording volume boost',
+  tap_action: 'Tap on a bird',
+  xeno_canto_key: 'Xeno-Canto API key',
   collage_scale: 'Collage scale',
   image_base: 'Artwork base URL',
   birdnet_url: 'BirdNET-Go URL',
@@ -314,6 +322,8 @@ var HABIRD_HELPERS = {
   hide_cursor: 'For wall displays: pointer disappears after 8 s idle.',
   sit_confidence: 'Birds perch at or above this detection confidence and fly below it. 0 = always perched, 1.01 = always flying.',
   audio_boost: 'Detection clips are quiet. The boost is compressed so it gets louder without clipping.',
+  tap_action: "What tapping a bird does. 'Play call' and 'both' need a Xeno-Canto key; without one they just open the info modal.",
+  xeno_canto_key: "Free key from xeno-canto.org/account. Adds a reference call (a clean example) to compare against your station's own captures.",
   collage_scale: 'How much of the card the flock claims. Birds always shrink to fit, so bigger is safe.',
   image_base: 'Empty loads artwork from the CDN. Use /local/habird-art/ for an offline copy.',
   birdnet_url: 'Empty uses this host on port 8080, or HA ingress when remote.',
@@ -421,6 +431,8 @@ class HABirdCard extends HTMLElement {
         ? c.collage_scale
         : 1.5,   // birds command a card harder than a full page
       audioBoostDb: (c.audio_boost == null ? 24 : +c.audio_boost),
+      tapAction: c.tap_action || 'info',          // info | call | both
+      xenoCantoKey: c.xeno_canto_key || '',        // enables reference calls
       __exposeRefresh: function (fn) { self._refresh = fn; },
       sitConfidence: (typeof c.sit_confidence === 'number') ? c.sit_confidence : 0.90,
       wall: {

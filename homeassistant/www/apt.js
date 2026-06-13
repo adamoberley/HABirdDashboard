@@ -578,6 +578,82 @@
     return (_speciesAudioCache[sci] = p);
   }
 
+  // ---- Reference call (Xeno-Canto) ----
+  // A canonical example call/song for a species, fetched from the
+  // Xeno-Canto v3 API so it can be compared against BirdNET-Go's own
+  // captures. This is a DIFFERENT thing from resolveSpeciesAudio above:
+  // that returns what your mic recorded, this returns a clean reference.
+  // Needs a free API key (AV_CFG.xenoCantoKey); the feature stays hidden
+  // without one. v3 sends `access-control-allow-origin: *`, so the
+  // browser can query it directly - no server proxy needed. Cached per
+  // species (resolved metadata, including the playable audio URL).
+  var _refCallCache = {};
+  function refCallEnabled() { return !!(AV_CFG && AV_CFG.xenoCantoKey); }
+  function _xcLenSeconds(s) {
+    // XC `length` is "m:ss" (or occasionally bare seconds).
+    if (s == null) return 0;
+    s = String(s);
+    if (s.indexOf(':') >= 0) {
+      var a = s.split(':');
+      return (+a[0] || 0) * 60 + (+a[1] || 0);
+    }
+    return +s || 0;
+  }
+  function _xcHttps(u) {
+    // XC returns protocol-relative URLs (//xeno-canto.org/...).
+    if (!u) return '';
+    return u.indexOf('//') === 0 ? 'https:' + u : u;
+  }
+  function resolveReferenceCall(sci) {
+    if (!refCallEnabled()) return Promise.reject(new Error('no key'));
+    if (_refCallCache[sci]) return _refCallCache[sci];
+    var parts = String(sci).trim().split(/\s+/);
+    // v3 query tags: gen:<genus> sp:<species>. Quote to keep them exact.
+    var q = 'gen:"' + (parts[0] || '') + '"';
+    if (parts[1]) q += ' sp:"' + parts[1] + '"';
+    var url = 'https://xeno-canto.org/api/3/recordings?query='
+      + encodeURIComponent(q) + '&key=' + encodeURIComponent(AV_CFG.xenoCantoKey);
+    var p = fetch(url)
+      .then(function (r) {
+        if (!r.ok) throw new Error('xc-http-' + r.status);
+        return r.json();
+      })
+      .then(function (j) {
+        var recs = (j && j.recordings) || [];
+        // Rank: real audio file first, then call/song over other types,
+        // then short clips (<=30s), then best quality (q 'A' beats 'E').
+        var scored = recs.filter(function (r) { return r && r.file; }).map(function (r) {
+          var t = (r.type || '').toLowerCase();
+          var qual = (r.q || 'E').charAt(0).toUpperCase();
+          var len = _xcLenSeconds(r.length);
+          return {
+            r: r,
+            pref: /\b(call|song)\b/.test(t) ? 0 : 1,
+            shortish: (len > 0 && len <= 30) ? 0 : 1,
+            qual: qual
+          };
+        });
+        scored.sort(function (a, b) {
+          return (a.pref - b.pref) || (a.shortish - b.shortish)
+            || (a.qual < b.qual ? -1 : a.qual > b.qual ? 1 : 0);
+        });
+        var best = scored[0] && scored[0].r;
+        if (!best) throw new Error('no recording');
+        return {
+          url: _xcHttps(best.file),
+          page: _xcHttps(best.url),
+          rec: best.rec || '',
+          lic: _xcHttps(best.lic),
+          type: best.type || '',
+          q: best.q || '',
+          id: best.id || ''
+        };
+      });
+    // Don't cache failures - a later open should retry (transient/quota).
+    p.catch(function () { if (_refCallCache[sci] === p) delete _refCallCache[sci]; });
+    return (_refCallCache[sci] = p);
+  }
+
   // ---- Fallback data source: HA history of the BirdNET-Go MQTT sensors ----
   // BirdNET-Go's MQTT support gives each microphone a Home Assistant device
   // with "Scientific Name" / "Last Species" / "Confidence" sensors that
@@ -1868,9 +1944,9 @@
   collage.addEventListener('click', function (ev) {
     var hit = maskHitTest(ev.clientX, ev.clientY);
     if (!hit) return;
-    // Open the detail modal right here, over the collage - no detour
-    // through the atlas view.
-    openDetailModal(hit.data.sci);
+    // Tap a bird: info modal (default), reference call, or both, per
+    // the tap_action setting. No detour through the atlas view.
+    handleBirdTap(hit.data.sci);
   });
 
   // Debug hook - call __layout({ slugs, weights, n }) from devtools to
@@ -3068,6 +3144,7 @@
   var WIKI_CACHE = {};
   var modalAudio = null;
   var modalRecBtn = null;
+  var __modalSci = null;   // species currently shown in the detail modal
   function fmtRecTime(d, t) {
     // d="2026-05-15", t="20:25:29"
     if (!d) return '-';
@@ -3162,6 +3239,127 @@
     }
   }
 
+  // ---- Reference-call playback ----
+  // Plays the Xeno-Canto reference call resolved by resolveReferenceCall.
+  // Shares the single-audio coordinator so starting it pauses any
+  // capture / live stream and vice versa. Reference recordings play at
+  // normal volume, so - unlike the quiet detection clips - they skip the
+  // WebAudio boost (which also avoids needing CORS on the XC media CDN).
+  var refAudio = null;
+  var refBtn = null;       // the modal "reference call" button, when used
+  var __refSci = null;     // species whose ref call is loaded (modal or tap)
+  function _refBtnLabel(icon) { return icon + '<span>reference call</span>'; }
+  function stopRefCall() {
+    audioRelease(stopRefCall);
+    if (refAudio) { try { refAudio.pause(); } catch (e) {} refAudio = null; }
+    if (refBtn) {
+      refBtn.removeAttribute('data-active');
+      refBtn.classList.remove('loading');
+      refBtn.innerHTML = _refBtnLabel(ICON_PLAY);
+      refBtn = null;
+    }
+    __refSci = null;
+  }
+  function _startRefAudio(info, onFail) {
+    // Plain <audio> (no boost / no crossOrigin): XC media plays fine
+    // direct, and this avoids any CORS requirement on their CDN.
+    var audio = new Audio(info.url);
+    refAudio = audio;
+    audio.addEventListener('ended', stopRefCall);
+    audio.addEventListener('error', function () { if (onFail) onFail(); });
+    audio.play().catch(function () { /* autoplay policy: needs a gesture */ });
+  }
+  // Modal button: full play / pause toggle, with attribution credit.
+  function toggleModalRefCall(btn, sci) {
+    if (refBtn === btn && refAudio) {           // same button -> pause/resume
+      if (refAudio.paused) {
+        audioClaim(stopRefCall);
+        refAudio.play().catch(function () {});
+        btn.setAttribute('data-active', 'true');
+        btn.innerHTML = _refBtnLabel(ICON_PAUSE);
+      } else {
+        refAudio.pause();
+        btn.removeAttribute('data-active');
+        btn.innerHTML = _refBtnLabel(ICON_PLAY);
+      }
+      return;
+    }
+    stopRefCall();
+    stopModalAudio();              // stop a playing capture
+    audioClaim(stopRefCall);       // and anything else (atlas / live stream)
+    refBtn = btn;
+    __refSci = sci;
+    btn.classList.add('loading');
+    btn.setAttribute('data-active', 'true');
+    btn.innerHTML = _refBtnLabel(ICON_PAUSE);
+    setRefCredit('');
+    resolveReferenceCall(sci).then(function (info) {
+      if (refBtn !== btn) return;  // user moved on
+      btn.classList.remove('loading');
+      _startRefAudio(info, function () {
+        if (refBtn === btn) { stopRefCall(); setRefCredit('reference call unavailable'); }
+      });
+      setRefCredit(info, true);
+    }).catch(function (err) {
+      if (refBtn !== btn) return;
+      stopRefCall();
+      setRefCredit(/no recording/.test(String((err && err.message) || err))
+        ? 'no reference call on Xeno-Canto for this species'
+        : 'reference call unavailable');
+    });
+  }
+  // Tap-to-play (tap_action='call'): no modal, just play. Tapping the
+  // same bird again restarts it; a different bird switches.
+  function tapPlayRefCall(sci) {
+    stopRefCall();
+    stopModalAudio();
+    audioClaim(stopRefCall);
+    __refSci = sci;
+    resolveReferenceCall(sci).then(function (info) {
+      if (__refSci !== sci) return;
+      _startRefAudio(info, function () {
+        try { console.warn('[bird-card] reference call media error:', info.url); } catch (e) {}
+      });
+    }).catch(function (err) {
+      if (__refSci !== sci) return;
+      try { console.warn('[bird-card] reference call:', (err && err.message) || err); } catch (e) {}
+    });
+  }
+  // Attribution line under the Recordings header. Xeno-Canto's CC
+  // licenses require crediting the recordist + license. Pass an info
+  // object with isInfo=true for a credit; pass a plain string for a
+  // status message; pass '' to clear.
+  function setRefCredit(infoOrMsg, isInfo) {
+    var el = document.getElementById('modalRefCredit');
+    if (!el) return;
+    if (!infoOrMsg) { el.hidden = true; el.innerHTML = ''; return; }
+    if (!isInfo) { el.hidden = false; el.textContent = infoOrMsg; return; }
+    var info = infoOrMsg;
+    var html = esc('Reference call: Xeno-Canto' + (info.rec ? ' · rec. ' + info.rec : ''));
+    if (info.lic) html += ' · <a href="' + esc(info.lic) + '" target="_blank" rel="noopener">license</a>';
+    if (info.page) html += ' · <a href="' + esc(info.page) + '" target="_blank" rel="noopener">XC' + esc(info.id) + '</a>';
+    el.hidden = false;
+    el.innerHTML = html;
+  }
+
+  // Bird-tap dispatcher - the collage and atlas grid route taps here.
+  // tap_action picks the info modal (default), the reference call, or
+  // both. 'call'/'both' fall back to the modal when no XC key is set.
+  function handleBirdTap(sci) {
+    if (!sci) return;
+    var act = (AV_CFG && AV_CFG.tapAction) || 'info';
+    if (act === 'call' && refCallEnabled()) { tapPlayRefCall(sci); return; }
+    if (act === 'both') {
+      openDetailModal(sci);
+      if (refCallEnabled()) {
+        var btn = document.getElementById('modalRefCall');
+        if (btn) toggleModalRefCall(btn, sci);
+      }
+      return;
+    }
+    openDetailModal(sci);   // 'info', or call/both with no key configured
+  }
+
   function sketchSrc(sci, pose) {
     // Bundled static illustration. The modal's HEAD probes hit these same
     // URLs, so a missing pose file 404s and its toggle button hides.
@@ -3250,6 +3448,18 @@
     document.getElementById('modalDesc').classList.add('placeholder');
     document.getElementById('modalRecordings').innerHTML = '<li class="rec-empty">Loading recordings...</li>';
     document.getElementById('modalRecCount').textContent = '';
+    // Reference-call button: stop any prior playback, reset it, and show
+    // it only when an XC key is configured.
+    stopRefCall();
+    __modalSci = sci;
+    var refBtnEl = document.getElementById('modalRefCall');
+    if (refBtnEl) {
+      refBtnEl.hidden = !refCallEnabled();
+      refBtnEl.innerHTML = _refBtnLabel(ICON_PLAY);
+      refBtnEl.removeAttribute('data-active');
+      refBtnEl.classList.remove('loading');
+    }
+    setRefCredit('');
     document.getElementById('modalWiki').href = wikiUrl(sci);
     document.getElementById('modalEbird').href = ebirdUrl(sci);
     // FLIP-style morph: scale + translate the modal-card from the
@@ -3328,6 +3538,7 @@
   function closeDetailModal() {
     var modal = document.getElementById('detail-modal');
     stopModalAudio();
+    stopRefCall();
     // Reverse-morph back into the source atlas card so the modal
     // appears to *retract* to where it came from. Look the card up
     // fresh - the user may have switched the time window or sort
@@ -3469,6 +3680,17 @@
   // from outside the IIFE if needed.
   window.__openDetailModal = openDetailModal;
   window.__closeDetailModal = closeDetailModal;
+
+  // Reference-call button in the detail modal: play/compare the canonical
+  // Xeno-Canto call against the station's own captures listed beside it.
+  (function () {
+    var refBtnEl = document.getElementById('modalRefCall');
+    if (refBtnEl) {
+      refBtnEl.addEventListener('click', function () {
+        if (__modalSci) toggleModalRefCall(refBtnEl, __modalSci);
+      });
+    }
+  })();
 
   // ===== Admin overlay (settings / system / logs / tools) =====
   // Lives in the same shell as the rest of the app - the menu button
@@ -4290,10 +4512,11 @@
   // propagation themselves.
   function jumpToSci(sci) {
     if (!sci) return;
-    // Open the detail modal over whatever view is showing. (This used
-    // to navigate to the atlas first; with single-view cards the
-    // current view must stay put, and in-place feels better anyway.)
-    openDetailModal(sci);
+    // Tap a bird from any surface (atlas card, stats row, heatmap):
+    // info modal (default), reference call, or both, per tap_action.
+    // (This used to navigate to the atlas first; with single-view cards
+    // the current view stays put, and in-place feels better anyway.)
+    handleBirdTap(sci);
   }
   document.addEventListener('click', function (ev) {
     if (!ev.target.closest) return;

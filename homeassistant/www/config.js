@@ -28,6 +28,21 @@ window.AV_CONFIG = {
   // compressor so louder doesn't mean clipped.
   audioBoostDb: 24,
 
+  // What a TAP on a bird does:
+  //   'info' (default) - open the detail modal (counts, captures, info)
+  //   'call'           - play the species' reference call (needs
+  //                      xenoCantoKey; falls back to 'info' without one)
+  //   'both'           - open the modal AND auto-play the reference call
+  tapAction: 'info',
+
+  // Free Xeno-Canto API key for the "reference call" feature: a clean
+  // example call/song per species, separate from the recordings YOUR
+  // station captured, so you can compare them in the detail modal.
+  // Get a key at https://xeno-canto.org/account . Left '', the feature
+  // is off: the reference-call button hides and 'call'/'both' tap modes
+  // fall back to opening the info modal.
+  xenoCantoKey: '',
+
   // Sitting-or-flying rule. A species shows its perched ("sitting")
   // illustration when its best detection confidence in the current
   // time window is at or above this value; below it, the bird renders

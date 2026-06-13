@@ -1404,6 +1404,27 @@
     font: 9px var(--av-font-mono); color: var(--ink-soft);
     letter-spacing: 0.06em;
   }
+  /* Reference-call (Xeno-Canto) button + its attribution line. */
+  .modal-recordings .rec-head { gap: 8px; }
+  .modal-recordings .rec-count { margin-left: auto; }
+  .ref-call-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    font: 700 9px var(--av-font-mono); letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-soft); background: var(--paper); white-space: nowrap;
+    border: 1px solid var(--hairline); border-radius: 999px;
+    padding: 4px 11px 4px 9px; cursor: pointer;
+    transition: color 160ms ease, background 160ms ease, border-color 160ms ease, transform 120ms ease;
+  }
+  .ref-call-btn svg { width: 9px; height: 9px; display: block; }
+  .ref-call-btn:hover { color: var(--ink); background: var(--paper-2); transform: translateY(-1px); }
+  .ref-call-btn[data-active="true"] { color: var(--accent-2); border-color: var(--ink-soft); }
+  .ref-call-btn.loading { opacity: 0.65; cursor: progress; }
+  .ref-credit {
+    font: 9px var(--av-font-mono); color: var(--ink-soft);
+    letter-spacing: 0.04em; line-height: 1.55; margin: -2px 0 8px;
+  }
+  .ref-credit a { color: var(--ink-2); text-decoration: underline; text-underline-offset: 2px; }
+  .ref-credit a:hover { color: var(--ink); }
   .modal-recordings ol {
     list-style: none; padding: 0; margin: 0;
     max-height: 220px; overflow-y: auto;
