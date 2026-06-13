@@ -619,8 +619,8 @@
      if the whole grid outgrows the viewport. */
   .stats-grid {
     flex: 1 1 auto; min-height: 0;
-    display: grid; grid-template-columns: 1.7fr minmax(300px, 0.85fr); gap: 56px;
-    max-width: none; margin: 0 auto; width: 100%;
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 48px;
+    max-width: 1400px; margin: 0 auto; width: 100%;
     align-items: stretch;
   }
   /* Anything that doesn't fit (short desktop window, stacked mobile
@@ -636,10 +636,9 @@
   }
   /* Desktop two-column: size the grid to the side panel's content height
      (the heatmap pane stretches to match it, scrolling internally) and
-     align it to the top so it fills the screen instead of floating in
-     the middle. */
+     float it in the centre of the view. */
   @media (min-width: 901px) {
-    .stats-grid { flex: 0 1 auto; }
+    .stats-grid { flex: 0 1 auto; margin: auto; }
   }
 
   /* Activity heatmap: one row per species (most-heard first), one cell
@@ -655,14 +654,14 @@
     overflow: auto; -webkit-overflow-scrolling: touch;
   }
   .stats-hm {
-    --hm-name: 190px;
+    --hm-name: 200px;
     display: flex; flex-direction: column;
     min-width: 100%;
   }
   .stats-hm-head, .stats-hm-row {
     display: grid;
-    grid-template-columns: var(--hm-name) repeat(24, minmax(17px, 1fr)) 42px;
-    gap: 2px;
+    grid-template-columns: var(--hm-name) repeat(24, minmax(22px, 1fr)) 48px;
+    gap: 3px;
     padding: 1px 0;
   }
   .stats-hm-head {
@@ -670,7 +669,7 @@
     background: var(--paper);
   }
   .stats-hm-hr {
-    font: 8px/1 var(--av-font-mono); color: var(--ink-soft);
+    font: 10px/1 var(--av-font-mono); color: var(--ink-soft);
     letter-spacing: 0.04em;
     text-align: center; padding: 3px 0 4px;
   }
@@ -682,16 +681,16 @@
     transition: background 140ms ease;
   }
   .stats-hm-name .com {
-    font: 600 11.5px/1.2 var(--av-font-display); color: var(--ink);
+    font: 600 14px/1.2 var(--av-font-display); color: var(--ink);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     transition: color 130ms ease;
   }
   .stats-hm-cell {
     display: flex; align-items: center; justify-content: center;
-    min-height: 19px;
+    min-height: 26px;
     border-radius: 2px;
     background: var(--paper-2);
-    font: 8.5px/1 var(--av-font-mono); color: var(--ink);
+    font: 11px/1 var(--av-font-mono); color: var(--ink);
     font-variant-numeric: tabular-nums;
     overflow: hidden;
   }
@@ -707,12 +706,12 @@
   .stats-hm-tot {
     display: flex; align-items: center; justify-content: flex-end;
     padding-right: 2px;
-    font: 10px/1 var(--av-font-mono); color: var(--ink-soft);
+    font: 12px/1 var(--av-font-mono); color: var(--ink-soft);
     font-variant-numeric: tabular-nums;
   }
   .stats-hm-head .stats-hm-tot {
     align-items: flex-start; padding-top: 3px;
-    font-size: 8px; letter-spacing: 0.04em;
+    font-size: 9.5px; letter-spacing: 0.04em;
   }
   /* Cross-highlight: hovering a heatmap row or a table row lights up the
      matching species on the other side - the name shifts to the accent
@@ -755,7 +754,7 @@
     padding: 6px 0;
   }
   .stats-side h3 {
-    font: 700 10px var(--av-font-mono); color: var(--ink);
+    font: 700 11.5px var(--av-font-mono); color: var(--ink);
     letter-spacing: 0.18em; text-transform: uppercase; margin: 0 0 1px;
     border-left: 2px solid var(--accent); padding-left: 10px;
   }
@@ -764,15 +763,17 @@
   .stats-side .grp { flex: 0 0 auto; }
   .stats-side .grp + .grp { margin-top: 22px; }
   .stats-side .grp small {
-    display: block; font: 9px var(--av-font-mono); color: var(--ink-soft);
+    display: block; font: 10px var(--av-font-mono); color: var(--ink-soft);
     letter-spacing: 0.06em; margin: 0 0 3px 12px;
   }
   .stats-side ol { list-style: none; padding: 0; margin: 0; }
+  /* Rank | name | count, all content-sized so the count sits right
+     after the name (no wide stretch) and the whole panel stays narrow. */
   .stats-side li {
-    display: grid; grid-template-columns: 44px 1fr auto; gap: 10px;
-    padding: 2px 0;
+    display: grid; grid-template-columns: 34px max-content auto; gap: 14px;
+    padding: 3px 0;
     box-shadow: inset 0 -1px 0 rgba(26,22,18,0.05);
-    font: 12.5px/1.25 var(--av-font-display); color: var(--ink);
+    font: 14px/1.3 var(--av-font-display); color: var(--ink);
     align-items: baseline;
     transition: background 140ms ease, color 140ms ease;
   }
@@ -781,8 +782,8 @@
   /* Cross-highlight from a hovered timeline square. */
   .stats-side li.sync-hi { background: var(--paper-2); }
   .stats-side li.sync-hi span:not(.yr):not(.ct) { color: var(--accent); }
-  .stats-side li .yr { font: 9.5px var(--av-font-mono); color: var(--accent-2); letter-spacing: 0.04em; }
-  .stats-side li .ct { font: 11px var(--av-font-mono); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .stats-side li .yr { font: 11px var(--av-font-mono); color: var(--accent-2); letter-spacing: 0.04em; }
+  .stats-side li .ct { font: 13px var(--av-font-mono); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 
   /* (Histogram strip removed - charts moved into the stats-grid LEFT
      column as full-bleed chart cards. See .stats-charts above.) */

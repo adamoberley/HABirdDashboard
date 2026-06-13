@@ -22,9 +22,10 @@
 ### Changed
 - The collage shows a **blank panel** when no birds are in the window,
   instead of a "No birds heard outside" message.
-- **Stats view** now fills the screen and aligns to the top (was capped
-  at 1280px and floated in the middle), with a wider species-name column
-  and taller heatmap so fewer names truncate and more rows show at once.
+- **Stats view** zoomed larger and easier to read: bigger heatmap cells,
+  numbers, and species names, a wider species-name column (fewer names
+  truncate), and a tighter, much narrower right-hand panel (counts sit
+  right beside their labels). Stays centred in the view.
 
 ### Fixed
 - `build_masks.py` silently skipped rewriting `masks.js` (its patch regex
