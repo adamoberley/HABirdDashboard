@@ -223,10 +223,11 @@ weather: true                # conditions + sunrise/sunset from HA
 weather_entity: ""           # empty = first weather.* entity found
 corner: bottom-right         # where the clock/weather block lives
 hide_cursor: false           # hide the pointer after 8s idle (wall displays)
-theme: auto                  # auto = follow HA light/dark; or light / dark
 image_base: ""               # empty = artwork from CDN (see below)
-height: ""                   # px; empty = fill the space (560px minimum)
 ```
+
+The card follows Home Assistant's light/dark theme automatically, and
+its height tracks HA's card sizing - neither is a configurable option.
 
 **Weather** reads your Home Assistant weather integration directly through
 the card's own connection - no access token, in your HA units, with

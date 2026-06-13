@@ -1148,19 +1148,23 @@
   }
 
   // ---- Theme (light / charcoal dark) ----
-  // A per-device preference (localStorage), applied as data-theme on
-  // <html>. An inline script in index.html sets it before first paint to
-  // avoid a flash; this keeps it in sync and powers the Settings switcher.
+  // No in-app toggle: the Home Assistant card follows HA's light/dark mode
+  // (the card wrapper sets data-theme on the host), and the standalone
+  // page follows the OS / browser color scheme.
   function applyTheme(name) {
-    var t = name === 'dark' ? 'dark' : 'light';
-    if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    if (name === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
     else document.documentElement.removeAttribute('data-theme');
-    writeLS('bird:theme', t);
   }
   function currentTheme() {
     return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
   }
-  applyTheme(readLS('bird:theme', 'light'));
+  (function followOsTheme() {
+    var mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+    applyTheme(mq && mq.matches ? 'dark' : 'light');
+    if (mq && mq.addEventListener) {
+      mq.addEventListener('change', function (e) { applyTheme(e.matches ? 'dark' : 'light'); });
+    }
+  })();
   var winBtns = [].slice.call(winPick.querySelectorAll('button'));
   var currentHours = +readLS('bird:window', '24') || 24;
   // Card builds fix the time window from card config and hide the
@@ -3049,20 +3053,6 @@
       + '  <div class="seg" data-key="' + key + '">' + btns + '</div>'
       + '</div>';
   }
-  // Client-side theme switcher row. Reuses the .seg look but is tagged
-  // data-theme-seg so wireSettingsControls skips it - it applies instantly
-  // and is NOT part of the Pi config save flow.
-  function themeRow() {
-    var cur = currentTheme();
-    var btn = function (v, label) {
-      return '<button type="button" data-theme="' + v + '" aria-current="' + (cur === v ? 'true' : 'false') + '">' + label + '</button>';
-    };
-    return ''
-      + '<div class="menu-row">'
-      + '  <div><span class="label">Theme</span><span class="hint">saved on this device</span></div>'
-      + '  <div class="seg" data-theme-seg>' + btn('light', 'light') + btn('dark', 'dark') + '</div>'
-      + '</div>';
-  }
   function wireSettingsControls(scope) {
     scope = scope || document;
     scope.querySelectorAll('.switch').forEach(function (sw) {
@@ -3823,7 +3813,6 @@
         var preserve = cfg.preserve;
         adminBody.innerHTML =
           '<div class="admin-settings">'
-          + themeRow()
           + settingsToggle('preserve', 'Preserve all recordings', "don't auto-delete", preserve)
           + settingsSlider('CONFIDENCE',  'Confidence threshold', 'min score to log a detection', v.CONFIDENCE,  0.1, 0.95, 0.05, 2)
           + settingsSlider('SENSITIVITY', 'Sensitivity',          'analyzer sensitivity',          v.SENSITIVITY, 0.5, 1.5,  0.05, 2)
@@ -3839,17 +3828,6 @@
           + '</div>';
         wireSettingsControls(adminBody);
         adminBody.querySelectorAll('.seg').forEach(wireToggleAdvance);   // open-space advance
-        // Theme switcher applies + persists immediately (separate from the
-        // Pi config save below).
-        var themeSeg = adminBody.querySelector('[data-theme-seg]');
-        if (themeSeg) themeSeg.addEventListener('click', function (ev) {
-          var b = ev.target.closest('button[data-theme]');
-          if (!b) return;
-          applyTheme(b.getAttribute('data-theme'));
-          [].forEach.call(themeSeg.querySelectorAll('button'), function (x) {
-            x.setAttribute('aria-current', x === b ? 'true' : 'false');
-          });
-        });
         var saveBtn = document.getElementById('saveBtn');
         if (saveBtn) saveBtn.addEventListener('click', saveSettings);
       })

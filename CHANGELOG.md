@@ -20,6 +20,12 @@
   species.
 
 ### Changed
+- **Dark mode is now neutral** — removed the blue tint from the page,
+  the view switcher, and the stats heatmap (charcoal greys, no saturation).
+- The card **always follows Home Assistant's light/dark theme** — the
+  manual theme toggle is gone.
+- Dropped the **fixed-height** option; the card tracks HA's own card
+  sizing. Background and font moved out to the top of the card editor.
 - The collage shows a **blank panel** when no birds are in the window,
   instead of a "No birds heard outside" message.
 - **Stats view** zoomed larger and easier to read: bigger heatmap cells,

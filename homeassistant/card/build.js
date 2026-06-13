@@ -223,23 +223,15 @@ var HABIRD_EDITOR_SCHEMA = [
     ] } } },
   ] },
   { name: 'title', selector: { text: {} } },
-  { name: 'appearance', type: 'expandable', flatten: true, title: 'Appearance', schema: [
-    { name: '', type: 'grid', schema: [
-      { name: 'background', selector: { select: { mode: 'dropdown', options: [
-        { value: 'transparent', label: 'Transparent' },
-        { value: 'paper', label: 'Paper' },
-      ] } } },
-      { name: 'font', selector: { select: { mode: 'dropdown', options: [
-        { value: 'system', label: 'Home Assistant' },
-        { value: 'serif', label: 'Editorial serif' },
-      ] } } },
-      { name: 'theme', selector: { select: { mode: 'dropdown', options: [
-        { value: 'auto', label: 'Follow Home Assistant' },
-        { value: 'light', label: 'Light' },
-        { value: 'dark', label: 'Dark' },
-      ] } } },
-      { name: 'height', selector: { number: { min: 300, max: 2000, step: 10, mode: 'box', unit_of_measurement: 'px' } } },
-    ] },
+  { name: '', type: 'grid', schema: [
+    { name: 'background', selector: { select: { mode: 'dropdown', options: [
+      { value: 'transparent', label: 'Transparent' },
+      { value: 'paper', label: 'Paper' },
+    ] } } },
+    { name: 'font', selector: { select: { mode: 'dropdown', options: [
+      { value: 'system', label: 'Home Assistant' },
+      { value: 'serif', label: 'Editorial serif' },
+    ] } } },
   ] },
   { name: 'clockweather', type: 'expandable', flatten: true, title: 'Clock & weather', schema: [
     { name: '', type: 'grid', schema: [
@@ -295,8 +287,6 @@ var HABIRD_LABELS = {
   selector_position: 'Switcher position',
   background: 'Background',
   font: 'Font',
-  theme: 'Theme',
-  height: 'Height',
   clock: 'Clock',
   weather: 'Weather',
   weather_entity: 'Weather entity',
@@ -317,7 +307,6 @@ var HABIRD_HELPERS = {
   title: 'Optional heading. Birds pack around it, clock-style.',
   view_selector: 'Turn off to lock this card to one view.',
   selector_position: 'Top pairs poorly with a title - both sit centred up top.',
-  height: 'Empty fills the available space (560 px minimum).',
   weather_entity: 'Empty auto-detects your first weather entity.',
   hide_cursor: 'For wall displays: pointer disappears after 8 s idle.',
   sit_confidence: 'Birds perch at or above this detection confidence and fly below it. 0 = always perched, 1.01 = always flying.',
@@ -346,10 +335,8 @@ class HABirdCard extends HTMLElement {
       throw new Error('sit_confidence must be a number from 0 to 1.01');
     }
     this._config = config;
-    if (this._config.height) this.style.height = Number(this._config.height) + 'px';
-    else this.style.removeProperty('height');
-    if (this._config.theme === 'dark') this.setAttribute('data-theme', 'dark');
-    else if (this._config.theme === 'light') this.removeAttribute('data-theme');
+    // Height follows HA's own card sizing (getGridOptions); theme always
+    // follows Home Assistant (see _applyHassTheme) - neither is configurable.
     // Config changes after boot (dashboard editor live preview) need a
     // fresh app instance - cheapest correct thing is a full re-boot.
     if (this._booted) {
@@ -393,12 +380,11 @@ class HABirdCard extends HTMLElement {
     }
     this._lastStamp = stamp;
   }
-  // Follow HA's light/dark unless the card pins a theme. Re-applied after
-  // boot too: the app applies its own saved theme while initialising,
-  // which would otherwise clobber the hass-driven choice.
+  // Always follow Home Assistant's light/dark mode. Re-applied after boot
+  // too: the app applies its own saved theme while initialising, which
+  // would otherwise clobber the hass-driven choice.
   _applyHassTheme() {
-    var mode = (this._config && this._config.theme) || 'auto';
-    if (mode === 'auto' && this._hass && this._hass.themes) {
+    if (this._hass && this._hass.themes) {
       if (this._hass.themes.darkMode) this.setAttribute('data-theme', 'dark');
       else this.removeAttribute('data-theme');
     }
@@ -498,7 +484,7 @@ class HABirdCardEditor extends HTMLElement {
       this.appendChild(this._form);
     }
     this._form.schema = HABIRD_EDITOR_SCHEMA;
-    this._form.data = Object.assign({ theme: 'auto', corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', collage_scale: 1.5, audio_boost: '24' }, this._config);
+    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', collage_scale: 1.5, audio_boost: '24' }, this._config);
     this._form.hass = this._hass;
   }
 }

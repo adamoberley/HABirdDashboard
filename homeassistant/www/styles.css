@@ -29,16 +29,16 @@
      dark surface (faint light edges, deeper drop shadows). ---- */
   :root[data-theme="dark"] {
     color-scheme: dark;
-    --paper:    #17181c;   /* charcoal page bg */
-    --paper-2:  #212329;   /* recessed track */
-    --paper-3:  #2c2f36;   /* placeholder fill */
+    --paper:    #1a1a1a;   /* neutral charcoal page bg (no blue tint) */
+    --paper-2:  #242424;   /* recessed track */
+    --paper-3:  #303030;   /* placeholder fill */
     --ink:      #ece8e1;   /* warm off-white text / marks */
     --ink-2:    #b7afa2;   /* secondary text */
     --ink-soft: #837c70;   /* muted text */
     --accent:   #d8d2c6;   /* light warm - pills read light-on-dark */
     --accent-2: #ece8e1;
     --hairline: rgba(236,232,225,0.20);  /* faint light divider on charcoal */
-    --pill:     #3a3e48;                 /* raised, clearly lighter than the track */
+    --pill:     #404040;                 /* raised, clearly lighter than the track (neutral) */
     --edge:    inset 0 0 0 1px rgba(255,255,255,0.05), 0 0 0 1px rgba(0,0,0,0.4);
     --edge-lg: inset 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 1px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.5);
     --recess:  inset 0 1px 2px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.04);

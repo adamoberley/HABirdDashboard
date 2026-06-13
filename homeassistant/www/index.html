@@ -7,9 +7,9 @@
 <meta name="description" content="A live bird collage from your window.">
 <link rel="icon" type="image/png" href="./favicon.png">
 <link rel="apple-touch-icon" href="./favicon.png">
-<!-- Apply the saved theme before first paint so dark mode doesn't flash
-     light on load. The full switcher lives in Settings (writes bird:theme). -->
-<script>try{if(localStorage.getItem('bird:theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
+<!-- Follow the OS color scheme before first paint so dark mode doesn't
+     flash light on load. (The HA card follows Home Assistant's theme instead.) -->
+<script>try{if(matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
 <link rel="stylesheet" href="./styles.css">
 <!-- Home Assistant build: BirdNET-Pi's admin surfaces (menu drawer,
      lock screen, admin overlay) have no backend here - BirdNET-Go owns
