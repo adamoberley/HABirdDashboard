@@ -23,12 +23,13 @@
 - **Stats & Atlas** drop the page title, and the stats heatmap now uses
   nearly the full height before it scrolls - many more species rows show
   at once.
-- **Card editor reorganized**: a single **Dashboard** section (view, time
-  window, view switcher + position, collage scale, clock/weather); **Birds
-  & audio** reordered (tap action → Xeno-Canto key → sit confidence →
-  volume boost → artwork) with the **volume boost now a slider**;
-  **Connection & data** laid out data source → BirdNET-Go URL →
-  history/refresh; and clearer "blank = default" hints on optional fields.
+- **Card editor reorganized** into three sections. **Dashboard** (open by
+  default) holds title, background, font, then a view/time-window +
+  switcher 2×2, a clock/weather 2×2, idle-cursor, and collage scale
+  (which now defaults to **1**). **Birds & audio** is ordered tap action →
+  Xeno-Canto key → sit confidence → volume boost (now a **slider**) →
+  artwork. **Connection & data** is data source → BirdNET-Go URL →
+  history/refresh. Optional fields carry "blank = default" hints.
 - **Stats side panel**: detection counts sit in a single aligned column
   at the panel's right edge (lined up with the group subtitles), with the
   names kept tight on the left - no longer stretched far from the names.

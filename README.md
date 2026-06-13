@@ -213,8 +213,7 @@ birdnet_url: ""              # empty = this host, port 8080 (the stock app)
 data_source: auto            # auto | api | ha (see Data sources below)
 history_days: 10             # ha-source span; bounded by recorder retention
 sit_confidence: 0.90         # perched at/above, flying below
-collage_scale: 1.5           # how much of the card the flock claims (0.5-3)
-                             #   (0 = always perched, 1.01 = always flying)
+collage_scale: 1             # how much of the card the flock claims (0.5-3)
 tap_action: both             # both (open details + play call, default) |
                              #   info (details only) | call (reference call only)
 xeno_canto_key: ""           # free key from xeno-canto.org/account; enables the

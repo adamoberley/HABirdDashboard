@@ -200,24 +200,19 @@ var HABIRD_CDN_ASSETS = 'https://cdn.jsdelivr.net/gh/adamoberley/HABirdDashboard
 var HABIRD_VERSION = '1.1.0';
 
 var HABIRD_EDITOR_SCHEMA = [
-  { name: 'title', selector: { text: {} } },
-  { name: '', type: 'grid', schema: [
-    { name: 'background', selector: { select: { mode: 'dropdown', options: [
-      { value: 'transparent', label: 'Transparent' },
-      { value: 'paper', label: 'Paper' },
-    ] } } },
-    { name: 'font', selector: { select: { mode: 'dropdown', options: [
-      { value: 'system', label: 'Home Assistant' },
-      { value: 'serif', label: 'Editorial serif' },
-    ] } } },
-  ] },
-  { name: 'dashboard', type: 'expandable', flatten: true, title: 'Dashboard', schema: [
+  { name: 'dashboard', type: 'expandable', flatten: true, title: 'Dashboard', expanded: true, schema: [
+    { name: 'title', selector: { text: {} } },
     { name: '', type: 'grid', schema: [
-      { name: 'view', selector: { select: { mode: 'dropdown', options: [
-        { value: 'collage', label: 'Collage' },
-        { value: 'stats', label: 'Stats' },
-        { value: 'atlas', label: 'Atlas' },
+      { name: 'background', selector: { select: { mode: 'dropdown', options: [
+        { value: 'transparent', label: 'Transparent' },
+        { value: 'paper', label: 'Paper' },
       ] } } },
+      { name: 'font', selector: { select: { mode: 'dropdown', options: [
+        { value: 'system', label: 'Home Assistant' },
+        { value: 'serif', label: 'Editorial serif' },
+      ] } } },
+    ] },
+    { name: '', type: 'grid', schema: [
       { name: 'window', selector: { select: { mode: 'dropdown', options: [
         { value: '1', label: 'Last hour' },
         { value: '12', label: 'Last 12 hours' },
@@ -228,29 +223,30 @@ var HABIRD_EDITOR_SCHEMA = [
         { value: '720', label: 'Last 30 days' },
         { value: 'all', label: 'All time' },
       ] } } },
-    ] },
-    { name: '', type: 'grid', schema: [
       { name: 'view_selector', selector: { boolean: {} } },
+      { name: 'view', selector: { select: { mode: 'dropdown', options: [
+        { value: 'collage', label: 'Collage' },
+        { value: 'stats', label: 'Stats' },
+        { value: 'atlas', label: 'Atlas' },
+      ] } } },
       { name: 'selector_position', selector: { select: { mode: 'dropdown', options: [
         { value: 'bottom', label: 'Bottom' },
         { value: 'top', label: 'Top' },
       ] } } },
     ] },
-    { name: 'collage_scale', selector: { number: { min: 0.5, max: 3, step: 0.1, mode: 'slider' } } },
     { name: '', type: 'grid', schema: [
       { name: 'clock', selector: { boolean: {} } },
-      { name: 'weather', selector: { boolean: {} } },
-    ] },
-    { name: 'weather_entity', selector: { entity: { domain: 'weather' } } },
-    { name: '', type: 'grid', schema: [
       { name: 'corner', selector: { select: { mode: 'dropdown', options: [
         { value: 'bottom-right', label: 'Bottom right' },
         { value: 'bottom-left', label: 'Bottom left' },
         { value: 'top-right', label: 'Top right' },
         { value: 'top-left', label: 'Top left' },
       ] } } },
-      { name: 'hide_cursor', selector: { boolean: {} } },
+      { name: 'weather', selector: { boolean: {} } },
+      { name: 'weather_entity', selector: { entity: { domain: 'weather' } } },
     ] },
+    { name: 'hide_cursor', selector: { boolean: {} } },
+    { name: 'collage_scale', selector: { number: { min: 0.5, max: 3, step: 0.1, mode: 'slider' } } },
   ] },
   { name: 'birds', type: 'expandable', flatten: true, title: 'Birds & audio', schema: [
     { name: 'tap_action', selector: { select: { mode: 'dropdown', options: [
@@ -412,7 +408,7 @@ class HABirdCard extends HTMLElement {
       pollSeconds: c.poll_seconds || 60,
       __budgetScale: (typeof c.collage_scale === 'number' && c.collage_scale > 0)
         ? c.collage_scale
-        : 1.5,   // birds command a card harder than a full page
+        : 1,   // default fill
       audioBoostDb: (c.audio_boost == null ? 24 : +c.audio_boost),
       tapAction: c.tap_action || 'both',          // both | info | call
       xenoCantoKey: c.xeno_canto_key || '',        // enables reference calls
@@ -481,7 +477,7 @@ class HABirdCardEditor extends HTMLElement {
       this.appendChild(this._form);
     }
     this._form.schema = HABIRD_EDITOR_SCHEMA;
-    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', collage_scale: 1.5, audio_boost: 24 }, this._config);
+    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', collage_scale: 1, audio_boost: 24 }, this._config);
     this._form.hass = this._hass;
   }
 }
