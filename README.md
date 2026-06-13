@@ -263,6 +263,13 @@ regions will have gaps. (Plain photos are deliberately not used as a
 stand-in - they'd break the kachō-e style and have no silhouette masks
 for the collage packing.) Two remedies, neither needs code changes:
 
+> 🤖 **Easiest: let an agent do it.** Open this repo in an AI coding agent
+> (Claude Code, Cursor, …) and tell it: *"Follow AGENTS.md to generate bird
+> illustrations for my birds."* [`AGENTS.md`](AGENTS.md) walks it through
+> downloading your BirdNET-Go species list, the whole render → cutout →
+> masks → card build, and getting them into your dashboard. The manual
+> steps are below.
+
 1. **Generate illustrations for exactly YOUR birds.** The art pipeline
    (the same one that made the bundled library - see
    [`avian/scripts/README.md`](avian/scripts/README.md) for prompts,

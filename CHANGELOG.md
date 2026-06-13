@@ -18,6 +18,10 @@
   warblers, vireos, flycatchers, shorebirds, rails, terns and more —
   generated through the `avian/scripts` pipeline, lifting the bundled
   library to 335 species.
+- **`AGENTS.md`** — a step-by-step guide an AI coding agent can follow to
+  generate kachō-e illustrations for the species at *your* location
+  (download the BirdNET-Go list → render → cut out → masks → card), so
+  anyone can fill their own regional gaps repeatably.
 
 ### Changed
 - **Stats & Atlas** drop the page title, and the stats heatmap now uses
