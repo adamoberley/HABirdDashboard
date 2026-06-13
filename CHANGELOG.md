@@ -1,5 +1,28 @@
 # Changelog
 
+## v1.1.0 — 2026-06-13
+
+### Added
+- **Reference calls** (optional): with a free [Xeno-Canto](https://xeno-canto.org/account)
+  API key (`xeno_canto_key`), each bird's detail card gains a **reference
+  call** button — a clean example call/song for the species, to A/B
+  against the recordings your own station captured. Credited to the
+  recordist per Xeno-Canto's license; falls through to another recording
+  if one won't play, and retries on rate-limit.
+- **Configurable tap** (`tap_action`): tapping a bird can open its
+  details (`info`, default — unchanged), play its reference call
+  (`call`), or both. Reference-call modes fall back to the details when
+  no key is set.
+- **+84 region species** (168 kachō-e illustrations) — Eastern-US
+  warblers, vireos, flycatchers, shorebirds and more — generated through
+  the `avian/scripts` pipeline, lifting the bundled library to 333
+  species.
+
+### Fixed
+- `build_masks.py` silently skipped rewriting `masks.js` (its patch regex
+  assumed a two-space indent the file no longer uses); it now tolerates
+  and preserves any indentation.
+
 ## v1.0.1 — 2026-06-11
 
 - Reliability of the "not it?" false-positive flag on every access path

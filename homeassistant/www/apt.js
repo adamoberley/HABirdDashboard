@@ -3275,19 +3275,23 @@
   // won't play in the browser. onCredit(info) fires for the candidate
   // being attempted; onAllFail() when none of them play. Plain <audio>
   // (no boost / no crossOrigin): XC media plays fine direct.
-  function _playRefCandidates(cands, idx, onCredit, onAllFail) {
+  function _playRefCandidates(cands, idx, onPlaying, onAllFail) {
     idx = idx || 0;
     if (!cands || idx >= cands.length) { if (onAllFail) onAllFail(); return; }
     var info = cands[idx];
     var audio = new Audio(info.url);
     refAudio = audio;
     audio.addEventListener('ended', stopRefCall);
+    // Credit the recording that ACTUALLY plays - not each one we skip
+    // past - so the attribution never flickers through dead candidates.
+    audio.addEventListener('playing', function () {
+      if (refAudio === audio && onPlaying) onPlaying(info);
+    });
     audio.addEventListener('error', function () {
       if (refAudio !== audio) return;   // superseded by a newer play
       try { console.warn('[bird-card] ref call would not play, trying next:', info.url); } catch (e) {}
-      _playRefCandidates(cands, idx + 1, onCredit, onAllFail);
+      _playRefCandidates(cands, idx + 1, onPlaying, onAllFail);
     });
-    if (onCredit) onCredit(info);
     audio.play().catch(function () { /* autoplay policy: needs a gesture */ });
   }
   // Map a resolve error to a user-facing line - distinguishes "none
@@ -3325,9 +3329,10 @@
     setRefCredit('');
     resolveReferenceCall(sci).then(function (cands) {
       if (refBtn !== btn) return;  // user moved on
-      btn.classList.remove('loading');
+      // Keep the loading state through any fall-through; clear it only
+      // when a recording actually starts playing.
       _playRefCandidates(cands, 0,
-        function (info) { if (refBtn === btn) setRefCredit(info, true); },
+        function (info) { if (refBtn === btn) { btn.classList.remove('loading'); setRefCredit(info, true); } },
         function () { if (refBtn === btn) { stopRefCall(); setRefCredit('couldn’t play this reference call'); } });
     }).catch(function (err) {
       if (refBtn !== btn) return;
@@ -3362,9 +3367,13 @@
     if (!infoOrMsg) { el.hidden = true; el.innerHTML = ''; return; }
     if (!isInfo) { el.hidden = false; el.textContent = infoOrMsg; return; }
     var info = infoOrMsg;
+    // Only ever link http(s) URLs - never let an unexpected scheme
+    // (e.g. javascript:) from the API become a clickable href.
+    var httpUrl = function (u) { return /^https?:\/\//i.test(u || '') ? u : ''; };
+    var lic = httpUrl(info.lic), page = httpUrl(info.page);
     var html = esc('Reference call: Xeno-Canto' + (info.rec ? ' · rec. ' + info.rec : ''));
-    if (info.lic) html += ' · <a href="' + esc(info.lic) + '" target="_blank" rel="noopener">license</a>';
-    if (info.page) html += ' · <a href="' + esc(info.page) + '" target="_blank" rel="noopener">XC' + esc(info.id) + '</a>';
+    if (lic) html += ' · <a href="' + esc(lic) + '" target="_blank" rel="noopener">license</a>';
+    if (page) html += ' · <a href="' + esc(page) + '" target="_blank" rel="noopener">XC' + esc(info.id) + '</a>';
     el.hidden = false;
     el.innerHTML = html;
   }

@@ -1405,7 +1405,7 @@
     letter-spacing: 0.06em;
   }
   /* Reference-call (Xeno-Canto) button + its attribution line. */
-  .modal-recordings .rec-head { gap: 8px; }
+  .modal-recordings .rec-head { gap: 8px; align-items: center; }
   .modal-recordings .rec-count { margin-left: auto; }
   .ref-call-btn {
     display: inline-flex; align-items: center; gap: 5px;
