@@ -1781,7 +1781,7 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
         // rotated bird's wings sweep into a neighbour the collision never saw.
         headingDeg: (typeof headDeg === 'number') ? headDeg : null,
         flow: (flowOn && pose === 2 && typeof headDeg === 'number')
-          ? { dir: (flow === 'ccw') ? 1 : -1, strength: flowStrength } : null,
+          ? { dir: (flow === 'ccw') ? -1 : 1, strength: flowStrength } : null,
       };
     }).filter(Boolean);
 
@@ -1822,7 +1822,7 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     // packs them closer (bigger, denser), higher gives more breathing room.
     // collageSpacing 0-1 (0.5 = the default gap); ?spacing= overrides on the
     // static page.
-    var spacing = (typeof AV_CFG.collageSpacing === 'number') ? AV_CFG.collageSpacing : 0.5;
+    var spacing = (typeof AV_CFG.collageSpacing === 'number') ? AV_CFG.collageSpacing : 0;
     if (window.AV_CONFIG) {
       var mSp = location.search.match(/[?&]spacing=([\d.]+)/);
       if (mSp) spacing = parseFloat(mSp[1]);
@@ -1968,7 +1968,7 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
       var head = DIRTAB[slugify(s.sci) + (r.pose === 2 ? '-2' : '')];
       if (flowOn && r.pose === 2 && typeof head === 'number') {
         var phi = Math.atan2(r.y + r.fullH / 2 - H / 2, r.x + r.fullW / 2 - W / 2) * 180 / Math.PI;
-        var dir = (flow === 'ccw') ? 1 : -1;
+        var dir = (flow === 'ccw') ? -1 : 1;
         var tau = phi + dir * 90;                          // nose rides the tangent
         var rightish = Math.cos(head * Math.PI / 180) >= 0;
         var flip = (dir === 1) ? !rightish : rightish;     // mirror if belly would face outward
@@ -5127,6 +5127,9 @@ var HABIRD_EDITOR_SCHEMA = [
     { name: 'collage_fill', selector: { number: { min: 0.1, max: 1, step: 0.05, mode: 'slider' } } },
     { name: 'size_contrast', selector: { number: { min: 0.2, max: 0.8, step: 0.05, mode: 'slider' } } },
     { name: 'paper_texture', selector: { number: { min: 0, max: 0.2, step: 0.01, mode: 'slider' } } },
+    { name: 'collage_spacing', selector: { number: { min: 0, max: 1, step: 0.05, mode: 'slider' } } },
+  ] },
+  { name: 'ring', type: 'expandable', flatten: true, title: 'Ring collage', schema: [
     { name: 'collage_shape', selector: { select: { mode: 'dropdown', options: [
       { value: 'cluster', label: 'Cluster (filled)' },
       { value: 'ring', label: 'Ring (open centre)' },
@@ -5138,7 +5141,6 @@ var HABIRD_EDITOR_SCHEMA = [
       { value: 'off', label: 'Off (natural)' },
     ] } } },
     { name: 'collage_flow_strength', selector: { number: { min: 0, max: 1, step: 0.05, mode: 'slider' } } },
-    { name: 'collage_spacing', selector: { number: { min: 0, max: 1, step: 0.05, mode: 'slider' } } },
   ] },
   { name: 'birds', type: 'expandable', flatten: true, title: 'Birds & audio', schema: [
     { name: 'tap_action', selector: { select: { mode: 'dropdown', options: [
@@ -5337,9 +5339,9 @@ class HABirdCard extends HTMLElement {
       // 0-1 scales from natural orientation to a full wheel. Ignored unless ring.
       collageFlow: c.collage_flow || 'cw',
       collageFlowStrength: (typeof c.collage_flow_strength === 'number') ? c.collage_flow_strength : 1,
-      // Gap between birds (0-1, default 0.5). They never overlap; this only
-      // tunes breathing room. Applies to every collage shape.
-      collageSpacing: (typeof c.collage_spacing === 'number') ? c.collage_spacing : 0.5,
+      // Gap between birds (0-1, default 0 = tightest). They never overlap; this
+      // only tunes breathing room. Applies to every collage shape.
+      collageSpacing: (typeof c.collage_spacing === 'number') ? c.collage_spacing : 0,
       audioBoostDb: (c.audio_boost == null ? 24 : +c.audio_boost),
       tapAction: c.tap_action || 'both',          // both | info | call
       xenoCantoKey: c.xeno_canto_key || '',        // enables reference calls

@@ -244,7 +244,7 @@ collage_shape: cluster       # cluster (one filled flock) | ring (birds scattere
 collage_hole: 0.5            # ring only: open-centre size 0.1-0.7 (bigger = a wider void)
 collage_flow: cw             # ring only: bank birds along the circle (a wheeling flock) - cw | ccw | off
 collage_flow_strength: 1     # ring flow strength 0-1 (1 = full head-to-tail wheel; lower = gentler bank)
-collage_spacing: 0.5         # gap between birds 0-1 (lower = closer/bigger, higher = airier; never overlap)
+collage_spacing: 0           # gap between birds 0-1 (0 = tightest/default, higher = airier; never overlap)
 tap_action: both             # both (open details + play call, default) |
                              #   info (details only) | call (reference call only)
 xeno_canto_key: ""           # free key from xeno-canto.org/account; enables the
