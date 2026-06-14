@@ -38,6 +38,18 @@ configuration:
       How much bigger your most-heard birds are drawn than the rest (0.2-0.8).
       Lower keeps everyone closer to the same size; higher lets the loudest few
       dominate. 0.5 is a balanced default.
+  collage_shape:
+    name: Collage shape
+    description: >-
+      Cluster (default) packs one filled flock from the centre out. Ring
+      scatters the birds across the whole frame around an open centre - the look
+      from the original Avian Visitors poster. Ring fills best with a busy flock
+      / a longer time window.
+  collage_hole:
+    name: Ring centre size
+    description: >-
+      Ring shape only: how big the open centre is (0.1-0.7 of the shorter side).
+      Bigger = a more prominent void with the flock pushed out toward the edges.
   show_caption:
     name: Caption
     description: >-

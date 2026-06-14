@@ -75,6 +75,8 @@ already look like a painting, so most setups change little. Most-touched:
 | `paper_texture` | Paper grain: `0` off, ~`0.06` subtle washi, higher coarser. |
 | `collage_fill` | How full the flock packs (0.1–1.0). |
 | `size_contrast` | How much bigger the most-heard birds draw (0.2–0.8). |
+| `collage_shape` | `cluster` (one filled flock) or `ring` (birds scatter across the frame around an open centre, like the original poster). |
+| `collage_hole` | Ring only: open-centre size (0.1–0.7 of the shorter side). Bigger = a more prominent void. |
 | `show_caption` | Off (default) = edge-to-edge art, no title. |
 | `window_hours` | Time window: `1`/`12`/`24`/`168`/`1000000` (ALL). |
 | `interval_minutes` | How often the collage refreshes on the TV. |
