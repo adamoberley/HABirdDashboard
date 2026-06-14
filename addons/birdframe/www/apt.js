@@ -1607,6 +1607,22 @@
       if (mHole) holeFrac = parseFloat(mHole[1]);
     }
     var ringMode = shape === 'ring';
+    // Flow: in ring mode, rotate in-flight birds so they fly along the ring's
+    // tangent (a wheeling flock). 'cw'/'ccw' pick the direction; flowStrength
+    // 0..1 scales from upright to fully tangential. Needs a per-illustration
+    // heading DIRS[slug] (degrees, 0=right, 90=down). Static page can override
+    // per-URL: ?flow=ccw&strength=1.
+    var flow = AV_CFG.collageFlow || 'off';
+    var flowStrength = (typeof AV_CFG.collageFlowStrength === 'number') ? AV_CFG.collageFlowStrength : 1;
+    if (window.AV_CONFIG) {
+      var mFlow = location.search.match(/[?&]flow=(cw|ccw|off)/);
+      if (mFlow) flow = mFlow[1];
+      var mFs = location.search.match(/[?&]strength=([\d.]+)/);
+      if (mFs) flowStrength = parseFloat(mFs[1]);
+    }
+    flowStrength = Math.max(0, Math.min(1, flowStrength));
+    var flowOn = ringMode && (flow === 'cw' || flow === 'ccw');
+    var DIRTAB = (window.__DIRS) || (typeof DIRS !== 'undefined' ? DIRS : {});
     if (ringMode) {
       holeFrac = Math.max(0.1, Math.min(0.7, holeFrac));
       // A roundish void, sized off the SHORTER axis (so it stays an open
@@ -1665,6 +1681,9 @@
       // (0) confidence must not read as "uncertain bird" - perch it.
       var __conf = +s.best_conf || 0;
       var pose = (DIMS[base + '-2'] && __conf > 0 && __conf < SIT_CONFIDENCE) ? 2 : 1;
+      // Flow wants a coherent wheel of fliers: force the flight pose for any
+      // species that has one (all bundled species do).
+      if (flowOn && DIMS[base + '-2']) pose = 2;
       var slug = pose === 2 ? base + '-2' : base;
       var mask = loadMask(slug);
       if (!mask && pose === 2) { pose = 1; slug = base; mask = loadMask(slug); }
@@ -1837,6 +1856,28 @@
         imgEl.style.visibility = '';
         imgEl.onerror = function () { window.__birdImgErr(imgEl); };
         imgEl.setAttribute('src', src);
+      }
+      // Ring flow: rotate the IMG only (never the tile - the tile box stays
+      // axis-aligned, so silhouette packing, alpha-mask hit-testing and the
+      // tooltip are all untouched). Bank each bird INTO the ring: nose along
+      // the tangent, BELLY toward the centre (the inside of the turn). The art
+      // is drawn dorsal-up, so the belly sits 90deg clockwise of the nose for a
+      // right-facing bird and ccw for a left-facing one; we mirror (flip) the
+      // birds whose belly would otherwise face outward. Far-side birds roll
+      // fully over - that's the wheel. Applied every render pass.
+      var head = DIRTAB[slugify(s.sci) + (r.pose === 2 ? '-2' : '')];
+      if (flowOn && r.pose === 2 && typeof head === 'number') {
+        var phi = Math.atan2(r.y + r.fullH / 2 - H / 2, r.x + r.fullW / 2 - W / 2) * 180 / Math.PI;
+        var dir = (flow === 'ccw') ? 1 : -1;
+        var tau = phi + dir * 90;                          // nose rides the tangent
+        var rightish = Math.cos(head * Math.PI / 180) >= 0;
+        var flip = (dir === 1) ? !rightish : rightish;     // mirror if belly would face outward
+        var rot = flip ? (tau - 180 + head) : (tau - head);
+        rot = ((((rot % 360) + 540) % 360) - 180) * flowStrength;
+        imgEl.style.transformOrigin = '50% 50%';
+        imgEl.style.transform = 'rotate(' + rot.toFixed(1) + 'deg)' + (flip ? ' scaleX(-1)' : '');
+      } else if (imgEl.style.transform) {
+        imgEl.style.transform = '';
       }
       if (fresh) {
         collage.appendChild(btn);

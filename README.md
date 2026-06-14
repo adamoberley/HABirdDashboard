@@ -242,6 +242,8 @@ collage_fill: 0.5            # screen fill 0.1-1.0 (0.5 = half, 1.0 = full; busi
 size_contrast: 0.5           # how much bigger your most-heard birds are (0.2-0.8; lower = more even)
 collage_shape: cluster       # cluster (one filled flock) | ring (birds scattered around an open centre)
 collage_hole: 0.5            # ring only: open-centre size 0.1-0.7 (bigger = a wider void)
+collage_flow: cw             # ring only: bank birds along the circle (a wheeling flock) - cw | ccw | off
+collage_flow_strength: 1     # ring flow strength 0-1 (1 = full head-to-tail wheel; lower = gentler bank)
 tap_action: both             # both (open details + play call, default) |
                              #   info (details only) | call (reference call only)
 xeno_canto_key: ""           # free key from xeno-canto.org/account; enables the

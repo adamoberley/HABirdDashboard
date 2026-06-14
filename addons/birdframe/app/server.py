@@ -176,6 +176,10 @@ def _config_js(opts: Options, birdnet_url: str) -> bytes:
         # around an open centre); collageHole sizes the ring's void.
         "collageShape": opts.collage_shape,
         "collageHole": opts.collage_hole,
+        # Ring flow: bank in-flight birds along the tangent so the flock wheels
+        # around the centre; strength scales natural->full wheel.
+        "collageFlow": opts.collage_flow,
+        "collageFlowStrength": opts.collage_flow_strength,
         "sitConfidence": opts.sit_confidence,
         "audioBoostDb": 0,
         "tapAction": "info",

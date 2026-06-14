@@ -77,6 +77,8 @@ already look like a painting, so most setups change little. Most-touched:
 | `size_contrast` | How much bigger the most-heard birds draw (0.2–0.8). |
 | `collage_shape` | `cluster` (one filled flock) or `ring` (birds scatter across the frame around an open centre, like the original poster). |
 | `collage_hole` | Ring only: open-centre size (0.1–0.7 of the shorter side). Bigger = a more prominent void. |
+| `collage_flow` | Ring only: bank birds along the circle so the flock wheels around the centre — `cw` / `ccw` / `off`. |
+| `collage_flow_strength` | Ring flow strength (0–1). 1 = full wheel; lower = gentler bank. |
 | `show_caption` | Off (default) = edge-to-edge art, no title. |
 | `window_hours` | Time window: `1`/`12`/`24`/`168`/`1000000` (ALL). |
 | `interval_minutes` | How often the collage refreshes on the TV. |

@@ -37,6 +37,8 @@ class Options:
     size_contrast: float
     collage_shape: str
     collage_hole: float
+    collage_flow: str
+    collage_flow_strength: float
     sit_confidence: float
     wall_clock: bool
     wall_weather: bool
@@ -97,6 +99,10 @@ def load() -> Options:
         # the ring's void; ignored for cluster.
         collage_shape=str(raw.get("collage_shape", "cluster")).strip(),
         collage_hole=float(raw.get("collage_hole", 0.5)),
+        # Ring flow: bank in-flight birds along the tangent ("cw"/"ccw"/"off");
+        # strength 0-1 scales from natural orientation to a full wheel.
+        collage_flow=str(raw.get("collage_flow", "cw")).strip(),
+        collage_flow_strength=float(raw.get("collage_flow_strength", 1.0)),
         sit_confidence=float(raw.get("sit_confidence", 0.90)),
         wall_clock=bool(raw.get("wall_clock", True)),
         wall_weather=bool(raw.get("wall_weather", True)),

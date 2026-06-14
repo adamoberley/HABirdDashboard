@@ -258,6 +258,12 @@ var HABIRD_EDITOR_SCHEMA = [
       { value: 'ring', label: 'Ring (open centre)' },
     ] } } },
     { name: 'collage_hole', selector: { number: { min: 0.1, max: 0.7, step: 0.05, mode: 'slider' } } },
+    { name: 'collage_flow', selector: { select: { mode: 'dropdown', options: [
+      { value: 'cw', label: 'Clockwise' },
+      { value: 'ccw', label: 'Counter-clockwise' },
+      { value: 'off', label: 'Off (natural)' },
+    ] } } },
+    { name: 'collage_flow_strength', selector: { number: { min: 0, max: 1, step: 0.05, mode: 'slider' } } },
   ] },
   { name: 'birds', type: 'expandable', flatten: true, title: 'Birds & audio', schema: [
     { name: 'tap_action', selector: { select: { mode: 'dropdown', options: [
@@ -307,6 +313,8 @@ var HABIRD_LABELS = {
   paper_texture: 'Paper texture',
   collage_shape: 'Collage shape',
   collage_hole: 'Ring centre size',
+  collage_flow: 'Ring flow (spin)',
+  collage_flow_strength: 'Flow strength',
   image_base: 'Artwork base URL',
   birdnet_url: 'BirdNET-Go URL',
   data_source: 'Data source',
@@ -330,6 +338,8 @@ var HABIRD_HELPERS = {
   paper_texture: 'With Background: Paper, a faint paper grain over the background (0 = off, ~0.06 = subtle), so it reads like a print on washi rather than flat colour.',
   collage_shape: 'Cluster packs one filled flock from the centre out; ring opens the middle into a halo of birds in flight.',
   collage_hole: 'Ring shape only: how big the open centre is, as a fraction of the card. Bigger = a wider gap and a thinner band of birds.',
+  collage_flow: 'Ring shape only: bank each in-flight bird along the circle so the flock wheels around the centre, like a murmuration. Off keeps natural orientations.',
+  collage_flow_strength: "How strictly birds align to the circle. 1 = a full head-to-tail wheel; lower keeps more of the natural pose.",
   image_base: 'Default (blank): artwork from the CDN. Use /local/habird-art/ for an offline copy.',
   birdnet_url: 'Default (blank): this host on port 8080, or HA ingress when remote.',
   data_source: 'Automatic uses the API and falls back to the MQTT sensors.',
@@ -446,6 +456,10 @@ class HABirdCard extends HTMLElement {
       // centre). collage_hole sizes the ring's gap (ignored for cluster).
       collageShape: c.collage_shape || 'cluster',
       collageHole: (typeof c.collage_hole === 'number') ? c.collage_hole : 0.5,
+      // Ring flow: bank in-flight birds along the tangent (cw default). Strength
+      // 0-1 scales from natural orientation to a full wheel. Ignored unless ring.
+      collageFlow: c.collage_flow || 'cw',
+      collageFlowStrength: (typeof c.collage_flow_strength === 'number') ? c.collage_flow_strength : 1,
       audioBoostDb: (c.audio_boost == null ? 24 : +c.audio_boost),
       tapAction: c.tap_action || 'both',          // both | info | call
       xenoCantoKey: c.xeno_canto_key || '',        // enables reference calls
