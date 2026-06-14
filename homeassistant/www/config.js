@@ -24,8 +24,10 @@ window.AV_CONFIG = {
   dataSource: 'auto',
   historyDays: 10,
 
-  // Recording playback boost in dB (0 = off). Routed through a
-  // compressor so louder doesn't mean clipped.
+  // Recording playback boost in dB, 0-48 (0 = off). Applied in the
+  // browser at playback and routed through a compressor that curbs
+  // clipping. Faint clips (weak mics) get much louder; at the top of
+  // the range the loudest clips can still distort a little.
   audioBoostDb: 24,
 
   // What a TAP on a bird does:
