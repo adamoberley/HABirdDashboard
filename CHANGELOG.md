@@ -13,11 +13,10 @@
   confident heading stay upright. Wired into the card editor, `config.js`
   (+ `?flow=` / `?strength=` URL overrides), and the Bird Frame app. Ring mode
   now forces the flight pose so the wheel reads coherently.
-- **Denser ring at high counts.** A busy ring (>60 species) now nests the birds
-  tightly around the open centre instead of scattering them evenly, with a
-  bigger area budget and a smaller gap as the flock grows - so a large all-time
-  flock packs close and each bird stays sizable rather than shrinking to specks.
-  Sparse rings keep the airy, frame-filling scatter.
+- **Flow never overlaps.** The packer reserves each bird's *rotated* silhouette
+  (not its upright one), so banked birds keep a clean gap and never touch - at
+  any density. Busy plates also pack a little closer (bigger area budget +
+  smaller gap as the flock grows), kept just shy of contact.
 - **Ring collage layout.** A second collage *shape* alongside the default
   cluster: the flock scatters across the whole frame around an open centre —
   the look of the original AvianVisitors poster. Card editor **Collage shape**

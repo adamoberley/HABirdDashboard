@@ -1446,23 +1446,57 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
       }
     });
 
-    function cellRange(tile, tx, ty, c) {
-      // For mask cell (c[0], c[1]), return [gx0, gy0, gx1, gy1] (inclusive)
-      // in grid coords, clamped to the grid.
+    function tileXf(tile, tx, ty) {
+      // Flow rotation for `tile` centred at this candidate position, IDENTICAL
+      // to the CSS transform render applies (scaleX(flip) then rotate). null =
+      // upright. With it, collision/stamp pack the ROTATED silhouette, so a
+      // rotated bird can never overlap a neighbour.
+      if (!tile.flow) return null;
+      var ccx = tx + tile.fullW / 2, ccy = ty + tile.fullH / 2;
+      var phi = Math.atan2(ccy - cy, ccx - cx) * 180 / Math.PI;
+      var tau = phi + tile.flow.dir * 90;
+      var rightish = Math.cos(tile.headingDeg * Math.PI / 180) >= 0;
+      var flip = (tile.flow.dir === 1) ? !rightish : rightish;
+      var deg = flip ? (tau - 180 + tile.headingDeg) : (tau - tile.headingDeg);
+      deg = ((((deg % 360) + 540) % 360) - 180) * tile.flow.strength;
+      var rad = deg * Math.PI / 180;
+      return { cos: Math.cos(rad), sin: Math.sin(rad), fx: flip ? -1 : 1, ox: ccx, oy: ccy };
+    }
+    function cellRange(tile, tx, ty, c, xf) {
+      // Grid range [gx0, gy0, gx1, gy1] (inclusive, clamped) the mask cell
+      // occupies. When `xf` is set the cell's footprint is rotated about the
+      // tile centre first (conservative: bounds the rotated quad).
       var sx = tile.fullW / tile.mask.w;
       var sy = tile.fullH / tile.mask.h;
-      var x0 = (tx + c[0] * sx) / GRID_STRIDE | 0;
-      var y0 = (ty + c[1] * sy) / GRID_STRIDE | 0;
-      var x1 = (tx + (c[0] + 1) * sx) / GRID_STRIDE | 0;
-      var y1 = (ty + (c[1] + 1) * sy) / GRID_STRIDE | 0;
+      var x0, y0, x1, y1;
+      if (!xf) {
+        x0 = (tx + c[0] * sx) / GRID_STRIDE | 0;
+        y0 = (ty + c[1] * sy) / GRID_STRIDE | 0;
+        x1 = (tx + (c[0] + 1) * sx) / GRID_STRIDE | 0;
+        y1 = (ty + (c[1] + 1) * sy) / GRID_STRIDE | 0;
+      } else {
+        var hw = tile.fullW / 2, hh = tile.fullH / 2;
+        var minx = 1e9, miny = 1e9, maxx = -1e9, maxy = -1e9;
+        for (var k = 0; k < 4; k++) {
+          var lx = ((c[0] + (k & 1)) * sx - hw) * xf.fx;
+          var ly = (c[1] + (k >> 1)) * sy - hh;
+          var px = xf.ox + lx * xf.cos - ly * xf.sin;
+          var py = xf.oy + lx * xf.sin + ly * xf.cos;
+          if (px < minx) minx = px; if (px > maxx) maxx = px;
+          if (py < miny) miny = py; if (py > maxy) maxy = py;
+        }
+        x0 = minx / GRID_STRIDE | 0; y0 = miny / GRID_STRIDE | 0;
+        x1 = maxx / GRID_STRIDE | 0; y1 = maxy / GRID_STRIDE | 0;
+      }
       if (x0 < 0) x0 = 0; if (y0 < 0) y0 = 0;
       if (x1 >= GW) x1 = GW - 1; if (y1 >= GH) y1 = GH - 1;
       return [x0, y0, x1, y1];
     }
     function collides(tile, tx, ty) {
+      var xf = tileXf(tile, tx, ty);
       var cells = tile.mask.cells;
       for (var i = 0; i < cells.length; i++) {
-        var r = cellRange(tile, tx, ty, cells[i]);
+        var r = cellRange(tile, tx, ty, cells[i], xf);
         for (var gy = r[1]; gy <= r[3]; gy++) {
           var off = gy * GW;
           for (var gx = r[0]; gx <= r[2]; gx++) {
@@ -1473,9 +1507,10 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
       return false;
     }
     function stamp(tile, tx, ty) {
+      var xf = tileXf(tile, tx, ty);
       var cells = tile.mask.cells;
       for (var i = 0; i < cells.length; i++) {
-        var r = cellRange(tile, tx, ty, cells[i]);
+        var r = cellRange(tile, tx, ty, cells[i], xf);
         // Dilate the stamped footprint by `pad` cells so the next bird can't
         // pack right up against this one - a uniform gap around every
         // silhouette. collides() stays unpadded, so the gap is added once.
@@ -1518,11 +1553,7 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
         continue;
       }
       var best = null;
-      // Sparse rings (<=60 birds) scatter evenly for an airy, frame-filling
-      // wheel; busier rings fall through to the tight spiral nesting below, so
-      // a big flock packs close around the hole and each bird stays larger
-      // instead of shrinking to fit even spacing.
-      if (ringMode && tiles.length <= 60) {
+      if (ringMode) {
         // RING: fill the whole frame around an open centre. The cluster
         // spiral below grows one compact blob (so a hole in it just reads
         // as "blob with a hole"); ring mode instead scatters birds across
@@ -1740,10 +1771,17 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
       if (!mask) return null;
       var d = DIMS[slug];
       var n = +s.n; if (!n || isNaN(n)) n = 1;
+      var headDeg = DIRTAB[slug];
       return {
         mask: mask, data: s, pose: pose,
         ar: d ? d[0] / d[1] : 1.4,
         score: Math.pow(Math.max(1, n), T.countExp),
+        // Flow heading for THIS tile so the packer can pack the ROTATED
+        // silhouette (maskPack/tileXf), not the upright one - otherwise a
+        // rotated bird's wings sweep into a neighbour the collision never saw.
+        headingDeg: (typeof headDeg === 'number') ? headDeg : null,
+        flow: (flowOn && pose === 2 && typeof headDeg === 'number')
+          ? { dir: (flow === 'ccw') ? 1 : -1, strength: flowStrength } : null,
       };
     }).filter(Boolean);
 
