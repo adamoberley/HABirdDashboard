@@ -1317,14 +1317,18 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
   // loop is willing to scale into the viewport.
   //
   // The budget FRACTION is set per render from collageFill + a count
-  // offset (see renderCollage), not here - tuning() only carries the
-  // count-dependent knobs that aren't user-facing.
+  // offset (see renderCollage), not here.
   function tuning(n) {
+    // Count -> area exponent ("size contrast"): how steeply a bird's area
+    // grows with its detection count. Lower = sizes stay closer together;
+    // higher = the loudest birds dominate. User-tunable via sizeContrast
+    // (card slider / config.js). At 0.5 the loudest bird reads a few times
+    // bigger than a quiet one without dwarfing the flock; was a fixed 0.65,
+    // which made the top few birds feel oversized.
+    var contrast = (typeof AV_CFG.sizeContrast === 'number') ? AV_CFG.sizeContrast : 0.5;
+    contrast = Math.max(0.2, Math.min(0.8, contrast));
     return {
-      // Count -> area exponent. ~0.65 keeps the visual hierarchy
-      // legible (n=400 reads ~5× bigger than n=30) without the
-      // loudest bird drowning everything else.
-      countExp: 0.65,
+      countExp: contrast,
       // Floor: every species in the dataset must be visible, even
       // n=1. Tracks species count so a tiny rare bird stays
       // recognisable on a crowded plate.
@@ -4906,6 +4910,7 @@ var HABIRD_EDITOR_SCHEMA = [
     ] },
     { name: 'hide_cursor', selector: { boolean: {} } },
     { name: 'collage_fill', selector: { number: { min: 0.1, max: 1, step: 0.05, mode: 'slider' } } },
+    { name: 'size_contrast', selector: { number: { min: 0.2, max: 0.8, step: 0.05, mode: 'slider' } } },
   ] },
   { name: 'birds', type: 'expandable', flatten: true, title: 'Birds & audio', schema: [
     { name: 'tap_action', selector: { select: { mode: 'dropdown', options: [
@@ -4949,6 +4954,7 @@ var HABIRD_LABELS = {
   tap_action: 'Tap on a bird',
   xeno_canto_key: 'Xeno-Canto API key',
   collage_fill: 'Collage fill',
+  size_contrast: 'Size contrast',
   image_base: 'Artwork base URL',
   birdnet_url: 'BirdNET-Go URL',
   data_source: 'Data source',
@@ -4966,6 +4972,7 @@ var HABIRD_HELPERS = {
   tap_action: "What tapping a bird does. Default opens the info modal and plays the reference call. Call/both need a Xeno-Canto key; without one they fall back to just opening info.",
   xeno_canto_key: "Default (blank): reference calls off. A free key from xeno-canto.org/account turns them on - a clean example call to compare against your station's own captures.",
   collage_fill: 'How much of the card the flock fills (0.5 ≈ half, 1.0 ≈ nearly edge-to-edge). Busier days spread a little wider on their own. Birds always shrink to fit, so higher is safe.',
+  size_contrast: 'How much bigger your most-heard birds are drawn than the rest. Lower keeps every bird closer to the same size; higher lets the loudest few dominate.',
   image_base: 'Default (blank): artwork from the CDN. Use /local/habird-art/ for an offline copy.',
   birdnet_url: 'Default (blank): this host on port 8080, or HA ingress when remote.',
   data_source: 'Automatic uses the API and falls back to the MQTT sensors.',
@@ -5068,6 +5075,9 @@ class HABirdCard extends HTMLElement {
       // How much of the card the flock fills (0.1-1.0, default 0.5). The
       // count curve in renderCollage nudges it per bird count.
       collageFill: (typeof c.collage_fill === 'number') ? c.collage_fill : 0.5,
+      // How much bigger the most-heard birds are drawn (0.2-0.8, default
+      // 0.5). Feeds the count->area exponent in renderCollage's tuning().
+      sizeContrast: (typeof c.size_contrast === 'number') ? c.size_contrast : 0.5,
       audioBoostDb: (c.audio_boost == null ? 24 : +c.audio_boost),
       tapAction: c.tap_action || 'both',          // both | info | call
       xenoCantoKey: c.xeno_canto_key || '',        // enables reference calls
@@ -5136,7 +5146,7 @@ class HABirdCardEditor extends HTMLElement {
       this.appendChild(this._form);
     }
     this._form.schema = HABIRD_EDITOR_SCHEMA;
-    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', collage_fill: 0.5, audio_boost: 24 }, this._config);
+    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', collage_fill: 0.5, size_contrast: 0.5, audio_boost: 24 }, this._config);
     this._form.hass = this._hass;
   }
 }

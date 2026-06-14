@@ -12,6 +12,19 @@
   `config.js` `collageFill`): a 0.1–1.0 control, default **0.5** (≈ half
   the screen; 1.0 ≈ edge-to-edge), replacing the old 0.5–3 multiplier.
   Birds still always shrink to fit, so higher values are safe.
+- **Tamed how much the most-heard birds dominate.** The count→area
+  exponent dropped from a fixed 0.65 to a tunable default of **0.5**, so
+  the top species are still the biggest but no longer dwarf the rest — and
+  the freed space spreads to the smaller birds, so the flock reads fuller.
+  New **`size_contrast`** control (card slider 0.2–0.8 + `config.js`
+  `sizeContrast`).
+- **Recording-boost ceiling raised** from +24 dB to **+48 dB**
+  (`audio_boost`) for quiet microphones.
+
+### Added
+- **2K artwork + higher-res pipeline.** `pregen.py` gains
+  `--model` / `--image-size` / `--aspect-ratio`; the House Sparrow (the
+  most common detection) was re-rendered with Gemini 3 Pro Image at 2K.
 
 ## v1.1.0 — 2026-06-13
 
