@@ -63,12 +63,14 @@ class FrameTV:
         """Upload+select `jpeg`, replacing this TV's previous Bird image.
         Returns the new content id, or None if the TV has no Art Mode (skipped).
         Raises on a real upload/select failure (old image left intact)."""
+        # 45s so there's comfortable time to tap "Allow" on the TV during the
+        # one-time pairing; once a token is cached, connects are quick anyway.
         tv = SamsungTVWS(
             host=self.host,
             port=8002,
             token_file=self.token_file,
             name=DEVICE_NAME,
-            timeout=20,
+            timeout=45,
         )
         try:
             art = tv.art()
