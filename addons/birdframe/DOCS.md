@@ -98,10 +98,11 @@ A manual push renders even outside `active_hours`, so you can test any time.
   the next cycle will include them. Needs internet for that first fetch.
 - **Wrong architecture** — Chromium needs `amd64`/`aarch64`. armhf/armv7/i386
   can't run it.
-- **Upload fails only on a newer (2022+) Frame** — some recent firmware needs
-  the maintained [`samsung-tv-ws-api`](https://github.com/NickWaterton/samsung-tv-ws-api)
-  fork's art path. If you hit this, bump `samsungtvws` in `requirements.txt` to
-  that fork's version and rebuild; the sync API used here is compatible.
+- **`ms.channel.timeOut` on upload** — the art handshake failing. The add-on
+  pins `samsungtvws 3.0.5` (the maintained fork, same version Home Assistant's
+  own samsungtv integration uses), which speaks the 2022+ Frames' art protocol.
+  If a future firmware breaks it again, bump `samsungtvws` in `requirements.txt`
+  and rebuild.
 
 ## Credits
 
