@@ -1,0 +1,129 @@
+"""Headless render of the Bird collage -> PNG bytes.
+
+Keeps one Chromium process warm across cycles; each capture uses a fresh
+context (cheap, and keeps memory flat over long runs). CORS is sidestepped with
+--disable-web-security since this is a controlled, headless capture talking to
+your own BirdNET-Go, not a user-facing browser.
+"""
+from __future__ import annotations
+
+import logging
+
+from playwright.sync_api import sync_playwright
+
+import sun
+from options import Options
+
+log = logging.getLogger("birdframe.capture")
+
+# Time to let the collage bloom in, weather paint, and the packer re-settle
+# after networkidle before we grab the frame.
+SETTLE_MS = 5000
+
+
+class Capturer:
+    def __init__(self, opts: Options, url: str) -> None:
+        self.opts = opts
+        self.url = url
+        self._pw = sync_playwright().start()
+        self._browser = self._pw.chromium.launch(
+            headless=True,
+            args=[
+                "--no-sandbox",
+                "--disable-web-security",   # talk to BirdNET-Go cross-origin
+                "--hide-scrollbars",
+                "--force-color-profile=srgb",
+            ],
+        )
+
+    def capture(self) -> bytes:
+        opts = self.opts
+
+        # Background colour by theme: light = day colour, dark = night colour,
+        # circadian = blend between them by the sun. `dark` then selects the
+        # light/dark text palette so any caption/overlay stays legible.
+        day = opts.paper_color or "#fcfcfb"
+        night = opts.paper_color_dark or "#1a1a1a"
+        if opts.theme == "circadian":
+            bg, dark = sun.circadian_paper(day, night)
+        elif opts.theme == "dark":
+            bg, dark = night, True
+        else:
+            bg, dark = day, False
+
+        ctx = self._browser.new_context(
+            viewport={"width": opts.width, "height": opts.height},
+            device_scale_factor=1,
+            color_scheme="dark" if dark else "light",
+        )
+        page = ctx.new_page()
+        try:
+            page.goto(self.url, wait_until="networkidle", timeout=60_000)
+
+            # Select the requested time window (24H is the harness default).
+            if opts.window_hours != 24:
+                try:
+                    page.click(
+                        f'#winPick button[data-h="{opts.window_hours}"]',
+                        timeout=4_000,
+                    )
+                    page.wait_for_load_state("networkidle", timeout=30_000)
+                except Exception as exc:  # noqa: BLE001
+                    log.debug("window select skipped: %s", exc)
+
+            # Strip on-screen chrome - this is wall art. Always hide the top
+            # page bar (window picker + menu) and zero the collage view's
+            # padding: its 88px bottom reserve for the now-hidden view slider
+            # pushed the flock above centre. The caption is optional; the paper
+            # colour computed above (day/night/circadian) is applied as --paper.
+            # The window was already selected above, while the bar was present.
+            art_css = (
+                "header.top{display:none!important;}"
+                ".view#v0{padding:0!important;}"
+            )
+            if not opts.show_caption:
+                art_css += ".static-head{display:none!important;}"
+            art_css += f"html{{--paper:{bg}!important;}}"
+            if opts.paper_texture and opts.paper_texture > 0:
+                # A subtle grayscale fractal-noise grain over the paper, so the
+                # background reads like washi/canvas instead of flat colour.
+                # Inline SVG (feTurbulence) - no bundled asset, renders in-engine.
+                svg = (
+                    "<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'>"
+                    "<filter id='p'><feTurbulence type='fractalNoise' "
+                    "baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/>"
+                    "<feColorMatrix type='saturate' values='0'/></filter>"
+                    f"<rect width='180' height='180' filter='url(#p)' "
+                    f"opacity='{opts.paper_texture}'/></svg>"
+                )
+                enc = (svg.replace("%", "%25").replace("#", "%23")
+                       .replace("<", "%3C").replace(">", "%3E").replace(" ", "%20"))
+                art_css += (
+                    "html,body{background-image:url(\"data:image/svg+xml,"
+                    + enc + "\")!important;background-repeat:repeat!important;}"
+                )
+            page.add_style_tag(content=art_css)
+
+            # The collage already packed on load using the old padding; the CSS
+            # above changed the box, so fire a resize - apt.js re-packs the
+            # collage on resize - to re-centre it in the full frame.
+            page.evaluate("window.dispatchEvent(new Event('resize'))")
+
+            try:
+                page.wait_for_function(
+                    "document.fonts ? document.fonts.status === 'loaded' : true",
+                    timeout=10_000,
+                )
+            except Exception:  # noqa: BLE001
+                pass
+
+            page.wait_for_timeout(SETTLE_MS)
+            return page.screenshot(type="png", full_page=False)
+        finally:
+            ctx.close()
+
+    def close(self) -> None:
+        try:
+            self._browser.close()
+        finally:
+            self._pw.stop()

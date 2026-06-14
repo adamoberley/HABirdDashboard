@@ -71,6 +71,18 @@ window.AV_CONFIG = {
   // overpowering. (The old fixed value was 0.65, which felt top-heavy.)
   sizeContrast: 0.5,
 
+  // Paper background colour, per theme (hex). Left '', each theme uses its
+  // built-in ground (near-white #fcfcfb light, charcoal #1a1a1a dark). Set
+  // these to taste - e.g. a warm cream by day, a near-black by night - to make
+  // the collage read more like a print on coloured paper.
+  paperColor: '',       // light theme
+  paperColorDark: '',   // dark theme
+
+  // Paper grain: a faint grayscale noise laid over the background so it looks
+  // like a print on washi/canvas rather than flat colour. 0 = off, ~0.06 is a
+  // gentle grain, higher is coarser.
+  paperTexture: 0,
+
   // Wall-mounted display extras. All off by default for desk browsing.
   //
   // The clock/weather block lives in a corner of the collage itself, and

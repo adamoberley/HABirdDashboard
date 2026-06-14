@@ -219,6 +219,9 @@ title: ""                    # empty = no title; set any text for a heading
 window: "24"                 # time window in hours, or "all" - the card has
                              #   no on-screen picker; this is the window
 background: transparent      # transparent (blend with dashboard) | paper
+paper_color: ""              # background: paper - light-mode page colour (hex); "" = theme default
+paper_color_dark: ""         # background: paper - dark-mode page colour (hex); "" = theme default
+paper_texture: 0             # background: paper - faint paper grain (0 = off, ~0.06 = subtle washi)
 font: system                 # system (HA's font) | serif (the original look)
 birdnet_url: ""              # empty = this host, port 8080 (the stock app)
 data_source: auto            # auto | api | ha (see Data sources below)
@@ -389,6 +392,48 @@ dashboards) that park the mouse mid-screen.
 
 ---
 
+## Display it on a Samsung Frame TV (optional app)
+
+Art Mode on a Samsung *The Frame* TV looks far better for this collage than a
+browser tab or an HDMI input - but Art Mode only displays *uploaded images*, not
+a live web page. The bundled **Bird Frame** app (a Home Assistant app, formerly
+"add-on") bridges that gap: it renders the collage headlessly on an interval and
+pushes it to the Frame as art, **replacing** the previous upload each time, so
+the TV's art library never fills up with duplicates.
+
+It's an *optional* companion. The card itself runs anywhere; the app needs
+**Home Assistant OS / Supervised** (where apps exist) and a Frame TV.
+
+**Install — this same repo doubles as an app repository:**
+
+1. Add the app repository:
+
+   [![Open your Home Assistant instance and add this app repository.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fadamoberley%2FHABirdDashboard)
+
+   Or by hand: **Settings → Apps** (called *Add-ons* before 2025) **→ ⋮
+   (top-right) → Repositories** → paste this repo's URL → **Add**.
+2. Install **Bird Frame (Samsung Frame TV)** from the store and **Start** it.
+3. **Accept the "Allow connection?" prompt on the TV** (once, per TV).
+
+Usually no configuration is needed: it auto-discovers BirdNET-Go and reads each
+Frame's IP from your **Samsung TV integration** (multiple Frames are found
+automatically). Put the TV in Art Mode and your birds appear within one interval.
+
+**Tuning it for the wall.** The Frame render has its *own* settings, independent
+of your dashboard card - set them in the app's options (theme, time window,
+collage fill, clock/weather, caption on/off, interval). A **Bird Frame** panel
+in the HA sidebar has a **Render &amp; push now** button and a live preview, so
+you can change a setting and see the result instantly instead of waiting for the
+interval (restarting the app also pushes immediately). Full setup and option
+docs: [`addons/birdframe/DOCS.md`](addons/birdframe/DOCS.md).
+
+> Note: this is a *separate* install from the HACS card - the card is a frontend
+> resource (HACS), the Bird Frame app is a Supervisor app. Same repo URL, added
+> in both places. The core `samsungtv` integration can't upload art itself, so
+> the app talks to the TV directly; it just borrows the IP that integration found.
+
+---
+
 ## How it maps onto BirdNET-Go
 
 The card reads BirdNET-Go's API v2 (public routes, CORS-open by default):
@@ -497,8 +542,11 @@ homeassistant/
 avian/
 ├── assets/          # 670 bundled illustrations + photo-cutout fallbacks
 └── scripts/         # generate -> cutout -> masks pipeline (Gemini + BiRefNet)
+addons/
+└── birdframe/       # optional app: push the collage to a Samsung Frame TV
 docs/                # screenshot
-hacs.json            # HACS metadata
+hacs.json            # HACS metadata (frontend card)
+repository.yaml      # Apps-store metadata (makes this repo an app repo too)
 ```
 
 After editing anything in `homeassistant/www/`, regenerate the card with

@@ -1,0 +1,132 @@
+# Bird Frame - Home Assistant add-on manifest.
+#
+# A long-running service (not the run-once pattern of most art-changer
+# add-ons): it keeps a headless Chromium warm and, every `interval_minutes`,
+# renders the Bird collage, screenshots it, and pushes the JPEG to a Samsung
+# Frame TV's Art Mode - replacing the previous upload in place so the TV's art
+# library never accumulates duplicates.
+name: Bird Frame (Samsung Frame TV)
+version: "0.6.0"
+slug: birdframe
+description: >-
+  Render the live Bird collage and push it to a Samsung Frame TV as Art Mode
+  artwork, on an interval, replacing the previous image each time.
+url: https://github.com/adamoberley/HABirdDashboard/tree/HABirdDashboard/addons/birdframe
+
+# Chromium (via Playwright) ships glibc binaries - amd64 and aarch64 only.
+# armhf/armv7/i386 are intentionally unsupported; they can't run the browser.
+arch:
+  - aarch64
+  - amd64
+
+# Long-running service. `init: false` because we build FROM a non-Home
+# Assistant base (the Playwright image) that has no s6-overlay.
+init: false
+startup: services
+boot: auto
+
+# No `image:` key on purpose -> the Supervisor builds the app locally from the
+# Dockerfile + build.yaml, so there's nothing to publish to a registry.
+
+# Ingress: adds a "Bird Frame" panel in the HA sidebar with a live preview and a
+# "render & push now" button. Served on the same internal port as the renderer.
+ingress: true
+ingress_port: 8099
+panel_icon: mdi:bird
+panel_title: Bird Frame
+
+# Read-only access to Home Assistant's config so we can auto-discover the Frame
+# TV's IP from the samsungtv integration's stored entry (.storage). Read only -
+# the add-on never writes here. (Persistent add-on state - pairing tokens, the
+# tracked "current art" id, the illustration cache - lives in /data, which is
+# always available and needs no map entry.)
+map:
+  - "homeassistant_config:ro"
+
+# Ordered for the Configuration tab: the painting's look first, then what it
+# shows, when it updates, connection (auto), and finally the dashboard-style
+# overlays + advanced bits most people never touch. Option keys are unchanged.
+options:
+  # --- Appearance: how the painting looks ---
+  theme: "circadian"
+  paper_color: "#f0e8d5"
+  paper_color_dark: "#15120d"
+  paper_texture: 0.06
+  collage_fill: 0.7
+  size_contrast: 0.5
+  show_caption: false
+  matte: "none"
+  # --- What it shows ---
+  window_hours: 24
+  sit_confidence: 0.90
+  # --- Updating ---
+  interval_minutes: 30
+  active_hours: ""
+  # --- Connection (auto-discovered; usually leave blank) ---
+  tv_ip: ""
+  birdnet_go_url: ""
+  resolution: "3840x2160"
+  # --- Optional overlays: clock & weather (off; not the usual art look) ---
+  wall_clock: false
+  wall_weather: false
+  wall_corner: "bottom-right"
+  weather_entity: ""
+  ha_token: ""
+  fahrenheit: false
+  # --- Advanced ---
+  log_level: "info"
+
+schema:
+  # ---- Appearance: how the painting looks ----
+  # light = day colour, dark = night colour, circadian = blend by the sun
+  # (uses Home Assistant's location; falls back to the day colour if unknown).
+  theme: "list(light|dark|circadian)"
+  # Day background colour (hex). Default warm cream.
+  paper_color: "str?"
+  # Night background colour (hex) - used by "dark" and the night end of
+  # "circadian". Default warm near-black.
+  paper_color_dark: "str?"
+  # Paper grain: 0 = flat colour, ~0.06 = subtle washi, higher = coarser.
+  paper_texture: "float(0,1)"
+  # How much of the screen the flock claims (0.1-1.0).
+  collage_fill: "float(0.1,1.0)"
+  # How much bigger the most-heard birds draw than the rest (0.2-0.8; lower =
+  # more even, higher = the loudest few dominate).
+  size_contrast: "float(0.2,0.8)"
+  # Show the small "Heard Recently" title (off = pure edge-to-edge art).
+  show_caption: "bool"
+  # TV border around the image: "none" fills the panel; a Samsung matte name
+  # (e.g. "shadowbox") gives a framed-print look.
+  matte: "str"
+  # ---- What it shows ----
+  # Time window the collage summarises: 1H / 12H / 24H / 7D / ALL.
+  window_hours: "list(1|12|24|168|1000000)"
+  # Best-confidence threshold above which a species perches (else it flies).
+  sit_confidence: "float(0,1.01)"
+  # ---- Updating ----
+  interval_minutes: "int(1,1440)"
+  # Empty = update 24/7. Or a local-time window, e.g. "06:30-22:00"; outside it
+  # the app idles and leaves the last image up.
+  active_hours: "str?"
+  # ---- Connection (auto-discovered; usually leave blank) ----
+  # Frame TV IP(s). BLANK = auto-discover from your samsungtv integration (finds
+  # every Frame). Or comma-separated IPs to override, e.g. "192.168.1.208".
+  tv_ip: "str?"
+  # BirdNET-Go base URL. BLANK = use the standard address; set only if it runs
+  # somewhere unusual, e.g. http://192.168.1.50:8080.
+  birdnet_go_url: "str?"
+  # Match your panel: 3840x2160 (most Frames) or 1920x1080 (32"/pre-2021).
+  resolution: "list(3840x2160|1920x1080)"
+  # ---- Optional overlays: clock & weather ----
+  # Off by default - dashboard-style extras, not the usual art look, but here if
+  # you want a functional wall display.
+  wall_clock: "bool"
+  wall_weather: "bool"
+  wall_corner: "list(top-left|top-right|bottom-left|bottom-right)"
+  # Weather overlay only: pull from Home Assistant instead of BirdNET-Go's
+  # built-in (yr.no) source. Token = a long-lived token from a non-admin user.
+  weather_entity: "str?"
+  ha_token: "str?"
+  fahrenheit: "bool"
+  # ---- Advanced ----
+  log_level: "list(debug|info|warning|error)"

@@ -1,0 +1,124 @@
+# Labels + help shown next to each field on the app's Configuration tab.
+# Ordered: Appearance -> What it shows -> Updating -> Connection -> Optional
+# overlays -> Advanced.
+configuration:
+  # ---- Appearance ----
+  theme:
+    name: Theme
+    description: >-
+      Light uses the day color; Dark uses the night color; Circadian blends
+      between them following the sun - cream by day, dimming through dusk, dark
+      at night, back at dawn - using your Home Assistant location (falls back to
+      the day color if none is set).
+  paper_color:
+    name: Paper color (day)
+    description: >-
+      Daytime background behind the birds, as a hex value. Default is a warm
+      cream so it reads as art paper, not bright white. Tweak it and hit
+      "Render & push now" on the Bird Frame panel to preview.
+  paper_color_dark:
+    name: Paper color (night)
+    description: >-
+      Nighttime background, as a hex value. Used by the Dark theme and the night
+      end of Circadian. Default is a warm near-black.
+  paper_texture:
+    name: Paper texture
+    description: >-
+      Subtle grain over the background so it looks like a print on paper, not
+      flat color. 0 = off, ~0.06 = gentle washi grain, higher = coarser. Preview
+      from the Bird Frame panel.
+  collage_fill:
+    name: Collage fill
+    description: >-
+      How much of the screen the flock claims (0.1-1.0). 0.5 fills about half;
+      1.0 packs nearly edge-to-edge.
+  size_contrast:
+    name: Size contrast
+    description: >-
+      How much bigger your most-heard birds are drawn than the rest (0.2-0.8).
+      Lower keeps everyone closer to the same size; higher lets the loudest few
+      dominate. 0.5 is a balanced default.
+  show_caption:
+    name: Caption
+    description: >-
+      Show a small "Heard Recently" title above the collage. Off (default) for a
+      pure edge-to-edge painting.
+  matte:
+    name: Frame matte
+    description: >-
+      Border the TV draws around the image. "none" (default) fills the whole
+      panel; a Samsung matte name like "shadowbox" gives a framed-print look.
+  # ---- What it shows ----
+  window_hours:
+    name: Time window
+    description: >-
+      How far back the collage summarises: 1 = 1H, 12 = 12H, 24 = 24H,
+      168 = 7D, 1000000 = ALL.
+  sit_confidence:
+    name: Perch confidence
+    description: >-
+      A species perches when its best detection confidence in the window is at
+      or above this (0-1.01); below it, it shows its flight pose.
+  # ---- Updating ----
+  interval_minutes:
+    name: Update interval (minutes)
+    description: How often a fresh collage is rendered and pushed to the TV.
+  active_hours:
+    name: Active hours
+    description: >-
+      Leave blank to update 24/7, or set a local-time window like 06:30-22:00.
+      Outside it the app idles and leaves the last image up.
+  # ---- Connection (auto-discovered; usually leave blank) ----
+  tv_ip:
+    name: Frame TV IP(s)
+    description: >-
+      Leave blank to auto-discover every Frame from your Samsung TV integration.
+      Or enter one or more IPs, comma-separated, to override
+      (e.g. 192.168.1.208,192.168.1.209). First run shows an "Allow connection?"
+      prompt on each TV - accept it once with the remote. Give each TV a DHCP
+      reservation.
+  birdnet_go_url:
+    name: BirdNET-Go URL
+    description: >-
+      Leave blank to use the standard BirdNET-Go address. Only set it
+      (e.g. http://192.168.1.50:8080) if BirdNET-Go runs somewhere unusual.
+  resolution:
+    name: Panel resolution
+    description: >-
+      Match your TV's panel. 3840x2160 for 4K Frames (most); 1920x1080 for 32"
+      and pre-2021 models.
+  # ---- Optional overlays: clock & weather (off by default) ----
+  wall_clock:
+    name: Clock overlay (optional)
+    description: >-
+      A clock in a corner of the collage. Off by default - most "painting"
+      setups leave it off; it's here if you want a functional wall display.
+  wall_weather:
+    name: Weather overlay (optional)
+    description: >-
+      Current conditions + sunrise/sunset in a corner. Off by default - not the
+      usual look for art, but available. Uses BirdNET-Go's built-in weather
+      unless you add a Home Assistant token below.
+  wall_corner:
+    name: Overlay corner
+    description: Which corner the clock/weather overlay sits in (if either is on).
+  weather_entity:
+    name: "Weather overlay: HA entity"
+    description: >-
+      Only with a Home Assistant token below. e.g. weather.forecast_home;
+      blank = first weather.* entity found.
+  ha_token:
+    name: "Weather overlay: HA token"
+    description: >-
+      Only if you want the weather overlay to use Home Assistant's weather
+      instead of BirdNET-Go's. A long-lived token from a non-admin user
+      (Profile - Security).
+  fahrenheit:
+    name: "Weather overlay: Fahrenheit"
+    description: >-
+      Convert BirdNET-Go's Celsius for the weather overlay. Ignored when weather
+      comes from Home Assistant (already in your units).
+  # ---- Advanced ----
+  log_level:
+    name: Log level
+    description: Set to debug to troubleshoot rendering or the TV connection.

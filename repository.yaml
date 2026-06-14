@@ -1,0 +1,9 @@
+# Makes this GitHub repo usable as a Home Assistant add-on repository, in
+# addition to being a HACS card repo (hacs.json). The two coexist: HACS reads
+# hacs.json + dist/, the Supervisor add-on store reads this file + addons/*.
+#
+# Install: Settings -> Add-ons -> Add-on Store -> (top-right) Repositories ->
+# paste this repo's URL -> the "Bird Frame" add-on appears under this name.
+name: HABirdDashboard Add-ons
+url: https://github.com/adamoberley/HABirdDashboard
+maintainer: Adam Oberley <adamoberley@damascus.net>
