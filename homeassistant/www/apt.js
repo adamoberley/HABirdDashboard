@@ -1276,14 +1276,18 @@
   // loop is willing to scale into the viewport.
   //
   // The budget FRACTION is set per render from collageFill + a count
-  // offset (see renderCollage), not here - tuning() only carries the
-  // count-dependent knobs that aren't user-facing.
+  // offset (see renderCollage), not here.
   function tuning(n) {
+    // Count -> area exponent ("size contrast"): how steeply a bird's area
+    // grows with its detection count. Lower = sizes stay closer together;
+    // higher = the loudest birds dominate. User-tunable via sizeContrast
+    // (card slider / config.js). At 0.5 the loudest bird reads a few times
+    // bigger than a quiet one without dwarfing the flock; was a fixed 0.65,
+    // which made the top few birds feel oversized.
+    var contrast = (typeof AV_CFG.sizeContrast === 'number') ? AV_CFG.sizeContrast : 0.5;
+    contrast = Math.max(0.2, Math.min(0.8, contrast));
     return {
-      // Count -> area exponent. ~0.65 keeps the visual hierarchy
-      // legible (n=400 reads ~5× bigger than n=30) without the
-      // loudest bird drowning everything else.
-      countExp: 0.65,
+      countExp: contrast,
       // Floor: every species in the dataset must be visible, even
       // n=1. Tracks species count so a tiny rare bird stays
       // recognisable on a crowded plate.

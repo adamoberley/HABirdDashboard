@@ -64,6 +64,13 @@ window.AV_CONFIG = {
   // always shrink to fit, so larger values are safe (they just fill more).
   collageFill: 0.5,
 
+  // Size contrast: how much bigger your most-heard birds are drawn than
+  // the rest (0.2 - 0.8). Lower keeps every bird closer to the same size;
+  // higher lets the loudest few dominate. 0.5 (default) makes the top
+  // birds a few times bigger than a quiet one - noticeable but not
+  // overpowering. (The old fixed value was 0.65, which felt top-heavy.)
+  sizeContrast: 0.5,
+
   // Wall-mounted display extras. All off by default for desk browsing.
   //
   // The clock/weather block lives in a corner of the collage itself, and

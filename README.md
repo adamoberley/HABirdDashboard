@@ -225,6 +225,7 @@ data_source: auto            # auto | api | ha (see Data sources below)
 history_days: 10             # ha-source span; bounded by recorder retention
 sit_confidence: 0.90         # perched at/above, flying below
 collage_fill: 0.5            # screen fill 0.1-1.0 (0.5 = half, 1.0 = full; busier = wider)
+size_contrast: 0.5           # how much bigger your most-heard birds are (0.2-0.8; lower = more even)
 tap_action: both             # both (open details + play call, default) |
                              #   info (details only) | call (reference call only)
 xeno_canto_key: ""           # free key from xeno-canto.org/account; enables the
