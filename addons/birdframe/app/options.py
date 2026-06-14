@@ -39,6 +39,7 @@ class Options:
     collage_hole: float
     collage_flow: str
     collage_flow_strength: float
+    collage_spacing: float
     sit_confidence: float
     wall_clock: bool
     wall_weather: bool
@@ -103,6 +104,8 @@ def load() -> Options:
         # strength 0-1 scales from natural orientation to a full wheel.
         collage_flow=str(raw.get("collage_flow", "cw")).strip(),
         collage_flow_strength=float(raw.get("collage_flow_strength", 1.0)),
+        # Gap between birds (0-1, default 0.5); they never overlap regardless.
+        collage_spacing=float(raw.get("collage_spacing", 0.5)),
         sit_confidence=float(raw.get("sit_confidence", 0.90)),
         wall_clock=bool(raw.get("wall_clock", True)),
         wall_weather=bool(raw.get("wall_weather", True)),

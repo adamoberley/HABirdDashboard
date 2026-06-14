@@ -3,6 +3,11 @@
 ## Unreleased
 
 ### Added
+- **Bird spacing control.** A `collageSpacing` slider (0–1, default 0.5) tunes
+  the gap between birds for any collage shape — lower packs them closer and a
+  touch bigger, higher gives more breathing room. They never overlap regardless
+  (the packer reserves each bird's footprint). Card editor, `config.js`
+  (+ `?spacing=` URL override), and the Bird Frame add-on.
 - **Ring "flow" — a wheeling flock.** In ring mode, every in-flight bird banks
   along the circle's tangent (nose around the ring, belly toward the centre),
   so the flock reads as one murmuration turning around the open middle - far-side

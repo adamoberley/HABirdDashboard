@@ -79,6 +79,7 @@ already look like a painting, so most setups change little. Most-touched:
 | `collage_hole` | Ring only: open-centre size (0.1–0.7 of the shorter side). Bigger = a more prominent void. |
 | `collage_flow` | Ring only: bank birds along the circle so the flock wheels around the centre — `cw` / `ccw` / `off`. |
 | `collage_flow_strength` | Ring flow strength (0–1). 1 = full wheel; lower = gentler bank. |
+| `collage_spacing` | Gap between birds (0–1, any shape). Lower = closer/bigger, higher = airier. They never overlap. |
 | `show_caption` | Off (default) = edge-to-edge art, no title. |
 | `window_hours` | Time window: `1`/`12`/`24`/`168`/`1000000` (ALL). |
 | `interval_minutes` | How often the collage refreshes on the TV. |

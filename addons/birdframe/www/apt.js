@@ -1775,9 +1775,18 @@
     var xBias = narrow ? 1 : T.ellipseAspectBias;
     var yBias = narrow ? 1.7 : 1;   // gentler than the desktop bias so the
                                     // portrait cluster stays a bit wider / less tall
-    // Tighten the breathing room as the flock grows: dense plates pack closer
-    // so each bird stays larger rather than shrinking to fit the gaps.
-    var basePad = nBirds > 90 ? 1 : nBirds > 45 ? 2 : COLLAGE_PAD;
+    // Spacing: user-tunable gap around each bird. Collision never lets birds
+    // overlap regardless; this only sets how much air sits between them - lower
+    // packs them closer (bigger, denser), higher gives more breathing room.
+    // collageSpacing 0-1 (0.5 = the default gap); ?spacing= overrides on the
+    // static page.
+    var spacing = (typeof AV_CFG.collageSpacing === 'number') ? AV_CFG.collageSpacing : 0.5;
+    if (window.AV_CONFIG) {
+      var mSp = location.search.match(/[?&]spacing=([\d.]+)/);
+      if (mSp) spacing = parseFloat(mSp[1]);
+    }
+    spacing = Math.max(0, Math.min(1, spacing));
+    var basePad = Math.max(1, Math.round(spacing * 2 * COLLAGE_PAD));  // 0->1 tight, 0.5->3 default, 1->6 airy
     var pad = narrow ? Math.max(1, basePad - 1) : basePad;
     var placed = maskPack(tiles, W, H, xBias, yBias, pad, obstacles, ringMode);
 
