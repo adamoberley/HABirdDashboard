@@ -32,6 +32,12 @@ configuration:
     description: >-
       How much of the screen the flock claims (0.1-1.0). 0.5 fills about half;
       1.0 packs nearly edge-to-edge.
+  size_contrast:
+    name: Size contrast
+    description: >-
+      How much bigger your most-heard birds are drawn than the rest (0.2-0.8).
+      Lower keeps everyone closer to the same size; higher lets the loudest few
+      dominate. 0.5 is a balanced default.
   show_caption:
     name: Caption
     description: >-

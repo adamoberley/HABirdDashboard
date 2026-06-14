@@ -1,16 +1,16 @@
 (function () {
   // Bumped whenever the offline sketch build changes, so the browser
   // doesn't keep a stale cache after we regenerate the sketches.
-  var SKETCH_VERSION = 'r11'; // r10 + 84 region species (E-US warblers,
-                              // vireos, flycatchers, shorebirds) added.
+  var SKETCH_VERSION = 'r12'; // r12: regenerated perched House Sparrow at 2K
+                              // (Nano Banana Pro). r11: +84 region species.
   // Cache-bust for /api/img - bump whenever a bird gets re-rendered via
   // /api/regen or whenever you need every CF DC to drop its cached copy.
   // Cloudflare keys on the full URL incl. query, so bumping this is
   // equivalent to a global cache purge for /api/img. (caches.default
   // .delete() in the worker only affects ONE colo at a time, so a
   // versioned URL is the only reliable way to invalidate everywhere.)
-  var IMG_VERSION = 'r11'; // r10 + 84 region species added, so drop every
-                           // cached copy.
+  var IMG_VERSION = 'r12'; // r12: new 2K House Sparrow perched art - drop
+                           // every cached copy. r11: +84 region species.
 
   // ===========================================================================
   // BirdNET-Go adapter (Home Assistant build)
@@ -1276,14 +1276,18 @@
   // loop is willing to scale into the viewport.
   //
   // The budget FRACTION is set per render from collageFill + a count
-  // offset (see renderCollage), not here - tuning() only carries the
-  // count-dependent knobs that aren't user-facing.
+  // offset (see renderCollage), not here.
   function tuning(n) {
+    // Count -> area exponent ("size contrast"): how steeply a bird's area
+    // grows with its detection count. Lower = sizes stay closer together;
+    // higher = the loudest birds dominate. User-tunable via sizeContrast
+    // (card slider / config.js). At 0.5 the loudest bird reads a few times
+    // bigger than a quiet one without dwarfing the flock; was a fixed 0.65,
+    // which made the top few birds feel oversized.
+    var contrast = (typeof AV_CFG.sizeContrast === 'number') ? AV_CFG.sizeContrast : 0.5;
+    contrast = Math.max(0.2, Math.min(0.8, contrast));
     return {
-      // Count -> area exponent. ~0.65 keeps the visual hierarchy
-      // legible (n=400 reads ~5× bigger than n=30) without the
-      // loudest bird drowning everything else.
-      countExp: 0.65,
+      countExp: contrast,
       // Floor: every species in the dataset must be visible, even
       // n=1. Tracks species count so a tiny rare bird stays
       // recognisable on a crowded plate.

@@ -171,6 +171,7 @@ def _config_js(opts: Options, birdnet_url: str) -> bytes:
         "view": "collage",
         "viewSelector": False,
         "collageFill": opts.collage_fill,
+        "sizeContrast": opts.size_contrast,
         "sitConfidence": opts.sit_confidence,
         "audioBoostDb": 0,
         "tapAction": "info",

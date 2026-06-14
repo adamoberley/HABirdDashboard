@@ -34,6 +34,7 @@ class Options:
     show_caption: bool
     window_hours: int
     collage_fill: float
+    size_contrast: float
     sit_confidence: float
     wall_clock: bool
     wall_weather: bool
@@ -87,6 +88,8 @@ def load() -> Options:
         show_caption=bool(raw.get("show_caption", True)),
         window_hours=int(raw.get("window_hours", 24)),
         collage_fill=float(raw.get("collage_fill", 0.5)),
+        # How much bigger the most-heard birds draw than the rest (0.2-0.8).
+        size_contrast=float(raw.get("size_contrast", 0.5)),
         sit_confidence=float(raw.get("sit_confidence", 0.90)),
         wall_clock=bool(raw.get("wall_clock", True)),
         wall_weather=bool(raw.get("wall_weather", True)),

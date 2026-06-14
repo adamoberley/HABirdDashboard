@@ -74,6 +74,7 @@ already look like a painting, so most setups change little. Most-touched:
 | `paper_color` / `paper_color_dark` | Day / night background hex (cream / near-black). |
 | `paper_texture` | Paper grain: `0` off, ~`0.06` subtle washi, higher coarser. |
 | `collage_fill` | How full the flock packs (0.1–1.0). |
+| `size_contrast` | How much bigger the most-heard birds draw (0.2–0.8). |
 | `show_caption` | Off (default) = edge-to-edge art, no title. |
 | `window_hours` | Time window: `1`/`12`/`24`/`168`/`1000000` (ALL). |
 | `interval_minutes` | How often the collage refreshes on the TV. |
