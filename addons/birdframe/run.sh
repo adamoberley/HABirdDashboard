@@ -3,6 +3,7 @@
 # /data/options.json (written by the Supervisor from the add-on config) itself.
 set -euo pipefail
 echo "[birdframe] starting"
-# One-line sanity check so the log confirms Playwright is importable here.
-python3 -c "import sys, playwright; print(f'[birdframe] python={sys.executable} playwright={playwright.__version__}')"
+# Non-fatal sanity check that the import main.py needs resolves in this python.
+python3 -c "from playwright.sync_api import sync_playwright; print('[birdframe] playwright OK', flush=True)" \
+  || echo "[birdframe] WARNING: playwright import check failed"
 exec python3 /app/main.py
