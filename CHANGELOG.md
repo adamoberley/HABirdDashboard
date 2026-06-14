@@ -3,6 +3,18 @@
 ## Unreleased
 
 ### Added
+- **Ring collage layout.** A second collage *shape* alongside the default
+  cluster: the flock scatters across the whole frame around an open centre —
+  the look of the original AvianVisitors poster. Card editor **Collage shape**
+  dropdown + **Ring centre size** slider; static-page `config.js`
+  `collageShape` / `collageHole`, with `?ring` / `?hole=` URL overrides; and a
+  matching option on the Bird Frame app. Cluster stays the default, unchanged.
+- **Bird Frame app — push the collage to a Samsung Frame TV.** An optional Home
+  Assistant app renders the collage headlessly on an interval and uploads it to
+  a Frame's Art Mode, replacing the previous image each time (no duplicate
+  buildup). Auto-discovers BirdNET-Go and the TV's IP; carries its own
+  appearance options (theme, time window, fill, shape, clock/weather, caption,
+  interval) and a sidebar panel with a live preview + "render &amp; push now".
 - **Custom paper background — colour per theme + texture.** With
   `background: paper`, set `paper_color` (light mode) and `paper_color_dark`
   (dark mode) to any hex, and `paper_texture` (0–0.2) for a faint grayscale
