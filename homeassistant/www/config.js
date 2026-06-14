@@ -71,6 +71,26 @@ window.AV_CONFIG = {
   // overpowering. (The old fixed value was 0.65, which felt top-heavy.)
   sizeContrast: 0.5,
 
+  // Collage shape: how the flock is arranged on the plate.
+  //   'cluster' (default) - birds pack outward from the centre into one
+  //              dense blob, largest in the middle.
+  //   'ring'    - birds pack into a halo around an open centre, so the
+  //              flock reads as a circle of birds in flight (the look
+  //              from the original Avian Visitors poster). Same artwork,
+  //              same packing - just a circular keep-out in the middle.
+  // Per-display override on the static page: add `?ring` to the URL (or
+  // `?shape=cluster` to force the blob), and `?hole=0.5` to size the gap.
+  collageShape: 'cluster',
+
+  // Ring hole: size of the open centre when collageShape is 'ring', as a
+  // fraction of the shorter screen axis (0.1 - 0.7). Bigger = a more
+  // prominent void with the flock pushed out toward the edges. Ring mode
+  // scatters birds across the WHOLE frame around this hole, so it looks
+  // fullest with a busy flock (a long time window / chatty station);
+  // with only a handful of species, 'cluster' reads better. Ignored in
+  // 'cluster' mode.
+  collageHole: 0.5,
+
   // Paper background colour, per theme (hex). Left '', each theme uses its
   // built-in ground (near-white #fcfcfb light, charcoal #1a1a1a dark). Set
   // these to taste - e.g. a warm cream by day, a near-black by night - to make
