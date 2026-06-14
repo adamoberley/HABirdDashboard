@@ -504,7 +504,9 @@
      this view's content is just the cluster of bird cutouts which fills
      the remaining viewport height. */
   .gcollage {
-    flex: 1 1 auto; width: 100%; max-width: 1300px; margin: 0 auto;
+    /* No max-width: the packing area spans the full viewport so the flock
+       can use the whole screen on wide laptops/monitors. */
+    flex: 1 1 auto; width: 100%; margin: 0 auto;
     position: relative; min-height: 0;
   }
   /* Centre-out bloom: each tile fades + scales in; JS staggers the

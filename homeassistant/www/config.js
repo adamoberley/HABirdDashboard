@@ -53,6 +53,15 @@ window.AV_CONFIG = {
   // always flies (confidence never exceeds 1.0).
   sitConfidence: 0.90,
 
+  // Collage fill: how much of the screen the flock claims, as a rough
+  // fraction of the viewport area (0.1 - 1.0). 0.5 (the default) targets
+  // about half the screen; 1.0 packs the birds nearly edge-to-edge. The
+  // bird count nudges it automatically - a busy day spreads a little
+  // wider, a quiet one pulls in - so at the 0.5 default the collage aims
+  // for ~0.45 / 0.50 / 0.55 of the screen from sparse to crowded. Birds
+  // always shrink to fit, so larger values are safe (they just fill more).
+  collageFill: 0.5,
+
   // Wall-mounted display extras. All off by default for desk browsing.
   //
   // The clock/weather block lives in a corner of the collage itself, and

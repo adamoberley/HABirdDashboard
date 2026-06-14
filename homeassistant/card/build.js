@@ -246,7 +246,7 @@ var HABIRD_EDITOR_SCHEMA = [
       { name: 'weather_entity', selector: { entity: { domain: 'weather' } } },
     ] },
     { name: 'hide_cursor', selector: { boolean: {} } },
-    { name: 'collage_scale', selector: { number: { min: 0.5, max: 3, step: 0.1, mode: 'slider' } } },
+    { name: 'collage_fill', selector: { number: { min: 0.1, max: 1, step: 0.05, mode: 'slider' } } },
   ] },
   { name: 'birds', type: 'expandable', flatten: true, title: 'Birds & audio', schema: [
     { name: 'tap_action', selector: { select: { mode: 'dropdown', options: [
@@ -289,7 +289,7 @@ var HABIRD_LABELS = {
   audio_boost: 'Recording volume boost',
   tap_action: 'Tap on a bird',
   xeno_canto_key: 'Xeno-Canto API key',
-  collage_scale: 'Collage scale',
+  collage_fill: 'Collage fill',
   image_base: 'Artwork base URL',
   birdnet_url: 'BirdNET-Go URL',
   data_source: 'Data source',
@@ -306,7 +306,7 @@ var HABIRD_HELPERS = {
   audio_boost: "Detection clips are quiet; the boost is compressed so louder doesn't clip. 0 dB = off.",
   tap_action: "What tapping a bird does. Default opens the info modal and plays the reference call. Call/both need a Xeno-Canto key; without one they fall back to just opening info.",
   xeno_canto_key: "Default (blank): reference calls off. A free key from xeno-canto.org/account turns them on - a clean example call to compare against your station's own captures.",
-  collage_scale: 'How much of the card the flock claims. Birds always shrink to fit, so bigger is safe.',
+  collage_fill: 'How much of the card the flock fills (0.5 ≈ half, 1.0 ≈ nearly edge-to-edge). Busier days spread a little wider on their own. Birds always shrink to fit, so higher is safe.',
   image_base: 'Default (blank): artwork from the CDN. Use /local/habird-art/ for an offline copy.',
   birdnet_url: 'Default (blank): this host on port 8080, or HA ingress when remote.',
   data_source: 'Automatic uses the API and falls back to the MQTT sensors.',
@@ -406,9 +406,9 @@ class HABirdCard extends HTMLElement {
       // MQTT sensor updates push refreshes (see _watchDetections), so the
       // timer is just a safety net - much longer than the page's 30s.
       pollSeconds: c.poll_seconds || 60,
-      __budgetScale: (typeof c.collage_scale === 'number' && c.collage_scale > 0)
-        ? c.collage_scale
-        : 1,   // default fill
+      // How much of the card the flock fills (0.1-1.0, default 0.5). The
+      // count curve in renderCollage nudges it per bird count.
+      collageFill: (typeof c.collage_fill === 'number') ? c.collage_fill : 0.5,
       audioBoostDb: (c.audio_boost == null ? 24 : +c.audio_boost),
       tapAction: c.tap_action || 'both',          // both | info | call
       xenoCantoKey: c.xeno_canto_key || '',        // enables reference calls
@@ -477,7 +477,7 @@ class HABirdCardEditor extends HTMLElement {
       this.appendChild(this._form);
     }
     this._form.schema = HABIRD_EDITOR_SCHEMA;
-    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', collage_scale: 1, audio_boost: 24 }, this._config);
+    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', collage_fill: 0.5, audio_boost: 24 }, this._config);
     this._form.hass = this._hass;
   }
 }
