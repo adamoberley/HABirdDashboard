@@ -1,0 +1,81 @@
+# Labels + help shown next to each field on the add-on's Configuration tab.
+configuration:
+  tv_ip:
+    name: Frame TV IP(s)
+    description: >-
+      Leave blank to auto-discover every Frame from your Samsung TV integration.
+      Or enter one or more IPs, comma-separated, to override
+      (e.g. 192.168.1.208,192.168.1.209). First run shows an "Allow connection?"
+      prompt on each TV - accept it once with the remote to pair. Give each TV a
+      DHCP reservation.
+  birdnet_go_url:
+    name: BirdNET-Go URL
+    description: >-
+      Leave blank to auto-discover the BirdNET-Go add-on. Only set it
+      (e.g. http://192.168.1.50:8080) if BirdNET-Go runs somewhere unusual.
+  interval_minutes:
+    name: Update interval (minutes)
+    description: How often a fresh collage is rendered and pushed to the TV.
+  resolution:
+    name: Panel resolution
+    description: >-
+      Match your TV's panel. 3840x2160 for 4K Frames (most); 1920x1080 for 32"
+      and pre-2021 models.
+  theme:
+    name: Theme
+    description: Light (paper) or dark background for the collage.
+  show_caption:
+    name: Show caption
+    description: >-
+      Show the small "Heard Recently" title above the collage. Turn off for a
+      pure edge-to-edge art look.
+  window_hours:
+    name: Time window
+    description: >-
+      How far back the collage summarises: 1 = 1H, 12 = 12H, 24 = 24H,
+      168 = 7D, 1000000 = ALL.
+  collage_fill:
+    name: Collage fill
+    description: >-
+      How much of the screen the flock claims (0.1-1.0). 0.5 fills about half;
+      1.0 packs nearly edge-to-edge.
+  sit_confidence:
+    name: Perch confidence
+    description: >-
+      A species perches when its best detection confidence in the window is at
+      or above this (0-1.01); below it, it shows its flight pose.
+  wall_clock:
+    name: Show clock
+    description: Show a clock in a corner of the collage.
+  wall_weather:
+    name: Show weather
+    description: >-
+      Show current conditions + sunrise/sunset. Uses BirdNET-Go's built-in
+      weather unless you set a Home Assistant token below.
+  wall_corner:
+    name: Clock/weather corner
+    description: Which corner the clock/weather block sits in.
+  matte:
+    name: Frame matte
+    description: 'Border style sent to the TV. "none" fills the whole panel.'
+  active_hours:
+    name: Active hours
+    description: >-
+      Leave blank to update 24/7, or set a local-time window like 06:30-22:00.
+      Outside it the add-on idles and leaves the last image up.
+  ha_token:
+    name: Home Assistant token (optional)
+    description: >-
+      Only needed if you want weather from Home Assistant instead of BirdNET-Go.
+      A long-lived token from a non-admin user (Profile - Security).
+  weather_entity:
+    name: Weather entity (optional)
+    description: e.g. weather.forecast_home. Blank = first weather.* entity found.
+  fahrenheit:
+    name: Fahrenheit
+    description: >-
+      Convert BirdNET-Go's Celsius for display. Ignored when weather comes from
+      Home Assistant (already in your units).
+  log_level:
+    name: Log level
+    description: Set to debug to troubleshoot rendering or TV connection.

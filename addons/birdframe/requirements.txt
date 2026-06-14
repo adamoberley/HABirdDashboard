@@ -1,0 +1,7 @@
+# playwright is intentionally NOT listed: it's preinstalled in the base image
+# (build.yaml) and pinned to the bundled Chromium. Adding it here risks a
+# version skew between the Python client and the browser binary.
+samsungtvws==2.6.0
+websocket-client>=1.6,<2     # sync transport used by samsungtvws
+Pillow>=10.0
+requests>=2.31

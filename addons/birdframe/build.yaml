@@ -1,0 +1,15 @@
+# Base images per architecture. We build FROM Microsoft's official Playwright
+# Python image, which ships a glibc Chromium plus all its system libraries
+# already installed and matched to the bundled Playwright version - this avoids
+# `playwright install --with-deps` (slow, and brittle on Home Assistant's
+# Alpine bases, which Chromium doesn't support).
+#
+# If you bump this tag, also unpin/bump `playwright` handling in
+# requirements.txt so the Python client matches the browser in the image.
+build_from:
+  aarch64: mcr.microsoft.com/playwright/python:v1.49.1-noble
+  amd64: mcr.microsoft.com/playwright/python:v1.49.1-noble
+
+labels:
+  org.opencontainers.image.title: "Bird Frame (Samsung Frame TV)"
+  org.opencontainers.image.source: "https://github.com/adamoberley/HABirdDashboard"

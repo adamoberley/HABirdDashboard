@@ -1,0 +1,101 @@
+# Bird Frame - Home Assistant add-on manifest.
+#
+# A long-running service (not the run-once pattern of most art-changer
+# add-ons): it keeps a headless Chromium warm and, every `interval_minutes`,
+# renders the Bird collage, screenshots it, and pushes the JPEG to a Samsung
+# Frame TV's Art Mode - replacing the previous upload in place so the TV's art
+# library never accumulates duplicates.
+name: Bird Frame (Samsung Frame TV)
+version: "0.1.0"
+slug: birdframe
+description: >-
+  Render the live Bird collage and push it to a Samsung Frame TV as Art Mode
+  artwork, on an interval, replacing the previous image each time.
+url: https://github.com/adamoberley/HABirdDashboard/tree/HABirdDashboard/addons/birdframe
+
+# Chromium (via Playwright) ships glibc binaries - amd64 and aarch64 only.
+# armhf/armv7/i386 are intentionally unsupported; they can't run the browser.
+arch:
+  - aarch64
+  - amd64
+
+# Long-running service. `init: false` because we build FROM a non-Home
+# Assistant base (the Playwright image) that has no s6-overlay.
+init: false
+startup: services
+boot: auto
+
+# No `image:` key on purpose -> the Supervisor builds the add-on locally from
+# the Dockerfile + build.yaml, so there's nothing to publish to a registry.
+
+# Supervisor API: used to auto-discover the BirdNET-Go add-on's internal address.
+hassio_api: true
+
+# Ingress: adds a "Bird Frame" panel in the HA sidebar with a live preview and a
+# "render & push now" button. Served on the same internal port as the renderer.
+ingress: true
+ingress_port: 8099
+panel_icon: mdi:bird
+panel_title: Bird Frame
+
+# Read-only access to Home Assistant's config so we can auto-discover the Frame
+# TV's IP from the samsungtv integration's stored entry (.storage). Read only -
+# the add-on never writes here. (Persistent add-on state - pairing tokens, the
+# tracked "current art" id, the illustration cache - lives in /data, which is
+# always available and needs no map entry.)
+map:
+  - "homeassistant_config:ro"
+
+options:
+  tv_ip: ""
+  birdnet_go_url: ""
+  interval_minutes: 30
+  resolution: "3840x2160"
+  theme: "light"
+  show_caption: true
+  window_hours: 24
+  collage_fill: 0.5
+  sit_confidence: 0.90
+  wall_clock: true
+  wall_weather: true
+  wall_corner: "bottom-right"
+  matte: "none"
+  active_hours: ""
+  ha_token: ""
+  weather_entity: ""
+  fahrenheit: false
+  log_level: "info"
+
+schema:
+  # Frame TV IP(s). Leave BLANK to auto-discover from your samsungtv
+  # integration (finds every Frame). Or set one or more IPs, comma-separated,
+  # to override - e.g. "192.168.1.208,192.168.1.209". Give each a DHCP
+  # reservation so it doesn't move.
+  tv_ip: "str?"
+  # BirdNET-Go base URL. Leave BLANK to auto-discover the add-on. Only set it
+  # (e.g. http://192.168.1.50:8080) if BirdNET-Go runs somewhere unusual.
+  birdnet_go_url: "str?"
+  interval_minutes: "int(1,1440)"
+  resolution: "list(3840x2160|1920x1080)"
+  theme: "list(light|dark)"
+  # Show the "Heard Recently" editorial caption above the collage.
+  show_caption: "bool"
+  # Time window the collage summarises: 1H / 12H / 24H / 7D / ALL.
+  window_hours: "list(1|12|24|168|1000000)"
+  collage_fill: "float(0.1,1.0)"
+  sit_confidence: "float(0,1.01)"
+  wall_clock: "bool"
+  wall_weather: "bool"
+  wall_corner: "list(top-left|top-right|bottom-left|bottom-right)"
+  # Frame matte/border style passed to the TV: "none" fills the panel.
+  matte: "str"
+  # Empty = push 24/7. Or a HH:MM-HH:MM window (local time), e.g. "06:30-22:00";
+  # outside it the add-on idles and leaves the last image up.
+  active_hours: "str?"
+  # Optional: pull weather from Home Assistant instead of BirdNET-Go's built-in
+  # source. A long-lived token + (optional) weather entity. Left blank, weather
+  # comes from BirdNET-Go (yr.no) with no token needed.
+  ha_token: "str?"
+  weather_entity: "str?"
+  fahrenheit: "bool"
+  log_level: "list(debug|info|warning|error)"
