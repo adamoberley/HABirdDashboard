@@ -91,6 +91,23 @@ window.AV_CONFIG = {
   // 'cluster' mode.
   collageHole: 0.5,
 
+  // Ring flow: in 'ring' mode, bank every in-flight bird so it follows the
+  // ring's tangent - nose along the circle, belly toward the centre - so the
+  // whole flock wheels like a murmuration (far-side birds roll fully over).
+  //   'cw'  (default) - clockwise
+  //   'ccw'           - counter-clockwise
+  //   'off'           - birds keep their natural orientation (the plain ring)
+  // Needs the per-illustration DIRS heading table (built by
+  // avian/scripts/build_dirs.py and baked into masks.js); birds without a
+  // heading stay upright. Ignored unless collageShape is 'ring'. Per-display
+  // override on the static page: ?flow=cw / ?flow=ccw / ?flow=off.
+  collageFlow: 'cw',
+
+  // Flow strength (0 - 1): how strictly birds align to the tangent. 1.0 (the
+  // default) is a full head-to-tail wheel; lower values keep more of each
+  // bird's own pose for a gentler bank. URL override: ?strength=0.6
+  collageFlowStrength: 1,
+
   // Paper background colour, per theme (hex). Left '', each theme uses its
   // built-in ground (near-white #fcfcfb light, charcoal #1a1a1a dark). Set
   // these to taste - e.g. a warm cream by day, a near-black by night - to make

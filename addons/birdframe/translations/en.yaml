@@ -50,6 +50,17 @@ configuration:
     description: >-
       Ring shape only: how big the open centre is (0.1-0.7 of the shorter side).
       Bigger = a more prominent void with the flock pushed out toward the edges.
+  collage_flow:
+    name: Ring flow (spin)
+    description: >-
+      Ring shape only: bank each in-flight bird along the circle so the flock
+      wheels around the centre, like a murmuration. Clockwise or
+      counter-clockwise, or off to keep natural orientations.
+  collage_flow_strength:
+    name: Flow strength
+    description: >-
+      How strictly birds align to the circle. 1 is a full head-to-tail wheel;
+      lower keeps more of each bird's own pose for a gentler bank.
   show_caption:
     name: Caption
     description: >-

@@ -1476,7 +1476,11 @@
         continue;
       }
       var best = null;
-      if (ringMode) {
+      // Sparse rings (<=60 birds) scatter evenly for an airy, frame-filling
+      // wheel; busier rings fall through to the tight spiral nesting below, so
+      // a big flock packs close around the hole and each bird stays larger
+      // instead of shrinking to fit even spacing.
+      if (ringMode && tiles.length <= 60) {
         // RING: fill the whole frame around an open centre. The cluster
         // spiral below grows one compact blob (so a hole in it just reads
         // as "blob with a hole"); ring mode instead scatters birds across
@@ -1607,6 +1611,22 @@
       if (mHole) holeFrac = parseFloat(mHole[1]);
     }
     var ringMode = shape === 'ring';
+    // Flow: in ring mode, rotate in-flight birds so they fly along the ring's
+    // tangent (a wheeling flock). 'cw'/'ccw' pick the direction; flowStrength
+    // 0..1 scales from upright to fully tangential. Needs a per-illustration
+    // heading DIRS[slug] (degrees, 0=right, 90=down). Static page can override
+    // per-URL: ?flow=ccw&strength=1.
+    var flow = AV_CFG.collageFlow || 'off';
+    var flowStrength = (typeof AV_CFG.collageFlowStrength === 'number') ? AV_CFG.collageFlowStrength : 1;
+    if (window.AV_CONFIG) {
+      var mFlow = location.search.match(/[?&]flow=(cw|ccw|off)/);
+      if (mFlow) flow = mFlow[1];
+      var mFs = location.search.match(/[?&]strength=([\d.]+)/);
+      if (mFs) flowStrength = parseFloat(mFs[1]);
+    }
+    flowStrength = Math.max(0, Math.min(1, flowStrength));
+    var flowOn = ringMode && (flow === 'cw' || flow === 'ccw');
+    var DIRTAB = (window.__DIRS) || (typeof DIRS !== 'undefined' ? DIRS : {});
     if (ringMode) {
       holeFrac = Math.max(0.1, Math.min(0.7, holeFrac));
       // A roundish void, sized off the SHORTER axis (so it stays an open
@@ -1645,7 +1665,11 @@
     var nBirds = items.length;
     var fill = (typeof AV_CFG.collageFill === 'number') ? AV_CFG.collageFill : 0.5;
     fill = Math.max(0.1, Math.min(1.0, fill));
-    var countOffset = nBirds <= 12 ? -0.05 : nBirds <= 24 ? 0 : 0.05;
+    // Busier plates get a bigger area budget AND a tighter gap (pad, below),
+    // so a large flock packs closer and each bird stays a bit larger instead
+    // of shrinking to specks.
+    var countOffset = nBirds <= 12 ? -0.05 : nBirds <= 24 ? 0 :
+                      nBirds <= 48 ? 0.08 : nBirds <= 90 ? 0.18 : 0.28;
     var budgetFrac = Math.max(0.04, Math.min(1.2, fill + countOffset));
     var budget  = vpArea * budgetFrac;
     var minArea = vpArea * T.minTileAreaFrac;
@@ -1665,6 +1689,9 @@
       // (0) confidence must not read as "uncertain bird" - perch it.
       var __conf = +s.best_conf || 0;
       var pose = (DIMS[base + '-2'] && __conf > 0 && __conf < SIT_CONFIDENCE) ? 2 : 1;
+      // Flow wants a coherent wheel of fliers: force the flight pose for any
+      // species that has one (all bundled species do).
+      if (flowOn && DIMS[base + '-2']) pose = 2;
       var slug = pose === 2 ? base + '-2' : base;
       var mask = loadMask(slug);
       if (!mask && pose === 2) { pose = 1; slug = base; mask = loadMask(slug); }
@@ -1710,7 +1737,10 @@
     var xBias = narrow ? 1 : T.ellipseAspectBias;
     var yBias = narrow ? 1.7 : 1;   // gentler than the desktop bias so the
                                     // portrait cluster stays a bit wider / less tall
-    var pad = narrow ? Math.max(1, COLLAGE_PAD - 1) : COLLAGE_PAD;
+    // Tighten the breathing room as the flock grows: dense plates pack closer
+    // so each bird stays larger rather than shrinking to fit the gaps.
+    var basePad = nBirds > 90 ? 1 : nBirds > 45 ? 2 : COLLAGE_PAD;
+    var pad = narrow ? Math.max(1, basePad - 1) : basePad;
     var placed = maskPack(tiles, W, H, xBias, yBias, pad, obstacles, ringMode);
 
     // Scale-to-fit: iterate shrink + repack until every tile lands on
@@ -1837,6 +1867,28 @@
         imgEl.style.visibility = '';
         imgEl.onerror = function () { window.__birdImgErr(imgEl); };
         imgEl.setAttribute('src', src);
+      }
+      // Ring flow: rotate the IMG only (never the tile - the tile box stays
+      // axis-aligned, so silhouette packing, alpha-mask hit-testing and the
+      // tooltip are all untouched). Bank each bird INTO the ring: nose along
+      // the tangent, BELLY toward the centre (the inside of the turn). The art
+      // is drawn dorsal-up, so the belly sits 90deg clockwise of the nose for a
+      // right-facing bird and ccw for a left-facing one; we mirror (flip) the
+      // birds whose belly would otherwise face outward. Far-side birds roll
+      // fully over - that's the wheel. Applied every render pass.
+      var head = DIRTAB[slugify(s.sci) + (r.pose === 2 ? '-2' : '')];
+      if (flowOn && r.pose === 2 && typeof head === 'number') {
+        var phi = Math.atan2(r.y + r.fullH / 2 - H / 2, r.x + r.fullW / 2 - W / 2) * 180 / Math.PI;
+        var dir = (flow === 'ccw') ? 1 : -1;
+        var tau = phi + dir * 90;                          // nose rides the tangent
+        var rightish = Math.cos(head * Math.PI / 180) >= 0;
+        var flip = (dir === 1) ? !rightish : rightish;     // mirror if belly would face outward
+        var rot = flip ? (tau - 180 + head) : (tau - head);
+        rot = ((((rot % 360) + 540) % 360) - 180) * flowStrength;
+        imgEl.style.transformOrigin = '50% 50%';
+        imgEl.style.transform = 'rotate(' + rot.toFixed(1) + 'deg)' + (flip ? ' scaleX(-1)' : '');
+      } else if (imgEl.style.transform) {
+        imgEl.style.transform = '';
       }
       if (fresh) {
         collage.appendChild(btn);
