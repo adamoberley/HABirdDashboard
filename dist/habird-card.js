@@ -4915,7 +4915,7 @@ var HABIRD_EDITOR_SCHEMA = [
     ] } } },
     { name: 'xeno_canto_key', selector: { text: {} } },
     { name: 'sit_confidence', selector: { number: { min: 0, max: 1.01, step: 0.01, mode: 'slider' } } },
-    { name: 'audio_boost', selector: { number: { min: 0, max: 24, step: 6, mode: 'slider', unit_of_measurement: 'dB' } } },
+    { name: 'audio_boost', selector: { number: { min: 0, max: 48, step: 6, mode: 'slider', unit_of_measurement: 'dB' } } },
     { name: 'image_base', selector: { text: {} } },
   ] },
   { name: 'connection', type: 'expandable', flatten: true, title: 'Connection & data', schema: [
@@ -4962,7 +4962,7 @@ var HABIRD_HELPERS = {
   weather_entity: 'Default (blank): the first weather.* entity found.',
   hide_cursor: 'For wall displays: pointer disappears after 8 s idle.',
   sit_confidence: 'Birds perch at or above this detection confidence and fly below it. 0 = always perched, 1.01 = always flying.',
-  audio_boost: "Detection clips are quiet; the boost is compressed so louder doesn't clip. 0 dB = off.",
+  audio_boost: "Detection clips are quiet; this boosts playback up to +48 dB (0 dB = off), compressed to curb clipping. Faint clips get much louder; the loudest can distort a little near the top - ease off if so.",
   tap_action: "What tapping a bird does. Default opens the info modal and plays the reference call. Call/both need a Xeno-Canto key; without one they fall back to just opening info.",
   xeno_canto_key: "Default (blank): reference calls off. A free key from xeno-canto.org/account turns them on - a clean example call to compare against your station's own captures.",
   collage_fill: 'How much of the card the flock fills (0.5 ≈ half, 1.0 ≈ nearly edge-to-edge). Busier days spread a little wider on their own. Birds always shrink to fit, so higher is safe.',
