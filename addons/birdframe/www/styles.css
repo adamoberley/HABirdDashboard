@@ -632,12 +632,19 @@
      layout) scrolls instead of clipping. */
   .view#v1 { overflow-y: auto; overflow-x: hidden; }
   @media (max-width: 900px) {
-    .stats-grid { grid-template-columns: 1fr; gap: 40px; }
+    /* Stacked single column: take the content's natural (tall) height instead
+       of shrinking to the view (flex: 1 1 auto + min-height: 0 would let the
+       grid collapse, clipping the heatmap), so #v1 actually scrolls on phones
+       and portrait displays. */
+    .stats-grid { grid-template-columns: 1fr; gap: 40px; flex: 0 0 auto; min-height: 0; }
     /* Stacked order: tables first, the heatmap underneath, and a buffer
        below it so its bottom row scrolls clear of the floating view
        switcher. */
     .stats-side { order: 1; }
-    .stats-timeline { order: 2; margin-bottom: 64px; max-height: none; }
+    /* Full-height heatmap (no inner scroll) so the whole view is ONE scroll on
+       a phone, not a nested one. Selector outranks the base max-height rule
+       that follows it in source order. */
+    .view#v1 .stats-timeline { order: 2; margin-bottom: 64px; max-height: none; }
   }
   /* Desktop two-column: size the grid to the side panel's content height
      (the heatmap pane stretches to match it, scrolling internally) and

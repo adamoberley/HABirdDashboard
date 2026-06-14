@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.2.2 — 2026-06-14
+
+### Fixed
+- **Stats view now scrolls on phones / portrait displays.** The stacked
+  single-column layout was a shrinking flex child, so it collapsed to the
+  viewport and clipped the heatmap instead of scrolling. It now takes its
+  natural height and the view scrolls; the heatmap is full-height there too,
+  so it's one clean scroll rather than a nested one.
+
 ## v1.2.1 — 2026-06-14
 
 ### Added
