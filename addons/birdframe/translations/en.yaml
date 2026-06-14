@@ -1,94 +1,110 @@
-# Labels + help shown next to each field on the add-on's Configuration tab.
+# Labels + help shown next to each field on the app's Configuration tab.
+# Ordered: Appearance -> What it shows -> Updating -> Connection -> Optional
+# overlays -> Advanced.
 configuration:
+  # ---- Appearance ----
+  theme:
+    name: Theme
+    description: Light (warm paper) or dark background for the collage.
+  paper_color:
+    name: Paper color
+    description: >-
+      Background color behind the birds, as a hex value. The default is a warm
+      cream so it reads as art paper, not bright white; blank uses the theme's
+      near-white. Tweak it and hit "Render & push now" on the Bird Frame panel
+      to preview.
+  paper_texture:
+    name: Paper texture
+    description: >-
+      Subtle grain over the background so it looks like a print on paper, not
+      flat color. 0 = off, ~0.06 = gentle washi grain, higher = coarser. Preview
+      from the Bird Frame panel.
+  collage_fill:
+    name: Collage fill
+    description: >-
+      How much of the screen the flock claims (0.1-1.0). 0.5 fills about half;
+      1.0 packs nearly edge-to-edge.
+  show_caption:
+    name: Caption
+    description: >-
+      Show a small "Heard Recently" title above the collage. Off (default) for a
+      pure edge-to-edge painting.
+  matte:
+    name: Frame matte
+    description: >-
+      Border the TV draws around the image. "none" (default) fills the whole
+      panel; a Samsung matte name like "shadowbox" gives a framed-print look.
+  # ---- What it shows ----
+  window_hours:
+    name: Time window
+    description: >-
+      How far back the collage summarises: 1 = 1H, 12 = 12H, 24 = 24H,
+      168 = 7D, 1000000 = ALL.
+  sit_confidence:
+    name: Perch confidence
+    description: >-
+      A species perches when its best detection confidence in the window is at
+      or above this (0-1.01); below it, it shows its flight pose.
+  # ---- Updating ----
+  interval_minutes:
+    name: Update interval (minutes)
+    description: How often a fresh collage is rendered and pushed to the TV.
+  active_hours:
+    name: Active hours
+    description: >-
+      Leave blank to update 24/7, or set a local-time window like 06:30-22:00.
+      Outside it the app idles and leaves the last image up.
+  # ---- Connection (auto-discovered; usually leave blank) ----
   tv_ip:
     name: Frame TV IP(s)
     description: >-
       Leave blank to auto-discover every Frame from your Samsung TV integration.
       Or enter one or more IPs, comma-separated, to override
       (e.g. 192.168.1.208,192.168.1.209). First run shows an "Allow connection?"
-      prompt on each TV - accept it once with the remote to pair. Give each TV a
-      DHCP reservation.
+      prompt on each TV - accept it once with the remote. Give each TV a DHCP
+      reservation.
   birdnet_go_url:
     name: BirdNET-Go URL
     description: >-
-      Leave blank to auto-discover the BirdNET-Go add-on. Only set it
+      Leave blank to use the standard BirdNET-Go address. Only set it
       (e.g. http://192.168.1.50:8080) if BirdNET-Go runs somewhere unusual.
-  interval_minutes:
-    name: Update interval (minutes)
-    description: How often a fresh collage is rendered and pushed to the TV.
   resolution:
     name: Panel resolution
     description: >-
       Match your TV's panel. 3840x2160 for 4K Frames (most); 1920x1080 for 32"
       and pre-2021 models.
-  theme:
-    name: Theme
-    description: Light (paper) or dark background for the collage.
-  paper_color:
-    name: Paper color
-    description: >-
-      Background color behind the birds, as a hex value (default is a warm
-      cream so it reads as art paper, not bright white). Leave blank to use the
-      theme's near-white. Tweak it and use the panel's "Render & push now"
-      preview to see the result.
-  paper_texture:
-    name: Paper texture
-    description: >-
-      Adds a subtle grain over the background so it looks like a print on paper
-      rather than flat color. 0 turns it off; about 0.06 is a gentle washi
-      grain; higher is coarser. Preview with the panel's "Render & push now".
-  show_caption:
-    name: Show caption
-    description: >-
-      Show the small "Heard Recently" title above the collage. Turn off for a
-      pure edge-to-edge art look.
-  window_hours:
-    name: Time window
-    description: >-
-      How far back the collage summarises: 1 = 1H, 12 = 12H, 24 = 24H,
-      168 = 7D, 1000000 = ALL.
-  collage_fill:
-    name: Collage fill
-    description: >-
-      How much of the screen the flock claims (0.1-1.0). 0.5 fills about half;
-      1.0 packs nearly edge-to-edge.
-  sit_confidence:
-    name: Perch confidence
-    description: >-
-      A species perches when its best detection confidence in the window is at
-      or above this (0-1.01); below it, it shows its flight pose.
+  # ---- Optional overlays: clock & weather (off by default) ----
   wall_clock:
-    name: Show clock
-    description: Show a clock in a corner of the collage.
+    name: Clock overlay (optional)
+    description: >-
+      A clock in a corner of the collage. Off by default - most "painting"
+      setups leave it off; it's here if you want a functional wall display.
   wall_weather:
-    name: Show weather
+    name: Weather overlay (optional)
     description: >-
-      Show current conditions + sunrise/sunset. Uses BirdNET-Go's built-in
-      weather unless you set a Home Assistant token below.
+      Current conditions + sunrise/sunset in a corner. Off by default - not the
+      usual look for art, but available. Uses BirdNET-Go's built-in weather
+      unless you add a Home Assistant token below.
   wall_corner:
-    name: Clock/weather corner
-    description: Which corner the clock/weather block sits in.
-  matte:
-    name: Frame matte
-    description: 'Border style sent to the TV. "none" fills the whole panel.'
-  active_hours:
-    name: Active hours
-    description: >-
-      Leave blank to update 24/7, or set a local-time window like 06:30-22:00.
-      Outside it the add-on idles and leaves the last image up.
-  ha_token:
-    name: Home Assistant token (optional)
-    description: >-
-      Only needed if you want weather from Home Assistant instead of BirdNET-Go.
-      A long-lived token from a non-admin user (Profile - Security).
+    name: Overlay corner
+    description: Which corner the clock/weather overlay sits in (if either is on).
   weather_entity:
-    name: Weather entity (optional)
-    description: e.g. weather.forecast_home. Blank = first weather.* entity found.
-  fahrenheit:
-    name: Fahrenheit
+    name: "Weather overlay: HA entity"
     description: >-
-      Convert BirdNET-Go's Celsius for display. Ignored when weather comes from
-      Home Assistant (already in your units).
+      Only with a Home Assistant token below. e.g. weather.forecast_home;
+      blank = first weather.* entity found.
+  ha_token:
+    name: "Weather overlay: HA token"
+    description: >-
+      Only if you want the weather overlay to use Home Assistant's weather
+      instead of BirdNET-Go's. A long-lived token from a non-admin user
+      (Profile - Security).
+  fahrenheit:
+    name: "Weather overlay: Fahrenheit"
+    description: >-
+      Convert BirdNET-Go's Celsius for the weather overlay. Ignored when weather
+      comes from Home Assistant (already in your units).
+  # ---- Advanced ----
   log_level:
     name: Log level
-    description: Set to debug to troubleshoot rendering or TV connection.
+    description: Set to debug to troubleshoot rendering or the TV connection.

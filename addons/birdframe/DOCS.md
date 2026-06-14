@@ -64,19 +64,25 @@ small and it runs offline after warm-up.
 
 ## Options
 
-See each field's inline help on the Configuration tab. The ones people touch
-most:
+Everything's on the Configuration tab, top to bottom: **Appearance → What it
+shows → Updating → Connection → Optional overlays → Advanced**. The defaults
+already look like a painting, so most setups change little. Most-touched:
 
 | Option | What it does |
 | --- | --- |
-| `interval_minutes` | How often the collage refreshes on the TV. |
-| `resolution` | `3840x2160` (4K Frames) or `1920x1080` (32"/older). |
-| `theme` | `light` (paper) or `dark`. |
-| `window_hours` | Collage time window: `1`/`12`/`24`/`168`/`1000000` (ALL). |
-| `wall_clock` / `wall_weather` | Clock / weather block in a corner. |
-| `show_caption` | Off (default) = edge-to-edge art, no title. |
+| `theme` | `light` (warm paper) or `dark`. |
+| `paper_color` | Background hex; default warm cream, blank = near-white. |
+| `paper_texture` | Paper grain: `0` off, ~`0.06` subtle washi, higher coarser. |
 | `collage_fill` | How full the flock packs (0.1–1.0). |
+| `show_caption` | Off (default) = edge-to-edge art, no title. |
+| `window_hours` | Time window: `1`/`12`/`24`/`168`/`1000000` (ALL). |
+| `interval_minutes` | How often the collage refreshes on the TV. |
 | `active_hours` | e.g. `06:30-22:00`; blank = 24/7. |
+| `resolution` | `3840x2160` (4K Frames) or `1920x1080` (32"/older). |
+
+*Optional overlays* — `wall_clock` / `wall_weather` add a dashboard-style
+clock/weather block in a corner. Off by default; the point here is art, not a
+status panel.
 
 ## Trying out config changes
 
