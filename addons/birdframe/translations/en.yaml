@@ -24,6 +24,13 @@ configuration:
   theme:
     name: Theme
     description: Light (paper) or dark background for the collage.
+  paper_color:
+    name: Paper color
+    description: >-
+      Background color behind the birds, as a hex value (default is a warm
+      cream so it reads as art paper, not bright white). Leave blank to use the
+      theme's near-white. Tweak it and use the panel's "Render & push now"
+      preview to see the result.
   show_caption:
     name: Show caption
     description: >-

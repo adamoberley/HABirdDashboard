@@ -6,7 +6,7 @@
 # Frame TV's Art Mode - replacing the previous upload in place so the TV's art
 # library never accumulates duplicates.
 name: Bird Frame (Samsung Frame TV)
-version: "0.3.0"
+version: "0.3.1"
 slug: birdframe
 description: >-
   Render the live Bird collage and push it to a Samsung Frame TV as Art Mode
@@ -49,6 +49,7 @@ options:
   interval_minutes: 30
   resolution: "3840x2160"
   theme: "light"
+  paper_color: "#f0e8d5"
   show_caption: false
   window_hours: 24
   collage_fill: 0.7
@@ -75,6 +76,9 @@ schema:
   interval_minutes: "int(1,1440)"
   resolution: "list(3840x2160|1920x1080)"
   theme: "list(light|dark)"
+  # Background paper colour (hex). Default is a warm cream; blank = the theme's
+  # near-white. Tune it from the panel's live preview.
+  paper_color: "str?"
   # Show the "Heard Recently" editorial caption above the collage.
   show_caption: "bool"
   # Time window the collage summarises: 1H / 12H / 24H / 7D / ALL.

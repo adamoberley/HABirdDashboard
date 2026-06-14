@@ -60,7 +60,8 @@ class Capturer:
             # Strip on-screen chrome - this is wall art. Always hide the top
             # page bar (window picker + menu) and zero the collage view's
             # padding: its 88px bottom reserve for the now-hidden view slider
-            # was pushing the flock above centre. The caption is optional. The
+            # pushed the flock above centre. The caption is optional, and an
+            # optional warmer paper colour overrides the near-white default. The
             # window was already selected above, while the bar was still present.
             art_css = (
                 "header.top{display:none!important;}"
@@ -68,7 +69,14 @@ class Capturer:
             )
             if not opts.show_caption:
                 art_css += ".static-head{display:none!important;}"
+            if opts.paper_color:
+                art_css += f"html{{--paper:{opts.paper_color}!important;}}"
             page.add_style_tag(content=art_css)
+
+            # The collage already packed on load using the old padding; the CSS
+            # above changed the box, so fire a resize - apt.js re-packs the
+            # collage on resize - to re-centre it in the full frame.
+            page.evaluate("window.dispatchEvent(new Event('resize'))")
 
             try:
                 page.wait_for_function(
