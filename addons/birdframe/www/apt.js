@@ -1739,7 +1739,7 @@
         // rotated bird's wings sweep into a neighbour the collision never saw.
         headingDeg: (typeof headDeg === 'number') ? headDeg : null,
         flow: (flowOn && pose === 2 && typeof headDeg === 'number')
-          ? { dir: (flow === 'ccw') ? 1 : -1, strength: flowStrength } : null,
+          ? { dir: (flow === 'ccw') ? -1 : 1, strength: flowStrength } : null,
       };
     }).filter(Boolean);
 
@@ -1780,7 +1780,7 @@
     // packs them closer (bigger, denser), higher gives more breathing room.
     // collageSpacing 0-1 (0.5 = the default gap); ?spacing= overrides on the
     // static page.
-    var spacing = (typeof AV_CFG.collageSpacing === 'number') ? AV_CFG.collageSpacing : 0.5;
+    var spacing = (typeof AV_CFG.collageSpacing === 'number') ? AV_CFG.collageSpacing : 0;
     if (window.AV_CONFIG) {
       var mSp = location.search.match(/[?&]spacing=([\d.]+)/);
       if (mSp) spacing = parseFloat(mSp[1]);
@@ -1926,7 +1926,7 @@
       var head = DIRTAB[slugify(s.sci) + (r.pose === 2 ? '-2' : '')];
       if (flowOn && r.pose === 2 && typeof head === 'number') {
         var phi = Math.atan2(r.y + r.fullH / 2 - H / 2, r.x + r.fullW / 2 - W / 2) * 180 / Math.PI;
-        var dir = (flow === 'ccw') ? 1 : -1;
+        var dir = (flow === 'ccw') ? -1 : 1;
         var tau = phi + dir * 90;                          // nose rides the tangent
         var rightish = Math.cos(head * Math.PI / 180) >= 0;
         var flip = (dir === 1) ? !rightish : rightish;     // mirror if belly would face outward

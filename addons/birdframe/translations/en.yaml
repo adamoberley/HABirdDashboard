@@ -64,9 +64,9 @@ configuration:
   collage_spacing:
     name: Bird spacing
     description: >-
-      How much space sits between birds (any shape). They never overlap; lower
-      packs them closer and a touch bigger, higher gives more breathing room.
-      0.5 is the default.
+      How much space sits between birds (any shape). They never overlap; 0 (the
+      default) packs them tightest and a touch bigger, higher gives more
+      breathing room.
   show_caption:
     name: Caption
     description: >-

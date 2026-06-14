@@ -58,7 +58,7 @@ options:
   collage_hole: 0.5
   collage_flow: "cw"
   collage_flow_strength: 1.0
-  collage_spacing: 0.5
+  collage_spacing: 0.0
   show_caption: false
   matte: "none"
   # --- What it shows ---
@@ -110,7 +110,7 @@ schema:
   collage_flow: "list(cw|ccw|off)"
   # How strictly birds align to the circle (0 = natural, 1 = full wheel).
   collage_flow_strength: "float(0,1)"
-  # Gap between birds (any shape; 0 = packed close, 0.5 = default, 1 = airy).
+  # Gap between birds (any shape; 0 = packed tight [default], 1 = airy).
   # They never overlap regardless - this only tunes the breathing room.
   collage_spacing: "float(0,1)"
   # Show the small "Heard Recently" title (off = pure edge-to-edge art).

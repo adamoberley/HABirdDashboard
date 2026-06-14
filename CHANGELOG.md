@@ -1,9 +1,9 @@
 # Changelog
 
-## Unreleased
+## v1.2.1 — 2026-06-14
 
 ### Added
-- **Bird spacing control.** A `collageSpacing` slider (0–1, default 0.5) tunes
+- **Bird spacing control.** A `collageSpacing` slider (0–1, default 0 = tightest) tunes
   the gap between birds for any collage shape — lower packs them closer and a
   touch bigger, higher gives more breathing room. They never overlap regardless
   (the packer reserves each bird's footprint). Card editor, `config.js`
@@ -60,6 +60,13 @@
   `sizeContrast`).
 - **Recording-boost ceiling raised** from +24 dB to **+48 dB**
   (`audio_boost`) for quiet microphones.
+- **Card editor: a "Ring collage" section.** The ring-specific settings (shape,
+  centre size, flow direction + strength) now live in their own collapsible
+  group, separate from the general collage controls.
+
+### Fixed
+- **Ring flow direction was inverted** — "clockwise" wheeled counter-clockwise
+  and vice versa. Corrected so each matches its label.
 
 ### Added
 - **2K artwork + higher-res pipeline.** `pregen.py` gains
