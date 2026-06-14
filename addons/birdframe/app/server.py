@@ -172,6 +172,10 @@ def _config_js(opts: Options, birdnet_url: str) -> bytes:
         "viewSelector": False,
         "collageFill": opts.collage_fill,
         "sizeContrast": opts.size_contrast,
+        # Cluster (one filled flock) or ring (birds scatter across the frame
+        # around an open centre); collageHole sizes the ring's void.
+        "collageShape": opts.collage_shape,
+        "collageHole": opts.collage_hole,
         "sitConfidence": opts.sit_confidence,
         "audioBoostDb": 0,
         "tapAction": "info",

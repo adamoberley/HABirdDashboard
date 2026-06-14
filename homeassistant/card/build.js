@@ -253,6 +253,11 @@ var HABIRD_EDITOR_SCHEMA = [
     { name: 'collage_fill', selector: { number: { min: 0.1, max: 1, step: 0.05, mode: 'slider' } } },
     { name: 'size_contrast', selector: { number: { min: 0.2, max: 0.8, step: 0.05, mode: 'slider' } } },
     { name: 'paper_texture', selector: { number: { min: 0, max: 0.2, step: 0.01, mode: 'slider' } } },
+    { name: 'collage_shape', selector: { select: { mode: 'dropdown', options: [
+      { value: 'cluster', label: 'Cluster (filled)' },
+      { value: 'ring', label: 'Ring (open centre)' },
+    ] } } },
+    { name: 'collage_hole', selector: { number: { min: 0.1, max: 0.7, step: 0.05, mode: 'slider' } } },
   ] },
   { name: 'birds', type: 'expandable', flatten: true, title: 'Birds & audio', schema: [
     { name: 'tap_action', selector: { select: { mode: 'dropdown', options: [
@@ -300,6 +305,8 @@ var HABIRD_LABELS = {
   paper_color: 'Paper color (light)',
   paper_color_dark: 'Paper color (dark)',
   paper_texture: 'Paper texture',
+  collage_shape: 'Collage shape',
+  collage_hole: 'Ring centre size',
   image_base: 'Artwork base URL',
   birdnet_url: 'BirdNET-Go URL',
   data_source: 'Data source',
@@ -321,6 +328,8 @@ var HABIRD_HELPERS = {
   paper_color: 'With Background: Paper, the page colour in light mode (hex, e.g. #f0e8d5). Blank uses the theme default (near-white).',
   paper_color_dark: 'With Background: Paper, the page colour in dark mode (hex, e.g. #15120d). Blank uses the theme default (charcoal).',
   paper_texture: 'With Background: Paper, a faint paper grain over the background (0 = off, ~0.06 = subtle), so it reads like a print on washi rather than flat colour.',
+  collage_shape: 'Cluster packs one filled flock from the centre out; ring opens the middle into a halo of birds in flight.',
+  collage_hole: 'Ring shape only: how big the open centre is, as a fraction of the card. Bigger = a wider gap and a thinner band of birds.',
   image_base: 'Default (blank): artwork from the CDN. Use /local/habird-art/ for an offline copy.',
   birdnet_url: 'Default (blank): this host on port 8080, or HA ingress when remote.',
   data_source: 'Automatic uses the API and falls back to the MQTT sensors.',
@@ -433,6 +442,10 @@ class HABirdCard extends HTMLElement {
       paperColorDark: c.paper_color_dark || '',
       paperTexture: (typeof c.paper_texture === 'number') ? c.paper_texture : 0,
       paperBg: (c.background || 'transparent') === 'paper',
+      // Collage shape: 'cluster' (default filled blob) or 'ring' (open
+      // centre). collage_hole sizes the ring's gap (ignored for cluster).
+      collageShape: c.collage_shape || 'cluster',
+      collageHole: (typeof c.collage_hole === 'number') ? c.collage_hole : 0.5,
       audioBoostDb: (c.audio_boost == null ? 24 : +c.audio_boost),
       tapAction: c.tap_action || 'both',          // both | info | call
       xenoCantoKey: c.xeno_canto_key || '',        // enables reference calls

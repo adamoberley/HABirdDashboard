@@ -54,6 +54,8 @@ options:
   paper_texture: 0.06
   collage_fill: 0.7
   size_contrast: 0.5
+  collage_shape: "cluster"
+  collage_hole: 0.5
   show_caption: false
   matte: "none"
   # --- What it shows ---
@@ -93,6 +95,13 @@ schema:
   # How much bigger the most-heard birds draw than the rest (0.2-0.8; lower =
   # more even, higher = the loudest few dominate).
   size_contrast: "float(0.2,0.8)"
+  # Collage shape: "cluster" packs one filled flock; "ring" scatters the birds
+  # across the whole frame around an open centre (the Avian Visitors poster
+  # look). Ring fills best with a busy flock / long window.
+  collage_shape: "list(cluster|ring)"
+  # Ring only: size of the open centre (0.1-0.7 of the shorter side). Bigger =
+  # a more prominent void with the flock pushed toward the edges.
+  collage_hole: "float(0.1,0.7)"
   # Show the small "Heard Recently" title (off = pure edge-to-edge art).
   show_caption: "bool"
   # TV border around the image: "none" fills the panel; a Samsung matte name

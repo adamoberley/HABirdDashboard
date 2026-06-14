@@ -1,16 +1,16 @@
 (function () {
   // Bumped whenever the offline sketch build changes, so the browser
   // doesn't keep a stale cache after we regenerate the sketches.
-  var SKETCH_VERSION = 'r12'; // r12: regenerated perched House Sparrow at 2K
-                              // (Nano Banana Pro). r11: +84 region species.
+  var SKETCH_VERSION = 'r13'; // r13: 2K House Sparrow flight + House Wren
+                              // (both poses). r12: 2K House Sparrow perched.
   // Cache-bust for /api/img - bump whenever a bird gets re-rendered via
   // /api/regen or whenever you need every CF DC to drop its cached copy.
   // Cloudflare keys on the full URL incl. query, so bumping this is
   // equivalent to a global cache purge for /api/img. (caches.default
   // .delete() in the worker only affects ONE colo at a time, so a
   // versioned URL is the only reliable way to invalidate everywhere.)
-  var IMG_VERSION = 'r12'; // r12: new 2K House Sparrow perched art - drop
-                           // every cached copy. r11: +84 region species.
+  var IMG_VERSION = 'r13'; // r13: 2K House Sparrow flight + House Wren art -
+                           // drop every cached copy. r12: 2K Sparrow perched.
 
   // ===========================================================================
   // BirdNET-Go adapter (Home Assistant build)
@@ -1371,7 +1371,7 @@
   // occupancy grid before any bird is placed, so the flock packs around
   // them exactly as it packs around another bird - used for the wall
   // clock/weather block and the card's configured title.
-  function maskPack(tiles, W, H, xBias, yBias, pad, obstacles) {
+  function maskPack(tiles, W, H, xBias, yBias, pad, obstacles, ringMode) {
     var GW = Math.ceil(W / GRID_STRIDE) + 2;
     var GH = Math.ceil(H / GRID_STRIDE) + 2;
     var grid = new Uint8Array(GW * GH);
@@ -1380,6 +1380,24 @@
       var oy0 = Math.max(0, ob.y / GRID_STRIDE | 0);
       var ox1 = Math.min(GW - 1, (ob.x + ob.w) / GRID_STRIDE | 0);
       var oy1 = Math.min(GH - 1, (ob.y + ob.h) / GRID_STRIDE | 0);
+      // An `ellipse` obstacle (the ring-mode centre keep-out) blocks only
+      // the cells inside the oval, so the flock packs into a rounded halo
+      // instead of around a hard-edged box. Everything else is a rectangle.
+      if (ob.ellipse) {
+        var ecx = (ob.x + ob.w / 2) / GRID_STRIDE;
+        var ecy = (ob.y + ob.h / 2) / GRID_STRIDE;
+        var erx = (ob.w / 2) / GRID_STRIDE || 1;
+        var ery = (ob.h / 2) / GRID_STRIDE || 1;
+        for (var egy = oy0; egy <= oy1; egy++) {
+          var eoff = egy * GW;
+          var ndy = (egy - ecy) / ery;
+          for (var egx = ox0; egx <= ox1; egx++) {
+            var ndx = (egx - ecx) / erx;
+            if (ndx * ndx + ndy * ndy <= 1) grid[eoff + egx] = 1;
+          }
+        }
+        return;
+      }
       for (var ogy = oy0; ogy <= oy1; ogy++) {
         var ooff = ogy * GW;
         for (var ogx = ox0; ogx <= ox1; ogx++) grid[ooff + ogx] = 1;
@@ -1448,7 +1466,8 @@
       // Anchor bird goes dead-centre - unless an obstacle (the wall
       // clock or title on a small screen) reaches that far, in which
       // case it falls through to the spiral search like everyone else.
-      if (i === 0 && !(obstacles && obstacles.length && collides(t, cx - t.fullW / 2, cy - t.fullH / 2))) {
+      // Ring mode never centres the anchor: the open middle is the point.
+      if (i === 0 && !ringMode && !(obstacles && obstacles.length && collides(t, cx - t.fullW / 2, cy - t.fullH / 2))) {
         tx = cx - t.fullW / 2;
         ty = cy - t.fullH / 2;
         t.x = tx; t.y = ty;
@@ -1456,46 +1475,72 @@
         placed.push(t);
         continue;
       }
-      // Spiral outward. Stop the first ring that yields any non-colliding
-      // position - that ring is the tightest possible distance from
-      // centre. Within the ring, pick the position closest to the centre
-      // of mass of already-placed tiles (so cluster grows organically,
-      // not in fixed directions).
-      var comX = 0, comY = 0, comW = 0;
-      placed.forEach(function (p) {
-        var a = p.fullW * p.fullH;
-        comX += (p.x + p.fullW / 2) * a;
-        comY += (p.y + p.fullH / 2) * a;
-        comW += a;
-      });
-      // Nothing placed yet (anchor was displaced by an obstacle):
-      // grow from the viewport centre instead of a 0/0 NaN.
-      if (comW > 0) { comX /= comW; comY /= comW; }
-      else { comX = cx; comY = cy; }
-
-      var best = null, bestCost = Infinity;
-      var step = Math.max(GRID_STRIDE, Math.min(t.fullW, t.fullH) * 0.05);
-      var maxR = Math.max(W, H);
-      var foundRing = -1;
-      var phase = rand() * Math.PI * 2;
-      for (var r = 0; r <= maxR; r += step) {
-        if (foundRing >= 0 && r > foundRing + step * 2) break;
-        var samples = Math.max(36, Math.floor(r / 1.6));
-        for (var k = 0; k < samples; k++) {
-          var theta = phase + (k / samples) * Math.PI * 2;
-          // Elliptical ring - stretched per axis: xBias>yBias gives a wide
-          // (landscape) cluster, yBias>xBias a tall (portrait) one.
-          var px = cx + r * xBias * Math.cos(theta) - t.fullW / 2;
-          var py = cy + r * yBias * Math.sin(theta) - t.fullH / 2;
-          if (offGrid(t, px, py)) continue;
-          if (collides(t, px, py)) continue;
-          // Distance to existing cluster centre of mass + small noise.
-          var dxx = (px + t.fullW / 2 - comX);
-          var dyy = (py + t.fullH / 2 - comY);
-          var cost = Math.hypot(dxx / xBias, dyy / yBias) + rand() * step * 0.5;
-          if (cost < bestCost) { bestCost = cost; best = { x: px, y: py }; }
+      var best = null;
+      if (ringMode) {
+        // RING: fill the whole frame around an open centre. The cluster
+        // spiral below grows one compact blob (so a hole in it just reads
+        // as "blob with a hole"); ring mode instead scatters birds across
+        // the ENTIRE viewport with blue-noise spacing - sample many
+        // positions, keep the one farthest from its nearest neighbour.
+        // That reaches the corners and edges, so the flock reads as a
+        // rectangle of birds; the centre keep-out (stamped already) holds
+        // the void. Largest birds (placed first) stake out the open frame,
+        // smaller ones fill the gaps in toward the rim - the look from the
+        // original poster.
+        var bestScore = -Infinity;
+        var rangeX = Math.max(0, W - t.fullW), rangeY = Math.max(0, H - t.fullH);
+        for (var s = 0; s < 96; s++) {
+          var sx = rand() * rangeX, sy = rand() * rangeY;
+          if (collides(t, sx, sy)) continue;
+          var scx = sx + t.fullW / 2, scy = sy + t.fullH / 2;
+          var nd = Infinity;
+          for (var pi = 0; pi < placed.length; pi++) {
+            var pp = placed[pi];
+            if (pp.x < -1000) continue;       // skip the unplaced
+            var d = Math.hypot(scx - (pp.x + pp.fullW / 2), scy - (pp.y + pp.fullH / 2));
+            if (d < nd) nd = d;
+          }
+          if (nd > bestScore) { bestScore = nd; best = { x: sx, y: sy }; }
         }
-        if (best && foundRing < 0) foundRing = r;
+      } else {
+        // CLUSTER: spiral outward, stopping at the first ring with any
+        // non-colliding spot (the tightest distance from centre). Within
+        // that ring, pick the position closest to the centre of mass of
+        // placed tiles, so the blob grows organically, not directionally.
+        var comX = 0, comY = 0, comW = 0;
+        placed.forEach(function (p) {
+          var a = p.fullW * p.fullH;
+          comX += (p.x + p.fullW / 2) * a;
+          comY += (p.y + p.fullH / 2) * a;
+          comW += a;
+        });
+        if (comW > 0) { comX /= comW; comY /= comW; }
+        else { comX = cx; comY = cy; }       // nothing placed yet: grow from centre
+
+        var bestCost = Infinity;
+        var step = Math.max(GRID_STRIDE, Math.min(t.fullW, t.fullH) * 0.05);
+        var maxR = Math.max(W, H);
+        var foundRing = -1;
+        var phase = rand() * Math.PI * 2;
+        for (var r = 0; r <= maxR; r += step) {
+          if (foundRing >= 0 && r > foundRing + step * 2) break;
+          var samples = Math.max(36, Math.floor(r / 1.6));
+          for (var k = 0; k < samples; k++) {
+            var theta = phase + (k / samples) * Math.PI * 2;
+            // Elliptical ring - stretched per axis: xBias>yBias gives a wide
+            // (landscape) cluster, yBias>xBias a tall (portrait) one.
+            var px = cx + r * xBias * Math.cos(theta) - t.fullW / 2;
+            var py = cy + r * yBias * Math.sin(theta) - t.fullH / 2;
+            if (offGrid(t, px, py)) continue;
+            if (collides(t, px, py)) continue;
+            // Distance to existing cluster centre of mass + small noise.
+            var dxx = (px + t.fullW / 2 - comX);
+            var dyy = (py + t.fullH / 2 - comY);
+            var cost = Math.hypot(dxx / xBias, dyy / yBias) + rand() * step * 0.5;
+            if (cost < bestCost) { bestCost = cost; best = { x: px, y: py }; }
+          }
+          if (best && foundRing < 0) foundRing = r;
+        }
       }
       if (best) {
         t.x = best.x; t.y = best.y;
@@ -1542,6 +1587,37 @@
     // birds simply pack around the pill.
     var slEl = document.getElementById('slider');
     if (slEl && slEl.style.display !== 'none') addObstacle(slEl);
+
+    // Collage shape: 'ring' opens the centre into a halo of birds in
+    // flight, 'cluster' (default) packs one solid blob. The open centre
+    // is just an elliptical obstacle stamped dead-middle, so the same
+    // nesting + shrink-to-fit that flows birds around the wall clock
+    // forms the ring - and maskPack skips its centre anchor so nothing
+    // fills the hole. Pushed here (not at pack time) so it lands in the
+    // obstacle set the render signature is built from, and a live shape
+    // change repacks. Static-page displays can override per-URL
+    // (?ring / ?shape=cluster / ?hole=0.5); the card feeds its own config.
+    var shape = AV_CFG.collageShape;
+    var holeFrac = (typeof AV_CFG.collageHole === 'number') ? AV_CFG.collageHole : 0.5;
+    if (window.AV_CONFIG) {
+      if (/[?&]ring(=|&|$)/.test(location.search)) shape = 'ring';
+      var mShape = location.search.match(/[?&]shape=([\w-]+)/);
+      if (mShape) shape = mShape[1];
+      var mHole = location.search.match(/[?&]hole=([\d.]+)/);
+      if (mHole) holeFrac = parseFloat(mHole[1]);
+    }
+    var ringMode = shape === 'ring';
+    if (ringMode) {
+      holeFrac = Math.max(0.1, Math.min(0.7, holeFrac));
+      // A roundish void, sized off the SHORTER axis (so it stays an open
+      // centre, not a slot) and stretched a touch wider for the landscape
+      // look of the poster. Birds scatter to fill the frame around it.
+      var holeR = Math.min(W, H) * 0.5 * holeFrac;
+      var holeRx = holeR * 1.3;
+      var holeRy = holeR;
+      obstacles.push({ x: W / 2 - holeRx, y: H / 2 - holeRy,
+                       w: holeRx * 2, h: holeRy * 2, ellipse: true });
+    }
 
     // The silent poll mostly returns identical data - skip the whole
     // pack/render when nothing that affects layout changed, so the DOM
@@ -1635,7 +1711,7 @@
     var yBias = narrow ? 1.7 : 1;   // gentler than the desktop bias so the
                                     // portrait cluster stays a bit wider / less tall
     var pad = narrow ? Math.max(1, COLLAGE_PAD - 1) : COLLAGE_PAD;
-    var placed = maskPack(tiles, W, H, xBias, yBias, pad, obstacles);
+    var placed = maskPack(tiles, W, H, xBias, yBias, pad, obstacles, ringMode);
 
     // Scale-to-fit: iterate shrink + repack until every tile lands on
     // screen. The old single-pass version dropped birds when one pass
@@ -1668,7 +1744,7 @@
         scale = Math.min(scale, sx, sy);
       }
       tiles.forEach(function (t) { t.fullW *= scale; t.fullH *= scale; });
-      placed = maskPack(tiles, W, H, xBias, yBias, pad, obstacles);
+      placed = maskPack(tiles, W, H, xBias, yBias, pad, obstacles, ringMode);
       b = clusterBounds(placed);
     }
 
@@ -2025,7 +2101,12 @@
       else if (weights === 'extreme') n = i === 0 ? 500 : 1;
       else if (Array.isArray(weights)) n = weights[i] || 1;
       else n = Math.pow(0.55, i) * 100; // default hierarchy
-      return { sci: sci, com: sci, n: n };
+      var it = { sci: sci, com: sci, n: n };
+      // Optional pose control for layout previews: a confidence below
+      // sitConfidence flies the bird (wings-spread silhouette), at/above
+      // it perches; omitted leaves the default (perched).
+      if (typeof opts.conf === 'number') it.best_conf = opts.conf;
+      return it;
     });
     renderCollage(items);
     return { rendered: items.length, mode: weights || 'hierarchy' };
