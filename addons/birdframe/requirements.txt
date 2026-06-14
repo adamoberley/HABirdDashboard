@@ -1,6 +1,9 @@
-# playwright is intentionally NOT listed: it's preinstalled in the base image
-# (build.yaml) and pinned to the bundled Chromium. Adding it here risks a
-# version skew between the Python client and the browser binary.
+# playwright is pinned to the base image's tag (build.yaml) so the pip package
+# and the bundled Chromium revision match. We install it explicitly (rather than
+# relying on the image's preinstalled copy) because that copy lives in a
+# different interpreter than the one run.sh launches on Ubuntu noble - installing
+# via `python3 -m pip` puts it where the app's `python3` will find it.
+playwright==1.49.1
 samsungtvws==2.6.0
 websocket-client>=1.6,<2     # sync transport used by samsungtvws
 Pillow>=10.0
