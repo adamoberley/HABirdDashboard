@@ -399,6 +399,9 @@ def gen_one(
     anti_ref_key: str | None = None,
     species_note: str | None = None,
     style_ref: Path | None = None,
+    url: str = GEMINI_URL,
+    image_size: str | None = None,
+    aspect_ratio: str | None = None,
 ) -> bytes:
     """Single Gemini call with bounded retry on 429 + transient 5xx.
     Returns raw PNG bytes.
@@ -470,16 +473,26 @@ def gen_one(
             "data": base64.b64encode(style_ref.read_bytes()).decode(),
         }})
 
+    gen_cfg = {"responseModalities": ["TEXT", "IMAGE"]}
+    # Gemini 3 image models accept an imageConfig for output resolution
+    # (1K/2K/4K) and aspect ratio; gemini-2.5-flash-image omits it.
+    img_cfg = {}
+    if image_size:
+        img_cfg["imageSize"] = image_size
+    if aspect_ratio:
+        img_cfg["aspectRatio"] = aspect_ratio
+    if img_cfg:
+        gen_cfg["imageConfig"] = img_cfg
     payload = {
         "contents": [{"parts": parts}],
         # TEXT included so Gemini can surface safety messaging without
         # rejecting the request shape (image-only sometimes errors).
-        "generationConfig": {"responseModalities": ["TEXT", "IMAGE"]},
+        "generationConfig": gen_cfg,
     }
     # API key as header, NOT URL - keeps the key out of Google's
     # request logs, proxy logs, and shell history.
     req = urllib.request.Request(
-        GEMINI_URL,
+        url,
         data=json.dumps(payload).encode(),
         headers={"Content-Type": "application/json", "x-goog-api-key": api_key},
         method="POST",
@@ -547,6 +560,13 @@ def main() -> int:
     ap.add_argument("--ebird-region", help="eBird region code (e.g. US-CA, US-CA-085) to filter labels")
     ap.add_argument("--ebird-key", help="eBird API key (or EBIRD_API_KEY env)")
     ap.add_argument("--gemini-key", help="Gemini API key (or GEMINI_API_KEY env)")
+    ap.add_argument("--model", default="gemini-2.5-flash-image",
+                    help="Gemini image model id (default: gemini-2.5-flash-image). "
+                         "gemini-3-pro-image renders at 2K/4K for hero-quality art.")
+    ap.add_argument("--image-size", choices=["1K", "2K", "4K"],
+                    help="Output resolution (Gemini 3 image models). Default: model native (~1K).")
+    ap.add_argument("--aspect-ratio",
+                    help="Output aspect ratio for Gemini 3 image models, e.g. 1:1, 4:3, 3:4.")
     ap.add_argument("--out", type=Path,
                     default=Path(__file__).resolve().parents[1] / "assets" / "illustrations",
                     help="Output directory (default: avian/assets/illustrations/)")
@@ -577,6 +597,8 @@ def main() -> int:
     if not gemini_key:
         print("error: GEMINI_API_KEY required (--gemini-key or env)", file=sys.stderr)
         return 2
+    gemini_url = ("https://generativelanguage.googleapis.com/v1beta/models/"
+                  + args.model + ":generateContent")
 
     # Build species list
     if args.from_birdnet:
@@ -659,7 +681,10 @@ def main() -> int:
                                positive_ref=pos_ref, anti_ref=anti,
                                anti_ref_key=anti_key_for_call,
                                species_note=notes.get(sci),
-                               style_ref=style_ref_path)
+                               style_ref=style_ref_path,
+                               url=gemini_url,
+                               image_size=args.image_size,
+                               aspect_ratio=args.aspect_ratio)
                 path.write_bytes(data)
                 done += 1
                 refs_tag = "+ref" if pos_ref else ""

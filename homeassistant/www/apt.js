@@ -1,16 +1,16 @@
 (function () {
   // Bumped whenever the offline sketch build changes, so the browser
   // doesn't keep a stale cache after we regenerate the sketches.
-  var SKETCH_VERSION = 'r11'; // r10 + 84 region species (E-US warblers,
-                              // vireos, flycatchers, shorebirds) added.
+  var SKETCH_VERSION = 'r12'; // r12: regenerated perched House Sparrow at 2K
+                              // (Nano Banana Pro). r11: +84 region species.
   // Cache-bust for /api/img - bump whenever a bird gets re-rendered via
   // /api/regen or whenever you need every CF DC to drop its cached copy.
   // Cloudflare keys on the full URL incl. query, so bumping this is
   // equivalent to a global cache purge for /api/img. (caches.default
   // .delete() in the worker only affects ONE colo at a time, so a
   // versioned URL is the only reliable way to invalidate everywhere.)
-  var IMG_VERSION = 'r11'; // r10 + 84 region species added, so drop every
-                           // cached copy.
+  var IMG_VERSION = 'r12'; // r12: new 2K House Sparrow perched art - drop
+                           // every cached copy. r11: +84 region species.
 
   // ===========================================================================
   // BirdNET-Go adapter (Home Assistant build)
