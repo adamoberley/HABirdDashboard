@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Added
+- **Custom paper background — colour per theme + texture.** With
+  `background: paper`, set `paper_color` (light mode) and `paper_color_dark`
+  (dark mode) to any hex, and `paper_texture` (0–0.2) for a faint grayscale
+  grain, so the collage can read like a print on coloured washi rather than a
+  flat ground. Card editor fields + static-page `config.js` (`paperColor`,
+  `paperColorDark`, `paperTexture`). All opt-in — blank colour / 0 texture keeps
+  each theme's default ground. (Ported back from the Bird Frame TV app.)
+
 ### Changed
 - **The collage fills more of the screen, and now _grows_ with bird
   count.** The packing budget was raised and its curve flipped — a busy

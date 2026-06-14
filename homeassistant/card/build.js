@@ -213,6 +213,10 @@ var HABIRD_EDITOR_SCHEMA = [
       ] } } },
     ] },
     { name: '', type: 'grid', schema: [
+      { name: 'paper_color', selector: { text: {} } },
+      { name: 'paper_color_dark', selector: { text: {} } },
+    ] },
+    { name: '', type: 'grid', schema: [
       { name: 'window', selector: { select: { mode: 'dropdown', options: [
         { value: '1', label: 'Last hour' },
         { value: '12', label: 'Last 12 hours' },
@@ -248,6 +252,7 @@ var HABIRD_EDITOR_SCHEMA = [
     { name: 'hide_cursor', selector: { boolean: {} } },
     { name: 'collage_fill', selector: { number: { min: 0.1, max: 1, step: 0.05, mode: 'slider' } } },
     { name: 'size_contrast', selector: { number: { min: 0.2, max: 0.8, step: 0.05, mode: 'slider' } } },
+    { name: 'paper_texture', selector: { number: { min: 0, max: 0.2, step: 0.01, mode: 'slider' } } },
   ] },
   { name: 'birds', type: 'expandable', flatten: true, title: 'Birds & audio', schema: [
     { name: 'tap_action', selector: { select: { mode: 'dropdown', options: [
@@ -292,6 +297,9 @@ var HABIRD_LABELS = {
   xeno_canto_key: 'Xeno-Canto API key',
   collage_fill: 'Collage fill',
   size_contrast: 'Size contrast',
+  paper_color: 'Paper color (light)',
+  paper_color_dark: 'Paper color (dark)',
+  paper_texture: 'Paper texture',
   image_base: 'Artwork base URL',
   birdnet_url: 'BirdNET-Go URL',
   data_source: 'Data source',
@@ -310,6 +318,9 @@ var HABIRD_HELPERS = {
   xeno_canto_key: "Default (blank): reference calls off. A free key from xeno-canto.org/account turns them on - a clean example call to compare against your station's own captures.",
   collage_fill: 'How much of the card the flock fills (0.5 ≈ half, 1.0 ≈ nearly edge-to-edge). Busier days spread a little wider on their own. Birds always shrink to fit, so higher is safe.',
   size_contrast: 'How much bigger your most-heard birds are drawn than the rest. Lower keeps every bird closer to the same size; higher lets the loudest few dominate.',
+  paper_color: 'With Background: Paper, the page colour in light mode (hex, e.g. #f0e8d5). Blank uses the theme default (near-white).',
+  paper_color_dark: 'With Background: Paper, the page colour in dark mode (hex, e.g. #15120d). Blank uses the theme default (charcoal).',
+  paper_texture: 'With Background: Paper, a faint paper grain over the background (0 = off, ~0.06 = subtle), so it reads like a print on washi rather than flat colour.',
   image_base: 'Default (blank): artwork from the CDN. Use /local/habird-art/ for an offline copy.',
   birdnet_url: 'Default (blank): this host on port 8080, or HA ingress when remote.',
   data_source: 'Automatic uses the API and falls back to the MQTT sensors.',
@@ -415,6 +426,13 @@ class HABirdCard extends HTMLElement {
       // How much bigger the most-heard birds are drawn (0.2-0.8, default
       // 0.5). Feeds the count->area exponent in renderCollage's tuning().
       sizeContrast: (typeof c.size_contrast === 'number') ? c.size_contrast : 0.5,
+      // Paper ground: per-theme colour override + an optional grain. paperBg
+      // gates the grain to when the card is actually showing a paper ground
+      // (with a transparent card the collage sits on the dashboard).
+      paperColor: c.paper_color || '',
+      paperColorDark: c.paper_color_dark || '',
+      paperTexture: (typeof c.paper_texture === 'number') ? c.paper_texture : 0,
+      paperBg: (c.background || 'transparent') === 'paper',
       audioBoostDb: (c.audio_boost == null ? 24 : +c.audio_boost),
       tapAction: c.tap_action || 'both',          // both | info | call
       xenoCantoKey: c.xeno_canto_key || '',        // enables reference calls
@@ -483,7 +501,7 @@ class HABirdCardEditor extends HTMLElement {
       this.appendChild(this._form);
     }
     this._form.schema = HABIRD_EDITOR_SCHEMA;
-    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', collage_fill: 0.5, size_contrast: 0.5, audio_boost: 24 }, this._config);
+    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', collage_fill: 0.5, size_contrast: 0.5, paper_color: '', paper_color_dark: '', paper_texture: 0, audio_boost: 24 }, this._config);
     this._form.hass = this._hass;
   }
 }

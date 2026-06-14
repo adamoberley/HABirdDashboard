@@ -1170,6 +1170,36 @@
       mq.addEventListener('change', function (e) { applyTheme(e.matches ? 'dark' : 'light'); });
     }
   })();
+
+  // ---- Optional paper colour + texture (config-driven, opt-in) ----
+  // paperColor / paperColorDark override --paper per theme; paperTexture lays a
+  // faint grayscale fractal-noise grain over the ground so the collage reads
+  // like a print on washi rather than flat colour. Blank colour / 0 texture
+  // leaves the theme's default --paper untouched. The colour is re-applied
+  // whenever data-theme flips (OS scheme on the page, HA dark mode on the card).
+  function applyPaperColour() {
+    var pc = (currentTheme() === 'dark') ? AV_CFG.paperColorDark : AV_CFG.paperColor;
+    if (pc) document.documentElement.style.setProperty('--paper', pc);
+    else document.documentElement.style.removeProperty('--paper');
+  }
+  applyPaperColour();
+  if (window.MutationObserver) {
+    new MutationObserver(applyPaperColour).observe(
+      document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  }
+  (function applyPaperTexture() {
+    var amt = Math.max(0, Math.min(0.3, +AV_CFG.paperTexture || 0));
+    if (amt <= 0 || AV_CFG.paperBg === false) return;   // needs a paper ground
+    var svg = "<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'>"
+      + "<filter id='p'><feTurbulence type='fractalNoise' baseFrequency='0.9' "
+      + "numOctaves='2' stitchTiles='stitch'/>"
+      + "<feColorMatrix type='saturate' values='0'/></filter>"
+      + "<rect width='180' height='180' filter='url(#p)' opacity='" + amt + "'/></svg>";
+    document.body.style.backgroundImage =
+      'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")';
+    document.body.style.backgroundRepeat = 'repeat';
+  })();
+
   var winBtns = [].slice.call(winPick.querySelectorAll('button'));
   var currentHours = +readLS('bird:window', '24') || 24;
   // Card builds fix the time window from card config and hide the

@@ -219,6 +219,9 @@ title: ""                    # empty = no title; set any text for a heading
 window: "24"                 # time window in hours, or "all" - the card has
                              #   no on-screen picker; this is the window
 background: transparent      # transparent (blend with dashboard) | paper
+paper_color: ""              # background: paper - light-mode page colour (hex); "" = theme default
+paper_color_dark: ""         # background: paper - dark-mode page colour (hex); "" = theme default
+paper_texture: 0             # background: paper - faint paper grain (0 = off, ~0.06 = subtle washi)
 font: system                 # system (HA's font) | serif (the original look)
 birdnet_url: ""              # empty = this host, port 8080 (the stock app)
 data_source: auto            # auto | api | ha (see Data sources below)
