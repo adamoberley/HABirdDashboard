@@ -1266,26 +1266,20 @@
   // Tunables - Galliformes-poster-inspired. Raster-mask nesting.
   //
   // Layout discipline: tile areas are NORMALISED against a viewport
-  // budget (sum of areas ≈ packingBudgetFrac × vpArea) rather than
-  // each tile being clamped to a per-tile maxArea. The old per-tile
-  // cap made every loud bird look identical (Anna n=398, Crow n=31
-  // and Phoebe n=26 all hit ceiling and rendered the same size) AND
-  // it allowed total area to overflow narrow viewports so birds got
-  // dropped off-screen. Normalising fixes both - relative size
-  // tracks the relative call ratio, and total area can never exceed
-  // what the iterative shrink loop is willing to scale into the
-  // viewport.
+  // budget (sum of areas ≈ budgetFrac × vpArea) rather than each tile
+  // being clamped to a per-tile maxArea. The old per-tile cap made every
+  // loud bird look identical (Anna n=398, Crow n=31 and Phoebe n=26 all
+  // hit ceiling and rendered the same size) AND it allowed total area to
+  // overflow narrow viewports so birds got dropped off-screen.
+  // Normalising fixes both - relative size tracks the relative call
+  // ratio, and total area can never exceed what the iterative shrink
+  // loop is willing to scale into the viewport.
+  //
+  // The budget FRACTION is set per render from collageFill + a count
+  // offset (see renderCollage), not here - tuning() only carries the
+  // count-dependent knobs that aren't user-facing.
   function tuning(n) {
     return {
-      // Soft area budget the whole cluster aims to fill, as a
-      // fraction of viewport area. Lower = sparser collage with more
-      // breathing room (and more headroom for packing efficiency).
-      // Steps down as species count grows so a busy plate doesn't
-      // try to claim the entire viewport.
-      packingBudgetFrac: n <= 4  ? 0.46 :
-                          n <= 12 ? 0.40 :
-                          n <= 24 ? 0.34 :
-                                    0.28,
       // Count -> area exponent. ~0.65 keeps the visual hierarchy
       // legible (n=400 reads ~5× bigger than n=30) without the
       // loudest bird drowning everything else.
@@ -1530,10 +1524,20 @@
     // pack densities for 6 vs 48 birds.
     var T = tuning(items.length);
     var vpArea = W * H;
-    // Card builds scale the area budget up (__budgetScale) - inside a
-    // dashboard card the flock should command the box; the shrink-to-fit
-    // loop still guarantees everything lands on screen.
-    var budget  = vpArea * T.packingBudgetFrac * (+AV_CFG.__budgetScale || 1);
+    // Collage fill: how much of the box the flock targets, as a fraction
+    // of viewport area. `collageFill` (0.1-1.0, default 0.5) is the
+    // user-facing control - the HA card exposes it as a slider, the
+    // static page sets it in config.js. A count offset nudges it so a
+    // BUSIER plate spreads a little wider and a sparse one pulls in
+    // (more birds -> bigger footprint); at the 0.5 default that's
+    // 0.45 / 0.50 / 0.55 by count. Birds always shrink to fit (the loop
+    // below), so values near 1.0 just fill the box.
+    var nBirds = items.length;
+    var fill = (typeof AV_CFG.collageFill === 'number') ? AV_CFG.collageFill : 0.5;
+    fill = Math.max(0.1, Math.min(1.0, fill));
+    var countOffset = nBirds <= 12 ? -0.05 : nBirds <= 24 ? 0 : 0.05;
+    var budgetFrac = Math.max(0.04, Math.min(1.2, fill + countOffset));
+    var budget  = vpArea * budgetFrac;
     var minArea = vpArea * T.minTileAreaFrac;
 
     // Step 1: build tiles + assign each a count-weighted SCORE (not a

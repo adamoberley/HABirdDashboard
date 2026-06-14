@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- **The collage fills more of the screen, and now _grows_ with bird
+  count.** The packing budget was raised and its curve flipped — a busy
+  plate claims a bit more area than a quiet one (the opposite of before).
+  The per-viewport width cap (`max-width` on the collage) was removed too,
+  so wide laptops and monitors use the full screen.
+- **`collage_scale` → `collage_fill`** (card slider + static-page
+  `config.js` `collageFill`): a 0.1–1.0 control, default **0.5** (≈ half
+  the screen; 1.0 ≈ edge-to-edge), replacing the old 0.5–3 multiplier.
+  Birds still always shrink to fit, so higher values are safe.
+
 ## v1.1.0 — 2026-06-13
 
 ### Added
