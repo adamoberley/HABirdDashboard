@@ -27,6 +27,7 @@ from samsungtvws import SamsungTVWS
 log = logging.getLogger("birdframe.frametv")
 
 DEVICE_NAME = "BirdFrame"
+_DIAGNOSED: set[str] = set()  # hosts we've already probed (log art caps once)
 
 
 def _safe(host: str) -> str:
@@ -78,7 +79,22 @@ class FrameTV:
                 log.warning("%s has no Art Mode - skipping", self.host)
                 return None
 
-            new_id = art.upload(jpeg, file_type="JPEG", matte=self.matte)
+            # One-time probe of the TV's art capabilities, so a send_image
+            # rejection (e.g. error -2) can be diagnosed from the log.
+            if self.host not in _DIAGNOSED:
+                _DIAGNOSED.add(self.host)
+                for probe in ("get_api_version", "get_matte_list"):
+                    try:
+                        log.info("%s art %s -> %s", self.host, probe, getattr(art, probe)())
+                    except Exception as exc:  # noqa: BLE001
+                        log.info("%s art %s probe failed: %s", self.host, probe, exc)
+
+            # Both mattes set to the same value ("none" by default) - a mismatch
+            # (matte=none but portrait_matte defaulting to shadowbox_polar) is a
+            # likely cause of send_image error -2.
+            new_id = art.upload(
+                jpeg, file_type="JPEG", matte=self.matte, portrait_matte=self.matte
+            )
             if not new_id:
                 raise RuntimeError("upload returned no content id")
 
