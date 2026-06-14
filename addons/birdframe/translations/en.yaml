@@ -31,6 +31,12 @@ configuration:
       cream so it reads as art paper, not bright white). Leave blank to use the
       theme's near-white. Tweak it and use the panel's "Render & push now"
       preview to see the result.
+  paper_texture:
+    name: Paper texture
+    description: >-
+      Adds a subtle grain over the background so it looks like a print on paper
+      rather than flat color. 0 turns it off; about 0.06 is a gentle washi
+      grain; higher is coarser. Preview with the panel's "Render & push now".
   show_caption:
     name: Show caption
     description: >-

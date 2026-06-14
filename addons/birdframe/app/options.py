@@ -29,6 +29,7 @@ class Options:
     height: int
     theme: str
     paper_color: str
+    paper_texture: float
     show_caption: bool
     window_hours: int
     collage_fill: float
@@ -78,6 +79,8 @@ def load() -> Options:
         # Warm-cream paper by default (reads as art paper, not bright white);
         # blank it to fall back to the theme's near-white.
         paper_color=str(raw.get("paper_color", "#f0e8d5")).strip(),
+        # Grayscale grain overlaid on the paper (0 = off, ~0.06 = subtle washi).
+        paper_texture=float(raw.get("paper_texture", 0.06)),
         show_caption=bool(raw.get("show_caption", True)),
         window_hours=int(raw.get("window_hours", 24)),
         collage_fill=float(raw.get("collage_fill", 0.5)),

@@ -71,6 +71,24 @@ class Capturer:
                 art_css += ".static-head{display:none!important;}"
             if opts.paper_color:
                 art_css += f"html{{--paper:{opts.paper_color}!important;}}"
+            if opts.paper_texture and opts.paper_texture > 0:
+                # A subtle grayscale fractal-noise grain over the paper, so the
+                # background reads like washi/canvas instead of flat colour.
+                # Inline SVG (feTurbulence) - no bundled asset, renders in-engine.
+                svg = (
+                    "<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'>"
+                    "<filter id='p'><feTurbulence type='fractalNoise' "
+                    "baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/>"
+                    "<feColorMatrix type='saturate' values='0'/></filter>"
+                    f"<rect width='180' height='180' filter='url(#p)' "
+                    f"opacity='{opts.paper_texture}'/></svg>"
+                )
+                enc = (svg.replace("%", "%25").replace("#", "%23")
+                       .replace("<", "%3C").replace(">", "%3E").replace(" ", "%20"))
+                art_css += (
+                    "html,body{background-image:url(\"data:image/svg+xml,"
+                    + enc + "\")!important;background-repeat:repeat!important;}"
+                )
             page.add_style_tag(content=art_css)
 
             # The collage already packed on load using the old padding; the CSS
