@@ -57,13 +57,17 @@ class Capturer:
                 except Exception as exc:  # noqa: BLE001
                     log.debug("window select skipped: %s", exc)
 
+            # Strip on-screen chrome - this is wall art. The top page bar
+            # (window picker + menu) always goes; the "Heard Recently" caption
+            # is optional. The window was already selected above, while the bar
+            # was still present, so hiding it now is safe.
+            art_css = "header.top{display:none!important;}"
             if not opts.show_caption:
-                # Pure-art look: drop the "Heard Recently" header and let the
-                # flex column hand the freed height to the collage.
-                page.add_style_tag(content=(
+                art_css += (
                     ".static-head{display:none!important;}"
                     ".view#v0{padding-top:0!important;}"
-                ))
+                )
+            page.add_style_tag(content=art_css)
 
             try:
                 page.wait_for_function(
