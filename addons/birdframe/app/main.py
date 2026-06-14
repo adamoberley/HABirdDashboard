@@ -17,6 +17,8 @@ import threading
 import time
 from datetime import datetime
 
+import urllib3
+
 import discover
 import options as options_mod
 import species
@@ -24,6 +26,10 @@ from capture import Capturer
 from frametv import FrameTV
 from imaging import to_panel_jpeg
 from server import make_server
+
+# The TV serves a self-signed cert on :8002 and samsungtvws connects without
+# verification, so silence urllib3's repeated InsecureRequestWarning.
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 SERVER_PORT = 8099
 PREVIEW_PATH = "/data/last-frame.jpg"

@@ -6,7 +6,7 @@
 # Frame TV's Art Mode - replacing the previous upload in place so the TV's art
 # library never accumulates duplicates.
 name: Bird Frame (Samsung Frame TV)
-version: "0.2.1"
+version: "0.3.0"
 slug: birdframe
 description: >-
   Render the live Bird collage and push it to a Samsung Frame TV as Art Mode
@@ -25,11 +25,8 @@ init: false
 startup: services
 boot: auto
 
-# No `image:` key on purpose -> the Supervisor builds the add-on locally from
-# the Dockerfile + build.yaml, so there's nothing to publish to a registry.
-
-# Supervisor API: used to auto-discover the BirdNET-Go add-on's internal address.
-hassio_api: true
+# No `image:` key on purpose -> the Supervisor builds the app locally from the
+# Dockerfile + build.yaml, so there's nothing to publish to a registry.
 
 # Ingress: adds a "Bird Frame" panel in the HA sidebar with a live preview and a
 # "render & push now" button. Served on the same internal port as the renderer.

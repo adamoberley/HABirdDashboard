@@ -57,16 +57,17 @@ class Capturer:
                 except Exception as exc:  # noqa: BLE001
                     log.debug("window select skipped: %s", exc)
 
-            # Strip on-screen chrome - this is wall art. The top page bar
-            # (window picker + menu) always goes; the "Heard Recently" caption
-            # is optional. The window was already selected above, while the bar
-            # was still present, so hiding it now is safe.
-            art_css = "header.top{display:none!important;}"
+            # Strip on-screen chrome - this is wall art. Always hide the top
+            # page bar (window picker + menu) and zero the collage view's
+            # padding: its 88px bottom reserve for the now-hidden view slider
+            # was pushing the flock above centre. The caption is optional. The
+            # window was already selected above, while the bar was still present.
+            art_css = (
+                "header.top{display:none!important;}"
+                ".view#v0{padding:0!important;}"
+            )
             if not opts.show_caption:
-                art_css += (
-                    ".static-head{display:none!important;}"
-                    ".view#v0{padding-top:0!important;}"
-                )
+                art_css += ".static-head{display:none!important;}"
             page.add_style_tag(content=art_css)
 
             try:
