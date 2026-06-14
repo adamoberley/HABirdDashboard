@@ -11,6 +11,7 @@ import logging
 
 from playwright.sync_api import sync_playwright
 
+import sun
 from options import Options
 
 log = logging.getLogger("birdframe.capture")
@@ -37,10 +38,23 @@ class Capturer:
 
     def capture(self) -> bytes:
         opts = self.opts
+
+        # Background colour by theme: light = day colour, dark = night colour,
+        # circadian = blend between them by the sun. `dark` then selects the
+        # light/dark text palette so any caption/overlay stays legible.
+        day = opts.paper_color or "#fcfcfb"
+        night = opts.paper_color_dark or "#1a1a1a"
+        if opts.theme == "circadian":
+            bg, dark = sun.circadian_paper(day, night)
+        elif opts.theme == "dark":
+            bg, dark = night, True
+        else:
+            bg, dark = day, False
+
         ctx = self._browser.new_context(
             viewport={"width": opts.width, "height": opts.height},
             device_scale_factor=1,
-            color_scheme="dark" if opts.theme == "dark" else "light",
+            color_scheme="dark" if dark else "light",
         )
         page = ctx.new_page()
         try:
@@ -60,17 +74,16 @@ class Capturer:
             # Strip on-screen chrome - this is wall art. Always hide the top
             # page bar (window picker + menu) and zero the collage view's
             # padding: its 88px bottom reserve for the now-hidden view slider
-            # pushed the flock above centre. The caption is optional, and an
-            # optional warmer paper colour overrides the near-white default. The
-            # window was already selected above, while the bar was still present.
+            # pushed the flock above centre. The caption is optional; the paper
+            # colour computed above (day/night/circadian) is applied as --paper.
+            # The window was already selected above, while the bar was present.
             art_css = (
                 "header.top{display:none!important;}"
                 ".view#v0{padding:0!important;}"
             )
             if not opts.show_caption:
                 art_css += ".static-head{display:none!important;}"
-            if opts.paper_color:
-                art_css += f"html{{--paper:{opts.paper_color}!important;}}"
+            art_css += f"html{{--paper:{bg}!important;}}"
             if opts.paper_texture and opts.paper_texture > 0:
                 # A subtle grayscale fractal-noise grain over the paper, so the
                 # background reads like washi/canvas instead of flat colour.

@@ -6,7 +6,7 @@
 # Frame TV's Art Mode - replacing the previous upload in place so the TV's art
 # library never accumulates duplicates.
 name: Bird Frame (Samsung Frame TV)
-version: "0.4.1"
+version: "0.5.0"
 slug: birdframe
 description: >-
   Render the live Bird collage and push it to a Samsung Frame TV as Art Mode
@@ -48,8 +48,9 @@ map:
 # overlays + advanced bits most people never touch. Option keys are unchanged.
 options:
   # --- Appearance: how the painting looks ---
-  theme: "light"
+  theme: "circadian"
   paper_color: "#f0e8d5"
+  paper_color_dark: "#15120d"
   paper_texture: 0.06
   collage_fill: 0.7
   show_caption: false
@@ -76,10 +77,14 @@ options:
 
 schema:
   # ---- Appearance: how the painting looks ----
-  # Light (warm paper) or dark background.
-  theme: "list(light|dark)"
-  # Background paper colour (hex). Default warm cream; blank = theme near-white.
+  # light = day colour, dark = night colour, circadian = blend by the sun
+  # (uses Home Assistant's location; falls back to the day colour if unknown).
+  theme: "list(light|dark|circadian)"
+  # Day background colour (hex). Default warm cream.
   paper_color: "str?"
+  # Night background colour (hex) - used by "dark" and the night end of
+  # "circadian". Default warm near-black.
+  paper_color_dark: "str?"
   # Paper grain: 0 = flat colour, ~0.06 = subtle washi, higher = coarser.
   paper_texture: "float(0,1)"
   # How much of the screen the flock claims (0.1-1.0).

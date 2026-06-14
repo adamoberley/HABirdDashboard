@@ -29,6 +29,7 @@ class Options:
     height: int
     theme: str
     paper_color: str
+    paper_color_dark: str
     paper_texture: float
     show_caption: bool
     window_hours: int
@@ -76,9 +77,11 @@ def load() -> Options:
         width=width,
         height=height,
         theme=str(raw.get("theme", "light")),
-        # Warm-cream paper by default (reads as art paper, not bright white);
-        # blank it to fall back to the theme's near-white.
+        # Day paper (warm cream) and night paper (warm near-black). For theme
+        # "circadian" the background blends between them with the sun; "light"
+        # uses the day colour, "dark" uses the night colour.
         paper_color=str(raw.get("paper_color", "#f0e8d5")).strip(),
+        paper_color_dark=str(raw.get("paper_color_dark", "#15120d")).strip(),
         # Grayscale grain overlaid on the paper (0 = off, ~0.06 = subtle washi).
         paper_texture=float(raw.get("paper_texture", 0.06)),
         show_caption=bool(raw.get("show_caption", True)),

@@ -70,8 +70,8 @@ already look like a painting, so most setups change little. Most-touched:
 
 | Option | What it does |
 | --- | --- |
-| `theme` | `light` (warm paper) or `dark`. |
-| `paper_color` | Background hex; default warm cream, blank = near-white. |
+| `theme` | `light` (day), `dark` (night), or `circadian` (blends by the sun). |
+| `paper_color` / `paper_color_dark` | Day / night background hex (cream / near-black). |
 | `paper_texture` | Paper grain: `0` off, ~`0.06` subtle washi, higher coarser. |
 | `collage_fill` | How full the flock packs (0.1–1.0). |
 | `show_caption` | Off (default) = edge-to-edge art, no title. |
@@ -79,6 +79,12 @@ already look like a painting, so most setups change little. Most-touched:
 | `interval_minutes` | How often the collage refreshes on the TV. |
 | `active_hours` | e.g. `06:30-22:00`; blank = 24/7. |
 | `resolution` | `3840x2160` (4K Frames) or `1920x1080` (32"/older). |
+
+**Circadian** (`theme: circadian`, the default) crossfades the background from
+the day color to the night color across dusk and dawn — driven by the sun's
+elevation at your Home Assistant location — so the frame isn't a glaring white
+rectangle at 2 a.m. Set the two colors to taste; it falls back to the day color
+if no location is configured.
 
 *Optional overlays* — `wall_clock` / `wall_weather` add a dashboard-style
 clock/weather block in a corner. Off by default; the point here is art, not a

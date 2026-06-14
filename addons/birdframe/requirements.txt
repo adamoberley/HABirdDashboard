@@ -10,3 +10,4 @@ samsungtvws==3.0.5
 websocket-client>=1.6,<2     # sync transport used by samsungtvws
 Pillow>=10.0
 requests>=2.31
+astral>=3.2     # sun elevation for the circadian background

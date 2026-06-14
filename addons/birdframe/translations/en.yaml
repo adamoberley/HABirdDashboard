@@ -5,14 +5,22 @@ configuration:
   # ---- Appearance ----
   theme:
     name: Theme
-    description: Light (warm paper) or dark background for the collage.
-  paper_color:
-    name: Paper color
     description: >-
-      Background color behind the birds, as a hex value. The default is a warm
-      cream so it reads as art paper, not bright white; blank uses the theme's
-      near-white. Tweak it and hit "Render & push now" on the Bird Frame panel
-      to preview.
+      Light uses the day color; Dark uses the night color; Circadian blends
+      between them following the sun - cream by day, dimming through dusk, dark
+      at night, back at dawn - using your Home Assistant location (falls back to
+      the day color if none is set).
+  paper_color:
+    name: Paper color (day)
+    description: >-
+      Daytime background behind the birds, as a hex value. Default is a warm
+      cream so it reads as art paper, not bright white. Tweak it and hit
+      "Render & push now" on the Bird Frame panel to preview.
+  paper_color_dark:
+    name: Paper color (night)
+    description: >-
+      Nighttime background, as a hex value. Used by the Dark theme and the night
+      end of Circadian. Default is a warm near-black.
   paper_texture:
     name: Paper texture
     description: >-
