@@ -108,6 +108,12 @@ window.AV_CONFIG = {
   // bird's own pose for a gentler bank. URL override: ?strength=0.6
   collageFlowStrength: 1,
 
+  // Spacing (0 - 1): how much air sits between birds, for any shape. Birds
+  // never overlap regardless; this just tunes the gap. Lower packs them
+  // closer (denser, a touch bigger), higher gives more breathing room. 0.5
+  // is the default. URL override on the static page: ?spacing=0.3
+  collageSpacing: 0.5,
+
   // Paper background colour, per theme (hex). Left '', each theme uses its
   // built-in ground (near-white #fcfcfb light, charcoal #1a1a1a dark). Set
   // these to taste - e.g. a warm cream by day, a near-black by night - to make

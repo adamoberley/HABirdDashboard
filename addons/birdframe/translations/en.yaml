@@ -61,6 +61,12 @@ configuration:
     description: >-
       How strictly birds align to the circle. 1 is a full head-to-tail wheel;
       lower keeps more of each bird's own pose for a gentler bank.
+  collage_spacing:
+    name: Bird spacing
+    description: >-
+      How much space sits between birds (any shape). They never overlap; lower
+      packs them closer and a touch bigger, higher gives more breathing room.
+      0.5 is the default.
   show_caption:
     name: Caption
     description: >-

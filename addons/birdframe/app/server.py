@@ -180,6 +180,7 @@ def _config_js(opts: Options, birdnet_url: str) -> bytes:
         # around the centre; strength scales natural->full wheel.
         "collageFlow": opts.collage_flow,
         "collageFlowStrength": opts.collage_flow_strength,
+        "collageSpacing": opts.collage_spacing,
         "sitConfidence": opts.sit_confidence,
         "audioBoostDb": 0,
         "tapAction": "info",
