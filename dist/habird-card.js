@@ -1518,7 +1518,11 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
         continue;
       }
       var best = null;
-      if (ringMode) {
+      // Sparse rings (<=60 birds) scatter evenly for an airy, frame-filling
+      // wheel; busier rings fall through to the tight spiral nesting below, so
+      // a big flock packs close around the hole and each bird stays larger
+      // instead of shrinking to fit even spacing.
+      if (ringMode && tiles.length <= 60) {
         // RING: fill the whole frame around an open centre. The cluster
         // spiral below grows one compact blob (so a hole in it just reads
         // as "blob with a hole"); ring mode instead scatters birds across
@@ -1703,7 +1707,11 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     var nBirds = items.length;
     var fill = (typeof AV_CFG.collageFill === 'number') ? AV_CFG.collageFill : 0.5;
     fill = Math.max(0.1, Math.min(1.0, fill));
-    var countOffset = nBirds <= 12 ? -0.05 : nBirds <= 24 ? 0 : 0.05;
+    // Busier plates get a bigger area budget AND a tighter gap (pad, below),
+    // so a large flock packs closer and each bird stays a bit larger instead
+    // of shrinking to specks.
+    var countOffset = nBirds <= 12 ? -0.05 : nBirds <= 24 ? 0 :
+                      nBirds <= 48 ? 0.08 : nBirds <= 90 ? 0.18 : 0.28;
     var budgetFrac = Math.max(0.04, Math.min(1.2, fill + countOffset));
     var budget  = vpArea * budgetFrac;
     var minArea = vpArea * T.minTileAreaFrac;
@@ -1771,7 +1779,10 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     var xBias = narrow ? 1 : T.ellipseAspectBias;
     var yBias = narrow ? 1.7 : 1;   // gentler than the desktop bias so the
                                     // portrait cluster stays a bit wider / less tall
-    var pad = narrow ? Math.max(1, COLLAGE_PAD - 1) : COLLAGE_PAD;
+    // Tighten the breathing room as the flock grows: dense plates pack closer
+    // so each bird stays larger rather than shrinking to fit the gaps.
+    var basePad = nBirds > 90 ? 1 : nBirds > 45 ? 2 : COLLAGE_PAD;
+    var pad = narrow ? Math.max(1, basePad - 1) : basePad;
     var placed = maskPack(tiles, W, H, xBias, yBias, pad, obstacles, ringMode);
 
     // Scale-to-fit: iterate shrink + repack until every tile lands on
