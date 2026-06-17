@@ -1313,9 +1313,10 @@
     // higher = the loudest birds dominate. User-tunable via sizeContrast
     // (card slider / config.js). At 0.5 the loudest bird reads a few times
     // bigger than a quiet one without dwarfing the flock; was a fixed 0.65,
-    // which made the top few birds feel oversized.
+    // which made the top few birds feel oversized. At 0 the exponent is 0,
+    // so every bird's score is 1 and the flock is drawn essentially uniform.
     var contrast = (typeof AV_CFG.sizeContrast === 'number') ? AV_CFG.sizeContrast : 0.5;
-    contrast = Math.max(0.2, Math.min(0.8, contrast));
+    contrast = Math.max(0, Math.min(0.8, contrast));
     return {
       countExp: contrast,
       // Floor: every species in the dataset must be visible, even

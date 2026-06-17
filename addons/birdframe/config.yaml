@@ -6,7 +6,7 @@
 # Frame TV's Art Mode - replacing the previous upload in place so the TV's art
 # library never accumulates duplicates.
 name: Bird Frame (Samsung Frame TV)
-version: "1.2.2"
+version: "1.2.3"
 slug: birdframe
 description: >-
   Render the live Bird collage and push it to a Samsung Frame TV as Art Mode
@@ -95,9 +95,10 @@ schema:
   paper_texture: "float(0,1)"
   # How much of the screen the flock claims (0.1-1.0).
   collage_fill: "float(0.1,1.0)"
-  # How much bigger the most-heard birds draw than the rest (0.2-0.8; lower =
-  # more even, higher = the loudest few dominate).
-  size_contrast: "float(0.2,0.8)"
+  # How much bigger the most-heard birds draw than the rest (0-0.8; lower =
+  # more even, 0 = all essentially the same size, higher = the loudest few
+  # dominate).
+  size_contrast: "float(0,0.8)"
   # Collage shape: "cluster" packs one filled flock; "ring" scatters the birds
   # across the whole frame around an open centre (the Avian Visitors poster
   # look). Ring fills best with a busy flock / long window.
