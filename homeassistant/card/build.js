@@ -197,7 +197,7 @@ const wrapper = `
 // you copied the artwork locally (homeassistant/install.sh layout).
 var HABIRD_CDN_ASSETS = 'https://cdn.jsdelivr.net/gh/adamoberley/HABirdDashboard@HABirdDashboard/avian/assets/';
 
-var HABIRD_VERSION = '1.2.2';
+var HABIRD_VERSION = '1.2.3';
 
 var HABIRD_EDITOR_SCHEMA = [
   { name: 'dashboard', type: 'expandable', flatten: true, title: 'Dashboard', expanded: true, schema: [
@@ -251,7 +251,7 @@ var HABIRD_EDITOR_SCHEMA = [
     ] },
     { name: 'hide_cursor', selector: { boolean: {} } },
     { name: 'collage_fill', selector: { number: { min: 0.1, max: 1, step: 0.05, mode: 'slider' } } },
-    { name: 'size_contrast', selector: { number: { min: 0.2, max: 0.8, step: 0.05, mode: 'slider' } } },
+    { name: 'size_contrast', selector: { number: { min: 0, max: 0.8, step: 0.05, mode: 'slider' } } },
     { name: 'paper_texture', selector: { number: { min: 0, max: 0.2, step: 0.01, mode: 'slider' } } },
     { name: 'collage_spacing', selector: { number: { min: 0, max: 1, step: 0.05, mode: 'slider' } } },
   ] },
@@ -336,7 +336,7 @@ var HABIRD_HELPERS = {
   tap_action: "What tapping a bird does. Default opens the info modal and plays the reference call. Call/both need a Xeno-Canto key; without one they fall back to just opening info.",
   xeno_canto_key: "Default (blank): reference calls off. A free key from xeno-canto.org/account turns them on - a clean example call to compare against your station's own captures.",
   collage_fill: 'How much of the card the flock fills (0.5 ≈ half, 1.0 ≈ nearly edge-to-edge). Busier days spread a little wider on their own. Birds always shrink to fit, so higher is safe.',
-  size_contrast: 'How much bigger your most-heard birds are drawn than the rest. Lower keeps every bird closer to the same size; higher lets the loudest few dominate.',
+  size_contrast: 'How much bigger your most-heard birds are drawn than the rest. Lower keeps every bird closer to the same size; 0 makes them all essentially the same size; higher lets the loudest few dominate.',
   paper_color: 'With Background: Paper, the page colour in light mode (hex, e.g. #f0e8d5). Blank uses the theme default (near-white).',
   paper_color_dark: 'With Background: Paper, the page colour in dark mode (hex, e.g. #15120d). Blank uses the theme default (charcoal).',
   paper_texture: 'With Background: Paper, a faint paper grain over the background (0 = off, ~0.06 = subtle), so it reads like a print on washi rather than flat colour.',

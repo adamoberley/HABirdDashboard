@@ -65,10 +65,12 @@ window.AV_CONFIG = {
   collageFill: 0.5,
 
   // Size contrast: how much bigger your most-heard birds are drawn than
-  // the rest (0.2 - 0.8). Lower keeps every bird closer to the same size;
+  // the rest (0 - 0.8). Lower keeps every bird closer to the same size;
   // higher lets the loudest few dominate. 0.5 (default) makes the top
   // birds a few times bigger than a quiet one - noticeable but not
-  // overpowering. (The old fixed value was 0.65, which felt top-heavy.)
+  // overpowering. At 0 every bird is drawn essentially the same size,
+  // regardless of how common it is. (The old fixed value was 0.65, which
+  // felt top-heavy.)
   sizeContrast: 0.5,
 
   // Collage shape: how the flock is arranged on the plate.

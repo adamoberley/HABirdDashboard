@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.2.3 — 2026-06-17
+
+### Changed
+- **Size contrast can now go all the way to 0.** The lower bound on the
+  `sizeContrast` control dropped from 0.2 to 0, so you can flatten the size
+  difference between common and rare birds completely — at 0 every bird is
+  drawn essentially the same size, regardless of how often it's heard. Wired
+  through the card editor slider, `config.js`, and the Bird Frame add-on
+  (`size_contrast` now accepts `0`–`0.8`). The default (0.5) is unchanged.
+
 ## v1.2.2 — 2026-06-14
 
 ### Fixed
