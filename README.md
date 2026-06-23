@@ -71,10 +71,10 @@ at home [pushed to a Samsung Frame TV](#display-it-on-a-samsung-frame-tv-optiona
   and eBird, plus an optional **reference call** (from Xeno-Canto) to
   compare against your own recordings. A tap can open the details, play
   the call, or both.
-- **670 illustrations** - 335 (mostly North American) species, a perched
-  and a flight pose each, lazy-loaded per detected species (no bulk
-  download). A [regeneration pipeline](avian/scripts/README.md) builds sets
-  for other regions.
+- **1,602 illustrations** - 801 species (North American + European / eBird
+  region DE), a perched and a flight pose each, lazy-loaded per detected
+  species (no bulk download). A [regeneration pipeline](avian/scripts/README.md)
+  builds sets for other regions.
 - Light/dark follows your Home Assistant theme. Data refreshes every 30
   seconds (paused while the tab is hidden). Fully responsive - the collage
   re-packs itself for any screen or orientation.
@@ -290,8 +290,8 @@ each, cached by the browser. For a fully offline install, copy
 
 ### Missing artwork for your area?
 
-The bundled library is 335 (mostly North American) species, so other
-regions will have gaps. (Plain photos are deliberately not used as a
+The bundled library covers 801 species (North American + European / eBird
+region DE), so other regions may still have gaps. (Plain photos are deliberately not used as a
 stand-in - they'd break the kachō-e style and have no silhouette masks
 for the collage packing.) Two remedies, neither needs code changes:
 
@@ -497,8 +497,8 @@ ring layout.
 ## Troubleshooting
 
 - **Some birds have no picture.** The most common question, and usually
-  not a bug: the bundled library covers **335 mostly North American
-  species**, so detections outside it simply have no illustration yet
+  not a bug: the bundled library covers **801 species (North American +
+  European / eBird region DE)**, so detections outside it simply have no illustration yet
   (the bird still counts everywhere - it just isn't drawn in the
   collage). Three checks, then the fix:
   1. *Is it just certain species?* That's coverage, not breakage - see
@@ -560,7 +560,7 @@ homeassistant/
     ├── styles.css
     └── favicon.png
 avian/
-├── assets/          # 670 bundled illustrations + photo-cutout fallbacks
+├── assets/          # 1,602 bundled illustrations + photo-cutout fallbacks
 └── scripts/         # generate -> cutout -> masks pipeline (Gemini + BiRefNet)
 addons/
 └── birdframe/       # optional app: push the collage to a Samsung Frame TV
