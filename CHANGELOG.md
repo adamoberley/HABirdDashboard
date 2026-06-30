@@ -1,5 +1,27 @@
 # Changelog
 
+## v1.2.5 — 2026-06-30
+
+### Fixed
+- **The collage now shows the European species, not just two of them.** v1.2.4
+  added 466 European (eBird region DE) birds as *illustrations* but never
+  generated their collage *silhouette masks*, so the collage — which packs
+  birds by their outline and skips any species without a mask — silently
+  dropped every new bird. The atlas (illustration-only) showed them all, the
+  collage showed only the handful that happened to be in the original North
+  American mask set (e.g. the cosmopolitan Rock Pigeon). Regenerated
+  `DIMS`/`MASKS` for all 801 species (1,602 masks, both poses) via
+  `build_masks.py`, so the collage now places the full library. Cache-bust
+  versions bumped (`r13`→`r14`). Fixes #52.
+
+## v1.2.4 — 2026-06-23
+
+### Added
+- **466 new European illustrations (eBird region DE).** The bird library grew
+  from 335 to 801 species (670 → 1,602 illustrations), so stations outside
+  North America — Germany and the rest of the region — get real artwork in the
+  atlas instead of placeholders.
+
 ## v1.2.3 — 2026-06-17
 
 ### Changed
