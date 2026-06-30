@@ -1,7 +1,9 @@
 (function () {
   // Bumped whenever the offline sketch build changes, so the browser
   // doesn't keep a stale cache after we regenerate the sketches.
-  var SKETCH_VERSION = 'r13'; // r13: 2K House Sparrow flight + House Wren
+  var SKETCH_VERSION = 'r14'; // r14: silhouette masks for the 466 European
+                              // (eBird DE) species so the collage can place
+                              // them. r13: 2K House Sparrow flight + House Wren
                               // (both poses). r12: 2K House Sparrow perched.
   // Cache-bust for /api/img - bump whenever a bird gets re-rendered via
   // /api/regen or whenever you need every CF DC to drop its cached copy.
@@ -9,8 +11,10 @@
   // equivalent to a global cache purge for /api/img. (caches.default
   // .delete() in the worker only affects ONE colo at a time, so a
   // versioned URL is the only reliable way to invalidate everywhere.)
-  var IMG_VERSION = 'r13'; // r13: 2K House Sparrow flight + House Wren art -
-                           // drop every cached copy. r12: 2K Sparrow perched.
+  var IMG_VERSION = 'r14'; // r14: European (eBird DE) species masks land in
+                           // the collage. r13: 2K House Sparrow flight + House
+                           // Wren art - drop every cached copy. r12: 2K Sparrow
+                           // perched.
 
   // ===========================================================================
   // BirdNET-Go adapter (Home Assistant build)

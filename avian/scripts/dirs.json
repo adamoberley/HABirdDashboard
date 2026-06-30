@@ -47,6 +47,22 @@
 "y": 0.58
 }
 },
+"accipiter-nisus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.085,
+"y": 0.455
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 193,
+"heading2": 193,
+"tail": {
+"x": 0.905,
+"y": 0.65
+}
+},
 "accipiter-striatus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -61,6 +77,150 @@
 "tail": {
 "x": 0.171,
 "y": 0.817
+}
+},
+"acrocephalus-agricola-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.17,
+"y": 0.38
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 200,
+"heading2": 200,
+"tail": {
+"x": 0.82,
+"y": 0.62
+}
+},
+"acrocephalus-arundinaceus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.2,
+"y": 0.375
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 208,
+"heading2": 208,
+"tail": {
+"x": 0.8,
+"y": 0.7
+}
+},
+"acrocephalus-dumetorum-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.18,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 220,
+"heading2": 216,
+"tail": {
+"x": 0.8,
+"y": 0.87
+}
+},
+"acrocephalus-melanopogon-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.1,
+"y": 0.4
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 195,
+"heading2": 195,
+"tail": {
+"x": 0.85,
+"y": 0.6
+}
+},
+"acrocephalus-paludicola-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.32,
+"y": 0.279
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 233,
+"heading2": 227,
+"tail": {
+"x": 0.68,
+"y": 0.761
+}
+},
+"acrocephalus-palustris-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.09,
+"y": 0.43
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 198,
+"heading2": 194,
+"tail": {
+"x": 0.84,
+"y": 0.67
+}
+},
+"acrocephalus-schoenobaenus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.32
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 203,
+"heading2": 203,
+"tail": {
+"x": 0.94,
+"y": 0.69
+}
+},
+"acrocephalus-scirpaceus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.18,
+"y": 0.38
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 198,
+"heading2": 198,
+"tail": {
+"x": 0.92,
+"y": 0.62
+}
+},
+"actitis-hypoleucos-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.06,
+"y": 0.4
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 198,
+"heading2": 198,
+"tail": {
+"x": 0.82,
+"y": 0.65
 }
 },
 "actitis-macularius-2": {
@@ -95,6 +255,22 @@
 "y": 0.626
 }
 },
+"aegithalos-caudatus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.045,
+"y": 0.465
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 195,
+"heading2": 189,
+"tail": {
+"x": 0.95,
+"y": 0.7
+}
+},
 "aegolius-acadicus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -109,6 +285,38 @@
 "tail": {
 "x": 0.73,
 "y": 0.77
+}
+},
+"aegolius-funereus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.5,
+"y": 0.39
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 267,
+"heading2": 267,
+"tail": {
+"x": 0.52,
+"y": 0.78
+}
+},
+"aegypius-monachus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.22,
+"y": 0.481
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 201,
+"heading2": 203,
+"tail": {
+"x": 0.78,
+"y": 0.693
 }
 },
 "aeronautes-saxatalis-2": {
@@ -127,6 +335,38 @@
 "y": 0.51
 }
 },
+"agapornis-fischeri-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.065,
+"y": 0.34
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 211,
+"heading2": 211,
+"tail": {
+"x": 0.9,
+"y": 0.84
+}
+},
+"agapornis-roseicollis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.35,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 231,
+"heading2": 231,
+"tail": {
+"x": 0.75,
+"y": 0.85
+}
+},
 "agelaius-phoeniceus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -143,6 +383,22 @@
 "y": 0.67
 }
 },
+"aix-galericulata-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.042,
+"y": 0.445
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 197,
+"heading2": 200,
+"tail": {
+"x": 0.855,
+"y": 0.695
+}
+},
 "aix-sponsa-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -157,6 +413,150 @@
 "tail": {
 "x": 0.908,
 "y": 0.818
+}
+},
+"alauda-arvensis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.25,
+"y": 0.347
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 207,
+"heading2": 207,
+"tail": {
+"x": 0.85,
+"y": 0.653
+}
+},
+"alca-torda-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.056,
+"y": 0.457
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 182,
+"heading2": 191,
+"tail": {
+"x": 0.906,
+"y": 0.486
+}
+},
+"alcedo-atthis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.03,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 209,
+"heading2": 209,
+"tail": {
+"x": 0.82,
+"y": 0.78
+}
+},
+"alectoris-graeca-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.046,
+"y": 0.281
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 208,
+"heading2": 206,
+"tail": {
+"x": 0.936,
+"y": 0.748
+}
+},
+"alectoris-rufa-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.19,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 203,
+"heading2": 203,
+"tail": {
+"x": 0.805,
+"y": 0.606
+}
+},
+"alopochen-aegyptiaca-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.055,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 192,
+"heading2": 192,
+"tail": {
+"x": 0.855,
+"y": 0.625
+}
+},
+"amazona-aestiva-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.28,
+"y": 0.42
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 220,
+"heading2": 220,
+"tail": {
+"x": 0.83,
+"y": 0.88
+}
+},
+"amazona-amazonica-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.24,
+"y": 0.44
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 219,
+"heading2": 219,
+"tail": {
+"x": 0.85,
+"y": 0.94
+}
+},
+"amazona-oratrix-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.22,
+"y": 0.34
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 223,
+"heading2": 222,
+"tail": {
+"x": 0.73,
+"y": 0.82
 }
 },
 "ammodramus-savannarum-2": {
@@ -191,6 +591,38 @@
 "y": 0.75
 }
 },
+"anas-acuta-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.045,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 202,
+"heading2": 202,
+"tail": {
+"x": 0.955,
+"y": 0.71
+}
+},
+"anas-castanea-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.953,
+"y": 0.451
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 344,
+"heading2": 344,
+"tail": {
+"x": 0.24,
+"y": 0.651
+}
+},
 "anas-crecca-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -205,6 +637,38 @@
 "tail": {
 "x": 0.894,
 "y": 0.65
+}
+},
+"anas-flavirostris-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.55
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 191,
+"heading2": 190,
+"tail": {
+"x": 0.85,
+"y": 0.7
+}
+},
+"anas-georgica-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.103,
+"y": 0.367
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 212,
+"heading2": 212,
+"tail": {
+"x": 0.89,
+"y": 0.864
 }
 },
 "anas-platyrhynchos-2": {
@@ -223,6 +687,54 @@
 "y": 0.8
 }
 },
+"anas-poecilorhyncha-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 199,
+"heading2": 199,
+"tail": {
+"x": 0.9,
+"y": 0.75
+}
+},
+"anas-superciliosa-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 197,
+"heading2": 194,
+"tail": {
+"x": 0.85,
+"y": 0.6
+}
+},
+"anas-undulata-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.045,
+"y": 0.455
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 200,
+"heading2": 200,
+"tail": {
+"x": 0.905,
+"y": 0.76
+}
+},
 "anser-albifrons-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -239,6 +751,278 @@
 "y": 0.833
 }
 },
+"anser-anser-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.48
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 189,
+"heading2": 189,
+"tail": {
+"x": 0.95,
+"y": 0.63
+}
+},
+"anser-brachyrhynchus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.045,
+"y": 0.5
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 203,
+"heading2": 201,
+"tail": {
+"x": 0.905,
+"y": 0.865
+}
+},
+"anser-caerulescens-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.075,
+"y": 0.32
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 202,
+"heading2": 202,
+"tail": {
+"x": 0.925,
+"y": 0.67
+}
+},
+"anser-canagicus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.048,
+"y": 0.451
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 194,
+"heading2": 189,
+"tail": {
+"x": 0.848,
+"y": 0.653
+}
+},
+"anser-cygnoides-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.32
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 202,
+"heading2": 196,
+"tail": {
+"x": 0.78,
+"y": 0.62
+}
+},
+"anser-erythropus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.925,
+"y": 0.456
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 345,
+"heading2": 345,
+"tail": {
+"x": 0.155,
+"y": 0.656
+}
+},
+"anser-fabalis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.46
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 192,
+"heading2": 195,
+"tail": {
+"x": 0.9,
+"y": 0.64
+}
+},
+"anser-indicus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.16,
+"y": 0.4
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 213,
+"heading2": 213,
+"tail": {
+"x": 0.86,
+"y": 0.86
+}
+},
+"anser-rossii-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.105,
+"y": 0.495
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 205,
+"heading2": 199,
+"tail": {
+"x": 0.855,
+"y": 0.84
+}
+},
+"anser-serrirostris-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.125,
+"y": 0.346
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 202,
+"heading2": 210,
+"tail": {
+"x": 0.825,
+"y": 0.629
+}
+},
+"anthus-campestris-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.32,
+"y": 0.21
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 233,
+"heading2": 223,
+"tail": {
+"x": 0.73,
+"y": 0.75
+}
+},
+"anthus-cervinus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.32,
+"y": 0.32
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 231,
+"heading2": 231,
+"tail": {
+"x": 0.73,
+"y": 0.83
+}
+},
+"anthus-godlewskii-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.17,
+"y": 0.28
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 217,
+"heading2": 217,
+"tail": {
+"x": 0.83,
+"y": 0.78
+}
+},
+"anthus-hodgsoni-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.238,
+"y": 0.357
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 220,
+"heading2": 220,
+"tail": {
+"x": 0.875,
+"y": 0.886
+}
+},
+"anthus-petrosus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.248,
+"y": 0.415
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 214,
+"heading2": 214,
+"tail": {
+"x": 0.905,
+"y": 0.86
+}
+},
+"anthus-pratensis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.22,
+"y": 0.43
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 202,
+"heading2": 202,
+"tail": {
+"x": 0.82,
+"y": 0.67
+}
+},
+"anthus-richardi-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.78,
+"y": 0.28
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 314,
+"heading2": 314,
+"tail": {
+"x": 0.3,
+"y": 0.78
+}
+},
 "anthus-rubescens-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -253,6 +1037,38 @@
 "tail": {
 "x": 0.929,
 "y": 0.957
+}
+},
+"anthus-spinoletta-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.095,
+"y": 0.393
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 210,
+"heading2": 204,
+"tail": {
+"x": 0.905,
+"y": 0.867
+}
+},
+"anthus-trivialis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.095,
+"y": 0.404
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 212,
+"heading2": 210,
+"tail": {
+"x": 0.885,
+"y": 0.89
 }
 },
 "antigone-canadensis-2": {
@@ -335,6 +1151,70 @@
 "y": 0.885
 }
 },
+"apus-affinis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.814,
+"y": 0.486
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 339,
+"heading2": 339,
+"tail": {
+"x": 0.321,
+"y": 0.672
+}
+},
+"apus-apus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.055,
+"y": 0.4
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 182,
+"heading2": 182,
+"tail": {
+"x": 0.955,
+"y": 0.433
+}
+},
+"apus-caffer-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.067,
+"y": 0.467
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 188,
+"heading2": 188,
+"tail": {
+"x": 0.933,
+"y": 0.583
+}
+},
+"apus-pallidus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.4
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 183,
+"heading2": 183,
+"tail": {
+"x": 0.9,
+"y": 0.45
+}
+},
 "aquila-chrysaetos-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -349,6 +1229,38 @@
 "tail": {
 "x": 0.7,
 "y": 0.68
+}
+},
+"aquila-heliaca-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.15,
+"y": 0.5
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 188,
+"heading2": 202,
+"tail": {
+"x": 0.85,
+"y": 0.6
+}
+},
+"ara-ararauna-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.61,
+"y": 0.39
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 305,
+"heading2": 319,
+"tail": {
+"x": 0.26,
+"y": 0.89
 }
 },
 "archilochus-alexandri-2": {
@@ -399,6 +1311,22 @@
 "y": 0.68
 }
 },
+"ardea-cinerea-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 197,
+"heading2": 193,
+"tail": {
+"x": 0.75,
+"y": 0.67
+}
+},
 "ardea-herodias-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -413,6 +1341,70 @@
 "tail": {
 "x": 0.714,
 "y": 0.62
+}
+},
+"ardea-purpurea-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.045,
+"y": 0.353
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 204,
+"heading2": 204,
+"tail": {
+"x": 0.825,
+"y": 0.7
+}
+},
+"ardenna-grisea-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.96,
+"y": 0.48
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 356,
+"heading2": 358,
+"tail": {
+"x": 0.05,
+"y": 0.55
+}
+},
+"ardeola-ralloides-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.018,
+"y": 0.432
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 211,
+"heading2": 211,
+"tail": {
+"x": 0.75,
+"y": 0.87
+}
+},
+"arenaria-interpres-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.093,
+"y": 0.471
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 201,
+"heading2": 194,
+"tail": {
+"x": 0.714,
+"y": 0.714
 }
 },
 "artemisiospiza-belli-2": {
@@ -479,6 +1471,22 @@
 "y": 0.86
 }
 },
+"athene-noctua-2": {
+"ambiguous": true,
+"ambiguous2": true,
+"beak": {
+"x": 0.5,
+"y": 0.286
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 270,
+"heading2": 270,
+"tail": {
+"x": 0.5,
+"y": 0.857
+}
+},
 "aythya-affinis-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -525,6 +1533,70 @@
 "tail": {
 "x": 0.964,
 "y": 0.723
+}
+},
+"aythya-ferina-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.048,
+"y": 0.293
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 199,
+"heading2": 196,
+"tail": {
+"x": 0.952,
+"y": 0.603
+}
+},
+"aythya-fuligula-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.95,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 343,
+"heading2": 342,
+"tail": {
+"x": 0.12,
+"y": 0.7
+}
+},
+"aythya-marila-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.115,
+"y": 0.356
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 203,
+"heading2": 203,
+"tail": {
+"x": 0.865,
+"y": 0.681
+}
+},
+"aythya-nyroca-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.055,
+"y": 0.455
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 194,
+"heading2": 194,
+"tail": {
+"x": 0.85,
+"y": 0.65
 }
 },
 "aythya-valisineria-2": {
@@ -575,6 +1647,22 @@
 "y": 0.65
 }
 },
+"balearica-regulorum-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.065,
+"y": 0.355
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 202,
+"heading2": 208,
+"tail": {
+"x": 0.935,
+"y": 0.715
+}
+},
 "bombycilla-cedrorum-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -607,6 +1695,38 @@
 "y": 0.92
 }
 },
+"botaurus-stellaris-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.22,
+"y": 0.18
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 216,
+"heading2": 221,
+"tail": {
+"x": 0.78,
+"y": 0.58
+}
+},
+"branta-bernicla-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.051,
+"y": 0.282
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 186,
+"heading2": 186,
+"tail": {
+"x": 0.953,
+"y": 0.38
+}
+},
 "branta-canadensis-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -621,6 +1741,86 @@
 "tail": {
 "x": 0.9,
 "y": 0.75
+}
+},
+"branta-hutchinsii-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.115,
+"y": 0.378
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 198,
+"heading2": 194,
+"tail": {
+"x": 0.8,
+"y": 0.6
+}
+},
+"branta-leucopsis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.044,
+"y": 0.475
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 201,
+"heading2": 197,
+"tail": {
+"x": 0.938,
+"y": 0.825
+}
+},
+"branta-sandvicensis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.06,
+"y": 0.38
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 196,
+"heading2": 196,
+"tail": {
+"x": 0.88,
+"y": 0.62
+}
+},
+"bubo-bengalensis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.5,
+"y": 0.385
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 273,
+"heading2": 279,
+"tail": {
+"x": 0.475,
+"y": 0.855
+}
+},
+"bubo-bubo-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.5,
+"y": 0.38
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 270,
+"heading2": 270,
+"tail": {
+"x": 0.5,
+"y": 0.85
 }
 },
 "bubo-virginianus-2": {
@@ -685,6 +1885,54 @@
 "tail": {
 "x": 0.864,
 "y": 0.808
+}
+},
+"bucephala-islandica-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.055,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 196,
+"heading2": 203,
+"tail": {
+"x": 0.87,
+"y": 0.68
+}
+},
+"burhinus-oedicnemus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.17,
+"y": 0.46
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 200,
+"heading2": 193,
+"tail": {
+"x": 0.87,
+"y": 0.71
+}
+},
+"buteo-buteo-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.285,
+"y": 0.412
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 203,
+"heading2": 197,
+"tail": {
+"x": 0.855,
+"y": 0.652
 }
 },
 "buteo-jamaicensis-2": {
@@ -767,6 +2015,22 @@
 "y": 0.62
 }
 },
+"buteo-rufinus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.25,
+"y": 0.435
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 213,
+"heading2": 217,
+"tail": {
+"x": 0.75,
+"y": 0.754
+}
+},
 "buteo-swainsoni-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -799,6 +2063,22 @@
 "y": 0.6
 }
 },
+"cairina-moschata-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.063,
+"y": 0.381
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 205,
+"heading2": 205,
+"tail": {
+"x": 0.881,
+"y": 0.756
+}
+},
 "calamospiza-melanocorys-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -813,6 +2093,54 @@
 "tail": {
 "x": 0.92,
 "y": 0.92
+}
+},
+"calandrella-brachydactyla-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.16,
+"y": 0.33
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 207,
+"heading2": 207,
+"tail": {
+"x": 0.82,
+"y": 0.67
+}
+},
+"calcarius-lapponicus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.16,
+"y": 0.41
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 208,
+"heading2": 208,
+"tail": {
+"x": 0.83,
+"y": 0.76
+}
+},
+"calidris-acuminata-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.029,
+"y": 0.481
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 186,
+"heading2": 186,
+"tail": {
+"x": 0.86,
+"y": 0.563
 }
 },
 "calidris-alba-2": {
@@ -847,6 +2175,118 @@
 "y": 0.68
 }
 },
+"calidris-bairdii-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.088,
+"y": 0.467
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 195,
+"heading2": 189,
+"tail": {
+"x": 0.813,
+"y": 0.667
+}
+},
+"calidris-canutus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.125,
+"y": 0.567
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 193,
+"heading2": 193,
+"tail": {
+"x": 0.875,
+"y": 0.746
+}
+},
+"calidris-falcinellus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.065,
+"y": 0.44
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 202,
+"heading2": 192,
+"tail": {
+"x": 0.815,
+"y": 0.75
+}
+},
+"calidris-ferruginea-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.5625
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 194,
+"heading2": 191,
+"tail": {
+"x": 0.8,
+"y": 0.75
+}
+},
+"calidris-fuscicollis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.045,
+"y": 0.55
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 187,
+"heading2": 187,
+"tail": {
+"x": 0.9,
+"y": 0.65
+}
+},
+"calidris-himantopus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.12,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 183,
+"heading2": 183,
+"tail": {
+"x": 0.8,
+"y": 0.48
+}
+},
+"calidris-maritima-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.035,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 197,
+"heading2": 197,
+"tail": {
+"x": 0.805,
+"y": 0.686
+}
+},
 "calidris-melanotos-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -861,6 +2301,22 @@
 "tail": {
 "x": 0.863,
 "y": 0.667
+}
+},
+"calidris-minuta-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.105,
+"y": 0.551
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 202,
+"heading2": 191,
+"tail": {
+"x": 0.885,
+"y": 0.866
 }
 },
 "calidris-minutilla-2": {
@@ -879,6 +2335,22 @@
 "y": 0.68
 }
 },
+"calidris-pugnax-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.255,
+"y": 0.481
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 211,
+"heading2": 214,
+"tail": {
+"x": 0.705,
+"y": 0.756
+}
+},
 "calidris-pusilla-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -895,6 +2367,70 @@
 "y": 0.823
 }
 },
+"calidris-subminuta-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.048,
+"y": 0.448
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 188,
+"heading2": 195,
+"tail": {
+"x": 0.908,
+"y": 0.573
+}
+},
+"calidris-subruficollis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.188,
+"y": 0.507
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 197,
+"heading2": 196,
+"tail": {
+"x": 0.813,
+"y": 0.696
+}
+},
+"calidris-temminckii-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.1,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 192,
+"heading2": 192,
+"tail": {
+"x": 0.79,
+"y": 0.6
+}
+},
+"calliope-calliope-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.09,
+"y": 0.38
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 200,
+"heading2": 200,
+"tail": {
+"x": 0.92,
+"y": 0.68
+}
+},
 "callipepla-californica-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -909,6 +2445,22 @@
 "tail": {
 "x": 0.8,
 "y": 0.75
+}
+},
+"calonectris-borealis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.064,
+"y": 0.46
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 195,
+"heading2": 197,
+"tail": {
+"x": 0.678,
+"y": 0.62
 }
 },
 "calothorax-lucifer-2": {
@@ -957,6 +2509,22 @@
 "tail": {
 "x": 0.9,
 "y": 0.754
+}
+},
+"caprimulgus-europaeus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.175,
+"y": 0.4
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 213,
+"heading2": 215,
+"tail": {
+"x": 0.835,
+"y": 0.835
 }
 },
 "cardellina-canadensis-2": {
@@ -1021,6 +2589,54 @@
 "tail": {
 "x": 0.75,
 "y": 0.567
+}
+},
+"carduelis-carduelis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.25,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 214,
+"heading2": 222,
+"tail": {
+"x": 0.85,
+"y": 0.75
+}
+},
+"carduelis-citrinella-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.18,
+"y": 0.26
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 222,
+"heading2": 222,
+"tail": {
+"x": 0.86,
+"y": 0.87
+}
+},
+"carpodacus-erythrinus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.22,
+"y": 0.33
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 207,
+"heading2": 197,
+"tail": {
+"x": 0.82,
+"y": 0.63
 }
 },
 "cathartes-aura-2": {
@@ -1119,6 +2735,22 @@
 "y": 0.585
 }
 },
+"cepphus-grylle-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.54
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 199,
+"heading2": 199,
+"tail": {
+"x": 0.95,
+"y": 0.85
+}
+},
 "certhia-americana-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -1133,6 +2765,54 @@
 "tail": {
 "x": 0.964,
 "y": 0.847
+}
+},
+"certhia-brachydactyla-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.064,
+"y": 0.421
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 207,
+"heading2": 207,
+"tail": {
+"x": 0.892,
+"y": 0.835
+}
+},
+"certhia-familiaris-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.45,
+"y": 0.15
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 266,
+"heading2": 266,
+"tail": {
+"x": 0.5,
+"y": 0.85
+}
+},
+"cettia-cetti-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.098,
+"y": 0.426
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 210,
+"heading2": 207,
+"tail": {
+"x": 0.9,
+"y": 0.882
 }
 },
 "chaetura-pelagica-2": {
@@ -1167,6 +2847,22 @@
 "y": 0.586
 }
 },
+"charadrius-hiaticula-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.205,
+"y": 0.55
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 194,
+"heading2": 194,
+"tail": {
+"x": 0.8,
+"y": 0.7
+}
+},
 "charadrius-vociferus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -1183,6 +2879,54 @@
 "y": 0.792
 }
 },
+"chenonetta-jubata-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.08,
+"y": 0.46
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 197,
+"heading2": 197,
+"tail": {
+"x": 0.89,
+"y": 0.7
+}
+},
+"chlidonias-hybrida-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.955,
+"y": 0.566
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 336,
+"heading2": 336,
+"tail": {
+"x": 0.165,
+"y": 0.926
+}
+},
+"chlidonias-leucopterus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.056,
+"y": 0.55
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 186,
+"heading2": 193,
+"tail": {
+"x": 0.95,
+"y": 0.65
+}
+},
 "chlidonias-niger-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -1197,6 +2941,38 @@
 "tail": {
 "x": 0.95,
 "y": 0.5
+}
+},
+"chloephaga-picta-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.04,
+"y": 0.36
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 200,
+"heading2": 188,
+"tail": {
+"x": 0.955,
+"y": 0.7
+}
+},
+"chloris-chloris-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.185,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 218,
+"heading2": 218,
+"tail": {
+"x": 0.885,
+"y": 0.901
 }
 },
 "chondestes-grammacus-2": {
@@ -1231,6 +3007,118 @@
 "y": 0.5
 }
 },
+"chroicocephalus-genei-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.24,
+"y": 0.44
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 193,
+"heading2": 193,
+"tail": {
+"x": 0.755,
+"y": 0.56
+}
+},
+"chroicocephalus-philadelphia-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.85,
+"y": 0.59
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 2,
+"heading2": 352,
+"tail": {
+"x": 0.15,
+"y": 0.57
+}
+},
+"chroicocephalus-ridibundus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.055,
+"y": 0.375
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 196,
+"heading2": 196,
+"tail": {
+"x": 0.91,
+"y": 0.617
+}
+},
+"chrysolophus-pictus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.955,
+"y": 0.381
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 329,
+"heading2": 331,
+"tail": {
+"x": 0.05,
+"y": 0.919
+}
+},
+"ciconia-ciconia-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.55
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 189,
+"heading2": 190,
+"tail": {
+"x": 0.7,
+"y": 0.65
+}
+},
+"ciconia-nigra-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.97,
+"y": 0.52
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 348,
+"heading2": 356,
+"tail": {
+"x": 0.2,
+"y": 0.68
+}
+},
+"cinclus-cinclus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.06,
+"y": 0.46
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 202,
+"heading2": 202,
+"tail": {
+"x": 0.913,
+"y": 0.807
+}
+},
 "cinclus-mexicanus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -1247,6 +3135,54 @@
 "y": 0.8
 }
 },
+"circaetus-gallicus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.28,
+"y": 0.46
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 211,
+"heading2": 211,
+"tail": {
+"x": 0.72,
+"y": 0.72
+}
+},
+"circus-aeruginosus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.245,
+"y": 0.34
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 210,
+"heading2": 210,
+"tail": {
+"x": 0.8,
+"y": 0.66
+}
+},
+"circus-cyaneus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.048,
+"y": 0.813
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 181,
+"heading2": 181,
+"tail": {
+"x": 0.933,
+"y": 0.833
+}
+},
 "circus-hudsonius-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -1261,6 +3197,54 @@
 "tail": {
 "x": 0.908,
 "y": 0.494
+}
+},
+"circus-macrourus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.175,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 203,
+"heading2": 203,
+"tail": {
+"x": 0.825,
+"y": 0.63
+}
+},
+"circus-pygargus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.425,
+"y": 0.52
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 243,
+"heading2": 230,
+"tail": {
+"x": 0.65,
+"y": 0.96
+}
+},
+"cisticola-juncidis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.075,
+"y": 0.3
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 189,
+"heading2": 189,
+"tail": {
+"x": 0.985,
+"y": 0.45
 }
 },
 "cistothorus-palustris-2": {
@@ -1293,6 +3277,86 @@
 "tail": {
 "x": 0.917,
 "y": 0.833
+}
+},
+"clamator-glandarius-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.085,
+"y": 0.469
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 184,
+"heading2": 184,
+"tail": {
+"x": 0.918,
+"y": 0.531
+}
+},
+"clanga-clanga-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.95,
+"y": 0.55
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 358,
+"heading2": 353,
+"tail": {
+"x": 0.12,
+"y": 0.58
+}
+},
+"clanga-pomarina-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.2,
+"y": 0.39
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 208,
+"heading2": 208,
+"tail": {
+"x": 0.8,
+"y": 0.705
+}
+},
+"clangula-hyemalis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.04,
+"y": 0.43
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 197,
+"heading2": 197,
+"tail": {
+"x": 0.95,
+"y": 0.71
+}
+},
+"coccothraustes-coccothraustes-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.2,
+"y": 0.4
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 215,
+"heading2": 215,
+"tail": {
+"x": 0.8,
+"y": 0.82
 }
 },
 "coccothraustes-vespertinus-2": {
@@ -1391,6 +3455,38 @@
 "y": 0.833
 }
 },
+"columba-oenas-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.155,
+"y": 0.455
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 203,
+"heading2": 204,
+"tail": {
+"x": 0.86,
+"y": 0.76
+}
+},
+"columba-palumbus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.17,
+"y": 0.41
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 215,
+"heading2": 215,
+"tail": {
+"x": 0.77,
+"y": 0.83
+}
+},
 "columbina-passerina-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -1455,6 +3551,22 @@
 "y": 0.78
 }
 },
+"coracias-garrulus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.08,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 207,
+"heading2": 206,
+"tail": {
+"x": 0.88,
+"y": 0.86
+}
+},
 "coragyps-atratus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -1469,6 +3581,22 @@
 "tail": {
 "x": 0.88,
 "y": 0.77
+}
+},
+"corvus-albus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.26,
+"y": 0.46
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 203,
+"heading2": 203,
+"tail": {
+"x": 0.79,
+"y": 0.69
 }
 },
 "corvus-brachyrhynchos-2": {
@@ -1503,6 +3631,70 @@
 "y": 0.556
 }
 },
+"corvus-cornix-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.78,
+"y": 0.4
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 333,
+"heading2": 334,
+"tail": {
+"x": 0.22,
+"y": 0.68
+}
+},
+"corvus-corone-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.22,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 216,
+"heading2": 204,
+"tail": {
+"x": 0.78,
+"y": 0.85
+}
+},
+"corvus-frugilegus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.145,
+"y": 0.453
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 216,
+"heading2": 216,
+"tail": {
+"x": 0.8,
+"y": 0.924
+}
+},
+"corvus-monedula-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.43
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 199,
+"heading2": 207,
+"tail": {
+"x": 0.95,
+"y": 0.74
+}
+},
 "corvus-ossifragus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -1517,6 +3709,214 @@
 "tail": {
 "x": 0.78,
 "y": 0.83
+}
+},
+"coturnix-coturnix-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.06,
+"y": 0.465
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 198,
+"heading2": 198,
+"tail": {
+"x": 0.86,
+"y": 0.72
+}
+},
+"coturnix-japonica-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.235,
+"y": 0.276
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 224,
+"heading2": 224,
+"tail": {
+"x": 0.76,
+"y": 0.78
+}
+},
+"crex-crex-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.048,
+"y": 0.484
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 194,
+"heading2": 194,
+"tail": {
+"x": 0.9,
+"y": 0.701
+}
+},
+"cuculus-canorus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.15,
+"y": 0.3
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 221,
+"heading2": 221,
+"tail": {
+"x": 0.85,
+"y": 0.9
+}
+},
+"curruca-communis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.87,
+"y": 0.37
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 339,
+"heading2": 339,
+"tail": {
+"x": 0.1,
+"y": 0.66
+}
+},
+"curruca-conspicillata-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.355,
+"y": 0.32
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 255,
+"heading2": 255,
+"tail": {
+"x": 0.505,
+"y": 0.88
+}
+},
+"curruca-curruca-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.038,
+"y": 0.392
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 201,
+"heading2": 201,
+"tail": {
+"x": 0.9,
+"y": 0.717
+}
+},
+"curruca-hortensis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.28,
+"y": 0.33
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 222,
+"heading2": 222,
+"tail": {
+"x": 0.73,
+"y": 0.74
+}
+},
+"curruca-iberiae-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.17,
+"y": 0.36
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 214,
+"heading2": 228,
+"tail": {
+"x": 0.78,
+"y": 0.77
+}
+},
+"curruca-melanocephala-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.27,
+"y": 0.33
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 221,
+"heading2": 242,
+"tail": {
+"x": 0.73,
+"y": 0.73
+}
+},
+"curruca-nisoria-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.25,
+"y": 0.4
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 218,
+"heading2": 203,
+"tail": {
+"x": 0.8,
+"y": 0.83
+}
+},
+"curruca-undata-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.081,
+"y": 0.392
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 205,
+"heading2": 205,
+"tail": {
+"x": 0.875,
+"y": 0.767
+}
+},
+"cyanistes-caeruleus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.04,
+"y": 0.436
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 193,
+"heading2": 193,
+"tail": {
+"x": 0.953,
+"y": 0.647
 }
 },
 "cyanocitta-cristata-2": {
@@ -1551,6 +3951,38 @@
 "y": 0.63
 }
 },
+"cyanoramphus-novaezelandiae-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.16,
+"y": 0.38
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 208,
+"heading2": 208,
+"tail": {
+"x": 0.88,
+"y": 0.77
+}
+},
+"cygnus-atratus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.04,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 191,
+"heading2": 196,
+"tail": {
+"x": 0.8,
+"y": 0.6
+}
+},
 "cygnus-buccinator-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -1565,6 +3997,54 @@
 "tail": {
 "x": 0.936,
 "y": 0.854
+}
+},
+"cygnus-columbianus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.035,
+"y": 0.492
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 191,
+"heading2": 191,
+"tail": {
+"x": 0.965,
+"y": 0.675
+}
+},
+"cygnus-cygnus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.056,
+"y": 0.458
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 192,
+"heading2": 192,
+"tail": {
+"x": 0.944,
+"y": 0.65
+}
+},
+"cygnus-melancoryphus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.035,
+"y": 0.473
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 195,
+"heading2": 195,
+"tail": {
+"x": 0.965,
+"y": 0.723
 }
 },
 "cygnus-olor-2": {
@@ -1599,6 +4079,150 @@
 "y": 0.64
 }
 },
+"delichon-urbicum-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.175,
+"y": 0.42
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 203,
+"heading2": 203,
+"tail": {
+"x": 0.925,
+"y": 0.74
+}
+},
+"dendrocopos-leucotos-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.47
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 203,
+"heading2": 200,
+"tail": {
+"x": 0.95,
+"y": 0.85
+}
+},
+"dendrocopos-major-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.098,
+"y": 0.373
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 214,
+"heading2": 222,
+"tail": {
+"x": 0.85,
+"y": 0.876
+}
+},
+"dendrocopos-syriacus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.92,
+"y": 0.38
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 324,
+"heading2": 327,
+"tail": {
+"x": 0.2,
+"y": 0.9
+}
+},
+"dendrocoptes-medius-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.2,
+"y": 0.3375
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 214,
+"heading2": 216,
+"tail": {
+"x": 0.825,
+"y": 0.7625
+}
+},
+"dendrocygna-autumnalis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.47
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 197,
+"heading2": 197,
+"tail": {
+"x": 0.88,
+"y": 0.73
+}
+},
+"dendrocygna-bicolor-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.105,
+"y": 0.407
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 210,
+"heading2": 210,
+"tail": {
+"x": 0.805,
+"y": 0.807
+}
+},
+"dendrocygna-viduata-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.054,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 192,
+"heading2": 203,
+"tail": {
+"x": 0.854,
+"y": 0.62
+}
+},
+"diopsittaca-nobilis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.167,
+"y": 0.523
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 214,
+"heading2": 214,
+"tail": {
+"x": 0.833,
+"y": 0.968
+}
+},
 "dolichonyx-oryzivorus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -1613,6 +4237,22 @@
 "tail": {
 "x": 0.3,
 "y": 0.8
+}
+},
+"dryobates-minor-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.25,
+"y": 0.4
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 214,
+"heading2": 231,
+"tail": {
+"x": 0.7,
+"y": 0.7
 }
 },
 "dryobates-nuttallii-2": {
@@ -1663,6 +4303,22 @@
 "y": 0.65
 }
 },
+"dryocopus-martius-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.49
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 190,
+"heading2": 190,
+"tail": {
+"x": 0.93,
+"y": 0.64
+}
+},
 "dryocopus-pileatus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -1711,6 +4367,22 @@
 "y": 0.68
 }
 },
+"egretta-garzetta-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.052,
+"y": 0.375
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 199,
+"heading2": 199,
+"tail": {
+"x": 0.781,
+"y": 0.625
+}
+},
 "egretta-thula-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -1727,6 +4399,22 @@
 "y": 0.62
 }
 },
+"elanus-caeruleus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.22,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 200,
+"heading2": 193,
+"tail": {
+"x": 0.9,
+"y": 0.7
+}
+},
 "elanus-leucurus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -1741,6 +4429,214 @@
 "tail": {
 "x": 0.25,
 "y": 0.6
+}
+},
+"emberiza-buchanani-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.08,
+"y": 0.34
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 200,
+"heading2": 208,
+"tail": {
+"x": 0.92,
+"y": 0.64
+}
+},
+"emberiza-caesia-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.19,
+"y": 0.39
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 212,
+"heading2": 212,
+"tail": {
+"x": 0.83,
+"y": 0.79
+}
+},
+"emberiza-calandra-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.17,
+"y": 0.32
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 212,
+"heading2": 217,
+"tail": {
+"x": 0.83,
+"y": 0.73
+}
+},
+"emberiza-cia-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.11,
+"y": 0.38
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 201,
+"heading2": 197,
+"tail": {
+"x": 0.89,
+"y": 0.68
+}
+},
+"emberiza-cirlus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.185,
+"y": 0.39
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 217,
+"heading2": 211,
+"tail": {
+"x": 0.85,
+"y": 0.89
+}
+},
+"emberiza-citrinella-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.2,
+"y": 0.41
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 206,
+"heading2": 204,
+"tail": {
+"x": 0.81,
+"y": 0.71
+}
+},
+"emberiza-hortulana-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.43
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 213,
+"heading2": 209,
+"tail": {
+"x": 0.85,
+"y": 0.94
+}
+},
+"emberiza-leucocephalos-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.125,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 211,
+"heading2": 211,
+"tail": {
+"x": 0.89,
+"y": 0.81
+}
+},
+"emberiza-melanocephala-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.17,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 211,
+"heading2": 219,
+"tail": {
+"x": 0.83,
+"y": 0.75
+}
+},
+"emberiza-pusilla-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.06,
+"y": 0.47
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 193,
+"heading2": 193,
+"tail": {
+"x": 0.94,
+"y": 0.68
+}
+},
+"emberiza-rustica-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.28,
+"y": 0.28
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 214,
+"heading2": 219,
+"tail": {
+"x": 0.9,
+"y": 0.7
+}
+},
+"emberiza-schoeniclus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.855,
+"y": 0.355
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 331,
+"heading2": 346,
+"tail": {
+"x": 0.15,
+"y": 0.75
+}
+},
+"emberiza-spodocephala-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.16,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 199,
+"heading2": 199,
+"tail": {
+"x": 0.83,
+"y": 0.68
 }
 },
 "empidonax-difficilis-2": {
@@ -1855,6 +4751,22 @@
 "y": 0.7
 }
 },
+"eophona-personata-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.15,
+"y": 0.48
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 209,
+"heading2": 209,
+"tail": {
+"x": 0.87,
+"y": 0.88
+}
+},
 "eremophila-alpestris-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -1871,6 +4783,22 @@
 "y": 0.7
 }
 },
+"erithacus-rubecula-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.083,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 206,
+"heading2": 206,
+"tail": {
+"x": 0.85,
+"y": 0.817
+}
+},
 "euphagus-cyanocephalus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -1885,6 +4813,22 @@
 "tail": {
 "x": 0.86,
 "y": 0.72
+}
+},
+"euplectes-afer-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.4
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 211,
+"heading2": 211,
+"tail": {
+"x": 0.87,
+"y": 0.89
 }
 },
 "falco-columbarius-2": {
@@ -1919,6 +4863,22 @@
 "y": 0.7
 }
 },
+"falco-naumanni-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.32,
+"y": 0.523
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 209,
+"heading2": 225,
+"tail": {
+"x": 0.78,
+"y": 0.781
+}
+},
 "falco-peregrinus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -1933,6 +4893,22 @@
 "tail": {
 "x": 0.85,
 "y": 0.75
+}
+},
+"falco-rusticolus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.15,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 203,
+"heading2": 203,
+"tail": {
+"x": 0.95,
+"y": 0.79
 }
 },
 "falco-sparverius-2": {
@@ -1951,6 +4927,198 @@
 "y": 0.882
 }
 },
+"falco-subbuteo-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.2,
+"y": 0.38
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 215,
+"heading2": 215,
+"tail": {
+"x": 0.8,
+"y": 0.8
+}
+},
+"falco-tinnunculus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.18,
+"y": 0.39
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 217,
+"heading2": 217,
+"tail": {
+"x": 0.9,
+"y": 0.93
+}
+},
+"falco-vespertinus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.17,
+"y": 0.37
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 205,
+"heading2": 205,
+"tail": {
+"x": 0.83,
+"y": 0.68
+}
+},
+"ficedula-albicilla-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.045,
+"y": 0.277
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 210,
+"heading2": 219,
+"tail": {
+"x": 0.94,
+"y": 0.792
+}
+},
+"ficedula-albicollis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.17,
+"y": 0.43
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 211,
+"heading2": 208,
+"tail": {
+"x": 0.83,
+"y": 0.83
+}
+},
+"ficedula-hypoleuca-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.175,
+"y": 0.385
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 212,
+"heading2": 216,
+"tail": {
+"x": 0.825,
+"y": 0.785
+}
+},
+"ficedula-parva-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.148,
+"y": 0.403
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 215,
+"heading2": 217,
+"tail": {
+"x": 0.852,
+"y": 0.89
+}
+},
+"forpus-coelestis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.35,
+"y": 0.48
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 219,
+"heading2": 219,
+"tail": {
+"x": 0.75,
+"y": 0.8
+}
+},
+"francolinus-francolinus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.04,
+"y": 0.34
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 199,
+"heading2": 199,
+"tail": {
+"x": 0.96,
+"y": 0.66
+}
+},
+"fratercula-arctica-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.057,
+"y": 0.457
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 194,
+"heading2": 194,
+"tail": {
+"x": 0.857,
+"y": 0.657
+}
+},
+"fringilla-coelebs-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.08,
+"y": 0.429
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 206,
+"heading2": 206,
+"tail": {
+"x": 0.947,
+"y": 0.857
+}
+},
+"fringilla-montifringilla-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.155,
+"y": 0.357
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 203,
+"heading2": 203,
+"tail": {
+"x": 0.855,
+"y": 0.657
+}
+},
 "fulica-americana-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -1967,6 +5135,166 @@
 "y": 0.588
 }
 },
+"fulica-atra-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.55
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 187,
+"heading2": 184,
+"tail": {
+"x": 0.85,
+"y": 0.65
+}
+},
+"fulmarus-glacialis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.15,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 203,
+"heading2": 203,
+"tail": {
+"x": 0.85,
+"y": 0.65
+}
+},
+"galerida-cristata-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.25,
+"y": 0.343
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 214,
+"heading2": 214,
+"tail": {
+"x": 0.85,
+"y": 0.743
+}
+},
+"gallinago-gallinago-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.95,
+"y": 0.4
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 343,
+"heading2": 343,
+"tail": {
+"x": 0.15,
+"y": 0.64
+}
+},
+"gallinago-media-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 190,
+"heading2": 188,
+"tail": {
+"x": 0.88,
+"y": 0.6
+}
+},
+"gallinula-chloropus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.06,
+"y": 0.49
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 186,
+"heading2": 177,
+"tail": {
+"x": 0.78,
+"y": 0.57
+}
+},
+"gallus-gallus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.075,
+"y": 0.311
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 206,
+"heading2": 206,
+"tail": {
+"x": 0.95,
+"y": 0.733
+}
+},
+"garrulus-glandarius-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.192,
+"y": 0.268
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 228,
+"heading2": 228,
+"tail": {
+"x": 0.802,
+"y": 0.944
+}
+},
+"gavia-adamsii-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.045,
+"y": 0.48
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 196,
+"heading2": 196,
+"tail": {
+"x": 0.95,
+"y": 0.747
+}
+},
+"gavia-arctica-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.045,
+"y": 0.4
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 204,
+"heading2": 204,
+"tail": {
+"x": 0.95,
+"y": 0.805
+}
+},
 "gavia-immer-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -1981,6 +5309,38 @@
 "tail": {
 "x": 0.9,
 "y": 0.758
+}
+},
+"gavia-stellata-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.105,
+"y": 0.403
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 208,
+"heading2": 208,
+"tail": {
+"x": 0.905,
+"y": 0.827
+}
+},
+"gelochelidon-nilotica-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.15,
+"y": 0.58
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 199,
+"heading2": 199,
+"tail": {
+"x": 0.9,
+"y": 0.84
 }
 },
 "geothlypis-formosa-2": {
@@ -2031,6 +5391,70 @@
 "y": 0.72
 }
 },
+"geronticus-eremita-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.6
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 188,
+"heading2": 187,
+"tail": {
+"x": 0.75,
+"y": 0.7
+}
+},
+"glareola-maldivarum-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.15,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 196,
+"heading2": 198,
+"tail": {
+"x": 0.85,
+"y": 0.55
+}
+},
+"glareola-nordmanni-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.1,
+"y": 0.475
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 186,
+"heading2": 184,
+"tail": {
+"x": 0.97,
+"y": 0.563
+}
+},
+"glareola-pratincola-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.25,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 210,
+"heading2": 210,
+"tail": {
+"x": 0.95,
+"y": 0.75
+}
+},
 "glaucidium-gnoma-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -2047,6 +5471,70 @@
 "y": 0.83
 }
 },
+"glaucidium-passerinum-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.4,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 225,
+"heading2": 225,
+"tail": {
+"x": 0.7,
+"y": 0.75
+}
+},
+"gracula-religiosa-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.225,
+"y": 0.47
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 212,
+"heading2": 212,
+"tail": {
+"x": 0.94,
+"y": 0.92
+}
+},
+"grus-grus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.105,
+"y": 0.415
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 193,
+"heading2": 189,
+"tail": {
+"x": 0.73,
+"y": 0.56
+}
+},
+"grus-japonensis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.12,
+"y": 0.5
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 194,
+"heading2": 188,
+"tail": {
+"x": 0.72,
+"y": 0.65
+}
+},
 "gymnogyps-californianus-2": {
 "ambiguous": true,
 "ambiguous2": true,
@@ -2061,6 +5549,38 @@
 "tail": {
 "x": 0.5,
 "y": 0.88
+}
+},
+"gyps-fulvus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.3,
+"y": 0.48
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 217,
+"heading2": 213,
+"tail": {
+"x": 0.7,
+"y": 0.78
+}
+},
+"haematopus-ostralegus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.17,
+"y": 0.47
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 205,
+"heading2": 205,
+"tail": {
+"x": 0.87,
+"y": 0.8
 }
 },
 "haemorhous-mexicanus-2": {
@@ -2095,6 +5615,22 @@
 "y": 0.72
 }
 },
+"haliaeetus-albicilla-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.27,
+"y": 0.32
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 193,
+"heading2": 193,
+"tail": {
+"x": 0.77,
+"y": 0.44
+}
+},
 "haliaeetus-leucocephalus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -2127,6 +5663,54 @@
 "y": 0.56
 }
 },
+"helopsaltes-certhiola-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.194,
+"y": 0.492
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 210,
+"heading2": 210,
+"tail": {
+"x": 0.944,
+"y": 0.925
+}
+},
+"hieraaetus-pennatus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.275,
+"y": 0.407
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 219,
+"heading2": 219,
+"tail": {
+"x": 0.735,
+"y": 0.778
+}
+},
+"himantopus-himantopus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.025,
+"y": 0.519
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 188,
+"heading2": 193,
+"tail": {
+"x": 0.756,
+"y": 0.619
+}
+},
 "himantopus-mexicanus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -2143,6 +5727,38 @@
 "y": 0.6
 }
 },
+"hippolais-icterina-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.2,
+"y": 0.2
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 226,
+"heading2": 221,
+"tail": {
+"x": 0.78,
+"y": 0.8
+}
+},
+"hippolais-polyglotta-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.03,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 181,
+"heading2": 181,
+"tail": {
+"x": 0.96,
+"y": 0.46
+}
+},
 "hirundo-rustica-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -2157,6 +5773,70 @@
 "tail": {
 "x": 0.85,
 "y": 0.9
+}
+},
+"human-vocal-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.17,
+"y": 0.46
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 208,
+"heading2": 205,
+"tail": {
+"x": 0.87,
+"y": 0.84
+}
+},
+"hydrobates-leucorhous-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.17,
+"y": 0.575
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 166,
+"heading2": 176,
+"tail": {
+"x": 0.82,
+"y": 0.417
+}
+},
+"hydrobates-pelagicus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.18,
+"y": 0.49
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 185,
+"heading2": 180,
+"tail": {
+"x": 0.91,
+"y": 0.55
+}
+},
+"hydrocoloeus-minutus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.165,
+"y": 0.58
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 187,
+"heading2": 187,
+"tail": {
+"x": 0.875,
+"y": 0.67
 }
 },
 "hydroprogne-caspia-2": {
@@ -2189,6 +5869,54 @@
 "tail": {
 "x": 0.88,
 "y": 0.65
+}
+},
+"ichthyaetus-audouinii-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.12,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 199,
+"heading2": 197,
+"tail": {
+"x": 0.78,
+"y": 0.68
+}
+},
+"ichthyaetus-ichthyaetus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.105,
+"y": 0.572
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 197,
+"heading2": 197,
+"tail": {
+"x": 0.895,
+"y": 0.819
+}
+},
+"ichthyaetus-melanocephalus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.055,
+"y": 0.483
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 190,
+"heading2": 203,
+"tail": {
+"x": 0.92,
+"y": 0.633
 }
 },
 "icteria-virens-2": {
@@ -2287,6 +6015,54 @@
 "y": 0.79
 }
 },
+"iduna-caligata-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.156,
+"y": 0.358
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 205,
+"heading2": 205,
+"tail": {
+"x": 0.806,
+"y": 0.658
+}
+},
+"iduna-opaca-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.22,
+"y": 0.32
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 220,
+"heading2": 222,
+"tail": {
+"x": 0.83,
+"y": 0.83
+}
+},
+"iduna-pallida-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.8,
+"y": 0.2
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 314,
+"heading2": 318,
+"tail": {
+"x": 0.2,
+"y": 0.82
+}
+},
 "ixoreus-naevius-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -2319,6 +6095,102 @@
 "y": 0.867
 }
 },
+"jynx-torquilla-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.025,
+"y": 0.223
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 218,
+"heading2": 218,
+"tail": {
+"x": 0.933,
+"y": 0.935
+}
+},
+"lagopus-muta-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.165,
+"y": 0.342
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 199,
+"heading2": 199,
+"tail": {
+"x": 0.835,
+"y": 0.575
+}
+},
+"lanius-collurio-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 197,
+"heading2": 209,
+"tail": {
+"x": 0.95,
+"y": 0.62
+}
+},
+"lanius-cristatus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.105,
+"y": 0.47
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 203,
+"heading2": 203,
+"tail": {
+"x": 0.9,
+"y": 0.81
+}
+},
+"lanius-excubitor-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.18,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 229,
+"heading2": 228,
+"tail": {
+"x": 0.69,
+"y": 0.94
+}
+},
+"lanius-isabellinus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.815,
+"y": 0.487
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 334,
+"heading2": 334,
+"tail": {
+"x": 0.185,
+"y": 0.793
+}
+},
 "lanius-ludovicianus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -2333,6 +6205,70 @@
 "tail": {
 "x": 0.87,
 "y": 0.85
+}
+},
+"lanius-minor-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.3,
+"y": 0.42
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 231,
+"heading2": 231,
+"tail": {
+"x": 0.7,
+"y": 0.92
+}
+},
+"lanius-nubicus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.1,
+"y": 0.3
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 212,
+"heading2": 212,
+"tail": {
+"x": 0.9,
+"y": 0.8
+}
+},
+"lanius-phoenicuroides-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.155,
+"y": 0.408
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 193,
+"heading2": 199,
+"tail": {
+"x": 0.905,
+"y": 0.585
+}
+},
+"lanius-senator-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.045,
+"y": 0.485
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 197,
+"heading2": 197,
+"tail": {
+"x": 0.955,
+"y": 0.77
 }
 },
 "larus-argentatus-2": {
@@ -2351,6 +6287,22 @@
 "y": 0.83
 }
 },
+"larus-cachinnans-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.178,
+"y": 0.591
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 205,
+"heading2": 201,
+"tail": {
+"x": 0.808,
+"y": 0.881
+}
+},
 "larus-californicus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -2365,6 +6317,22 @@
 "tail": {
 "x": 0.881,
 "y": 0.42
+}
+},
+"larus-canus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.065,
+"y": 0.55
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 190,
+"heading2": 182,
+"tail": {
+"x": 0.905,
+"y": 0.7
 }
 },
 "larus-delawarensis-2": {
@@ -2383,6 +6351,22 @@
 "y": 0.57
 }
 },
+"larus-fuscus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.11,
+"y": 0.48
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 194,
+"heading2": 198,
+"tail": {
+"x": 0.89,
+"y": 0.68
+}
+},
 "larus-glaucescens-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -2399,6 +6383,22 @@
 "y": 0.675
 }
 },
+"larus-glaucoides-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.15,
+"y": 0.653
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 193,
+"heading2": 193,
+"tail": {
+"x": 0.79,
+"y": 0.8
+}
+},
 "larus-heermanni-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -2413,6 +6413,54 @@
 "tail": {
 "x": 0.881,
 "y": 0.788
+}
+},
+"larus-hyperboreus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.483
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 187,
+"heading2": 200,
+"tail": {
+"x": 0.95,
+"y": 0.6
+}
+},
+"larus-marinus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.06,
+"y": 0.48
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 186,
+"heading2": 186,
+"tail": {
+"x": 0.72,
+"y": 0.55
+}
+},
+"larus-michahellis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 195,
+"heading2": 192,
+"tail": {
+"x": 0.85,
+"y": 0.66
 }
 },
 "larus-occidentalis-2": {
@@ -2495,6 +6543,22 @@
 "y": 0.75
 }
 },
+"leiothrix-lutea-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.195,
+"y": 0.319
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 219,
+"heading2": 219,
+"tail": {
+"x": 0.855,
+"y": 0.857
+}
+},
 "leucophaeus-atricilla-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -2509,6 +6573,22 @@
 "tail": {
 "x": 0.8,
 "y": 0.69
+}
+},
+"leucophaeus-modestus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.115,
+"y": 0.577
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 184,
+"heading2": 203,
+"tail": {
+"x": 0.785,
+"y": 0.623
 }
 },
 "leucophaeus-pipixcan-2": {
@@ -2543,6 +6623,22 @@
 "y": 0.942
 }
 },
+"limnodromus-scolopaceus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.98,
+"y": 0.55
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 354,
+"heading2": 346,
+"tail": {
+"x": 0.08,
+"y": 0.65
+}
+},
 "limosa-fedoa-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -2557,6 +6653,134 @@
 "tail": {
 "x": 0.931,
 "y": 0.715
+}
+},
+"limosa-lapponica-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.4
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 194,
+"heading2": 191,
+"tail": {
+"x": 0.85,
+"y": 0.6
+}
+},
+"limosa-limosa-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.06,
+"y": 0.571
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 176,
+"heading2": 187,
+"tail": {
+"x": 0.87,
+"y": 0.521
+}
+},
+"linaria-cannabina-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.89,
+"y": 0.41
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 347,
+"heading2": 347,
+"tail": {
+"x": 0.09,
+"y": 0.59
+}
+},
+"linaria-flavirostris-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.1,
+"y": 0.44
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 212,
+"heading2": 212,
+"tail": {
+"x": 0.8,
+"y": 0.88
+}
+},
+"locustella-fluviatilis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.18,
+"y": 0.32
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 206,
+"heading2": 218,
+"tail": {
+"x": 0.82,
+"y": 0.63
+}
+},
+"locustella-lanceolata-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.055,
+"y": 0.375
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 195,
+"heading2": 199,
+"tail": {
+"x": 0.91,
+"y": 0.6
+}
+},
+"locustella-luscinioides-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.107,
+"y": 0.332
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 208,
+"heading2": 209,
+"tail": {
+"x": 0.829,
+"y": 0.723
+}
+},
+"locustella-naevia-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.22,
+"y": 0.34
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 207,
+"heading2": 207,
+"tail": {
+"x": 0.88,
+"y": 0.68
 }
 },
 "lophodytes-cucullatus-2": {
@@ -2575,6 +6799,22 @@
 "y": 0.7
 }
 },
+"lophophanes-cristatus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.194,
+"y": 0.458
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 209,
+"heading2": 206,
+"tail": {
+"x": 0.881,
+"y": 0.842
+}
+},
 "loxia-curvirostra-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -2591,6 +6831,134 @@
 "y": 0.773
 }
 },
+"loxia-leucoptera-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.15,
+"y": 0.346
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 206,
+"heading2": 206,
+"tail": {
+"x": 0.85,
+"y": 0.691
+}
+},
+"loxia-pytyopsittacus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.106,
+"y": 0.408
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 204,
+"heading2": 204,
+"tail": {
+"x": 0.894,
+"y": 0.758
+}
+},
+"lullula-arborea-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.148,
+"y": 0.331
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 217,
+"heading2": 218,
+"tail": {
+"x": 0.852,
+"y": 0.871
+}
+},
+"luscinia-luscinia-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.225,
+"y": 0.483
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 208,
+"heading2": 207,
+"tail": {
+"x": 0.875,
+"y": 0.833
+}
+},
+"luscinia-megarhynchos-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.67,
+"y": 0.49
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 308,
+"heading2": 306,
+"tail": {
+"x": 0.33,
+"y": 0.93
+}
+},
+"luscinia-svecica-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.063,
+"y": 0.444
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 205,
+"heading2": 205,
+"tail": {
+"x": 0.881,
+"y": 0.82
+}
+},
+"lymnocryptes-minimus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.06,
+"y": 0.581
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 188,
+"heading2": 188,
+"tail": {
+"x": 0.781,
+"y": 0.681
+}
+},
+"lyrurus-tetrix-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.32,
+"y": 0.2
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 241,
+"heading2": 237,
+"tail": {
+"x": 0.72,
+"y": 0.92
+}
+},
 "mareca-americana-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -2605,6 +6973,54 @@
 "tail": {
 "x": 0.96,
 "y": 0.7
+}
+},
+"mareca-falcata-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.052,
+"y": 0.452
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 198,
+"heading2": 198,
+"tail": {
+"x": 0.953,
+"y": 0.751
+}
+},
+"mareca-penelope-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.027,
+"y": 0.44
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 188,
+"heading2": 192,
+"tail": {
+"x": 0.92,
+"y": 0.57
+}
+},
+"mareca-sibilatrix-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.055,
+"y": 0.487
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 193,
+"heading2": 193,
+"tail": {
+"x": 0.88,
+"y": 0.675
 }
 },
 "mareca-strepera-2": {
@@ -2719,6 +7135,102 @@
 "y": 0.9
 }
 },
+"melanitta-americana-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.056,
+"y": 0.513
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 205,
+"heading2": 193,
+"tail": {
+"x": 0.944,
+"y": 0.93
+}
+},
+"melanitta-fusca-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.055,
+"y": 0.5
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 187,
+"heading2": 188,
+"tail": {
+"x": 0.87,
+"y": 0.6
+}
+},
+"melanitta-nigra-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.045,
+"y": 0.355
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 198,
+"heading2": 192,
+"tail": {
+"x": 0.895,
+"y": 0.625
+}
+},
+"melanitta-perspicillata-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.045,
+"y": 0.507
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 197,
+"heading2": 203,
+"tail": {
+"x": 0.955,
+"y": 0.786
+}
+},
+"melanocorypha-bimaculata-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.155,
+"y": 0.357
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 216,
+"heading2": 211,
+"tail": {
+"x": 0.85,
+"y": 0.857
+}
+},
+"melanocorypha-calandra-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.11,
+"y": 0.23
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 210,
+"heading2": 210,
+"tail": {
+"x": 0.89,
+"y": 0.68
+}
+},
 "meleagris-gallopavo-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -2733,6 +7245,22 @@
 "tail": {
 "x": 0.931,
 "y": 0.819
+}
+},
+"melopsittacus-undulatus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.24,
+"y": 0.306
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 221,
+"heading2": 221,
+"tail": {
+"x": 0.9,
+"y": 0.881
 }
 },
 "melospiza-georgiana-2": {
@@ -2831,6 +7359,22 @@
 "y": 0.56
 }
 },
+"mergellus-albellus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 193,
+"heading2": 193,
+"tail": {
+"x": 0.95,
+"y": 0.65
+}
+},
 "mergus-merganser-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -2845,6 +7389,70 @@
 "tail": {
 "x": 0.91,
 "y": 0.762
+}
+},
+"mergus-serrator-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.11,
+"y": 0.41
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 192,
+"heading2": 192,
+"tail": {
+"x": 0.87,
+"y": 0.57
+}
+},
+"merops-apiaster-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.37
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 218,
+"heading2": 218,
+"tail": {
+"x": 0.78,
+"y": 0.94
+}
+},
+"milvus-migrans-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.22,
+"y": 0.49
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 216,
+"heading2": 216,
+"tail": {
+"x": 0.78,
+"y": 0.9
+}
+},
+"milvus-milvus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.17,
+"y": 0.32
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 220,
+"heading2": 224,
+"tail": {
+"x": 0.78,
+"y": 0.83
 }
 },
 "mimus-polyglottos-2": {
@@ -2895,6 +7503,150 @@
 "y": 0.846
 }
 },
+"monticola-saxatilis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.38,
+"y": 0.25
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 238,
+"heading2": 238,
+"tail": {
+"x": 0.75,
+"y": 0.85
+}
+},
+"montifringilla-nivalis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.27,
+"y": 0.257
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 227,
+"heading2": 227,
+"tail": {
+"x": 0.72,
+"y": 0.743
+}
+},
+"morus-bassanus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.96,
+"y": 0.58
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 1,
+"heading2": 350,
+"tail": {
+"x": 0.06,
+"y": 0.57
+}
+},
+"motacilla-alba-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.064,
+"y": 0.442
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 181,
+"heading2": 175,
+"tail": {
+"x": 0.929,
+"y": 0.45
+}
+},
+"motacilla-cinerea-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.15,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 203,
+"heading2": 200,
+"tail": {
+"x": 0.85,
+"y": 0.65
+}
+},
+"motacilla-citreola-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.11,
+"y": 0.42
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 198,
+"heading2": 198,
+"tail": {
+"x": 0.91,
+"y": 0.68
+}
+},
+"motacilla-flava-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.035,
+"y": 0.375
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 199,
+"heading2": 199,
+"tail": {
+"x": 0.94,
+"y": 0.695
+}
+},
+"motacilla-tschutschensis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.03,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 201,
+"heading2": 201,
+"tail": {
+"x": 0.95,
+"y": 0.8
+}
+},
+"muscicapa-striata-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.17,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 196,
+"heading2": 196,
+"tail": {
+"x": 0.87,
+"y": 0.65
+}
+},
 "myadestes-townsendi-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -2943,6 +7695,22 @@
 "y": 0.68
 }
 },
+"myiopsitta-monachus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.781,
+"y": 0.281
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 320,
+"heading2": 320,
+"tail": {
+"x": 0.181,
+"y": 0.781
+}
+},
 "nannopterum-auritum-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -2957,6 +7725,54 @@
 "tail": {
 "x": 0.87,
 "y": 0.62
+}
+},
+"neophema-pulchella-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.39,
+"y": 0.317
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 230,
+"heading2": 229,
+"tail": {
+"x": 0.9,
+"y": 0.917
+}
+},
+"netta-rufina-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.082,
+"y": 0.302
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 202,
+"heading2": 205,
+"tail": {
+"x": 0.851,
+"y": 0.605
+}
+},
+"nucifraga-caryocatactes-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.081,
+"y": 0.419
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 210,
+"heading2": 210,
+"tail": {
+"x": 0.875,
+"y": 0.881
 }
 },
 "nucifraga-columbiana-2": {
@@ -2991,6 +7807,54 @@
 "y": 0.6
 }
 },
+"numenius-arquata-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.055,
+"y": 0.514
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 194,
+"heading2": 193,
+"tail": {
+"x": 0.805,
+"y": 0.703
+}
+},
+"numenius-phaeopus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 188,
+"heading2": 189,
+"tail": {
+"x": 0.75,
+"y": 0.55
+}
+},
+"numida-meleagris-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.058,
+"y": 0.365
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 209,
+"heading2": 205,
+"tail": {
+"x": 0.885,
+"y": 0.815
+}
+},
 "nycticorax-nycticorax-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -3005,6 +7869,134 @@
 "tail": {
 "x": 0.7,
 "y": 0.6
+}
+},
+"nymphicus-hollandicus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.06,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 215,
+"heading2": 213,
+"tail": {
+"x": 0.89,
+"y": 0.93
+}
+},
+"oenanthe-deserti-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.12,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 202,
+"heading2": 202,
+"tail": {
+"x": 0.88,
+"y": 0.65
+}
+},
+"oenanthe-hispanica-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.015,
+"y": 0.32
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 202,
+"heading2": 202,
+"tail": {
+"x": 0.91,
+"y": 0.68
+}
+},
+"oenanthe-isabellina-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.18,
+"y": 0.42
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 214,
+"heading2": 214,
+"tail": {
+"x": 0.88,
+"y": 0.9
+}
+},
+"oenanthe-leucopyga-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.055,
+"y": 0.417
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 206,
+"heading2": 211,
+"tail": {
+"x": 0.87,
+"y": 0.817
+}
+},
+"oenanthe-melanoleuca-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.15,
+"y": 0.401
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 211,
+"heading2": 211,
+"tail": {
+"x": 0.9,
+"y": 0.858
+}
+},
+"oenanthe-oenanthe-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.22,
+"y": 0.333
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 226,
+"heading2": 220,
+"tail": {
+"x": 0.82,
+"y": 0.96
+}
+},
+"oenanthe-pleschanka-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.83,
+"y": 0.4
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 331,
+"heading2": 331,
+"tail": {
+"x": 0.23,
+"y": 0.73
 }
 },
 "oreothlypis-ruficapilla-2": {
@@ -3023,6 +8015,86 @@
 "y": 0.68
 }
 },
+"oressochen-jubatus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 195,
+"heading2": 208,
+"tail": {
+"x": 0.8,
+"y": 0.65
+}
+},
+"oressochen-melanopterus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.073,
+"y": 0.52
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 198,
+"heading2": 198,
+"tail": {
+"x": 0.913,
+"y": 0.793
+}
+},
+"oriolus-oriolus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.18,
+"y": 0.32
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 226,
+"heading2": 226,
+"tail": {
+"x": 0.73,
+"y": 0.88
+}
+},
+"otus-scops-2": {
+"ambiguous": true,
+"ambiguous2": true,
+"beak": {
+"x": 0.5,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 270,
+"heading2": 270,
+"tail": {
+"x": 0.5,
+"y": 0.885
+}
+},
+"oxyura-jamaicensis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.045,
+"y": 0.481
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 188,
+"heading2": 188,
+"tail": {
+"x": 0.885,
+"y": 0.606
+}
+},
 "pandion-haliaetus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -3037,6 +8109,22 @@
 "tail": {
 "x": 0.223,
 "y": 0.669
+}
+},
+"panurus-biarmicus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.175,
+"y": 0.46
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 212,
+"heading2": 206,
+"tail": {
+"x": 0.905,
+"y": 0.913
 }
 },
 "parkesia-motacilla-2": {
@@ -3071,6 +8159,22 @@
 "y": 0.72
 }
 },
+"parus-major-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.569,
+"y": 0.285
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 279,
+"heading2": 280,
+"tail": {
+"x": 0.506,
+"y": 0.705
+}
+},
 "passer-domesticus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -3085,6 +8189,54 @@
 "tail": {
 "x": 0.09,
 "y": 0.62
+}
+},
+"passer-hispaniolensis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.06,
+"y": 0.47
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 201,
+"heading2": 199,
+"tail": {
+"x": 0.88,
+"y": 0.78
+}
+},
+"passer-italiae-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.17,
+"y": 0.22
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 218,
+"heading2": 218,
+"tail": {
+"x": 0.83,
+"y": 0.73
+}
+},
+"passer-luteus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.155,
+"y": 0.258
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 220,
+"heading2": 221,
+"tail": {
+"x": 0.855,
+"y": 0.842
 }
 },
 "passer-montanus-2": {
@@ -3183,6 +8335,22 @@
 "y": 0.88
 }
 },
+"pastor-roseus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.125,
+"y": 0.446
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 212,
+"heading2": 211,
+"tail": {
+"x": 0.875,
+"y": 0.923
+}
+},
 "patagioenas-fasciata-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -3197,6 +8365,22 @@
 "tail": {
 "x": 0.9,
 "y": 0.708
+}
+},
+"pavo-cristatus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.78,
+"y": 0.186
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 306,
+"heading2": 310,
+"tail": {
+"x": 0.23,
+"y": 0.953
 }
 },
 "pelecanus-erythrorhynchos-2": {
@@ -3231,6 +8415,54 @@
 "y": 0.467
 }
 },
+"pelecanus-onocrotalus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.11,
+"y": 0.57
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 199,
+"heading2": 199,
+"tail": {
+"x": 0.83,
+"y": 0.82
+}
+},
+"perdix-perdix-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.11,
+"y": 0.43
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 204,
+"heading2": 192,
+"tail": {
+"x": 0.88,
+"y": 0.77
+}
+},
+"periparus-ater-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.06,
+"y": 0.4
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 181,
+"heading2": 193,
+"tail": {
+"x": 0.94,
+"y": 0.41
+}
+},
 "perisoreus-canadensis-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -3245,6 +8477,22 @@
 "tail": {
 "x": 0.82,
 "y": 0.83
+}
+},
+"pernis-apivorus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.11,
+"y": 0.332
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 210,
+"heading2": 207,
+"tail": {
+"x": 0.87,
+"y": 0.764
 }
 },
 "petrochelidon-pyrrhonota-2": {
@@ -3295,6 +8543,22 @@
 "y": 0.92
 }
 },
+"phalacrocorax-carbo-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.11,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 189,
+"heading2": 189,
+"tail": {
+"x": 0.89,
+"y": 0.58
+}
+},
 "phalaenoptilus-nuttallii-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -3309,6 +8573,54 @@
 "tail": {
 "x": 0.82,
 "y": 0.83
+}
+},
+"phalaropus-fulicarius-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.16,
+"y": 0.46
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 189,
+"heading2": 189,
+"tail": {
+"x": 0.83,
+"y": 0.57
+}
+},
+"phalaropus-lobatus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.036,
+"y": 0.381
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 196,
+"heading2": 196,
+"tail": {
+"x": 0.864,
+"y": 0.613
+}
+},
+"phalaropus-tricolor-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.06,
+"y": 0.47
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 189,
+"heading2": 190,
+"tail": {
+"x": 0.92,
+"y": 0.61
 }
 },
 "phasianus-colchicus-2": {
@@ -3359,6 +8671,358 @@
 "y": 0.78
 }
 },
+"phoeniconaias-minor-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.03,
+"y": 0.42
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 185,
+"heading2": 185,
+"tail": {
+"x": 0.93,
+"y": 0.5
+}
+},
+"phoenicopterus-chilensis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.025,
+"y": 0.036
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 212,
+"heading2": 212,
+"tail": {
+"x": 0.81,
+"y": 0.52
+}
+},
+"phoenicopterus-roseus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.155,
+"y": 0.305
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 208,
+"heading2": 191,
+"tail": {
+"x": 0.715,
+"y": 0.605
+}
+},
+"phoenicopterus-ruber-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.07,
+"y": 0.58
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 196,
+"heading2": 196,
+"tail": {
+"x": 0.78,
+"y": 0.79
+}
+},
+"phoenicurus-ochruros-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.96,
+"y": 0.39
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 329,
+"heading2": 329,
+"tail": {
+"x": 0.12,
+"y": 0.89
+}
+},
+"phoenicurus-phoenicurus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.28,
+"y": 0.27
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 232,
+"heading2": 235,
+"tail": {
+"x": 0.78,
+"y": 0.9
+}
+},
+"phylloscopus-bonelli-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.28,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 222,
+"heading2": 222,
+"tail": {
+"x": 0.75,
+"y": 0.77
+}
+},
+"phylloscopus-borealis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.148,
+"y": 0.375
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 215,
+"heading2": 215,
+"tail": {
+"x": 0.852,
+"y": 0.87
+}
+},
+"phylloscopus-collybita-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.18,
+"y": 0.385
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 216,
+"heading2": 216,
+"tail": {
+"x": 0.85,
+"y": 0.865
+}
+},
+"phylloscopus-coronatus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.175,
+"y": 0.445
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 196,
+"heading2": 196,
+"tail": {
+"x": 0.825,
+"y": 0.63
+}
+},
+"phylloscopus-fuscatus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.77,
+"y": 0.36
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 318,
+"heading2": 315,
+"tail": {
+"x": 0.23,
+"y": 0.84
+}
+},
+"phylloscopus-humei-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.2,
+"y": 0.25
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 175,
+"heading2": 175,
+"tail": {
+"x": 0.8,
+"y": 0.2
+}
+},
+"phylloscopus-ibericus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.27,
+"y": 0.3
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 229,
+"heading2": 229,
+"tail": {
+"x": 0.78,
+"y": 0.88
+}
+},
+"phylloscopus-inornatus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.15,
+"y": 0.372
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 211,
+"heading2": 207,
+"tail": {
+"x": 0.8,
+"y": 0.769
+}
+},
+"phylloscopus-nitidus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.185,
+"y": 0.436
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 213,
+"heading2": 201,
+"tail": {
+"x": 0.855,
+"y": 0.864
+}
+},
+"phylloscopus-orientalis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.55,
+"y": 0.24
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 274,
+"heading2": 274,
+"tail": {
+"x": 0.5,
+"y": 0.9
+}
+},
+"phylloscopus-plumbeitarsus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.038,
+"y": 0.479
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 165,
+"heading2": 165,
+"tail": {
+"x": 0.95,
+"y": 0.229
+}
+},
+"phylloscopus-proregulus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.044,
+"y": 0.392
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 201,
+"heading2": 199,
+"tail": {
+"x": 0.856,
+"y": 0.708
+}
+},
+"phylloscopus-schwarzi-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.4
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 208,
+"heading2": 208,
+"tail": {
+"x": 0.9,
+"y": 0.85
+}
+},
+"phylloscopus-sibilatrix-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.19,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 199,
+"heading2": 206,
+"tail": {
+"x": 0.85,
+"y": 0.68
+}
+},
+"phylloscopus-trochiloides-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.28,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 205,
+"heading2": 205,
+"tail": {
+"x": 0.78,
+"y": 0.68
+}
+},
+"phylloscopus-trochilus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.275,
+"y": 0.275
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 225,
+"heading2": 225,
+"tail": {
+"x": 0.825,
+"y": 0.825
+}
+},
 "pica-nuttalli-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -3375,6 +9039,22 @@
 "y": 0.978
 }
 },
+"pica-pica-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.11,
+"y": 0.34
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 213,
+"heading2": 205,
+"tail": {
+"x": 0.92,
+"y": 0.87
+}
+},
 "picoides-arcticus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -3389,6 +9069,54 @@
 "tail": {
 "x": 0.31,
 "y": 0.81
+}
+},
+"picoides-tridactylus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.16,
+"y": 0.32
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 214,
+"heading2": 214,
+"tail": {
+"x": 0.83,
+"y": 0.78
+}
+},
+"picus-canus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.17,
+"y": 0.22
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 220,
+"heading2": 220,
+"tail": {
+"x": 0.83,
+"y": 0.78
+}
+},
+"picus-viridis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.043,
+"y": 0.401
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 199,
+"heading2": 208,
+"tail": {
+"x": 0.9,
+"y": 0.701
 }
 },
 "pinicola-enucleator-2": {
@@ -3503,6 +9231,86 @@
 "y": 0.881
 }
 },
+"platalea-leucorodia-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.025,
+"y": 0.585
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 187,
+"heading2": 187,
+"tail": {
+"x": 0.87,
+"y": 0.69
+}
+},
+"platycercus-adscitus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.29,
+"y": 0.34
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 228,
+"heading2": 228,
+"tail": {
+"x": 0.81,
+"y": 0.91
+}
+},
+"platycercus-elegans-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.15,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 212,
+"heading2": 211,
+"tail": {
+"x": 0.857,
+"y": 0.9
+}
+},
+"platycercus-eximius-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.28,
+"y": 0.29
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 230,
+"heading2": 224,
+"tail": {
+"x": 0.85,
+"y": 0.96
+}
+},
+"plectrophenax-nivalis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.19,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 215,
+"heading2": 215,
+"tail": {
+"x": 0.8,
+"y": 0.875
+}
+},
 "plegadis-chihi-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -3519,6 +9327,70 @@
 "y": 0.769
 }
 },
+"plegadis-falcinellus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.47
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 183,
+"heading2": 183,
+"tail": {
+"x": 0.89,
+"y": 0.52
+}
+},
+"pluvialis-apricaria-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.065,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 187,
+"heading2": 205,
+"tail": {
+"x": 0.87,
+"y": 0.55
+}
+},
+"pluvialis-dominica-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.026,
+"y": 0.258
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 202,
+"heading2": 195,
+"tail": {
+"x": 0.857,
+"y": 0.59
+}
+},
+"pluvialis-fulva-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.08,
+"y": 0.41
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 196,
+"heading2": 196,
+"tail": {
+"x": 0.83,
+"y": 0.63
+}
+},
 "pluvialis-squatarola-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -3533,6 +9405,54 @@
 "tail": {
 "x": 0.89,
 "y": 0.473
+}
+},
+"podiceps-auritus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.4
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 197,
+"heading2": 193,
+"tail": {
+"x": 0.85,
+"y": 0.65
+}
+},
+"podiceps-cristatus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.905,
+"y": 0.345
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 335,
+"heading2": 335,
+"tail": {
+"x": 0.155,
+"y": 0.7
+}
+},
+"podiceps-grisegena-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.967,
+"y": 0.46
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 340,
+"heading2": 343,
+"tail": {
+"x": 0.267,
+"y": 0.72
 }
 },
 "podiceps-nigricollis-2": {
@@ -3615,6 +9535,38 @@
 "y": 0.71
 }
 },
+"poecile-montanus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.25,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 198,
+"heading2": 198,
+"tail": {
+"x": 0.85,
+"y": 0.65
+}
+},
+"poecile-palustris-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.2,
+"y": 0.3
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 220,
+"heading2": 212,
+"tail": {
+"x": 0.81,
+"y": 0.81
+}
+},
 "poecile-rufescens-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -3647,6 +9599,22 @@
 "y": 0.751
 }
 },
+"polytelis-swainsonii-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.19,
+"y": 0.51
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 213,
+"heading2": 213,
+"tail": {
+"x": 0.81,
+"y": 0.91
+}
+},
 "pooecetes-gramineus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -3663,6 +9631,38 @@
 "y": 0.78
 }
 },
+"porphyrio-poliocephalus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 194,
+"heading2": 193,
+"tail": {
+"x": 0.85,
+"y": 0.55
+}
+},
+"porphyrio-porphyrio-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.46
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 187,
+"heading2": 193,
+"tail": {
+"x": 0.89,
+"y": 0.56
+}
+},
 "porzana-carolina-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -3677,6 +9677,22 @@
 "tail": {
 "x": 0.783,
 "y": 0.546
+}
+},
+"porzana-porzana-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.179,
+"y": 0.399
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 196,
+"heading2": 190,
+"tail": {
+"x": 0.806,
+"y": 0.579
 }
 },
 "progne-subis-2": {
@@ -3711,6 +9727,54 @@
 "y": 0.35
 }
 },
+"prunella-collaris-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.085,
+"y": 0.4
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 203,
+"heading2": 203,
+"tail": {
+"x": 0.9,
+"y": 0.75
+}
+},
+"prunella-modularis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.19,
+"y": 0.43
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 216,
+"heading2": 219,
+"tail": {
+"x": 0.8,
+"y": 0.88
+}
+},
+"prunella-montanella-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.042,
+"y": 0.455
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 210,
+"heading2": 210,
+"tail": {
+"x": 0.842,
+"y": 0.917
+}
+},
 "psaltriparus-minimus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -3725,6 +9789,166 @@
 "tail": {
 "x": 0.77,
 "y": 0.78
+}
+},
+"psephotus-haematonotus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.07,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 200,
+"heading2": 206,
+"tail": {
+"x": 0.97,
+"y": 0.78
+}
+},
+"psittacula-cyanocephala-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.125,
+"y": 0.5
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 185,
+"heading2": 185,
+"tail": {
+"x": 0.975,
+"y": 0.571
+}
+},
+"psittacula-eupatria-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.883,
+"y": 0.278
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 320,
+"heading2": 315,
+"tail": {
+"x": 0.083,
+"y": 0.944
+}
+},
+"psittacula-krameri-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.19,
+"y": 0.41
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 217,
+"heading2": 225,
+"tail": {
+"x": 0.85,
+"y": 0.9
+}
+},
+"psittacus-erithacus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.24,
+"y": 0.36
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 218,
+"heading2": 218,
+"tail": {
+"x": 0.76,
+"y": 0.76
+}
+},
+"ptyonoprogne-rupestris-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.17,
+"y": 0.22
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 220,
+"heading2": 223,
+"tail": {
+"x": 0.84,
+"y": 0.78
+}
+},
+"puffinus-puffinus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.098,
+"y": 0.525
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 203,
+"heading2": 192,
+"tail": {
+"x": 0.9,
+"y": 0.87
+}
+},
+"pycnonotus-leucotis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.181,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 220,
+"heading2": 220,
+"tail": {
+"x": 0.881,
+"y": 0.936
+}
+},
+"pyrrhocorax-graculus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.12,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 202,
+"heading2": 200,
+"tail": {
+"x": 0.88,
+"y": 0.65
+}
+},
+"pyrrhula-pyrrhula-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.16,
+"y": 0.36
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 208,
+"heading2": 208,
+"tail": {
+"x": 0.8,
+"y": 0.7
 }
 },
 "quiscalus-mexicanus-2": {
@@ -3759,6 +9983,38 @@
 "y": 0.8
 }
 },
+"radjah-radjah-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.044,
+"y": 0.483
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 196,
+"heading2": 196,
+"tail": {
+"x": 0.888,
+"y": 0.733
+}
+},
+"rallus-aquaticus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.025,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 194,
+"heading2": 194,
+"tail": {
+"x": 0.91,
+"y": 0.675
+}
+},
 "rallus-limicola-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -3791,6 +10047,22 @@
 "y": 0.721
 }
 },
+"recurvirostra-avosetta-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 176,
+"heading2": 192,
+"tail": {
+"x": 0.64,
+"y": 0.41
+}
+},
 "regulus-calendula-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -3805,6 +10077,38 @@
 "tail": {
 "x": 0.3,
 "y": 0.38
+}
+},
+"regulus-ignicapilla-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.22,
+"y": 0.42
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 198,
+"heading2": 198,
+"tail": {
+"x": 0.82,
+"y": 0.61
+}
+},
+"regulus-regulus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.96,
+"y": 0.47
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 354,
+"heading2": 354,
+"tail": {
+"x": 0.06,
+"y": 0.57
 }
 },
 "regulus-satrapa-2": {
@@ -3823,6 +10127,54 @@
 "y": 0.79
 }
 },
+"remiz-pendulinus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.236,
+"y": 0.489
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 211,
+"heading2": 211,
+"tail": {
+"x": 0.876,
+"y": 0.876
+}
+},
+"rhea-americana-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.1,
+"y": 0.28
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 205,
+"heading2": 205,
+"tail": {
+"x": 0.8,
+"y": 0.6
+}
+},
+"rhodostethia-rosea-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.95,
+"y": 0.49
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 353,
+"heading2": 348,
+"tail": {
+"x": 0.1,
+"y": 0.601
+}
+},
 "riparia-riparia-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -3837,6 +10189,22 @@
 "tail": {
 "x": 0.325,
 "y": 0.8
+}
+},
+"rissa-tridactyla-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.069,
+"y": 0.55
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 197,
+"heading2": 195,
+"tail": {
+"x": 0.944,
+"y": 0.81
 }
 },
 "rynchops-niger-2": {
@@ -3869,6 +10237,70 @@
 "tail": {
 "x": 0.923,
 "y": 0.923
+}
+},
+"saxicola-maurus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.21,
+"y": 0.26
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 219,
+"heading2": 218,
+"tail": {
+"x": 0.85,
+"y": 0.78
+}
+},
+"saxicola-rubetra-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.16,
+"y": 0.414
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 209,
+"heading2": 209,
+"tail": {
+"x": 0.83,
+"y": 0.786
+}
+},
+"saxicola-rubicola-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.115,
+"y": 0.38
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 213,
+"heading2": 213,
+"tail": {
+"x": 0.895,
+"y": 0.88
+}
+},
+"saxicola-stejnegeri-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.075,
+"y": 0.34
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 212,
+"heading2": 212,
+"tail": {
+"x": 0.865,
+"y": 0.84
 }
 },
 "sayornis-nigricans-2": {
@@ -3917,6 +10349,22 @@
 "tail": {
 "x": 0.929,
 "y": 0.94
+}
+},
+"scolopax-rusticola-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.06,
+"y": 0.7375
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 189,
+"heading2": 190,
+"tail": {
+"x": 0.88,
+"y": 0.8625
 }
 },
 "seiurus-aurocapilla-2": {
@@ -3981,6 +10429,38 @@
 "tail": {
 "x": 0.91,
 "y": 0.97
+}
+},
+"serinus-canaria-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.2,
+"y": 0.49
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 213,
+"heading2": 220,
+"tail": {
+"x": 0.89,
+"y": 0.93
+}
+},
+"serinus-serinus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.225,
+"y": 0.358
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 218,
+"heading2": 218,
+"tail": {
+"x": 0.825,
+"y": 0.825
 }
 },
 "setophaga-americana-2": {
@@ -4367,6 +10847,22 @@
 "y": 0.65
 }
 },
+"sitta-europaea-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.95,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 336,
+"heading2": 333,
+"tail": {
+"x": 0.15,
+"y": 0.8
+}
+},
 "sitta-pygmaea-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -4381,6 +10877,38 @@
 "tail": {
 "x": 0.967,
 "y": 0.917
+}
+},
+"somateria-mollissima-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.025,
+"y": 0.341
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 208,
+"heading2": 208,
+"tail": {
+"x": 0.91,
+"y": 0.807
+}
+},
+"somateria-spectabilis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.045,
+"y": 0.441
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 199,
+"heading2": 195,
+"tail": {
+"x": 0.9,
+"y": 0.735
 }
 },
 "spatula-clypeata-2": {
@@ -4399,6 +10927,22 @@
 "y": 0.662
 }
 },
+"spatula-cyanoptera-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.055,
+"y": 0.4
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 184,
+"heading2": 186,
+"tail": {
+"x": 0.915,
+"y": 0.46
+}
+},
 "spatula-discors-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -4413,6 +10957,22 @@
 "tail": {
 "x": 0.915,
 "y": 0.8
+}
+},
+"spatula-querquedula-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.045,
+"y": 0.533
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 188,
+"heading2": 202,
+"tail": {
+"x": 0.905,
+"y": 0.65
 }
 },
 "sphyrapicus-ruber-2": {
@@ -4509,6 +11069,22 @@
 "tail": {
 "x": 0.88,
 "y": 0.71
+}
+},
+"spinus-spinus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.155,
+"y": 0.382
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 204,
+"heading2": 211,
+"tail": {
+"x": 0.855,
+"y": 0.688
 }
 },
 "spinus-tristis-2": {
@@ -4639,6 +11215,70 @@
 "y": 0.925
 }
 },
+"stercorarius-longicaudus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.095,
+"y": 0.505
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 203,
+"heading2": 197,
+"tail": {
+"x": 0.955,
+"y": 0.867
+}
+},
+"stercorarius-parasiticus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.115,
+"y": 0.54
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 195,
+"heading2": 195,
+"tail": {
+"x": 0.91,
+"y": 0.75
+}
+},
+"stercorarius-pomarinus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.065,
+"y": 0.285
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 188,
+"heading2": 188,
+"tail": {
+"x": 0.935,
+"y": 0.4
+}
+},
+"stercorarius-skua-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.06,
+"y": 0.208
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 200,
+"heading2": 194,
+"tail": {
+"x": 0.94,
+"y": 0.531
+}
+},
 "sterna-forsteri-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -4671,6 +11311,38 @@
 "y": 0.4
 }
 },
+"sterna-paradisaea-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.047,
+"y": 0.55
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 177,
+"heading2": 176,
+"tail": {
+"x": 0.967,
+"y": 0.5
+}
+},
+"sternula-albifrons-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.1,
+"y": 0.58
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 197,
+"heading2": 190,
+"tail": {
+"x": 0.9,
+"y": 0.82
+}
+},
 "streptopelia-decaocto-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -4687,6 +11359,70 @@
 "y": 0.672
 }
 },
+"streptopelia-orientalis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.095,
+"y": 0.39
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 205,
+"heading2": 205,
+"tail": {
+"x": 0.905,
+"y": 0.76
+}
+},
+"streptopelia-roseogrisea-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.08,
+"y": 0.52
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 199,
+"heading2": 200,
+"tail": {
+"x": 0.88,
+"y": 0.8
+}
+},
+"streptopelia-turtur-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.25,
+"y": 0.4375
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 219,
+"heading2": 215,
+"tail": {
+"x": 0.8,
+"y": 0.875
+}
+},
+"strix-aluco-2": {
+"ambiguous": true,
+"ambiguous2": true,
+"beak": {
+"x": 0.5,
+"y": 0.34
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 270,
+"heading2": 262,
+"tail": {
+"x": 0.5,
+"y": 0.92
+}
+},
 "strix-occidentalis-2": {
 "ambiguous": true,
 "ambiguous2": true,
@@ -4701,6 +11437,22 @@
 "tail": {
 "x": 0.5,
 "y": 0.87
+}
+},
+"strix-uralensis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.445,
+"y": 0.629
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 240,
+"heading2": 240,
+"tail": {
+"x": 0.65,
+"y": 0.986
 }
 },
 "strix-varia-2": {
@@ -4767,6 +11519,70 @@
 "y": 0.846
 }
 },
+"surnia-ulula-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.485,
+"y": 0.527
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 268,
+"heading2": 262,
+"tail": {
+"x": 0.5,
+"y": 0.914
+}
+},
+"sylvia-atricapilla-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.225,
+"y": 0.431
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 217,
+"heading2": 221,
+"tail": {
+"x": 0.875,
+"y": 0.923
+}
+},
+"sylvia-borin-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.44
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 207,
+"heading2": 207,
+"tail": {
+"x": 0.85,
+"y": 0.85
+}
+},
+"tachybaptus-ruficollis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.07,
+"y": 0.44
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 195,
+"heading2": 199,
+"tail": {
+"x": 0.88,
+"y": 0.65
+}
+},
 "tachycineta-bicolor-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -4799,6 +11615,166 @@
 "y": 0.923
 }
 },
+"tadorna-cana-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.069,
+"y": 0.53
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 197,
+"heading2": 197,
+"tail": {
+"x": 0.929,
+"y": 0.8
+}
+},
+"tadorna-ferruginea-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 199,
+"heading2": 199,
+"tail": {
+"x": 0.9,
+"y": 0.65
+}
+},
+"tadorna-tadorna-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.085,
+"y": 0.425
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 194,
+"heading2": 195,
+"tail": {
+"x": 0.915,
+"y": 0.625
+}
+},
+"tadorna-tadornoides-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.098,
+"y": 0.438
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 211,
+"heading2": 193,
+"tail": {
+"x": 0.882,
+"y": 0.903
+}
+},
+"taeniopygia-guttata-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.178,
+"y": 0.376
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 218,
+"heading2": 218,
+"tail": {
+"x": 0.852,
+"y": 0.911
+}
+},
+"tarsiger-cyanurus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.25,
+"y": 0.43
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 199,
+"heading2": 209,
+"tail": {
+"x": 0.85,
+"y": 0.64
+}
+},
+"tetrao-urogallus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.055,
+"y": 0.297
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 209,
+"heading2": 209,
+"tail": {
+"x": 0.975,
+"y": 0.804
+}
+},
+"tetrastes-bonasia-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.08,
+"y": 0.28
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 205,
+"heading2": 205,
+"tail": {
+"x": 0.92,
+"y": 0.68
+}
+},
+"tetrax-tetrax-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.08,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 194,
+"heading2": 199,
+"tail": {
+"x": 0.9,
+"y": 0.55
+}
+},
+"thalassarche-melanophris-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.15,
+"y": 0.555
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 193,
+"heading2": 193,
+"tail": {
+"x": 0.8,
+"y": 0.705
+}
+},
 "thalasseus-elegans-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -4813,6 +11789,38 @@
 "tail": {
 "x": 0.975,
 "y": 0.891
+}
+},
+"thalasseus-sandvicensis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.045,
+"y": 0.54
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 190,
+"heading2": 192,
+"tail": {
+"x": 0.965,
+"y": 0.698
+}
+},
+"theristicus-melanopis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.0625,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 193,
+"heading2": 193,
+"tail": {
+"x": 0.7,
+"y": 0.5
 }
 },
 "thryomanes-bewickii-2": {
@@ -4847,6 +11855,22 @@
 "y": 0.868
 }
 },
+"tichodroma-muraria-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.238,
+"y": 0.25
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 223,
+"heading2": 227,
+"tail": {
+"x": 0.763,
+"y": 0.738
+}
+},
 "toxostoma-redivivum-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -4879,6 +11903,22 @@
 "y": 0.65
 }
 },
+"tringa-erythropus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.34
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 192,
+"heading2": 192,
+"tail": {
+"x": 0.74,
+"y": 0.49
+}
+},
 "tringa-flavipes-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -4895,6 +11935,22 @@
 "y": 0.6
 }
 },
+"tringa-glareola-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.115,
+"y": 0.41
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 195,
+"heading2": 197,
+"tail": {
+"x": 0.865,
+"y": 0.61
+}
+},
 "tringa-melanoleuca-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -4909,6 +11965,38 @@
 "tail": {
 "x": 0.85,
 "y": 0.65
+}
+},
+"tringa-nebularia-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.038,
+"y": 0.457
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 186,
+"heading2": 175,
+"tail": {
+"x": 0.875,
+"y": 0.543
+}
+},
+"tringa-ochropus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.056,
+"y": 0.43
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 183,
+"heading2": 183,
+"tail": {
+"x": 0.935,
+"y": 0.469
 }
 },
 "tringa-semipalmata-2": {
@@ -4941,6 +12029,38 @@
 "tail": {
 "x": 0.86,
 "y": 0.56
+}
+},
+"tringa-stagnatilis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.06,
+"y": 0.36
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 190,
+"heading2": 202,
+"tail": {
+"x": 0.78,
+"y": 0.49
+}
+},
+"tringa-totanus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.245,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 195,
+"heading2": 195,
+"tail": {
+"x": 0.755,
+"y": 0.59
 }
 },
 "troglodytes-aedon-2": {
@@ -4991,6 +12111,86 @@
 "y": 0.378
 }
 },
+"troglodytes-troglodytes-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.458
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 160,
+"heading2": 160,
+"tail": {
+"x": 0.872,
+"y": 0.158
+}
+},
+"turdus-atrogularis-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.145,
+"y": 0.453
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 206,
+"heading2": 200,
+"tail": {
+"x": 0.855,
+"y": 0.806
+}
+},
+"turdus-eunomus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.12,
+"y": 0.35
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 202,
+"heading2": 202,
+"tail": {
+"x": 0.88,
+"y": 0.65
+}
+},
+"turdus-iliacus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.055,
+"y": 0.355
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 209,
+"heading2": 209,
+"tail": {
+"x": 0.855,
+"y": 0.805
+}
+},
+"turdus-merula-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.32,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 212,
+"heading2": 223,
+"tail": {
+"x": 0.7,
+"y": 0.69
+}
+},
 "turdus-migratorius-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -5005,6 +12205,102 @@
 "tail": {
 "x": 0.89,
 "y": 0.95
+}
+},
+"turdus-obscurus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.25,
+"y": 0.28
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 226,
+"heading2": 226,
+"tail": {
+"x": 0.82,
+"y": 0.88
+}
+},
+"turdus-pallidus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.085,
+"y": 0.24
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 222,
+"heading2": 222,
+"tail": {
+"x": 0.835,
+"y": 0.92
+}
+},
+"turdus-philomelos-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.25,
+"y": 0.3
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 215,
+"heading2": 223,
+"tail": {
+"x": 0.9,
+"y": 0.75
+}
+},
+"turdus-pilaris-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.155,
+"y": 0.356
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 221,
+"heading2": 216,
+"tail": {
+"x": 0.835,
+"y": 0.956
+}
+},
+"turdus-torquatus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.056,
+"y": 0.375
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 200,
+"heading2": 200,
+"tail": {
+"x": 0.881,
+"y": 0.681
+}
+},
+"turdus-viscivorus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.058,
+"y": 0.457
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 188,
+"heading2": 205,
+"tail": {
+"x": 0.94,
+"y": 0.579
 }
 },
 "tyrannus-tyrannus-2": {
@@ -5071,6 +12367,38 @@
 "y": 0.77
 }
 },
+"upupa-epops-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.198,
+"y": 0.536
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 210,
+"heading2": 210,
+"tail": {
+"x": 0.782,
+"y": 0.878
+}
+},
+"uria-aalge-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.024,
+"y": 0.458
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 203,
+"heading2": 200,
+"tail": {
+"x": 0.94,
+"y": 0.842
+}
+},
 "urile-penicillatus-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -5085,6 +12413,54 @@
 "tail": {
 "x": 0.833,
 "y": 0.906
+}
+},
+"vanellus-leucurus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.45
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 193,
+"heading2": 194,
+"tail": {
+"x": 0.9,
+"y": 0.65
+}
+},
+"vanellus-miles-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.12,
+"y": 0.54
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 177,
+"heading2": 183,
+"tail": {
+"x": 0.88,
+"y": 0.5
+}
+},
+"vanellus-vanellus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.05,
+"y": 0.4
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 187,
+"heading2": 187,
+"tail": {
+"x": 0.95,
+"y": 0.51
 }
 },
 "vermivora-chrysoptera-2": {
@@ -5263,6 +12639,70 @@
 "y": 0.7
 }
 },
+"xema-sabini-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.046,
+"y": 0.546
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 181,
+"heading2": 181,
+"tail": {
+"x": 0.954,
+"y": 0.569
+}
+},
+"xenus-cinereus-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.045,
+"y": 0.485
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 194,
+"heading2": 191,
+"tail": {
+"x": 0.705,
+"y": 0.655
+}
+},
+"zapornia-parva-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.056,
+"y": 0.486
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 186,
+"heading2": 186,
+"tail": {
+"x": 0.881,
+"y": 0.579
+}
+},
+"zapornia-pusilla-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.042,
+"y": 0.483
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 192,
+"heading2": 192,
+"tail": {
+"x": 0.857,
+"y": 0.65
+}
+},
 "zenaida-asiatica-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -5357,6 +12797,22 @@
 "tail": {
 "x": 0.86,
 "y": 0.75
+}
+},
+"zoothera-aurea-2": {
+"ambiguous": false,
+"ambiguous2": false,
+"beak": {
+"x": 0.175,
+"y": 0.325
+},
+"confidence": "high",
+"confidence2": "high",
+"heading": 208,
+"heading2": 215,
+"tail": {
+"x": 0.825,
+"y": 0.675
 }
 }
 }

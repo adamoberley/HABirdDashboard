@@ -1,17 +1,22 @@
 # Generating illustrations
 
-The collage art is generated, not hand-drawn. The repo ships 670 kachō-e
-illustrations (335 species, a perched and a flight pose each). To restyle
-them or build a set for your own region, the pipeline is four scripts in
-this directory.
+The collage art is generated, not hand-drawn. The repo ships 1,602 kachō-e
+illustrations (801 species, a perched and a flight pose each). To restyle
+them or build a set for your own region, the pipeline is a handful of scripts
+in this directory.
 
 ## Pipeline
 
 1. `pregen.py` renders each bird with Gemini 2.5 Flash Image, on a flat cream ground.
 2. `cutout.py` removes the ground with BiRefNet and crops to the bird.
-3. `build_masks.py` rebuilds the generated silhouette tables in
-   `homeassistant/www/masks.js`.
-4. `verify.py` (optional) runs an adversarial species-ID + anatomy check.
+3. `build_masks.py` rebuilds the generated silhouette tables (`DIMS` + `MASKS`)
+   in `homeassistant/www/masks.js`. **The collage packs birds by these masks
+   and skips any species without one** — so new illustrations don't show in the
+   collage until you run this (the atlas, image-only, already shows them).
+4. `build_dirs.py` (optional) writes the `DIRS` flight-heading table into the
+   same `masks.js`, used only by the ring **flow** layout. See
+   [Flight directions](#flight-directions) below.
+5. `verify.py` (optional) runs an adversarial species-ID + anatomy check.
 
 ```bash
 pip install -r requirements.txt
@@ -25,6 +30,10 @@ python3 cutout.py
 
 # 3. rebuild the collage masks, then bump SKETCH_VERSION + IMG_VERSION in apt.js
 python3 build_masks.py
+
+# 4. (optional) flight headings for the ring "flow" layout
+python3 build_dirs.py            # first pass over new -2.png flight renders
+python3 build_dirs.py --verify   # cross-check pass; drops head/tail-confused birds
 ```
 
 `--labels` takes any `Sci|Com` per-line file; the bundled `labels.txt` is the
@@ -70,6 +79,37 @@ All three degrade gracefully: a missing reference is simply not attached.
 gets wrong. Each note names the field marks that matter and the look-alikes to
 avoid, and is appended to the prompt for that species. Add entries as you find
 drift; they carry forward to every future regeneration of that bird.
+
+## Flight directions
+
+The ring **flow** layout banks every in-flight bird so it follows the circle's
+tangent — a wheeling flock. To do that the renderer needs to know which way each
+flight illustration (`<slug>-2.png`) is *already* pointing. `build_dirs.py` asks
+Gemini Vision for the beak tip and tail tip of each flight render, turns the
+tail→beak vector into a heading (degrees, `0` = right, `90` = down), and writes a
+`var DIRS = {…}` table into `homeassistant/www/masks.js` next to `DIMS`/`MASKS`.
+
+```bash
+python3 build_dirs.py                 # all flight renders not already cached
+python3 build_dirs.py larus-canus-2   # re-annotate one slug
+python3 build_dirs.py --verify        # 2nd independent pass; drop disagreements
+python3 build_dirs.py --check         # rebuild the DIRS table from dirs.json, no API calls
+```
+
+Notes:
+
+- **Cached.** Results accumulate in `dirs.json`, so a normal run only annotates
+  flight renders it hasn't seen — adding a region's birds costs only those birds.
+- **Two passes.** Run the plain pass, then `--verify`. The cross-check runs a
+  second independent read into `heading2`; headings whose two passes disagree by
+  >40° (the classic head/tail confusion, e.g. gulls) are dropped rather than
+  baked in backwards.
+- **Omissions are fine.** Head-on or tail-toward-viewer poses have no in-plane
+  direction; they're flagged `ambiguous` and left out of `DIRS`, so the renderer
+  draws them upright. Only the ring flow layout cares — the default collage and
+  the atlas ignore `DIRS` entirely.
+- **Overrides.** `dirs_overrides.json` holds hand-verified headings that win over
+  the vision pass for the occasional bird the model reverses.
 
 ## Verifying
 
