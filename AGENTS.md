@@ -113,7 +113,7 @@ set — so don't skip it if you want them to match.)
 
 ---
 
-## 3. Generate → cut out → masks → card
+## 3. Generate → cut out → masks → directions → card
 
 If you used the **CSV** (option A), convert it to the `Sci|Com` label format the
 pipeline reads (skip if using `--from-birdnet`):
@@ -148,11 +148,35 @@ caffeinate -i .venv/bin/python avian/scripts/cutout.py   # drop `caffeinate -i` 
 > If your tool kills long-running commands, just run `cutout.py` again — it's
 > idempotent (skips already-transparent files) and resumes where it stopped.
 
-**Rebuild masks**, then bake them into the card:
+**Rebuild masks.** The collage packs birds by their outline, so every species
+needs a 1-bit silhouette mask in `homeassistant/www/masks.js` (`DIMS` + `MASKS`).
+Derived from the cutout PNGs' alpha — **new illustrations don't appear in the
+collage until you run this**, even though the atlas (image-only) already shows
+them:
 
 ```bash
 .venv/bin/python avian/scripts/build_masks.py
-node homeassistant/card/build.js     # writes dist/habird-card.js with new masks
+```
+
+**Bake in flight directions (optional).** The ring **flow** layout banks each
+in-flight bird along the circle, which needs to know which way its flight
+illustration already points. `build_dirs.py` asks Gemini Vision for the beak/tail
+points of every `<slug>-2.png` and writes the `DIRS` table into the same
+`masks.js`. It **skips species already annotated** (cached in `dirs.json`), and
+ambiguous/head-on birds are omitted (left upright). Skip this and the new birds
+simply stay upright in flow mode — the default collage is unaffected:
+
+```bash
+.venv/bin/python avian/scripts/build_dirs.py            # first pass (new flight renders)
+.venv/bin/python avian/scripts/build_dirs.py --verify   # cross-check pass; drops reversed birds
+```
+
+**Bump the cache-bust, then build the card.** Bump `SKETCH_VERSION` *and*
+`IMG_VERSION` in `homeassistant/www/apt.js` (so browsers drop stale artwork),
+then inline the new tables into the shipped card:
+
+```bash
+node homeassistant/card/build.js     # writes dist/habird-card.js with new masks + dirs
 ```
 
 ---
@@ -218,6 +242,10 @@ artwork into `/config/www/habird/`; no card build needed.)
   homeassistant/card/build.js`) *and* load that rebuilt file. New PNGs alone
   aren't enough.
 - **Style looks off / inconsistent** — you skipped the style references (Step 2).
+- **New birds fly upright in the ring "flow" layout** — you skipped
+  `build_dirs.py` (or it omitted them as ambiguous). They have no heading in the
+  `DIRS` table, so the renderer can't bank them. Harmless for the default
+  collage; re-run `build_dirs.py` to annotate them.
 
 ---
 

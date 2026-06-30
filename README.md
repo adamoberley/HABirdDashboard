@@ -314,9 +314,16 @@ for the collage packing.) Two remedies, neither needs code changes:
    export GEMINI_API_KEY='your-key'
    python3 avian/scripts/pregen.py --from-birdnet http://homeassistant.local:8080
    python3 avian/scripts/cutout.py
-   python3 avian/scripts/build_masks.py     # rebuilds the collage masks
-   node homeassistant/card/build.js         # bakes the masks into the card
+   python3 avian/scripts/build_masks.py     # rebuilds the collage silhouette masks
+   python3 avian/scripts/build_dirs.py      # optional: flight headings for the ring "flow" layout
+   node homeassistant/card/build.js         # bakes the masks (+ dirs) into the card
    ```
+
+   The masks are what the collage packs against, so a new bird only appears
+   in the collage once `build_masks.py` has run; `build_dirs.py` is only
+   needed for the ring **flow** layout (it banks in-flight birds along the
+   circle). Both write `homeassistant/www/masks.js`, which the card build
+   inlines.
 
    Host the PNGs at `/config/www/habird-art/` (set `image_base`) and add
    the rebuilt `dist/habird-card.js` as your dashboard resource.

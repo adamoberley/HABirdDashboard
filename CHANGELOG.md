@@ -14,6 +14,21 @@
   `build_masks.py`, so the collage now places the full library. Cache-bust
   versions bumped (`r13`→`r14`). Fixes #52.
 
+### Added
+- **Flight headings for the new species.** Ran `build_dirs.py` over the 466
+  European flight renders so the ring **flow** layout banks them along the
+  circle instead of leaving them upright. The `DIRS` table now covers the whole
+  library.
+
+### Changed
+- **Bird Frame add-on re-synced and versioned.** The add-on bundles its own
+  copy of the renderer (`addons/birdframe/www/`); refreshed it from source via
+  `sync-www.sh` so the Frame TV collage gets the European masks + headings too,
+  and bumped the add-on `config.yaml` to `1.2.5` (it had lagged at `1.2.3`).
+- **Pipeline docs.** Documented `build_dirs.py` and the "masks are required for
+  the collage" gotcha in `README.md`, `AGENTS.md`, and
+  `avian/scripts/README.md`.
+
 ## v1.2.4 — 2026-06-23
 
 ### Added
