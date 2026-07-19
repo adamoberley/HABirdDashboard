@@ -1,5 +1,35 @@
 # Changelog
 
+## v1.2.6 — 2026-07-19
+
+### Added
+- **64 Australian species.** Generated kachō-e illustrations (128 renders,
+  both poses) for the missing species on a residential BirdNET-Go station's
+  list (Melbourne, VIC), following the `AGENTS.md` pipeline end to end:
+  pregen → cutout → masks → flight directions → card rebuild. The illustrated
+  library grows from 862 to 926 species. `DIMS`/`MASKS` and the `DIRS` flight
+  headings were regenerated for every new species, so they show in the **atlas**
+  and are placed and banked correctly in the **collage** ring. Cache-bust
+  versions bumped `r14`→`r15`.
+- **Two intentional non-bird detections.** At the station owner's request, the
+  BirdNET non-target false-positives Common Eastern Froglet (`Crinia
+  signifera`) and Red Fox (`Vulpes vulpes`) are rendered in matching style, the
+  fox with a lying/standing pose override (instead of perched/flight) in
+  `species-notes.json`.
+
+### Changed
+- **Bird Frame add-on re-synced and versioned.** The add-on bundles its own copy
+  of the renderer (`addons/birdframe/www/`); refreshed it from source via
+  `sync-www.sh` so the Frame TV collage picks up the new masks + flight headings
+  (it had lagged at `r14`), and bumped the add-on `config.yaml` to `1.2.6`.
+
+### Fixed
+- **Stale Gemini model id in the illustration pipeline.** `build_dirs.py` and
+  `verify.py` hardcoded a Gemini model id that now 404s for newer API
+  keys/projects, silently zeroing out flight-direction annotation for new
+  species until caught. Bumped to a current model. (Dev tooling only — does not
+  affect the shipped card.)
+
 ## v1.2.5 — 2026-06-30
 
 ### Fixed
