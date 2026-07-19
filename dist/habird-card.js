@@ -5080,7 +5080,7 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
 // you copied the artwork locally (homeassistant/install.sh layout).
 var HABIRD_CDN_ASSETS = 'https://cdn.jsdelivr.net/gh/adamoberley/HABirdDashboard@HABirdDashboard/avian/assets/';
 
-var HABIRD_VERSION = '1.2.5';
+var HABIRD_VERSION = '1.2.6';
 
 var HABIRD_EDITOR_SCHEMA = [
   { name: 'dashboard', type: 'expandable', flatten: true, title: 'Dashboard', expanded: true, schema: [
