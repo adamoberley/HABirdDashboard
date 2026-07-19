@@ -44,7 +44,7 @@ from pathlib import Path
 
 GEMINI_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/"
-    "gemini-2.5-flash:generateContent"
+    "gemini-3.5-flash:generateContent"
 )
 
 # macOS Python.framework ships without a usable CA bundle, so urllib HTTPS dies
