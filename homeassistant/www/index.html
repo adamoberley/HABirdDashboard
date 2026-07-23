@@ -33,11 +33,11 @@
 <header class="top">
   <div class="window-pick" id="winPick" role="tablist">
     <i class="seg-pill" aria-hidden="true"></i>
-    <button data-h="1"   type="button">1H</button>
-    <button data-h="12"  type="button">12H</button>
-    <button data-h="24"  type="button" aria-current="true">24H</button>
-    <button data-h="168" type="button">7D</button>
-    <button data-h="1000000" type="button">ALL</button>
+    <button data-h="1"   type="button" data-i18n="winpick.1h">1H</button>
+    <button data-h="12"  type="button" data-i18n="winpick.12h">12H</button>
+    <button data-h="24"  type="button" aria-current="true" data-i18n="winpick.24h">24H</button>
+    <button data-h="168" type="button" data-i18n="winpick.7d">7D</button>
+    <button data-h="1000000" type="button" data-i18n="winpick.all">ALL</button>
   </div>
   <button class="menu-btn" id="menuBtn">menu</button>
 </header>
@@ -56,13 +56,13 @@
 
 <main class="stage">
   <header class="static-head">
-    <button type="button" class="pre" id="aboutLink">your birds</button>
+    <button type="button" class="pre" id="aboutLink" data-i18n="head.about">your birds</button>
     <h1 id="staticTitle">Heard Recently</h1>
   </header>
   <div class="views" id="views">
 
     <!-- ========== View 1 - Collage ========== -->
-    <section class="view" id="v0" aria-label="Bird collage">
+    <section class="view" id="v0" aria-label="Bird collage" data-i18n-aria="aria.collage">
       <div class="gcollage" id="collage"></div>
       <!-- Wall-display widgets (clock / weather), hidden unless enabled in
            config.js (wall: {...}) or via ?wall. Lives in a corner of the
@@ -85,7 +85,7 @@
     </section>
 
     <!-- ========== View 2 - Stats ========== -->
-    <section class="view" id="v1" aria-label="Stats">
+    <section class="view" id="v1" aria-label="Stats" data-i18n-aria="aria.stats">
       <div class="stats-grid">
         <div class="stats-timeline" id="statsTimeline">
           <!-- Activity heatmap. One row per species from the current
@@ -95,18 +95,18 @@
         </div>
         <aside class="stats-side">
           <div class="grp">
-            <h3>By Period</h3>
-            <small>detections, grouped by recency</small>
+            <h3 data-i18n="stats.byPeriod">By Period</h3>
+            <small data-i18n="stats.byPeriodSub">detections, grouped by recency</small>
             <ol id="statsByPeriod"></ol>
           </div>
           <div class="grp">
-            <h3>Top Species</h3>
+            <h3 data-i18n="stats.topSpecies">Top Species</h3>
             <small id="statsTopSpecCap">most-heard, current window</small>
             <ol id="statsTopSpec"></ol>
           </div>
           <div class="grp">
-            <h3>First Detections</h3>
-            <small>newest additions to the life list</small>
+            <h3 data-i18n="stats.firstDetections">First Detections</h3>
+            <small data-i18n="stats.firstDetectionsSub">newest additions to the life list</small>
             <ol id="statsFirstSeen"></ol>
           </div>
         </aside>
@@ -114,28 +114,28 @@
     </section>
 
     <!-- ========== View 3 - Atlas ========== -->
-    <section class="view" id="v2" aria-label="Atlas">
+    <section class="view" id="v2" aria-label="Atlas" data-i18n-aria="aria.atlas">
       <div class="atlas-controls">
-        <div class="atlas-sort" id="atlasSort" role="tablist" aria-label="sort atlas">
+        <div class="atlas-sort" id="atlasSort" role="tablist" aria-label="sort atlas" data-i18n-aria="atlas.sort">
           <i class="seg-pill" aria-hidden="true"></i>
-          <button data-sort="count"  type="button" aria-current="true" aria-label="most heard">
+          <button data-sort="count"  type="button" aria-current="true" aria-label="most heard" data-i18n-aria="atlas.mostHeard">
             <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
               <path d="M2 12 V8"/><path d="M6 12 V5"/><path d="M10 12 V3"/>
             </svg>
-            <span class="tip">most heard</span>
+            <span class="tip" data-i18n="atlas.mostHeard">most heard</span>
           </button>
-          <button data-sort="recent" type="button" aria-label="most recent">
+          <button data-sort="recent" type="button" aria-label="most recent" data-i18n-aria="atlas.mostRecent">
             <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="7" cy="7" r="5.2"/><path d="M7 4 V7 L9.2 8.3"/>
             </svg>
-            <span class="tip">most recent</span>
+            <span class="tip" data-i18n="atlas.mostRecent">most recent</span>
           </button>
-          <button data-sort="alpha"  type="button" aria-label="alphabetical">
+          <button data-sort="alpha"  type="button" aria-label="alphabetical" data-i18n-aria="atlas.alphabetical">
             <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
               <path d="M2.4 11.5 L4 4.5 L5.6 11.5"/><path d="M2.9 9.2 H5.1"/>
               <path d="M8.2 11.5 V4.5 H10.4 a1.3 1.3 0 0 1 0 2.6 H8.2"/><path d="M8.2 7.1 H10.6 a1.5 1.5 0 0 1 0 3 H8.2"/>
             </svg>
-            <span class="tip">a → z</span>
+            <span class="tip" data-i18n="atlas.atoz">a → z</span>
           </button>
         </div>
       </div>
@@ -148,13 +148,13 @@
 <div id="detail-modal" aria-hidden="true" role="dialog" aria-labelledby="modalCommon">
   <div class="modal-backdrop" data-close="1"></div>
   <article class="modal-card">
-    <button class="modal-close" type="button" aria-label="Close" data-close="1">×</button>
+    <button class="modal-close" type="button" aria-label="Close" data-i18n-aria="modal.close" data-close="1">×</button>
     <div class="modal-grid">
       <div class="modal-img">
         <img id="modalImg" src="" alt="" loading="eager">
-        <div class="pose-toggle" id="modalPoseToggle" role="tablist" aria-label="Pose">
+        <div class="pose-toggle" id="modalPoseToggle" role="tablist" aria-label="Pose" data-i18n-aria="modal.pose">
           <i class="seg-pill" aria-hidden="true"></i>
-          <button type="button" data-pose="1" aria-label="perched">
+          <button type="button" data-pose="1" aria-label="perched" data-i18n-aria="modal.perched">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3.5 6.5 C 4 4, 6 3, 8 4 C 10 3.6, 11.6 4.6, 12 6.5 L 11.5 8 C 11 9.6, 9.4 10.4, 8 10.4 C 6.4 10.4, 4.8 9.6, 4.2 8 Z"/>
               <circle cx="10.6" cy="5.7" r=".4" fill="currentColor"/>
@@ -163,16 +163,16 @@
               <path d="M8.6 10.4 L 8.9 12.2"/>
               <path d="M2 12.6 H 13"/>
             </svg>
-            <span class="tip">perched</span>
+            <span class="tip" data-i18n="modal.perched">perched</span>
           </button>
-          <button type="button" data-pose="2" aria-label="in flight">
+          <button type="button" data-pose="2" aria-label="in flight" data-i18n-aria="modal.inFlight">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
               <path d="M1.5 8 Q 4.5 4, 7.5 7.5 Q 11 4, 14.5 8"/>
               <path d="M7.5 7.5 L 8 9.5"/>
               <circle cx="8.5" cy="7.2" r=".4" fill="currentColor"/>
               <path d="M8.6 7 L 10 6.6"/>
             </svg>
-            <span class="tip">in flight</span>
+            <span class="tip" data-i18n="modal.inFlight">in flight</span>
           </button>
         </div>
       </div>
@@ -180,33 +180,33 @@
         <h2 id="modalCommon">-</h2>
         <p class="sci" id="modalSci"></p>
         <div class="modal-meta">
-          <span class="meta-item"><span class="k">genus</span><span class="v" id="modalGenus">-</span></span>
-          <span class="meta-item"><span class="k">rarity</span><span class="v" id="modalRarity">-</span></span>
+          <span class="meta-item"><span class="k" data-i18n="modal.genus">genus</span><span class="v" id="modalGenus">-</span></span>
+          <span class="meta-item"><span class="k" data-i18n="modal.rarity">rarity</span><span class="v" id="modalRarity">-</span></span>
         </div>
         <div class="modal-stats">
-          <div><span class="n" id="modalAllTime">-</span><span class="lbl">all time</span></div>
+          <div><span class="n" id="modalAllTime">-</span><span class="lbl" data-i18n="modal.allTime">all time</span></div>
           <div id="modalWindowStat"><span class="n" id="modalWindow">-</span><span class="lbl" id="modalWindowLbl">window</span></div>
-          <div><span class="n" id="modalFirstSeen">-</span><span class="lbl">first heard</span></div>
+          <div><span class="n" id="modalFirstSeen">-</span><span class="lbl" data-i18n="modal.firstHeard">first heard</span></div>
         </div>
-        <p class="desc placeholder" id="modalDesc">Loading description...</p>
+        <p class="desc placeholder" id="modalDesc" data-i18n="modal.loadingDesc">Loading description...</p>
       </div>
     </div>
     <div class="modal-recordings">
       <div class="rec-head">
-        <h3>Recordings</h3>
-        <button type="button" class="ref-call-btn" id="modalRefCall" hidden aria-label="play reference call">
-          <svg viewBox="0 0 12 12" fill="currentColor"><path d="M3 2 L10 6 L3 10 Z"/></svg><span>reference call</span>
+        <h3 data-i18n="modal.recordings">Recordings</h3>
+        <button type="button" class="ref-call-btn" id="modalRefCall" hidden aria-label="play reference call" data-i18n-aria="modal.playRefCall">
+          <svg viewBox="0 0 12 12" fill="currentColor"><path d="M3 2 L10 6 L3 10 Z"/></svg><span data-i18n="modal.refCall">reference call</span>
         </button>
         <span class="rec-count" id="modalRecCount"></span>
       </div>
       <p class="ref-credit" id="modalRefCredit" hidden></p>
       <ol id="modalRecordings">
-        <li class="rec-empty">Loading recordings...</li>
+        <li class="rec-empty" data-i18n="modal.loadingRecordings">Loading recordings...</li>
       </ol>
     </div>
     <div class="modal-actions">
-      <a id="modalWiki" class="chip ext" target="_blank" rel="noopener">wiki</a>
-      <a id="modalEbird" class="chip ext" target="_blank" rel="noopener">ebird</a>
+      <a id="modalWiki" class="chip ext" target="_blank" rel="noopener" data-i18n="modal.wiki">wiki</a>
+      <a id="modalEbird" class="chip ext" target="_blank" rel="noopener" data-i18n="modal.ebird">ebird</a>
     </div>
   </article>
 </div>
@@ -215,18 +215,18 @@
   <div class="modal-backdrop" data-close="1"></div>
   <div class="about-card" role="document">
     <button type="button" class="modal-close" data-close="1" aria-label="close">×</button>
-    <p class="about-eyebrow">your birds</p>
-    <h2 id="aboutTitle">The birds outside your window</h2>
-    <p class="about-body">A tiny microphone identifies every passing bird with <a href="https://github.com/tphakala/birdnet-go" target="_blank" rel="noopener">BirdNET-Go</a>, built on Cornell's <a href="https://birdnet.cornell.edu/" target="_blank" rel="noopener">BirdNET</a>. Each species shows up as an illustration in the collage, sized by how often it's been heard. Confident detections perch; uncertain ones fly past.</p>
-    <button type="button" class="about-explore" data-close="1">explore the birds →</button>
+    <p class="about-eyebrow" data-i18n="head.about">your birds</p>
+    <h2 id="aboutTitle" data-i18n="about.title">The birds outside your window</h2>
+    <p class="about-body" data-i18n-html="about.body">A tiny microphone identifies every passing bird with <a href="https://github.com/tphakala/birdnet-go" target="_blank" rel="noopener">BirdNET-Go</a>, built on Cornell's <a href="https://birdnet.cornell.edu/" target="_blank" rel="noopener">BirdNET</a>. Each species shows up as an illustration in the collage, sized by how often it's been heard. Confident detections perch; uncertain ones fly past.</p>
+    <button type="button" class="about-explore" data-close="1" data-i18n="about.explore">explore the birds →</button>
     </div>
 </div>
 
-<nav class="slider" id="slider" aria-label="View">
+<nav class="slider" id="slider" aria-label="View" data-i18n-aria="view.aria">
   <i class="seg-pill" aria-hidden="true"></i>
-  <button type="button" data-i="0" aria-current="true">collage</button>
-  <button type="button" data-i="1">stats</button>
-  <button type="button" data-i="2">atlas</button>
+  <button type="button" data-i="0" aria-current="true" data-i18n="view.collage">collage</button>
+  <button type="button" data-i="1" data-i18n="view.stats">stats</button>
+  <button type="button" data-i="2" data-i18n="view.atlas">atlas</button>
 </nav>
 
 
@@ -243,6 +243,27 @@
 
 <script src="./config.js"></script>
 <script src="./masks.js"></script>
-<script src="./apt.js"></script>
+<!-- i18n bootstrap: load the English reference table plus the detected
+     language (config override, else navigator.language), THEN the app.
+     Dynamically injected <script src> runs even from file://; a missing
+     language 404s harmlessly (onerror) and English still loads. Adding a
+     new language needs a new i18n/<code>.js file and no edit here. -->
+<script>
+(function () {
+  var want = (window.AV_CONFIG && AV_CONFIG.language)
+    || (navigator.language || 'en').toLowerCase().split('-')[0];
+  var files = (want && want !== 'en') ? ['en', want] : ['en'];
+  var left = files.length;
+  files.forEach(function (code) {
+    var s = document.createElement('script');
+    s.src = './i18n/' + code + '.js';
+    s.onload = s.onerror = function () { if (--left === 0) loadApp(); };
+    document.head.appendChild(s);
+  });
+  function loadApp() {
+    var a = document.createElement('script'); a.src = './apt.js'; document.head.appendChild(a);
+  }
+})();
+</script>
 </body>
 </html>

@@ -51,6 +51,68 @@
   //   wiki        -> en.wikipedia.org REST summary, fetched directly (CORS-open)
 
   var AV_CFG = window.AV_CONFIG || {};
+
+  // ---- i18n runtime ----
+  // Defined up front so it's available to every init-time and render-time
+  // consumer below. Translation tables self-register into window.HABIRD_I18N
+  // (one file per language under homeassistant/www/i18n/; the card build
+  // inlines them all, the standalone page loads en + the detected language).
+  // `en` is the complete key set and the fallback for every other language.
+  var I18N = (typeof window !== 'undefined' && window.HABIRD_I18N) || { en: {} };
+  // Resolve the active language once. Priority:
+  //   1. explicit config override (AV_CFG.language)
+  //   2. Home Assistant UI language (hass.language / hass.locale.language)
+  //   3. navigator.language (standalone page)
+  //   4. 'en'
+  function resolveLocale() {
+    var hass = AV_CFG.__getHass && AV_CFG.__getHass();
+    var want = AV_CFG.language
+      || (hass && (hass.language || (hass.locale && hass.locale.language)))
+      || (typeof navigator !== 'undefined' && navigator.language)
+      || 'en';
+    want = String(want).toLowerCase();          // 'pt-BR' -> 'pt-br'
+    if (I18N[want]) return want;
+    var base = want.split('-')[0];
+    if (I18N[base]) return base;
+    return 'en';
+  }
+  var LOCALE = resolveLocale();   // key into I18N ('da', 'en', ...)
+  var BCP47 = LOCALE;             // tag for Intl.* APIs (used from Step 2)
+  // Translate a key, falling back to the en table, then the key itself.
+  // {name} placeholders are filled from the optional params object.
+  function tt(key, params) {
+    var table = I18N[LOCALE] || {};
+    var en = I18N.en || {};
+    var s = (key in table) ? table[key] : (en[key] != null ? en[key] : key);
+    if (params) s = s.replace(/\{(\w+)\}/g, function (_, k) { return params[k] == null ? '' : params[k]; });
+    return s;
+  }
+  // One DOM pass over the static template: data-i18n -> textContent,
+  // data-i18n-html -> innerHTML (trusted rich strings), data-i18n-aria ->
+  // aria-label, data-i18n-placeholder -> placeholder. The English literal
+  // stays in the markup too (readable source + a no-JS default).
+  function localizeStaticDom() {
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      el.textContent = tt(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(function (el) {
+      el.innerHTML = tt(el.getAttribute('data-i18n-html'));
+    });
+    document.querySelectorAll('[data-i18n-aria]').forEach(function (el) {
+      el.setAttribute('aria-label', tt(el.getAttribute('data-i18n-aria')));
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+      el.setAttribute('placeholder', tt(el.getAttribute('data-i18n-placeholder')));
+    });
+  }
+  if (typeof document !== 'undefined') localizeStaticDom();
+  // Test hook: expose the resolved locale + helpers so the jsdom suite can
+  // assert the fallback anchor (resolveLocale() === 'en' with no
+  // hass.language) without reaching into this closure. Harmless in prod.
+  try {
+    window.__habirdI18n = { resolveLocale: resolveLocale, t: tt, get locale() { return LOCALE; } };
+  } catch (e) {}
+
   // '' -> same host the dashboard is served from, port 8080 (the stock
   // alexbelgium app (add-on) exposes BirdNET-Go there on the HA box itself).
   var BG_BASE = (AV_CFG.birdnetGoUrl || '').replace(/\/+$/, '') ||
@@ -1060,10 +1122,13 @@
   var btns = [].slice.call(slider.querySelectorAll('button'));
   var winPick = document.getElementById('winPick');
 
-  // Each view's title text. The shared static-head shows one of these
-  // based on the current view; identical adjacent values mean the title
-  // stays put with no fade (collage and stats both say Heard Recently).
-  var VIEW_TITLES = ['Heard Recently', 'Heard Recently', 'Avian Visitors'];
+  // Each view's title. The shared static-head shows one of these based on
+  // the current view; identical adjacent values mean the title stays put
+  // with no fade (collage and stats both say Heard Recently). Titles are
+  // resolved through t() lazily (at view-switch time) so translations that
+  // load with the app are picked up; a config `title` pins a custom string.
+  var VIEW_TITLE_KEYS = ['title.heardRecently', 'title.heardRecently', 'title.avianVisitors'];
+  var CUSTOM_TITLE = null;
   var staticHead = document.querySelector('.static-head');
   var staticTitle = document.getElementById('staticTitle');
   // Card builds pass a `title` key: '' hides the whole title block, a
@@ -1075,7 +1140,7 @@
     if (!AV_CFG.title) {
       if (staticHead) staticHead.style.display = 'none';
     } else {
-      VIEW_TITLES = [AV_CFG.title, AV_CFG.title, AV_CFG.title];
+      CUSTOM_TITLE = AV_CFG.title;
       if (staticTitle) staticTitle.textContent = AV_CFG.title;
       var __pre = staticHead && staticHead.querySelector('.pre');
       if (__pre) __pre.style.display = 'none';
@@ -1085,8 +1150,11 @@
       document.body.classList.add('av-title-overlay');
     }
   }
+  function viewTitle(i) {
+    return CUSTOM_TITLE != null ? CUSTOM_TITLE : tt(VIEW_TITLE_KEYS[i]);
+  }
   function setTitleForView(i) {
-    var next = VIEW_TITLES[i];
+    var next = viewTitle(i);
     if (!staticTitle || staticTitle.textContent === next) return;
     // Fade out -> swap text -> fade in. The opacity transition is 240ms;
     // we swap at ~half that so the eye doesn't catch the text change.
@@ -1903,7 +1971,7 @@
       // detections in a session; "heard" implies distinct individuals.
       var titleN = +s.n || 0;
       btn.title = (s.com || s.sci) + ' · ' + fmtN(titleN) + ' ' +
-        (titleN === 1 ? 'call' : 'calls') + ' ' + windowLabel(currentHours);
+        (titleN === 1 ? tt('unit.call') : tt('unit.calls')) + ' ' + windowLabel(currentHours);
       btn.style.left   = r.x + 'px';
       btn.style.top    = r.y + 'px';
       btn.style.width  = r.fullW + 'px';
@@ -2165,7 +2233,7 @@
         var wasHidden = tip.getAttribute('aria-hidden') !== 'false';
         var s = hit.data;
         var n = +s.n || 0;
-        var noun = (n === 1) ? 'call' : 'calls';
+        var noun = (n === 1) ? tt('unit.call') : tt('unit.calls');
         tip.innerHTML = '<span class="ct-name">' + esc(s.com || s.sci) + '</span>'
           + '<span class="ct-w"> - </span>'
           + '<span class="ct-n">' + fmtN(n) + '</span>'
@@ -2269,15 +2337,16 @@
     if (n >= 10000) return (n / 1000).toFixed(1) + 'k';
     return n.toLocaleString();
   }
+
   // Human label for the current time-window picker selection - replaces
   // a bare "window" with the span it actually covers. Thresholds match
   // the winPick buttons (1H / 12H / 24H / 7D / ALL).
   function windowLabel(h) {
-    if (h <= 1) return 'this hour';
-    if (h <= 12) return 'past 12h';
-    if (h <= 24) return 'today';
-    if (h <= 168) return 'this week';
-    return 'all time';
+    if (h <= 1) return tt('window.thisHour');
+    if (h <= 12) return tt('window.past12h');
+    if (h <= 24) return tt('window.today');
+    if (h <= 168) return tt('window.thisWeek');
+    return tt('window.allTime');
   }
 
   // ---- Live Pi data layer ----
@@ -2405,7 +2474,7 @@
     var act = DATA.activity || {};
     var species = (act.species || []).slice();
     if (!species.length) {
-      setHtml(tl, '<div class="stats-hm-empty">no detections in this window</div>');
+      setHtml(tl, '<div class="stats-hm-empty">' + esc(tt('stats.heatmapEmpty')) + '</div>');
       return;
     }
     var MAX_ROWS = 40;
@@ -2437,7 +2506,7 @@
 
     var head = '<div class="stats-hm-head"><span class="stats-hm-name"></span>';
     for (var hh = 0; hh < 24; hh++) head += '<span class="stats-hm-hr">' + pad(hh) + '</span>';
-    head += '<span class="stats-hm-tot">all</span></div>';
+    head += '<span class="stats-hm-tot">' + esc(tt('stats.heatmapTotal')) + '</span></div>';
 
     var rows = species.map(function (s) {
       var cells = '';
@@ -2455,9 +2524,9 @@
     // Past the 7-day cap (the ALL window) the matrix only covers the
     // last week - say so instead of implying all time.
     var cap = currentHours > 7 * 24
-      ? 'detections by hour of day · last 7 days'
-      : 'detections by hour · ' + windowLabel(currentHours);
-    if (trimmed) cap += ' · ' + MAX_ROWS + ' most-heard of ' + act.species.length;
+      ? tt('stats.byHourDayCap')
+      : tt('stats.byHourCap', { window: windowLabel(currentHours) });
+    if (trimmed) cap += ' · ' + tt('stats.heatmapTrim', { max: MAX_ROWS, total: act.species.length });
 
     setHtml(tl,
       '<div class="stats-hm">' + head + rows + '</div>'
@@ -2506,10 +2575,10 @@
     var week_det = (stats.week && stats.week.detections) || 0;
     var all_det = (stats.totals && stats.totals.detections) || 0;
     setHtml(document.getElementById('statsByPeriod'),
-        liRow('NOW',   'last hour',   fmtN(last_hour))
-      + liRow('TODAY', 'today',       fmtN(today_det))
-      + liRow('WEEK',  'last 7 days', fmtN(week_det))
-      + liRow('ALL',   'all time',    fmtN(all_det)));
+        liRow(tt('stats.badgeNow'),   tt('stats.lastHour'),  fmtN(last_hour))
+      + liRow(tt('stats.badgeToday'), tt('stats.today'),     fmtN(today_det))
+      + liRow(tt('stats.badgeWeek'),  tt('stats.last7days'), fmtN(week_det))
+      + liRow(tt('stats.badgeAll'),   tt('stats.allTime'),   fmtN(all_det)));
 
     // Top Species - top 5 species in the current window. ./avian/api/birdnet-api.php?action=recent
     // already returns species sorted by last_seen DESC; re-sort by count.
@@ -2519,9 +2588,9 @@
       .slice(0, 5);
     setHtml(document.getElementById('statsTopSpec'), ranked.length
       ? ranked.map(function (s, i) { return liRow(pad(i + 1), s.com, fmtN(+s.n), s.sci); }).join('')
-      : liRow('-', 'no detections in window', ''));
+      : liRow('-', tt('stats.noneInWindow'), ''));
     document.getElementById('statsTopSpecCap').textContent =
-      'most-heard, ' + windowLabel(currentHours);
+      tt('stats.topSpecCap', { window: windowLabel(currentHours) });
 
     // First Detections - newest additions to the life list, with a
     // "Xd ago" label computed from first_seen.
@@ -2533,11 +2602,11 @@
           var label = '-';
           if (!isNaN(t)) {
             var daysAgo = Math.floor((now - t) / 86400000);
-            label = daysAgo === 0 ? 'today' : daysAgo + 'd ago';
+            label = daysAgo === 0 ? tt('stats.today') : tt('stats.daysAgo', { n: daysAgo });
           }
           return liRow(label, s.com, '', s.sci);
         }).join('')
-      : liRow('-', 'no detections yet', ''));
+      : liRow('-', tt('stats.noneYet'), ''));
   }
 
   // ---- Atlas: field-guide card grid ----
@@ -2589,8 +2658,8 @@
 
     if (!lifelist.length) {
       setHtml(grid, '<div class="atlas-empty">' +
-        '<p>No birds detected yet.</p>' +
-        '<p class="hint">The atlas fills up as new species are identified.</p>' +
+        '<p>' + esc(tt('atlas.emptyTitle')) + '</p>' +
+        '<p class="hint">' + esc(tt('atlas.emptyHint')) + '</p>' +
         '</div>');
       return;
     }
@@ -2603,8 +2672,8 @@
       : lifelist.filter(function (s) { return (winBySci[s.sci] || 0) > 0; });
     if (!filtered.length) {
       setHtml(grid, '<div class="atlas-empty">' +
-        '<p>No detections in this window.</p>' +
-        '<p class="hint">Try a longer time window.</p>' +
+        '<p>' + esc(tt('atlas.noWindowTitle')) + '</p>' +
+        '<p class="hint">' + esc(tt('atlas.noWindowHint')) + '</p>' +
         '</div>');
       return;
     }
@@ -2641,12 +2710,12 @@
       // all-time count - collapse to a single stat rather than print the
       // same number twice. Otherwise label the count with its span.
       var statRows = currentHours >= 1000000
-        ? '<div><span class="n">' + fmtN(total) + '</span><span class="lbl-inline">all time</span></div>'
-        : '<div><span class="n">' + fmtN(win) + '</span><span class="lbl-inline">' + windowLabel(currentHours) + '</span></div>'
-          + '<div><span class="n">' + fmtN(total) + '</span><span class="lbl-inline">all time</span></div>';
+        ? '<div><span class="n">' + fmtN(total) + '</span><span class="lbl-inline">' + esc(tt('atlas.allTime')) + '</span></div>'
+        : '<div><span class="n">' + fmtN(win) + '</span><span class="lbl-inline">' + esc(windowLabel(currentHours)) + '</span></div>'
+          + '<div><span class="n">' + fmtN(total) + '</span><span class="lbl-inline">' + esc(tt('atlas.allTime')) + '</span></div>';
       return ''
         + '<article class="bird-card" data-sci="' + esc(s.sci) + '">'
-        +   (isLifer ? '<span class="lifer-badge" title="first time this species has ever been heard here">new</span>' : '')
+        +   (isLifer ? '<span class="lifer-badge" title="' + esc(tt('atlas.newTitle')) + '">' + esc(tt('atlas.new')) + '</span>' : '')
         +   '<div class="stat">' + statRows + '</div>'
         +   '<div class="img-wrap">'
         +     '<img loading="lazy" decoding="async" src="' + sketchSrc + '" alt="' + esc(s.com) + '"' + birdImgAttrs(s.sci, 1) + '>'
@@ -3538,10 +3607,10 @@
   // exist", rate-limit, and other HTTP errors so the cause is obvious.
   function _refErrMsg(err) {
     var m = String((err && err.message) || err || '');
-    if (/no recording/.test(m)) return 'no reference call on Xeno-Canto for this species';
-    if (/xc-http-429/.test(m)) return 'Xeno-Canto is busy (rate limit) — try again in a moment';
+    if (/no recording/.test(m)) return tt('refcall.none');
+    if (/xc-http-429/.test(m)) return tt('refcall.busy');
     var code = (m.match(/xc-http-(\d+)/) || [])[1];
-    return code ? ('reference call unavailable (Xeno-Canto ' + code + ')') : 'reference call unavailable';
+    return code ? tt('refcall.unavailableCode', { code: code }) : tt('refcall.unavailable');
   }
   // Per-species memory of the recording that actually played, so repeat
   // presses (and later sessions) skip straight to it instead of falling
@@ -3590,7 +3659,7 @@
       // when a recording actually starts playing.
       _playRefCandidates(_refCallOrder(sci, cands), 0,
         function (info) { if (refBtn === btn) { btn.classList.remove('loading'); setRefCredit(info, true); _refSaveWorking(sci, info); } },
-        function () { if (refBtn === btn) { stopRefCall(); setRefCredit('couldn’t play this reference call'); } });
+        function () { if (refBtn === btn) { stopRefCall(); setRefCredit(tt('refcall.cantPlay')); } });
     }).catch(function (err) {
       if (refBtn !== btn) return;
       stopRefCall();
@@ -3628,8 +3697,8 @@
     // (e.g. javascript:) from the API become a clickable href.
     var httpUrl = function (u) { return /^https?:\/\//i.test(u || '') ? u : ''; };
     var lic = httpUrl(info.lic), page = httpUrl(info.page);
-    var html = esc('Reference call: Xeno-Canto' + (info.rec ? ' · rec. ' + info.rec : ''));
-    if (lic) html += ' · <a href="' + esc(lic) + '" target="_blank" rel="noopener">license</a>';
+    var html = esc(tt('refcall.credit') + (info.rec ? tt('refcall.recBy', { rec: info.rec }) : ''));
+    if (lic) html += ' · <a href="' + esc(lic) + '" target="_blank" rel="noopener">' + esc(tt('refcall.license')) + '</a>';
     if (page) html += ' · <a href="' + esc(page) + '" target="_blank" rel="noopener">XC' + esc(info.id) + '</a>';
     el.hidden = false;
     el.innerHTML = html;
@@ -3737,9 +3806,9 @@
     document.getElementById('modalFirstSeen').textContent = '-';
     document.getElementById('modalRarity').textContent = '-';
     document.getElementById('modalRarity').classList.remove('rare');
-    document.getElementById('modalDesc').textContent = 'Loading description...';
+    document.getElementById('modalDesc').textContent = tt('modal.loadingDesc');
     document.getElementById('modalDesc').classList.add('placeholder');
-    document.getElementById('modalRecordings').innerHTML = '<li class="rec-empty">Loading recordings...</li>';
+    document.getElementById('modalRecordings').innerHTML = '<li class="rec-empty">' + esc(tt('modal.loadingRecordings')) + '</li>';
     document.getElementById('modalRecCount').textContent = '';
     // Reference-call button: stop any prior playback, reset it, and show
     // it only when an XC key is configured.
@@ -3785,31 +3854,31 @@
       document.getElementById('modalFirstSeen').textContent = s.first_seen ? fmtRecTime(s.first_seen) : '-';
       var rar = rarityLabel(+s.total || 0, s.first_seen);
       var rarEl = document.getElementById('modalRarity');
-      rarEl.textContent = rar;
+      rarEl.textContent = rar === '-' ? '-' : tt('rarity.' + rar);
       if (rar === 'rare') rarEl.classList.add('rare');
       var dets = j.detections || [];
-      document.getElementById('modalRecCount').textContent = dets.length + ' captured';
+      document.getElementById('modalRecCount').textContent = tt('modal.captured', { n: dets.length });
       document.getElementById('modalRecordings').innerHTML = dets.length
         ? dets.map(function (d) {
             return '<li class="rec-row" data-file="' + esc(d.file || '') + '" data-date="' + esc(d.d || '') + '">'
-              + '<button class="play" type="button" aria-label="play">' + ICON_PLAY + '</button>'
+              + '<button class="play" type="button" aria-label="' + esc(tt('modal.play')) + '">' + ICON_PLAY + '</button>'
               + '<span class="when">' + esc(fmtRecTime(d.d, d.t)) + '<small>' + esc(fmtDateLine(d.d, d.t)) + '</small></span>'
               // Review write-back needs a detection id - present with the
               // API data source, absent over MQTT history. Sits just left
               // of the confidence; a ghost x that arms on first tap.
-              + (d.file ? '<button class="flag" type="button" data-state="idle" title="report as a false positive" aria-label="report as a false positive">\u2715</button>' : '')
+              + (d.file ? '<button class="flag" type="button" data-state="idle" title="' + esc(tt('flag.report')) + '" aria-label="' + esc(tt('flag.report')) + '">\u2715</button>' : '')
               + '<span class="conf">' + ((+d.conf || 0) * 100).toFixed(0) + '%</span>'
               + '<div class="rec-spectro" aria-hidden="true">'
-              +   '<div class="rec-spectro-loading">loading spectrogram...</div>'
+              +   '<div class="rec-spectro-loading">' + esc(tt('spectro.loading')) + '</div>'
               +   '<div class="rec-spectro-played"></div>'
               +   '<div class="rec-spectro-cursor"></div>'
-              +   '<div class="rec-spectro-scrub" role="slider" aria-label="scrub" tabindex="0"></div>'
+              +   '<div class="rec-spectro-scrub" role="slider" aria-label="' + esc(tt('modal.scrub')) + '" tabindex="0"></div>'
               + '</div>'
               + '</li>';
           }).join('')
-        : '<li class="rec-empty">No recordings yet.</li>';
+        : '<li class="rec-empty">' + esc(tt('modal.noRecordings')) + '</li>';
     }).catch(function () {
-      document.getElementById('modalRecordings').innerHTML = '<li class="rec-empty">Failed to load recordings.</li>';
+      document.getElementById('modalRecordings').innerHTML = '<li class="rec-empty">' + esc(tt('modal.recordingsFailed')) + '</li>';
     });
 
     // Wikipedia summary (description + genus / family).
@@ -4569,7 +4638,7 @@
     }
     if (loadingEl) {
       loadingEl.style.display = '';
-      loadingEl.textContent = 'rendering spectrogram...';
+      loadingEl.textContent = tt('spectro.rendering');
     }
 
     function done() {
@@ -4578,7 +4647,7 @@
     function fail(reason) {
       if (loadingEl) {
         loadingEl.style.display = '';
-        loadingEl.textContent = reason || 'spectrogram unavailable';
+        loadingEl.textContent = reason || tt('spectro.unavailable');
       }
     }
 
@@ -4588,7 +4657,7 @@
       return;
     }
     var ctx = getSpecCtx();
-    if (!ctx) { fail('WebAudio not available'); return; }
+    if (!ctx) { fail(tt('spectro.noWebAudio')); return; }
     fetch(bgAudioUrl(file))
       .then(function (r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -4601,7 +4670,7 @@
         done();
       })
       .catch(function (e) {
-        fail('spectrogram failed: ' + (e && e.message ? e.message : ''));
+        fail(tt('spectro.failed') + (e && e.message ? e.message : ''));
       });
   }
 
@@ -4631,9 +4700,9 @@
         if (title) flagBtn.title = title;
       };
       if (flagBtn.getAttribute('data-state') === 'idle') {
-        setFlag('armed', 'not it?', 'tap again to report as a false positive');
+        setFlag('armed', tt('flag.armed'), tt('flag.armedTitle'));
         setTimeout(function () {
-          if (flagBtn.getAttribute('data-state') === 'armed') setFlag('idle', '\u2715', 'report as a false positive');
+          if (flagBtn.getAttribute('data-state') === 'armed') setFlag('idle', '\u2715', tt('flag.report'));
         }, 3500);
         return;
       }
@@ -4642,7 +4711,7 @@
       setFlag('saving', '\u22ef');
       bgReview(fid, 'false_positive').then(function () {
         frow.classList.add('flagged');
-        setFlag('done', '\u2713', 'reported as a false positive');
+        setFlag('done', '\u2713', tt('flag.done'));
         // BirdNET-Go's analytics fold reviews in - refetch so the
         // collage/counts follow the correction.
         _bgMemo = {};
@@ -4652,15 +4721,15 @@
         flagBtn.disabled = false;
         // Tooltips don't exist on touch - put a short reason IN the pill.
         var isPath = typeof err === 'string' && err.indexOf('needs-ingress') === 0;
-        var label = isPath ? 'no path'
-          : (typeof err === 'number' ? 'err ' + err : 'failed');
+        var label = isPath ? tt('flag.noPath')
+          : (typeof err === 'number' ? tt('flag.errCode', { code: err }) : tt('flag.failed'));
         var why = isPath
-          ? 'needs the HA ingress connection - ' + err.slice('needs-ingress: '.length)
-          : 'BirdNET-Go refused (' + err + ')';
+          ? tt('flag.needsIngress', { detail: err.slice('needs-ingress: '.length) })
+          : tt('flag.refused', { err: err });
         try { console.warn('[bird-card] review write failed:', err); } catch (e) {}
-        setFlag('failed', label, 'could not save: ' + why);
+        setFlag('failed', label, tt('flag.couldNotSave', { why: why }));
         setTimeout(function () {
-          if (flagBtn.getAttribute('data-state') === 'failed') setFlag('idle', '\u2715', 'report as a false positive');
+          if (flagBtn.getAttribute('data-state') === 'failed') setFlag('idle', '\u2715', tt('flag.report'));
         }, 5000);
       });
       return;

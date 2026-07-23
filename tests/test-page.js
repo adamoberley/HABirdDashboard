@@ -64,6 +64,9 @@ window.HTMLCanvasElement.prototype.getContext = () => ({ fillRect(){}, fillStyle
 
 window.eval(fs.readFileSync(WWW + '/config.js', 'utf8'));
 window.eval(fs.readFileSync(WWW + '/masks.js', 'utf8'));
+// The page's i18n bootstrap loads the English table before apt.js; mirror
+// that here so UI strings resolve (rather than falling back to raw keys).
+window.eval(fs.readFileSync(WWW + '/i18n/en.js', 'utf8'));
   window.eval(fs.readFileSync(WWW + '/apt.js', 'utf8'));
 
 setTimeout(() => {
