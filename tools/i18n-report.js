@@ -11,37 +11,55 @@
 const { audit, loadTables } = require('./i18n-audit');
 
 const args = process.argv.slice(2);
-const stubIdx = args.indexOf('--stub');
-const stubLang = stubIdx >= 0 ? args[stubIdx + 1] : null;
+const stubFlagIndex = args.indexOf('--stub');
+const stubLang = stubFlagIndex >= 0 ? args[stubFlagIndex + 1] : null;
 
 const { enKeyCount, languages } = audit();
 
 if (stubLang) {
-  const r = languages.find(function (l) { return l.lang === stubLang; });
-  if (!r) {
-    console.error('unknown language "' + stubLang + '". Known: ' + languages.map(function (l) { return l.lang; }).join(', '));
+  const target = languages.find(function (language) { return language.lang === stubLang; });
+
+  if (!target) {
+    const knownCodes = languages.map(function (language) { return language.lang; }).join(', ');
+
+    console.error('unknown language "' + stubLang + '". Known: ' + knownCodes);
     process.exit(1);
   }
-  const en = loadTables().en || {};
-  if (!r.missing.length) {
+
+  if (!target.missing.length) {
     console.log('// ' + stubLang + '.js is fully translated - nothing to stub.');
     process.exit(0);
   }
-  console.log('  // —— UNTRANSLATED (' + r.missing.length + ' keys, currently fall back to English) ——');
-  r.missing.forEach(function (k) {
-    console.log('  ' + JSON.stringify(k) + ': ' + JSON.stringify(en[k]) + ',');
+
+  const reference = loadTables().en || {};
+
+  console.log('  // —— UNTRANSLATED (' + target.missing.length + ' keys, currently fall back to English) ——');
+
+  target.missing.forEach(function (key) {
+    console.log('  ' + JSON.stringify(key) + ': ' + JSON.stringify(reference[key]) + ',');
   });
+
   process.exit(0);
 }
 
 console.log('i18n coverage — reference: en (' + enKeyCount + ' keys)\n');
-languages.forEach(function (r) {
-  console.log(r.lang + '  ' + r.coverage + '%  (' + r.translated + '/' + r.total + ' translated)');
-  if (r.missing.length) console.log('  missing (' + r.missing.length + '): ' + r.missing.join(', '));
-  if (r.extra.length) console.log('  EXTRA keys not in en (' + r.extra.length + '): ' + r.extra.join(', '));
-  r.placeholderMismatch.forEach(function (m) {
-    console.log('  placeholder mismatch ' + m.key + ': en={' + m.enTokens + '} ' + r.lang + '={' + m.langTokens + '}');
+
+languages.forEach(function (language) {
+  console.log(language.lang + '  ' + language.coverage + '%  (' + language.translated + '/' + language.total + ' translated)');
+
+  if (language.missing.length) {
+    console.log('  missing (' + language.missing.length + '): ' + language.missing.join(', '));
+  }
+
+  if (language.extra.length) {
+    console.log('  EXTRA keys not in en (' + language.extra.length + '): ' + language.extra.join(', '));
+  }
+
+  language.placeholderMismatch.forEach(function (mismatch) {
+    console.log('  placeholder mismatch ' + mismatch.key + ': en={' + mismatch.enTokens + '} ' + language.lang + '={' + mismatch.langTokens + '}');
   });
+
   console.log('');
 });
+
 console.log('Tip: `npm run i18n:report -- --stub <lang>` prints the missing keys ready to paste in.');
