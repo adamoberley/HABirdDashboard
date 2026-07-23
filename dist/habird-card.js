@@ -3995,7 +3995,7 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
   var refAudio = null;
   var refBtn = null;       // the modal "reference call" button, when used
   var __refSci = null;     // species whose ref call is loaded (modal or tap)
-  function _refBtnLabel(icon) { return icon + '<span>reference call</span>'; }
+  function _refBtnLabel(icon) { return icon + '<span>' + esc(tt('modal.refCall')) + '</span>'; }
   function stopRefCall() {
     audioRelease(stopRefCall);
     if (refAudio) { try { refAudio.pause(); } catch (e) {} refAudio = null; }
