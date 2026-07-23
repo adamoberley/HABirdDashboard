@@ -140,7 +140,7 @@
   // assert the fallback anchor (resolveLocale() === 'en' with no
   // hass.language) without reaching into this closure. Harmless in prod.
   try {
-    window.__habirdI18n = { resolveLocale: resolveLocale, t: tt, get locale() { return LOCALE; } };
+    window.__habirdI18n = { resolveLocale: resolveLocale, t: tt, get locale() { return LOCALE; }, get wikiLang() { return WIKI_LANG; } };
   } catch (e) {}
 
   // '' -> same host the dashboard is served from, port 8080 (the stock
