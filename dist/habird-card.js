@@ -257,8 +257,8 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
 
   // ---- Atlas ----
   'atlas.sort': 'sortér atlas',
-  'atlas.mostHeard': 'mest hørt',
-  'atlas.mostRecent': 'nyeste',
+  'atlas.mostHeard': 'mest hørte',
+  'atlas.mostRecent': 'seneste',
   'atlas.alphabetical': 'alfabetisk',
   'atlas.atoz': 'a → å',
   'atlas.emptyTitle': 'Ingen fugle registreret endnu.',

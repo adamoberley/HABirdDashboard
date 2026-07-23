@@ -70,8 +70,8 @@
 
   // ---- Atlas ----
   'atlas.sort': 'sortér atlas',
-  'atlas.mostHeard': 'mest hørt',
-  'atlas.mostRecent': 'nyeste',
+  'atlas.mostHeard': 'mest hørte',
+  'atlas.mostRecent': 'seneste',
   'atlas.alphabetical': 'alfabetisk',
   'atlas.atoz': 'a → å',
   'atlas.emptyTitle': 'Ingen fugle registreret endnu.',
