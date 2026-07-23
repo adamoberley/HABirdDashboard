@@ -49,8 +49,17 @@ const i18nSrc = fs.readdirSync(i18nDir)
 // ---------- Template: <body> contents, scripts stripped, in a shell div ----------
 const bodyMatch = htmlSrc.match(/<body[^>]*>([\s\S]*)<\/body>/);
 if (!bodyMatch) throw new Error('no <body> in index.html');
+// Strip HTML comments BEFORE scripts: some comments (e.g. the i18n
+// bootstrap note) contain literal "<script ...>" as prose. The script-tag
+// strip below is a naive regex that would otherwise latch onto that
+// in-comment "<script>", eat through to the next real </script>, and leave
+// the comment's "<!--" unterminated - which then swallows the <style> block
+// _boot appends after this template, killing all card CSS. Dropping
+// comments first makes the script strip see only real tags.
 const template = '<div class="av-shell av-local">'
-  + bodyMatch[1].replace(/<script[\s\S]*?<\/script>/g, '')
+  + bodyMatch[1]
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .replace(/<script[\s\S]*?<\/script>/g, '')
   + '</div>';
 
 // ---------- CSS: scope to the shadow root / card box ----------

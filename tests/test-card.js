@@ -56,6 +56,12 @@ setTimeout(() => {
   try {
     const root = card.shadowRoot;
     assert.ok(root, 'shadow root attached');
+    // The inlined CSS must survive template processing as a real <style>
+    // in the shadow root (regression: a comment containing "<script>" prose
+    // once mangled the template into an unterminated <!-- that swallowed it).
+    const styleEl = root.querySelector('style');
+    assert.ok(styleEl && styleEl.textContent.length > 1000,
+      'shadow <style> present with CSS (len ' + (styleEl ? styleEl.textContent.length : 'none') + ')');
     // Collage rendered with CDN-based artwork and confidence poses.
     const tiles = [...root.querySelectorAll('.gtile img')];
     assert.strictEqual(tiles.length, 2, 'tiles: ' + tiles.length);
