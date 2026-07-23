@@ -3945,10 +3945,20 @@
   // (default) and in-flight alt pose. A short opacity transition makes
   // the swap feel intentional rather than a hard cut.
   document.getElementById('modalPoseToggle').addEventListener('click', function (ev) {
+    var toggle = document.getElementById('modalPoseToggle');
     var btn = ev.target.closest && ev.target.closest('button');
     if (!btn || btn.getAttribute('data-unavailable') === 'true') return;
+    // Doubles as a toggle: this control's two buttons tile its whole width,
+    // so there's no open space for wireToggleAdvance to catch. Clicking the
+    // already-active pose therefore advances to the other available one.
+    if (btn.getAttribute('aria-current') === 'true') {
+      var avail = [].slice.call(toggle.querySelectorAll('button')).filter(function (b) {
+        return !b.disabled && b.getAttribute('data-unavailable') !== 'true';
+      });
+      if (avail.length < 2) return;   // only one pose exists - nothing to flip to
+      btn = avail[(avail.indexOf(btn) + 1) % avail.length];
+    }
     var pose = +btn.dataset.pose;
-    var toggle = document.getElementById('modalPoseToggle');
     [].slice.call(toggle.querySelectorAll('button')).forEach(function (b) {
       b.setAttribute('aria-current', b === btn ? 'true' : 'false');
     });
