@@ -33,10 +33,20 @@ never are.
   standalone page loads `en.js` + the detected language. **Adding a new language
   is a single new file in this folder — no other edits.**
 
-## Add or extend a language
+## Add a language
 
-1. Copy `en.js` to `<code>.js` (e.g. `da.js`), change the `.en =` to `.<code> =`,
-   and translate the values. Keep the **keys** exactly as in `en.js`.
+Scaffold the file:
+
+```sh
+npm run i18n:new           # prompts for the code, e.g. da
+npm run i18n:new -- de     # or pass it directly
+```
+
+This copies `en.js` to `<code>.js` with the registration line rewritten (and
+refuses if the file already exists). Then:
+
+1. Translate the **values** in the new file. Keep the **keys** exactly as in
+   `en.js`, and keep every `{placeholder}` (see rules below).
 2. You may delete keys you don't want to translate yet — they fall back to
    English. (Or translate incrementally; see the report below.)
 3. Rebuild and test:
@@ -44,6 +54,9 @@ never are.
    ```sh
    npm run build && npm test
    ```
+
+Nothing else needs editing — the card build globs this folder and the standalone
+page loads `en` + the detected language automatically.
 
 ## Rules translators must follow
 

@@ -7,6 +7,7 @@
   "scripts": {
     "build": "node homeassistant/card/build.js",
     "test": "node tests/run.js",
+    "i18n:new": "node tools/i18n-new.js",
     "i18n:report": "node tools/i18n-report.js"
   },
   "devDependencies": {
