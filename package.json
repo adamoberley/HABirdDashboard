@@ -6,7 +6,8 @@
   "license": "CC-BY-NC-SA-4.0",
   "scripts": {
     "build": "node homeassistant/card/build.js",
-    "test": "node tests/run.js"
+    "test": "node tests/run.js",
+    "i18n:report": "node tools/i18n-report.js"
   },
   "devDependencies": {
     "jsdom": "^24.0.0"
