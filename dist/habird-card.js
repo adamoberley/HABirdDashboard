@@ -293,6 +293,17 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
   }
   var LOCALE = resolveLocale();   // key into I18N ('da', 'en', ...)
   var BCP47 = LOCALE;             // tag for Intl.* APIs (used from Step 2)
+  // Wikipedia language subdomain for the active locale (used from Step 3).
+  // Derive from the base subtag ('pt-br' -> 'pt'), with a small override
+  // map for wikis whose code differs from the UI-language code (Norwegian
+  // Bokmal/Nynorsk both live on no.wikipedia.org). 'en' means "current
+  // behaviour" (English Wikipedia + English external link), so with no
+  // hass.language (the test env) this stays byte-identical to before.
+  var WIKI_LANG_OVERRIDES = { nb: 'no', nn: 'no' };
+  var WIKI_LANG = (function () {
+    var base = String(LOCALE || 'en').split('-')[0];
+    return WIKI_LANG_OVERRIDES[base] || base || 'en';
+  })();
   // Translate a key, falling back to the en table, then the key itself.
   // {name} placeholders are filled from the optional params object.
   function tt(key, params) {
@@ -849,12 +860,32 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     });
   }
 
-  function bgWiki(sci) {
-    return fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(sci))
-      .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
-      .then(function (j) {
-        return { extract: j.extract || null, title: j.title || null };
-      });
+  // Fetch a Wikipedia summary for a scientific name. The query key is the
+  // Latin name (language-independent), and most non-English wikis carry a
+  // redirect from it that the summary endpoint follows - so the localized
+  // article can usually be fetched directly. Tries `lang` first, then
+  // falls back to English on any 404 / network error / empty extract.
+  // Returns { extract, title, lang, url } (title/url reflect the wiki the
+  // extract actually came from). With lang omitted or 'en' this is the
+  // original English-only behaviour.
+  function bgWiki(sci, lang) {
+    var L = lang || 'en';
+    var tryLang = function (code) {
+      return fetch('https://' + code + '.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(sci))
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+        .then(function (j) {
+          if (!j.extract) return Promise.reject('empty');
+          return {
+            extract: j.extract,
+            title: j.title || null,
+            lang: code,
+            url: (j.content_urls && j.content_urls.desktop && j.content_urls.desktop.page) || null,
+          };
+        });
+    };
+    return (L !== 'en')
+      ? tryLang(L).catch(function () { return tryLang('en'); })
+      : tryLang('en');
   }
 
   // BirdNET-Go serves each detection's clip at /api/v2/audio/:id.
@@ -2621,7 +2652,7 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
         if (i < 0) { q[decodeURIComponent(kv)] = ''; return; }
         q[decodeURIComponent(kv.slice(0, i))] = decodeURIComponent(kv.slice(i + 1).replace(/\+/g, '%20'));
       });
-      if (m[1] === 'wiki') return bgWiki(q.sci || '');
+      if (m[1] === 'wiki') return bgWiki(q.sci || '', WIKI_LANG);
       if (m[1] === 'birdnet-api') {
         // Data-source routing: 'api' = BirdNET-Go REST only, 'ha' = HA
         // history of the MQTT sensors only, 'auto' (default) = REST first,
@@ -2864,8 +2895,11 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     'Corvus brachyrhynchos':  'amecro'
   };
 
-  function wikiUrl(sci) {
-    return 'https://en.wikipedia.org/wiki/' + encodeURIComponent(sci.replace(/ /g, '_'));
+  // External "read more" link. Points at the active locale's Wikipedia so
+  // the link lands on the same-language article as the fetched summary;
+  // with WIKI_LANG='en' this is byte-identical to the original.
+  function wikiUrl(sci, lang) {
+    return 'https://' + (lang || WIKI_LANG) + '.wikipedia.org/wiki/' + encodeURIComponent(sci.replace(/ /g, '_'));
   }
   function ebirdUrl(sci) {
     var code = EBIRD_CODES[sci];
@@ -4119,16 +4153,29 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
       __root.getElementById('modalRecordings').innerHTML = '<li class="rec-empty">' + esc(tt('modal.recordingsFailed')) + '</li>';
     });
 
-    // Wikipedia summary (description + genus / family).
-    var loadWiki = WIKI_CACHE[sci]
-      ? Promise.resolve(WIKI_CACHE[sci])
+    // Wikipedia summary (description + genus / family). Cached per
+    // scientific name AND resolved wiki language (language is fixed per
+    // session, but the compound key is future-proof).
+    var wikiKey = sci + '|' + WIKI_LANG;
+    var loadWiki = WIKI_CACHE[wikiKey]
+      ? Promise.resolve(WIKI_CACHE[wikiKey])
       : fetchJson('./avian/api/wiki.php?sci=' + encodeURIComponent(sci)).then(function (j) {
-          WIKI_CACHE[sci] = j; return j;
+          WIKI_CACHE[wikiKey] = j; return j;
         });
     loadWiki.then(function (j) {
       var desc = __root.getElementById('modalDesc');
       desc.textContent = j.extract || 'No description available.';
       desc.classList.toggle('placeholder', !j.extract);
+      // Point the external link at the article the extract came from,
+      // preferring the summary response's own url/title when present so a
+      // localized (or English-fallback) fetch lands on the matching wiki.
+      if (sci === __modalSci) {
+        var wEl = __root.getElementById('modalWiki');
+        if (wEl) {
+          if (j.url) wEl.href = j.url;
+          else if (j.title) wEl.href = wikiUrl(j.title, j.lang || WIKI_LANG);
+        }
+      }
     }).catch(function () {
       var desc = __root.getElementById('modalDesc');
       desc.textContent = 'No description available.';
