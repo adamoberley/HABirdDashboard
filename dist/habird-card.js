@@ -157,6 +157,27 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
   'flag.needsIngress': 'needs the HA ingress connection - {detail}',
   'flag.refused': 'BirdNET-Go refused ({err})',
 
+  // ---- Weather conditions (standalone / fallback path) ----
+  // Keyed by Home Assistant's weather condition slugs. The card build
+  // prefers HA's own localized text (hass.formatEntityState / hass.localize)
+  // and only uses this table when neither is available (and on the
+  // standalone page). English reproduces haCond's original wording exactly.
+  'weather.clear-night': 'clear night',
+  'weather.cloudy': 'cloudy',
+  'weather.exceptional': 'exceptional',
+  'weather.fog': 'fog',
+  'weather.hail': 'hail',
+  'weather.lightning': 'lightning',
+  'weather.lightning-rainy': 'lightning rainy',
+  'weather.partlycloudy': 'partly cloudy',
+  'weather.pouring': 'pouring',
+  'weather.rainy': 'rainy',
+  'weather.snowy': 'snowy',
+  'weather.snowy-rainy': 'snowy rainy',
+  'weather.sunny': 'sunny',
+  'weather.windy': 'windy',
+  'weather.windy-variant': 'windy',
+
   // ---- About modal ----
   'about.title': 'The birds outside your window',
   // Rich string (assigned via innerHTML - static, trusted markup).
@@ -280,6 +301,25 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     var s = (key in table) ? table[key] : (en[key] != null ? en[key] : key);
     if (params) s = s.replace(/\{(\w+)\}/g, function (_, k) { return params[k] == null ? '' : params[k]; });
     return s;
+  }
+  // Relative-time formatter. Intl.RelativeTimeFormat localizes "5m ago",
+  // "2d ago", ... for non-English locales. English is deliberately NOT
+  // routed through it: the card's own compact "5m ago" wording is kept
+  // byte-identical to the pre-i18n literals (RTF would say "5 min. ago").
+  // So RTF stays null for BCP47='en' (and whenever Intl is unavailable),
+  // and every site falls back to its plain-English string in that case.
+  var RTF = null;
+  try {
+    if (BCP47 !== 'en' && typeof Intl !== 'undefined' && Intl.RelativeTimeFormat) {
+      RTF = new Intl.RelativeTimeFormat(BCP47, { numeric: 'always', style: 'short' });
+    }
+  } catch (e) { RTF = null; }
+  // Format "<n> <unit> ago" via RTF when available, else the supplied
+  // English fallback string. `unit` is an Intl RelativeTimeFormat unit
+  // ('second'|'minute'|'hour'|'day'); the value is negated (past).
+  function relTimeAgo(n, unit, enFallback) {
+    if (RTF) { try { return RTF.format(-n, unit); } catch (e) {} }
+    return enFallback;
   }
   // One DOM pass over the static template: data-i18n -> textContent,
   // data-i18n-html -> innerHTML (trusted rich strings), data-i18n-aria ->
@@ -2529,7 +2569,7 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
   function fmtN(n) {
     if (n == null) return '-';
     if (n >= 10000) return (n / 1000).toFixed(1) + 'k';
-    return n.toLocaleString();
+    return n.toLocaleString(BCP47);
   }
 
   // Human label for the current time-window picker selection - replaces
@@ -2796,7 +2836,8 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
           var label = '-';
           if (!isNaN(t)) {
             var daysAgo = Math.floor((now - t) / 86400000);
-            label = daysAgo === 0 ? tt('stats.today') : tt('stats.daysAgo', { n: daysAgo });
+            label = daysAgo === 0 ? tt('stats.today')
+              : relTimeAgo(daysAgo, 'day', tt('stats.daysAgo', { n: daysAgo }));
           }
           return liRow(label, s.com, '', s.sci);
         }).join('')
@@ -3652,16 +3693,19 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     if (isNaN(date.getTime())) return t ? (d + ' ' + t) : d;
     var now = Date.now();
     var ago = Math.floor((now - date.getTime()) / 1000);
-    if (ago < 60) return ago + 's ago';
-    if (ago < 3600) return Math.floor(ago / 60) + 'm ago';
-    if (ago < 86400) return Math.floor(ago / 3600) + 'h ago';
-    return Math.floor(ago / 86400) + 'd ago';
+    if (ago < 60) return relTimeAgo(ago, 'second', ago + 's ago');
+    var mins = Math.floor(ago / 60);
+    if (ago < 3600) return relTimeAgo(mins, 'minute', mins + 'm ago');
+    var hrs = Math.floor(ago / 3600);
+    if (ago < 86400) return relTimeAgo(hrs, 'hour', hrs + 'h ago');
+    var days = Math.floor(ago / 86400);
+    return relTimeAgo(days, 'day', days + 'd ago');
   }
   function fmtDateLine(d, t) {
     if (!d) return '';
     try {
       var date = new Date(d + 'T' + (t || '00:00:00'));
-      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) +
+      return date.toLocaleDateString(BCP47, { month: 'short', day: 'numeric' }) +
         ' · ' + (t ? t.slice(0, 5) : '');
     } catch (e) { return d + ' ' + (t || ''); }
   }
@@ -5157,8 +5201,8 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
       clockEl.hidden = false;
       var drawClock = function () {
         var now = new Date();
-        timeEl.textContent = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-        dateEl.textContent = now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+        timeEl.textContent = now.toLocaleTimeString(BCP47, { hour: 'numeric', minute: '2-digit' });
+        dateEl.textContent = now.toLocaleDateString(BCP47, { weekday: 'short', month: 'short', day: 'numeric' });
         setTimeout(drawClock, (61 - now.getSeconds()) * 1000);
       };
       drawClock();
@@ -5172,7 +5216,7 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
       var sunEl = __root.getElementById('wwSun');
       var hhmm = function (iso) {
         var d = new Date(iso);
-        return isNaN(d) ? '' : d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+        return isNaN(d) ? '' : d.toLocaleTimeString(BCP47, { hour: 'numeric', minute: '2-digit' });
       };
       var paintWeather = function (temp, cond, rise, set) {
         if (typeof temp !== 'number' || isNaN(temp)) return;
@@ -5195,11 +5239,21 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
           headers: { 'Authorization': 'Bearer ' + WALL.haToken },
         }).then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); });
       };
-      // HA condition slugs -> printable words.
+      // HA condition slugs -> printable words. Standalone/fallback path:
+      // the weather.* table carries the standard HA condition slugs (en
+      // reproduces the original wording verbatim); unknown slugs fall back
+      // to plain de-hyphenation. The card build prefers hass's own
+      // localized text before this (see drawWeatherHass).
       var haCond = function (s) {
+        s = String(s || '');
+        if (!s) return '';
+        var key = 'weather.' + s;
+        if (key in (I18N.en || {})) return tt(key);
+        // Fallbacks (also cover the case where no i18n table is loaded):
+        // the two multi-word slugs, then plain de-hyphenation.
         if (s === 'partlycloudy') return 'partly cloudy';
         if (s === 'windy-variant') return 'windy';
-        return String(s || '').replace(/-/g, ' ');
+        return s.replace(/-/g, ' ');
       };
       var drawWeatherHA = function () {
         var entityP = haEntity
@@ -5268,9 +5322,19 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
         haEntity = ent;
         var attrs = w.attributes || {};
         var sun = (hass.states['sun.sun'] || {}).attributes || {};
+        // Prefer HA's own localized condition text (it follows the HA UI
+        // language); fall back to the card's weather.* table via haCond.
+        var cond = '';
+        try {
+          if (typeof hass.formatEntityState === 'function') cond = hass.formatEntityState(w);
+          else if (typeof hass.localize === 'function') {
+            cond = hass.localize('component.weather.entity_component._.state.' + w.state);
+          }
+        } catch (e) { cond = ''; }
+        if (!cond) cond = haCond(w.state);
         paintWeather(
           attrs.temperature,
-          haCond(w.state),
+          cond,
           sun.next_rising ? hhmm(sun.next_rising) : '',
           sun.next_setting ? hhmm(sun.next_setting) : ''
         );

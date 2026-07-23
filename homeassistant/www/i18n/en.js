@@ -143,6 +143,27 @@
   'flag.needsIngress': 'needs the HA ingress connection - {detail}',
   'flag.refused': 'BirdNET-Go refused ({err})',
 
+  // ---- Weather conditions (standalone / fallback path) ----
+  // Keyed by Home Assistant's weather condition slugs. The card build
+  // prefers HA's own localized text (hass.formatEntityState / hass.localize)
+  // and only uses this table when neither is available (and on the
+  // standalone page). English reproduces haCond's original wording exactly.
+  'weather.clear-night': 'clear night',
+  'weather.cloudy': 'cloudy',
+  'weather.exceptional': 'exceptional',
+  'weather.fog': 'fog',
+  'weather.hail': 'hail',
+  'weather.lightning': 'lightning',
+  'weather.lightning-rainy': 'lightning rainy',
+  'weather.partlycloudy': 'partly cloudy',
+  'weather.pouring': 'pouring',
+  'weather.rainy': 'rainy',
+  'weather.snowy': 'snowy',
+  'weather.snowy-rainy': 'snowy rainy',
+  'weather.sunny': 'sunny',
+  'weather.windy': 'windy',
+  'weather.windy-variant': 'windy',
+
   // ---- About modal ----
   'about.title': 'The birds outside your window',
   // Rich string (assigned via innerHTML - static, trusted markup).
