@@ -1,6 +1,19 @@
 # Changelog
 
-## v1.2.6 — 2026-07-19
+## v1.2.7 — 2026-07-24
+
+### Fixed
+- **The detail modal no longer collapses to a strip of padding in Chrome and
+  the Home Assistant companion app.** The `.modal-card` was capped with
+  `max-height: calc(100vh - 48px)`, which the card build rewrites to
+  `calc(100cqh - 48px)`. When Home Assistant lays the card out with an
+  *indefinite* height (masonry / content-sized slots), Blink resolves the
+  container-query height `100cqh` to `0`, so the cap became `calc(0 - 48px)` →
+  clamped to `0` and the modal shrank to just its padding. Firefox and Safari
+  resolved the unit against the rendered height, so they were unaffected. The
+  cap is now `max-height: 100%` against the `inset:0` overlay (whose height is
+  always definite), which equals the old value on a normal viewport but never
+  collapses. Fixes #58.
 
 ### Added
 - **64 Australian species.** Generated kachō-e illustrations (128 renders,

@@ -1276,7 +1276,15 @@
   }
   .modal-card {
     position: relative;
-    max-width: 920px; max-height: calc(100vh - 48px);
+    /* Cap to the overlay, NOT the viewport. #detail-modal is inset:0 with
+       24px padding, so 100% here == its content box == the old
+       calc(100vh - 48px) on a normal viewport - but robustly. In the card
+       build 100vh becomes 100cqh, and when Home Assistant gives the card an
+       indefinite height (masonry / content-sized slots) Blink resolves cqh
+       to 0, so calc(100cqh - 48px) collapsed to 0 and the modal shrank to a
+       strip of padding (Chrome / HA companion WebView only; Firefox & Safari
+       resolved it fine). % of the definite inset:0 overlay sidesteps that. */
+    max-width: 920px; max-height: 100%;
     width: 100%;
     background: var(--paper);
     border-radius: 14px;
