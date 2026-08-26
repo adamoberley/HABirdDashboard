@@ -256,6 +256,9 @@ weather_entity: ""           # empty = first weather.* entity found
 corner: bottom-right         # where the clock/weather block lives
 hide_cursor: false           # hide the pointer after 8s idle (wall displays)
 image_base: ""               # empty = artwork from CDN (see below)
+visits_sensors: []           # feeder-camera sensors - blends per-species
+                             #   "visits" next to the audio "calls"
+                             #   (see Blending feeder visits below)
 ```
 
 The card follows Home Assistant's light/dark theme automatically, and
@@ -396,6 +399,52 @@ summed; to pin specific ones, list their scientific-name sensors in YAML:
 ha_sensors:
   - sensor.birdnet_go_door_bell_scientific_name
   - sensor.birdnet_go_garden_scientific_name
+```
+
+### Blending feeder visits (camera + microphone)
+
+If a camera watches your feeder and an automation identifies each visitor
+(e.g. [LLM Vision](https://llmvision.org/), Frigate + a classifier, or
+anything else), the card can blend those **sightings** with what the
+microphone **hears** - per species, in the same time window:
+
+- the collage hover pill reads `12 calls · 3 visits today`,
+- each visited species' atlas card gains a `visits` line under its call
+  counts, and
+- the detail modal gains a `visits` stat next to *all time* / *first heard*.
+
+Publish each sighting the same way BirdNET-Go publishes a detection: a
+sensor trio per camera - `..._scientific_name` (required; update it on
+every sighting), `..._confidence` and `..._last_species` (both optional
+but nice) - then list the scientific-name sensors on the card:
+
+```yaml
+visits_sensors:
+  - sensor.feeder_cam_scientific_name
+```
+
+(Also in the visual editor, under **Connection & data**.) The card
+rebuilds the sensors' history through its own HA connection - same
+mechanism as the MQTT data source, so it works with any `data_source` and
+reaches back as far as your recorder retention. Sensors listed here are
+*excluded* from microphone auto-discovery, so a sighting is never
+double-counted as a call. If your automation only knows common names,
+publish those into the scientific-name sensor - visits match on either
+name. Species that were only *seen*, never heard, don't join the collage;
+visits annotate the birds your station knows.
+
+A template sensor works fine as the trio - e.g. from an LLM Vision
+automation's response:
+
+```yaml
+mqtt:
+  sensor:
+    - name: "Feeder Cam Scientific Name"
+      state_topic: "feedercam/species_sci"
+    - name: "Feeder Cam Last Species"
+      state_topic: "feedercam/species"
+    - name: "Feeder Cam Confidence"
+      state_topic: "feedercam/confidence"
 ```
 
 ---

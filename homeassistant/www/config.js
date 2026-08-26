@@ -24,6 +24,20 @@ window.AV_CONFIG = {
   dataSource: 'auto',
   historyDays: 10,
 
+  // Feeder visits (optional). If a camera watches your feeder and an
+  // automation (e.g. LLM Vision) publishes each identified visitor as a
+  // BirdNET-style MQTT sensor trio (*_scientific_name, *_confidence,
+  // *_last_species), list those *_scientific_name entity ids here. The
+  // dashboard rebuilds their Home Assistant history the same way it does
+  // the microphone sensors and blends the counts in as "visits": on the
+  // collage hover pill ("12 calls · 3 visits today"), as a stat in the
+  // species detail modal, and as a line on each atlas card. Sensors
+  // listed here are never counted as microphone calls.
+  // Needs HA access: on this static page that means wall.haToken below
+  // (the custom card build uses its own HA connection and needs no token).
+  // e.g. ['sensor.feeder_cam_scientific_name']
+  visitsSensors: [],
+
   // Recording playback boost in dB, 0-48 (0 = off). Applied in the
   // browser at playback and routed through a compressor that curbs
   // clipping. Faint clips (weak mics) get much louder; at the top of

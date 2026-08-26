@@ -724,8 +724,13 @@
   // The MQTT sensor trios, one per microphone. Explicit via AV_CFG.haSensors
   // (a list of *_scientific_name entity ids) or discovered by suffix.
   function hhSensorSets() {
+    // Feeder-visit sensors (see vvSensorIds below) share the
+    // *_scientific_name suffix but are a different stream - never count
+    // a camera sighting as a microphone call.
+    var skip = {};
+    vvSensorIds().forEach(function (id) { skip[id] = 1; });
     function fromIds(ids) {
-      return ids.filter(function (id) { return /_scientific_name$/.test(id); })
+      return ids.filter(function (id) { return /_scientific_name$/.test(id) && !skip[id]; })
         .map(function (id) {
           return {
             sci: id,
@@ -767,77 +772,136 @@
         : Date.now() - hhDays() * 86400000;
       return hhSensorSets().then(function (sets) {
         if (!sets.length) return Promise.reject('no BirdNET-Go MQTT sensors found');
-        var ids = [];
-        sets.forEach(function (s) { ids.push(s.sci, s.conf, s.com); });
-        var path = 'history/period/' + new Date(sinceMs).toISOString() +
-          '?filter_entity_id=' + encodeURIComponent(ids.join(',')) +
-          '&end_time=' + encodeURIComponent(new Date().toISOString()) +
-          '&minimal_response&no_attributes';
-        return haApi(path).then(function (hist) {
-          // hist: one array per entity; its first row carries entity_id,
-          // later rows are minimal {state, last_changed}.
-          var byId = {};
-          (hist || []).forEach(function (rows) {
-            if (rows && rows.length) byId[rows[0].entity_id] = rows;
-          });
-          function timeline(id) {
-            var out = [];
-            (byId[id] || []).forEach(function (r) {
-              var st = r.state;
-              if (st == null || st === '' || st === 'unknown' || st === 'unavailable' || st === 'None') return;
-              var t = Date.parse(r.last_changed || r.last_updated);
-              if (!isNaN(t)) out.push({ t: t, v: st });
-            });
-            out.sort(function (a, b) { return a.t - b.t; });
-            return out;
-          }
-          // Monotonic "latest value at time t (+2s MQTT fan-out jitter)"
-          // walker: the event streams are processed in ascending time, so
-          // a single advancing pointer replaces the old O(n^2) rescans -
-          // a 10-day busy-station history joins in linear time.
-          function walker(tl) {
-            var i = 0, last = null;
-            return function (t) {
-              while (i < tl.length && tl[i].t <= t + 2000) { last = tl[i].v; i++; }
-              return last;
-            };
-          }
-          function toConf(v) {
-            var n = parseFloat(v);
-            if (isNaN(n)) return 0;
-            return n > 1 ? n / 100 : n;   // sensor publishes percent
-          }
-          var events = [];
-          sets.forEach(function (s) {
-            var confs = timeline(s.conf);
-            var scis = timeline(s.sci);
-            var comAtA = walker(timeline(s.com));
-            var comAtB = walker(timeline(s.com));
-            var sciAt = walker(scis);
-            var confAt = walker(confs);
-            // 2-second buckets of (species, time) already emitted via the
-            // confidence stream, so the species pass can skip duplicates
-            // without scanning the whole event list per entry.
-            var seen = {};
-            confs.forEach(function (c) {
-              var sci = sciAt(c.t);
-              if (!sci) return;
-              var b = Math.round(c.t / 2000);
-              seen[sci + '|' + (b - 1)] = 1;
-              seen[sci + '|' + b] = 1;
-              seen[sci + '|' + (b + 1)] = 1;
-              events.push({ t: c.t, sci: sci, com: comAtA(c.t) || sci, conf: toConf(c.v) });
-            });
-            scis.forEach(function (sc) {
-              if (seen[sc.v + '|' + Math.round(sc.t / 2000)]) return;
-              events.push({ t: sc.t, sci: sc.v, com: comAtB(sc.t) || sc.v,
-                conf: toConf(confAt(sc.t)) });
-            });
-          });
-          events.sort(function (a, b) { return a.t - b.t; });
-          return events;
+        return hhJoinHistory(sets, sinceMs);
+      });
+    });
+  }
+
+  // Fetch the HA history of the given sensor trios and join it back into
+  // a detection-event stream. Shared by the microphone source above and
+  // the feeder-visit source below - same sensors, same join.
+  function hhJoinHistory(sets, sinceMs) {
+    var ids = [];
+    sets.forEach(function (s) { ids.push(s.sci, s.conf, s.com); });
+    var path = 'history/period/' + new Date(sinceMs).toISOString() +
+      '?filter_entity_id=' + encodeURIComponent(ids.join(',')) +
+      '&end_time=' + encodeURIComponent(new Date().toISOString()) +
+      '&minimal_response&no_attributes';
+    return haApi(path).then(function (hist) {
+      // hist: one array per entity; its first row carries entity_id,
+      // later rows are minimal {state, last_changed}.
+      var byId = {};
+      (hist || []).forEach(function (rows) {
+        if (rows && rows.length) byId[rows[0].entity_id] = rows;
+      });
+      function timeline(id) {
+        var out = [];
+        (byId[id] || []).forEach(function (r) {
+          var st = r.state;
+          if (st == null || st === '' || st === 'unknown' || st === 'unavailable' || st === 'None') return;
+          var t = Date.parse(r.last_changed || r.last_updated);
+          if (!isNaN(t)) out.push({ t: t, v: st });
+        });
+        out.sort(function (a, b) { return a.t - b.t; });
+        return out;
+      }
+      // Monotonic "latest value at time t (+2s MQTT fan-out jitter)"
+      // walker: the event streams are processed in ascending time, so
+      // a single advancing pointer replaces the old O(n^2) rescans -
+      // a 10-day busy-station history joins in linear time.
+      function walker(tl) {
+        var i = 0, last = null;
+        return function (t) {
+          while (i < tl.length && tl[i].t <= t + 2000) { last = tl[i].v; i++; }
+          return last;
+        };
+      }
+      function toConf(v) {
+        var n = parseFloat(v);
+        if (isNaN(n)) return 0;
+        return n > 1 ? n / 100 : n;   // sensor publishes percent
+      }
+      var events = [];
+      sets.forEach(function (s) {
+        var confs = timeline(s.conf);
+        var scis = timeline(s.sci);
+        var comAtA = walker(timeline(s.com));
+        var comAtB = walker(timeline(s.com));
+        var sciAt = walker(scis);
+        var confAt = walker(confs);
+        // 2-second buckets of (species, time) already emitted via the
+        // confidence stream, so the species pass can skip duplicates
+        // without scanning the whole event list per entry.
+        var seen = {};
+        confs.forEach(function (c) {
+          var sci = sciAt(c.t);
+          if (!sci) return;
+          var b = Math.round(c.t / 2000);
+          seen[sci + '|' + (b - 1)] = 1;
+          seen[sci + '|' + b] = 1;
+          seen[sci + '|' + (b + 1)] = 1;
+          events.push({ t: c.t, sci: sci, com: comAtA(c.t) || sci, conf: toConf(c.v) });
+        });
+        scis.forEach(function (sc) {
+          if (seen[sc.v + '|' + Math.round(sc.t / 2000)]) return;
+          events.push({ t: sc.t, sci: sc.v, com: comAtB(sc.t) || sc.v,
+            conf: toConf(confAt(sc.t)) });
         });
       });
+      events.sort(function (a, b) { return a.t - b.t; });
+      return events;
+    });
+  }
+
+  // ---- Feeder visits (optional second detection stream) ----
+  // A feeder camera (e.g. an LLM Vision automation) can publish sightings
+  // as the same BirdNET-style MQTT sensor trio a microphone gets
+  // (*_scientific_name / *_confidence / *_last_species). AV_CFG.visitsSensors
+  // lists those *_scientific_name entity ids; their HA history is rebuilt
+  // with the same joiner as the microphones and blended into the collage
+  // tooltips, atlas cards and detail modal as per-species "visits" beside
+  // the audio "calls". Never auto-discovered - a camera sensor picked up
+  // by the microphone discovery would double-count every sighting as a
+  // call, so hhSensorSets excludes these ids explicitly.
+  function vvSensorIds() {
+    var v = AV_CFG.visitsSensors;
+    if (!v) return [];
+    if (typeof v === 'string') v = v.split(',');
+    if (!v.map) return [];
+    return v.map(function (s) { return String(s).trim(); })
+      .filter(function (s) { return /_scientific_name$/.test(s); });
+  }
+  function vvEnabled() { return vvSensorIds().length > 0 && haAvailable(); }
+  function vvSensorSets() {
+    return vvSensorIds().map(function (id) {
+      return {
+        sci: id,
+        conf: id.replace(/_scientific_name$/, '_confidence'),
+        com: id.replace(/_scientific_name$/, '_last_species'),
+      };
+    });
+  }
+  function vvEvents(kind) {
+    var ttl = kind === 'short' ? 10000 : 240000;
+    return haMemo('visits:' + kind, ttl, function () {
+      var sinceMs = kind === 'short'
+        ? Date.now() - 25 * 3600000
+        : Date.now() - hhDays() * 86400000;
+      return hhJoinHistory(vvSensorSets(), sinceMs);
+    });
+  }
+  // Windowed per-species visit counts, keyed by lowercased scientific AND
+  // common name so a camera stream that publishes only one of the two
+  // still joins onto the audio species rows.
+  function vvRecent(hours) {
+    var since = hours >= 1000000 ? 0 : Date.now() - hours * 3600000;
+    return vvEvents(hours <= 24 ? 'short' : 'long').then(function (ev) {
+      var by = {};
+      hhAgg(ev, since).forEach(function (r) {
+        by[String(r.sci).toLowerCase()] = r;
+        if (r.com) by[String(r.com).toLowerCase()] = r;
+      });
+      return { hours: hours, bySci: by, as_of: new Date().toISOString() };
     });
   }
 
@@ -1902,8 +1966,11 @@
       // "calls" (not "heard") because one bird can rack up dozens of
       // detections in a session; "heard" implies distinct individuals.
       var titleN = +s.n || 0;
+      var titleV = visitCount(s.sci, s.com);
       btn.title = (s.com || s.sci) + ' · ' + fmtN(titleN) + ' ' +
-        (titleN === 1 ? 'call' : 'calls') + ' ' + windowLabel(currentHours);
+        (titleN === 1 ? 'call' : 'calls') +
+        (titleV ? ' · ' + fmtN(titleV) + ' ' + (titleV === 1 ? 'visit' : 'visits') : '') +
+        ' ' + windowLabel(currentHours);
       btn.style.left   = r.x + 'px';
       btn.style.top    = r.y + 'px';
       btn.style.width  = r.fullW + 'px';
@@ -2166,10 +2233,17 @@
         var s = hit.data;
         var n = +s.n || 0;
         var noun = (n === 1) ? 'call' : 'calls';
+        // Feeder blend: "12 calls · 3 visits today" when a visits stream
+        // has sightings for this bird; the plain calls line otherwise.
+        var v = visitCount(s.sci, s.com);
         tip.innerHTML = '<span class="ct-name">' + esc(s.com || s.sci) + '</span>'
           + '<span class="ct-w"> - </span>'
           + '<span class="ct-n">' + fmtN(n) + '</span>'
-          + '<span class="ct-w"> ' + noun + ' ' + windowLabel(currentHours) + '</span>';
+          + '<span class="ct-w"> ' + noun + (v ? '' : ' ' + windowLabel(currentHours)) + '</span>'
+          + (v
+            ? '<span class="ct-w"> · </span><span class="ct-n">' + fmtN(v) + '</span>'
+              + '<span class="ct-w"> ' + (v === 1 ? 'visit' : 'visits') + ' ' + windowLabel(currentHours) + '</span>'
+            : '');
         positionCollageTip(tip, hit, wasHidden);
         tip.setAttribute('aria-hidden', 'false');
       } else {
@@ -2291,6 +2365,7 @@
     firstseen: null,    // ./avian/api/birdnet-api.php?action=firstseen (newest lifelist additions)
     recent: null,       // ./avian/api/birdnet-api.php?action=recent&hours=N (refetched on picker change)
     activity: null,     // ./avian/api/birdnet-api.php?action=activity&hours=N (per-species hourly heatmap)
+    visits: null,       // vvRecent(hours) - feeder-camera sightings, when configured
   };
 
   // Derived chart arrays, backfilled so 30 buckets always exist.
@@ -2302,6 +2377,18 @@
 
   // Map sci -> all-time detection count, populated from lifelist for atlas.
   var speciesTotals = {};
+
+  // Feeder-visit count for a species in the current window: 0 when no
+  // visits stream is configured (or it has nothing for this species), so
+  // every caller can render unconditionally and the "visits" chrome only
+  // appears where there's a number to show.
+  function visitCount(sci, com) {
+    var by = DATA.visits && DATA.visits.bySci;
+    if (!by) return 0;
+    var r = by[String(sci == null ? '' : sci).toLowerCase()];
+    if (!r && com != null) r = by[String(com).toLowerCase()];
+    return r ? (+r.n || 0) : 0;
+  }
 
   // Legacy-URL dispatcher (see the BirdNET-Go adapter block at the top of
   // this file). Call sites throughout this file still ask for the BirdNET-Pi
@@ -2644,6 +2731,13 @@
         ? '<div><span class="n">' + fmtN(total) + '</span><span class="lbl-inline">all time</span></div>'
         : '<div><span class="n">' + fmtN(win) + '</span><span class="lbl-inline">' + windowLabel(currentHours) + '</span></div>'
           + '<div><span class="n">' + fmtN(total) + '</span><span class="lbl-inline">all time</span></div>';
+      // Feeder blend: a "visits" line under the call counts whenever the
+      // camera stream saw this species in the same window.
+      var visits = visitCount(s.sci, s.com);
+      if (visits) {
+        statRows += '<div><span class="n">' + fmtN(visits) + '</span><span class="lbl-inline">'
+          + (visits === 1 ? 'visit' : 'visits') + '</span></div>';
+      }
       return ''
         + '<article class="bird-card" data-sci="' + esc(s.sci) + '">'
         +   (isLifer ? '<span class="lifer-badge" title="first time this species has ever been heard here">new</span>' : '')
@@ -2853,10 +2947,14 @@
       fetchJson('./avian/api/birdnet-api.php?action=recent&hours=' + forHours),
       fetchJson('./avian/api/birdnet-api.php?action=activity&hours=' + forHours)
         .catch(function () { return null; }),
+      vvEnabled()
+        ? vvRecent(forHours).catch(function () { return null; })
+        : Promise.resolve(null),
     ]).then(function (parts) {
         if (forHours !== currentHours) return; // window changed mid-flight
         DATA.recent = parts[0];
         DATA.activity = parts[1];
+        DATA.visits = parts[2];
         renderWindowDependent(animate);
       })
       .catch(function (e) { console.warn('recent fetch failed', e); });
@@ -2870,6 +2968,9 @@
       fetchJson('./avian/api/birdnet-api.php?action=firstseen&limit=10').catch(function () { return null; }),
       fetchJson('./avian/api/birdnet-api.php?action=recent&hours=' + forHours).catch(function () { return null; }),
       fetchJson('./avian/api/birdnet-api.php?action=activity&hours=' + forHours).catch(function () { return null; }),
+      vvEnabled()
+        ? vvRecent(forHours).catch(function () { return null; })
+        : Promise.resolve(null),
     ]).then(function (parts) {
       DATA.stats = parts[0];
       DATA.lifelist = parts[1];
@@ -2880,6 +2981,7 @@
       if (forHours === currentHours) {
         if (parts[4]) DATA.recent = parts[4];
         if (parts[5]) DATA.activity = parts[5];
+        if (parts[6]) DATA.visits = parts[6];
       }
       recomputeDerived();
       renderTimeIndependent(animate);
@@ -3730,6 +3832,19 @@
       modalWinStat.style.display = '';
       document.getElementById('modalWindowLbl').textContent = windowLabel(currentHours);
     }
+    // Feeder visits: a stat cell that only exists when a visits stream is
+    // configured and loaded. The count matches the selected window (like
+    // the window stat), so the label carries the span; over the ALL
+    // window it reads as a plain "visits" total.
+    var modalVisitsStat = document.getElementById('modalVisitsStat');
+    if (DATA.visits) {
+      modalVisitsStat.style.display = '';
+      document.getElementById('modalVisits').textContent = fmtN(visitCount(sci, null));
+      document.getElementById('modalVisitsLbl').textContent =
+        currentHours >= 1000000 ? 'visits' : 'visits ' + windowLabel(currentHours);
+    } else {
+      modalVisitsStat.style.display = 'none';
+    }
     document.getElementById('modalFirstSeen').textContent = '-';
     document.getElementById('modalRarity').textContent = '-';
     document.getElementById('modalRarity').classList.remove('rare');
@@ -3776,6 +3891,11 @@
       var s = j.summary || {};
       document.getElementById('modalCommon').textContent = s.com || sci;
       document.getElementById('modalAllTime').textContent = fmtN(+s.total || 0);
+      // Re-resolve visits now the common name is known - a camera stream
+      // that publishes common names only joins through it.
+      if (DATA.visits) {
+        document.getElementById('modalVisits').textContent = fmtN(visitCount(sci, s.com));
+      }
       var winRow = ((DATA.recent && DATA.recent.species) || []).filter(function (x) { return x.sci === sci; })[0];
       document.getElementById('modalWindow').textContent = fmtN(winRow ? +winRow.n : 0);
       document.getElementById('modalFirstSeen').textContent = s.first_seen ? fmtRecTime(s.first_seen.split(' ')[0], s.first_seen.split(' ')[1]) : '-';
