@@ -427,8 +427,8 @@ visits_sensors:
 rebuilds the sensors' history through its own HA connection - same
 mechanism as the MQTT data source, so it works with any `data_source` and
 reaches back as far as your recorder retention. Sensors listed here are
-*excluded* from microphone auto-discovery, so a sighting is never
-double-counted as a call. If your automation only knows common names,
+*excluded* from microphone auto-discovery (and from an explicit
+`ha_sensors` list), so a sighting is never double-counted as a call. If your automation only knows common names,
 publish those into the scientific-name sensor - visits match on either
 name. Species that were only *seen*, never heard, don't join the collage;
 visits annotate the birds your station knows.
@@ -441,11 +441,19 @@ mqtt:
   sensor:
     - name: "Feeder Cam Scientific Name"
       state_topic: "feedercam/species_sci"
+      force_update: true
     - name: "Feeder Cam Last Species"
       state_topic: "feedercam/species"
+      force_update: true
     - name: "Feeder Cam Confidence"
       state_topic: "feedercam/confidence"
+      force_update: true
 ```
+
+`force_update: true` matters: visits are counted from the sensors' HA
+history, and the recorder only writes a row when a state *changes*. Without
+it, the same species visiting twice in a row leaves no second row - the
+repeat visit is silently lost.
 
 ---
 
