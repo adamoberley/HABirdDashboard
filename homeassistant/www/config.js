@@ -21,6 +21,18 @@ window.AV_CONFIG = {
   // e.g. 'http://192.168.1.50:8080'.
   birdnetGoUrl: '',
 
+  // API token for BirdNET-Go's "Private Mode" (Security.PrivateMode). When
+  // that's on, BirdNET-Go requires a signed-in session for every API call -
+  // this page has no login flow, so every request 401s without a token.
+  // Create one in BirdNET-Go's own settings and paste it here; it rides an
+  // Authorization: Bearer header on every request to BirdNET-Go (never to
+  // Wikipedia, Xeno-Canto, or Home Assistant).
+  //
+  // SECURITY NOTE: like wall.haToken below, /config/www files are served
+  // without authentication, so this token is readable by anyone who can
+  // reach this page. Leave '' unless Private Mode is actually on.
+  apiToken: '',
+
   // Data source. 'auto' (default) reads BirdNET-Go's REST API and, if
   // that's unreachable from this browser, falls back to rebuilding the
   // detection stream from Home Assistant's history of the BirdNET-Go

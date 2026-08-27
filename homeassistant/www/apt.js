@@ -175,6 +175,29 @@
 
   function bgUrl(path) { return BG_BASE + '/api/v2' + path; }
 
+  // ---- API token (Private Mode) ----
+  // BirdNET-Go's "Private Mode" (Security.PrivateMode, mid-2026+) locks the
+  // ENTIRE v2 API behind login - every unauthenticated request 401s, even
+  // the previously-public detections/analytics routes this adapter relies
+  // on. api_token carries a personal token minted in BirdNET-Go's own
+  // settings; when set, every request that touches the BirdNET-Go API
+  // (reads AND the review write-back) rides an Authorization: Bearer
+  // header. This is the ONLY place that header gets added - Wikipedia,
+  // Xeno-Canto and Home Assistant fetches call the platform fetch()
+  // directly (see bgWiki, the XC helpers below, and haJson further down)
+  // and never see it. With no token set this is a transparent passthrough.
+  function bgFetch(url, opts) {
+    opts = opts || {};
+    if (!AV_CFG.apiToken) return fetch(url, opts);
+    var headers = {}, k;
+    for (k in (opts.headers || {})) headers[k] = opts.headers[k];
+    headers.Authorization = 'Bearer ' + AV_CFG.apiToken;
+    var merged = {};
+    for (k in opts) merged[k] = opts[k];
+    merged.headers = headers;
+    return fetch(url, merged);
+  }
+
   // ---- HTTPS / Nabu Casa: route the API through HA ingress ----
   // Remote access tunnels only HA itself, and the browser blocks an
   // https page from calling a plain-http LAN URL (mixed content) - so
@@ -310,7 +333,13 @@
           (location.protocol === 'https:' ? ';Secure' : '');
       }
       function post() {
-        return fetch(base + '/api/v2/detections/' + encodeURIComponent(id) + '/review', {
+        // Field name: BirdNET-Go's public API reference documents this
+        // route (POST /detections/:id/review) but not its request body -
+        // and the Apr 2026 release renamed the SEARCH response's verdict
+        // field 'verified' -> 'correct'. Send both; BirdNET-Go ignores
+        // unknown JSON fields, so this reads correctly on either side of
+        // the rename without needing to sniff the server version first.
+        return bgFetch(base + '/api/v2/detections/' + encodeURIComponent(id) + '/review', {
           method: 'POST',
           credentials: 'same-origin',
           cache: 'no-store',
@@ -318,7 +347,7 @@
             'Content-Type': 'application/json',
             'X-CSRF-Token': tok,
           },
-          body: JSON.stringify({ verified: verified }),
+          body: JSON.stringify({ verified: verified, correct: verified }),
         }).then(function (r) { return r.ok ? r : Promise.reject(r.status); });
       }
       return post().catch(function (status) {
@@ -364,7 +393,7 @@
 
   function bgJson(path) {
     return BG_READY.then(function () {
-      return fetch(bgUrl(path), { cache: 'no-store' });
+      return bgFetch(bgUrl(path), { cache: 'no-store' });
     }).then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); });
   }
   // Short-TTL memo so one refreshAll() fan-out (stats + lifelist + recent +
@@ -638,6 +667,18 @@
     });
   }
 
+  // DetectionResponse.source changed from a plain string to an object
+  // {id, type, displayName} in BirdNET-Go's Aug 2026 release (per the API
+  // docs, unauthenticated clients only ever get the anonymized id form
+  // either way - full displayName needs an authenticated request). Route
+  // every read of a detection's source through here so it resolves to a
+  // display string regardless of which shape the server sends.
+  function sourceDisplayName(source) {
+    if (source == null) return '';
+    if (typeof source === 'string') return source;
+    return source.displayName || source.id || '';
+  }
+
   // Per-species detail: the detection list that powers the modal's
   // Recordings section. queryType=search matches sci OR common name with
   // LIKE, so re-filter to the exact scientific name (keeps subspecies and
@@ -651,7 +692,7 @@
       var dets = ((parts[0] || {}).data || []).filter(function (d) {
         return d.scientificName === sci;
       }).map(function (d) {
-        return { d: d.date, t: d.time, file: String(d.id), conf: +d.confidence || 0 };
+        return { d: d.date, t: d.time, file: String(d.id), conf: +d.confidence || 0, src: sourceDisplayName(d.source) };
       });
       var row = parts[1].species.filter(function (s) { return s.sci === sci; })[0] || {};
       return {
@@ -699,6 +740,23 @@
   // BirdNET-Go serves each detection's clip at /api/v2/audio/:id.
   function bgAudioUrl(fileId) {
     return bgUrl('/audio/' + encodeURIComponent(fileId));
+  }
+
+  // Extended-capture clips answer 503 + Retry-After while BirdNET-Go is
+  // still writing the file to disk. Wait the advertised delay (capped at
+  // 10s so a bad/huge header can't hang the UI) and retry exactly once;
+  // a second failure (or a 503 with no Retry-After) falls through to the
+  // caller's existing error handling unchanged. Used for the spectrogram
+  // decode fetches only - playback itself goes through a plain <audio>
+  // element (see makeAudio), which can't retry a load this way.
+  function bgAudioFetch(url) {
+    return bgFetch(url).then(function (r) {
+      if (r.status !== 503) return r;
+      var ra = parseFloat(r.headers.get('Retry-After'));
+      var wait = Math.min((ra > 0 ? ra : 1), 10) * 1000;
+      return new Promise(function (res) { setTimeout(res, wait); })
+        .then(function () { return bgFetch(url); });
+    });
   }
 
   // Latest clip for a species (the atlas cards' play button). Resolved
@@ -2509,6 +2567,12 @@
     activity: null,     // ./avian/api/birdnet-api.php?action=activity&hours=N (per-species hourly heatmap)
     visits: null,       // vvRecent(hours) - feeder-camera sightings, when configured
   };
+  // Set by the most recent refreshAll() when the stats/lifelist fetches
+  // (the primary summary/daily calls) came back 401 - BirdNET-Go's
+  // "Private Mode" gating the whole API behind login with no api_token
+  // configured. Read by renderAtlas to swap its normal empty state for a
+  // message that says what's actually wrong, instead of a silent blank.
+  var apiPrivateMode = false;
 
   // Derived chart arrays, backfilled so 30 buckets always exist.
   var STATS = {
@@ -2821,10 +2885,15 @@
     recent.forEach(function (s) { winBySci[s.sci] = +s.n; });
 
     if (!lifelist.length) {
-      setHtml(grid, '<div class="atlas-empty">' +
-        '<p>' + esc(tt('atlas.emptyTitle')) + '</p>' +
-        '<p class="hint">' + esc(tt('atlas.emptyHint')) + '</p>' +
-        '</div>');
+      // Private Mode (401 on the primary summary/daily fetches) gets its
+      // own message instead of the generic "nothing yet" copy - the fix
+      // (set api_token) is different from "wait for detections".
+      setHtml(grid, apiPrivateMode
+        ? '<div class="atlas-empty"><p>' + esc(tt('error.privateMode')) + '</p></div>'
+        : '<div class="atlas-empty">' +
+          '<p>' + esc(tt('atlas.emptyTitle')) + '</p>' +
+          '<p class="hint">' + esc(tt('atlas.emptyHint')) + '</p>' +
+          '</div>');
       return;
     }
 
@@ -2988,7 +3057,7 @@
           } else {
             var actx = getSpecCtx();
             if (actx) {
-              fetch(aurl)
+              bgAudioFetch(aurl)
                 .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); })
                 .then(function (b) { return actx.decodeAudioData(b); })
                 .then(function (buf) {
@@ -3107,9 +3176,20 @@
   }
   function refreshAll(animate) {
     var forHours = currentHours;
+    // Only the primary summary/daily fetches (stats + lifelist) flip the
+    // Private Mode message - a 401 from a secondary call (timeseries,
+    // visits, ...) still means "not signed in", but stats/lifelist always
+    // fire together and their failure alone is enough to tell the story.
+    var authFailed = false;
+    function watchAuth(p) {
+      return p.catch(function (e) {
+        if (e === 401) authFailed = true;
+        return null;
+      });
+    }
     return Promise.all([
-      fetchJson('./avian/api/birdnet-api.php?action=stats').catch(function () { return null; }),
-      fetchJson('./avian/api/birdnet-api.php?action=lifelist').catch(function () { return null; }),
+      watchAuth(fetchJson('./avian/api/birdnet-api.php?action=stats')),
+      watchAuth(fetchJson('./avian/api/birdnet-api.php?action=lifelist')),
       fetchJson('./avian/api/birdnet-api.php?action=timeseries&days=30').catch(function () { return null; }),
       fetchJson('./avian/api/birdnet-api.php?action=firstseen&limit=10').catch(function () { return null; }),
       fetchJson('./avian/api/birdnet-api.php?action=recent&hours=' + forHours).catch(function () { return null; }),
@@ -3118,6 +3198,7 @@
         ? vvRecent(forHours).catch(function () { return null; })
         : Promise.resolve(null),
     ]).then(function (parts) {
+      apiPrivateMode = authFailed;
       DATA.stats = parts[0];
       DATA.lifelist = parts[1];
       DATA.timeseries = parts[2];
@@ -4060,7 +4141,12 @@
       document.getElementById('modalRecCount').textContent = tt('modal.captured', { n: dets.length });
       document.getElementById('modalRecordings').innerHTML = dets.length
         ? dets.map(function (d) {
-            return '<li class="rec-row" data-file="' + esc(d.file || '') + '" data-date="' + esc(d.d || '') + '">'
+            return '<li class="rec-row" data-file="' + esc(d.file || '') + '" data-date="' + esc(d.d || '') + '"'
+              // Multi-source stations (several RTSP/mic inputs) tag each
+              // detection with which one heard it; exposed as a data
+              // attribute (no dedicated UI yet) so it survives round-trip
+              // and can be styled/queried later without another API audit.
+              + (d.src ? ' data-source="' + esc(d.src) + '"' : '') + '>'
               + '<button class="play" type="button" aria-label="' + esc(tt('modal.play')) + '">' + ICON_PLAY + '</button>'
               + '<span class="when">' + esc(fmtRecTime(d.d, d.t)) + '<small>' + esc(fmtDateLine(d.d, d.t)) + '</small></span>'
               // Review write-back needs a detection id - present with the
@@ -4871,7 +4957,7 @@
     }
     var ctx = getSpecCtx();
     if (!ctx) { fail(tt('spectro.noWebAudio')); return; }
-    fetch(bgAudioUrl(file))
+    bgAudioFetch(bgAudioUrl(file))
       .then(function (r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.arrayBuffer();
@@ -4934,10 +5020,16 @@
         flagBtn.disabled = false;
         // Tooltips don't exist on touch - put a short reason IN the pill.
         var isPath = typeof err === 'string' && err.indexOf('needs-ingress') === 0;
+        // 403 is BirdNET-Go's Aug 2026 CSRF enforcement rejecting the
+        // write (a stale self-minted token, or a proxy that stripped the
+        // cookie) - distinct enough from a generic error code to say so.
+        var isForbidden = err === 403;
         var label = isPath ? tt('flag.noPath')
+          : isForbidden ? tt('flag.forbidden')
           : (typeof err === 'number' ? tt('flag.errCode', { code: err }) : tt('flag.failed'));
         var why = isPath
           ? tt('flag.needsIngress', { detail: err.slice('needs-ingress: '.length) })
+          : isForbidden ? tt('flag.forbiddenDetail')
           : tt('flag.refused', { err: err });
         try { console.warn('[bird-card] review write failed:', err); } catch (e) {}
         setFlag('failed', label, tt('flag.couldNotSave', { why: why }));

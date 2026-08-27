@@ -307,6 +307,7 @@ var HABIRD_EDITOR_SCHEMA = [
       { value: 'ha', label: 'MQTT history only' },
     ] } } },
     { name: 'birdnet_url', selector: { text: {} } },
+    { name: 'api_token', selector: { text: {} } },
     { name: '', type: 'grid', schema: [
       { name: 'history_days', selector: { number: { min: 1, max: 365, step: 1, mode: 'box', unit_of_measurement: 'days' } } },
       { name: 'poll_seconds', selector: { number: { min: 10, max: 3600, step: 10, mode: 'box', unit_of_measurement: 's' } } },
@@ -343,6 +344,7 @@ var HABIRD_LABELS = {
   collage_spacing: 'Bird spacing',
   image_base: 'Artwork base URL',
   birdnet_url: 'BirdNET-Go URL',
+  api_token: 'BirdNET-Go API token',
   data_source: 'Data source',
   history_days: 'History span',
   poll_seconds: 'Refresh interval',
@@ -370,6 +372,7 @@ var HABIRD_HELPERS = {
   collage_spacing: 'How much space sits between birds (any shape). Birds never overlap; lower packs them closer and a touch bigger, higher gives more breathing room.',
   image_base: 'Default (blank): artwork from the CDN. Use /local/habird-art/ for an offline copy.',
   birdnet_url: 'Default (blank): this host on port 8080, or HA ingress when remote.',
+  api_token: "Default (blank): none. Required if BirdNET-Go's Security > Private Mode is on - every API call 401s without it. Create a token in BirdNET-Go's own settings; sent as an Authorization: Bearer header, never to Wikipedia/Xeno-Canto/Home Assistant.",
   data_source: 'Automatic uses the API and falls back to the MQTT sensors.',
   history_days: 'How far MQTT history reaches; bounded by recorder retention.',
   poll_seconds: 'Safety-net refresh. MQTT pushes new detections instantly.',
@@ -462,6 +465,7 @@ class HABirdCard extends HTMLElement {
       selectorPosition: c.selector_position || 'bottom',
       windowHours: c.window || 24,           // hours, or 'all'
       birdnetGoUrl: c.birdnet_url || '',
+      apiToken: c.api_token || '',   // Bearer token for BirdNET-Go's "Private Mode"
       dataSource: c.data_source || 'auto',
       language: c.language || '',        // UI language override ('' = auto: hass -> browser)
       historyDays: c.history_days,

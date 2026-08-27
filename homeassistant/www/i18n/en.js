@@ -86,6 +86,9 @@
   'atlas.new': 'new',
   'atlas.newTitle': 'first time this species has ever been heard here',
 
+  // ---- API errors ----
+  'error.privateMode': 'BirdNET-Go requires sign-in (Private Mode) — set api_token in the card config',
+
   // ---- Detail modal: chrome ----
   'modal.close': 'Close',
   'modal.pose': 'Pose',
@@ -146,6 +149,8 @@
   'flag.couldNotSave': 'could not save: {why}',
   'flag.needsIngress': 'needs the HA ingress connection - {detail}',
   'flag.refused': 'BirdNET-Go refused ({err})',
+  'flag.forbidden': 'blocked',
+  'flag.forbiddenDetail': 'BirdNET-Go rejected the request (CSRF) - reload the card and try again',
 
   // ---- Weather conditions (standalone / fallback path) ----
   // Keyed by Home Assistant's weather condition slugs. The card build
