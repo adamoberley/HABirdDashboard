@@ -377,6 +377,20 @@ keeps flowing anywhere the API can't be reached, and every microphone
 becomes a real HA device you can use in automations (announce rare birds,
 light up a lamp for an owl...).
 
+**Zero-YAML path (alexbelgium add-on):** as of the add-on's Jan 2026
+update, switching on **`mqtt_auto_config`** (BirdNET-Go's web UI →
+**Configuration** tab) alone does the whole job - it wires up HA's broker
+credentials *and* turns on BirdNET-Go's native Home Assistant MQTT
+discovery, publishing each microphone as a proper HA device with retained
+state (`_species` / `_confidence` / `_scientific_name` / `_sound_level`
+sensors, correctly showing `unavailable` if that mic's source drops). Flip
+it on, restart the app, and skip straight to step 4 below to verify - the
+card finds the discovered sensors automatically, nothing to set here or in
+the card's YAML.
+
+Not using the add-on, or wiring MQTT up by hand? The manual steps below
+still work exactly as before:
+
 1. **Broker**: install the official **Mosquitto broker** app (Settings →
    Apps - it's in the official catalog, no custom repository needed)
    and start it. HA will then offer the discovered **MQTT integration**
@@ -395,7 +409,8 @@ light up a lamp for an owl...).
    (auto-discovery) option. This is a separate toggle from MQTT itself,
    off by default - and it's the one that creates the per-microphone
    device with the *Scientific Name* / *Last Species* / *Confidence*
-   sensors this card uses.
+   sensors this card uses. (Already on if you used `mqtt_auto_config`
+   above - this step is only needed for the manual broker setup.)
 4. **Verify**: Settings → Devices & Services → MQTT should show a
    "BirdNET-Go <your mic>" device whose sensors update on each
    detection. The card picks them up automatically - nothing to

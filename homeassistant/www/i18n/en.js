@@ -56,6 +56,9 @@
   'stats.today': 'today',
   'stats.last7days': 'last 7 days',
   'stats.allTime': 'all time',
+  // Shown only when >=1 auto-discovered HA microphone sensor is offline
+  // (native MQTT discovery's availability topic reads 'unavailable').
+  'stats.micsOffline': '{n} microphone(s) offline',
   // ---- Stats: Top Species ----
   'stats.topSpecies': 'Top Species',
   'stats.topSpecCap': 'most-heard, {window}',

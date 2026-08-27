@@ -98,6 +98,9 @@
             <h3 data-i18n="stats.byPeriod">By Period</h3>
             <small data-i18n="stats.byPeriodSub">detections, grouped by recency</small>
             <ol id="statsByPeriod"></ol>
+            <!-- Only shown while >=1 auto-discovered HA microphone sensor
+                 reads 'unavailable'/'unknown' - see renderMicOfflineNote(). -->
+            <small id="statsMicNote" class="mic-note" hidden></small>
           </div>
           <div class="grp">
             <h3 data-i18n="stats.topSpecies">Top Species</h3>

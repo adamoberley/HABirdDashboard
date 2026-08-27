@@ -915,32 +915,66 @@
   function hhDays() { return Math.max(1, +AV_CFG.historyDays || 10); }
 
   // The MQTT sensor trios, one per microphone. Explicit via AV_CFG.haSensors
-  // (a list of *_scientific_name entity ids) or discovered by suffix.
+  // (a list of *_scientific_name entity ids) or discovered by suffix. This
+  // also picks up BirdNET-Go's native HA MQTT auto-discovery sensors
+  // (shipped Jan 2026, e.g. via the alexbelgium add-on's mqtt_auto_config)
+  // without any change - they publish the same *_scientific_name /
+  // *_confidence suffix convention as a manually-wired MQTT sensor.
+  //
+  // Each returned set carries `offline`: true when the scientific-name
+  // sensor's current HA state is 'unavailable' or 'unknown' - the state
+  // native discovery's device availability topic flips it to when the
+  // source (RTSP stream, USB mic, ...) drops. The mic stays listed (its
+  // history is never dropped - hhJoinHistory already ignores unavailable/
+  // unknown readings when it walks that history, offline or not) but
+  // callers can use the flag to exclude it from "is everything live"
+  // checks. `offline` is false when we have no current-state info to
+  // judge from (the AV_CFG.haSensors override without a live hass).
   function hhSensorSets() {
     // Feeder-visit sensors (see vvSensorIds below) share the
     // *_scientific_name suffix but are a different stream - never count
     // a camera sighting as a microphone call.
     var skip = {};
     vvSensorIds().forEach(function (id) { skip[id] = 1; });
-    function fromIds(ids) {
+    function fromIds(ids, stateOf) {
+      stateOf = stateOf || function () { return null; };
       return ids.filter(function (id) { return /_scientific_name$/.test(id) && !skip[id]; })
         .map(function (id) {
+          var st = stateOf(id);
           return {
             sci: id,
             conf: id.replace(/_scientific_name$/, '_confidence'),
             com: id.replace(/_scientific_name$/, '_last_species'),
+            offline: st === 'unavailable' || st === 'unknown',
           };
         });
     }
-    if (AV_CFG.haSensors && AV_CFG.haSensors.length) {
-      return Promise.resolve(fromIds(AV_CFG.haSensors));
-    }
     var hass = AV_CFG.__getHass && AV_CFG.__getHass();
-    if (hass && hass.states) return Promise.resolve(fromIds(Object.keys(hass.states)));
+    var stateOfHass = (hass && hass.states)
+      ? function (id) { return hass.states[id] && hass.states[id].state; }
+      : null;
+    if (AV_CFG.haSensors && AV_CFG.haSensors.length) {
+      return Promise.resolve(fromIds(AV_CFG.haSensors, stateOfHass));
+    }
+    if (hass && hass.states) return Promise.resolve(fromIds(Object.keys(hass.states), stateOfHass));
     return haMemo('states', 60000, function () { return haApi('states'); })
       .then(function (all) {
-        return fromIds((all || []).map(function (e) { return e.entity_id; }));
+        var byId = {};
+        (all || []).forEach(function (e) { byId[e.entity_id] = e.state; });
+        return fromIds((all || []).map(function (e) { return e.entity_id; }),
+          function (id) { return byId[id]; });
       });
+  }
+
+  // How many discovered microphones are currently offline (their
+  // scientific-name sensor reads 'unavailable'/'unknown'). Resolves 0
+  // (never rejects) with no HA connection or no discovered sensors, so
+  // callers can use it unconditionally to drive a UI note.
+  function hhOfflineMicCount() {
+    if (!haAvailable()) return Promise.resolve(0);
+    return hhSensorSets().then(function (sets) {
+      return sets.filter(function (s) { return s.offline; }).length;
+    }).catch(function () { return 0; });
   }
 
   function hhFmtTs(ms) {
@@ -2832,6 +2866,27 @@
           return liRow(label, s.com, '', s.sci);
         }).join('')
       : liRow('-', tt('stats.noneYet'), ''));
+
+    renderMicOfflineNote();
+  }
+
+  // Discovered-microphone availability note - a small muted line under
+  // "By Period" that only appears while at least one auto-discovered mic
+  // sensor is offline (native HA MQTT discovery flips it to 'unavailable'
+  // when the source drops). Silent (element stays hidden) the rest of the
+  // time, including when the card isn't using any HA sensors at all.
+  function renderMicOfflineNote() {
+    var el = document.getElementById('statsMicNote');
+    if (!el) return;
+    hhOfflineMicCount().then(function (n) {
+      if (n > 0) {
+        el.hidden = false;
+        el.textContent = tt('stats.micsOffline', { n: n });
+      } else {
+        el.hidden = true;
+        el.textContent = '';
+      }
+    });
   }
 
   // ---- Atlas: field-guide card grid ----
