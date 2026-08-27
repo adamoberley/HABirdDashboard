@@ -42,6 +42,8 @@
   // ---- Collage tooltip units ----
   'unit.call': 'call',
   'unit.calls': 'calls',
+  'unit.visit': 'visit',
+  'unit.visits': 'visits',
 
   // ---- Stats: By Period ----
   'stats.byPeriod': 'By Period',
@@ -93,6 +95,8 @@
   'modal.rarity': 'rarity',
   'modal.allTime': 'all time',
   'modal.firstHeard': 'first heard',
+  'modal.visits': 'visits',
+  'modal.visitsWindow': 'visits {window}',
   'modal.recordings': 'Recordings',
   'modal.refCall': 'reference call',
   'modal.playRefCall': 'play reference call',

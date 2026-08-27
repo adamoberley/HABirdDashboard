@@ -311,6 +311,7 @@ var HABIRD_EDITOR_SCHEMA = [
       { name: 'history_days', selector: { number: { min: 1, max: 365, step: 1, mode: 'box', unit_of_measurement: 'days' } } },
       { name: 'poll_seconds', selector: { number: { min: 10, max: 3600, step: 10, mode: 'box', unit_of_measurement: 's' } } },
     ] },
+    { name: 'visits_sensors', selector: { entity: { multiple: true, filter: [{ domain: 'sensor' }] } } },
   ] },
 ];
 var HABIRD_LABELS = {
@@ -345,6 +346,7 @@ var HABIRD_LABELS = {
   data_source: 'Data source',
   history_days: 'History span',
   poll_seconds: 'Refresh interval',
+  visits_sensors: 'Feeder visit sensors',
 };
 var HABIRD_HELPERS = {
   title: 'Default (blank): no heading. Any text adds a title the birds pack around, clock-style.',
@@ -371,6 +373,7 @@ var HABIRD_HELPERS = {
   data_source: 'Automatic uses the API and falls back to the MQTT sensors.',
   history_days: 'How far MQTT history reaches; bounded by recorder retention.',
   poll_seconds: 'Safety-net refresh. MQTT pushes new detections instantly.',
+  visits_sensors: "Optional: a feeder camera's BirdNET-style “... scientific name” sensors (e.g. published by an LLM Vision automation). Their sightings blend in as per-species “visits” next to the audio “calls” - on hover, in the atlas and in the detail view.",
 };
 
 class HABirdCard extends HTMLElement {
@@ -462,6 +465,10 @@ class HABirdCard extends HTMLElement {
       dataSource: c.data_source || 'auto',
       historyDays: c.history_days,
       haSensors: c.ha_sensors,   // YAML-only: explicit *_scientific_name entity ids
+      // Feeder-camera sightings: *_scientific_name entity ids of a second,
+      // BirdNET-style sensor set (e.g. published by an LLM Vision
+      // automation). Blended into tooltips, atlas and modal as "visits".
+      visitsSensors: c.visits_sensors,
       // MQTT sensor updates push refreshes (see _watchDetections), so the
       // timer is just a safety net - much longer than the page's 30s.
       pollSeconds: c.poll_seconds || 60,

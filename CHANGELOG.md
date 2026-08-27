@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- **Feeder visits: blend a camera's sightings with the microphone's calls.**
+  A feeder camera whose automation (e.g. LLM Vision) publishes each
+  identified visitor as a BirdNET-style sensor trio (`*_scientific_name`,
+  optionally `*_confidence` / `*_last_species`) can now be listed on the
+  card as `visits_sensors` (visual editor: **Connection & data → Feeder
+  visit sensors**; static page: `visitsSensors` in `config.js`). The card
+  rebuilds those sensors' Home Assistant history with the same joiner as
+  the MQTT data source and blends the counts in per species, windowed like
+  everything else: the collage hover pill reads `12 calls · 3 visits
+  today`, atlas cards gain a `visits` line, and the detail modal gains a
+  `visits` stat. Visit sensors are excluded from microphone auto-discovery
+  (a sighting is never double-counted as a call), visits match on
+  scientific *or* common name, and species only ever *seen* don't join the
+  collage. Implements #61.
+
 ## v1.2.7 — 2026-07-24
 
 ### Fixed

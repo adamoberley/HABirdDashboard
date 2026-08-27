@@ -40,6 +40,8 @@
   // ---- Collage tooltip units ----
   'unit.call': 'kald',
   'unit.calls': 'kald',
+  'unit.visit': 'besøg',
+  'unit.visits': 'besøg',
 
   // ---- Stats: By Period ----
   'stats.byPeriod': 'Efter periode',
@@ -91,6 +93,8 @@
   'modal.rarity': 'sjældenhed',
   'modal.allTime': 'nogensinde',
   'modal.firstHeard': 'først hørt',
+  'modal.visits': 'besøg',
+  'modal.visitsWindow': 'besøg {window}',
   'modal.recordings': 'Optagelser',
   'modal.refCall': 'referencekald',
   'modal.playRefCall': 'afspil referencekald',
