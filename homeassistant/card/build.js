@@ -307,10 +307,12 @@ var HABIRD_EDITOR_SCHEMA = [
       { value: 'ha', label: 'MQTT history only' },
     ] } } },
     { name: 'birdnet_url', selector: { text: {} } },
+    { name: 'api_token', selector: { text: {} } },
     { name: '', type: 'grid', schema: [
       { name: 'history_days', selector: { number: { min: 1, max: 365, step: 1, mode: 'box', unit_of_measurement: 'days' } } },
       { name: 'poll_seconds', selector: { number: { min: 10, max: 3600, step: 10, mode: 'box', unit_of_measurement: 's' } } },
     ] },
+    { name: 'live', selector: { boolean: {} } },
     { name: 'visits_sensors', selector: { entity: { multiple: true, filter: [{ domain: 'sensor' }] } } },
   ] },
 ];
@@ -343,9 +345,11 @@ var HABIRD_LABELS = {
   collage_spacing: 'Bird spacing',
   image_base: 'Artwork base URL',
   birdnet_url: 'BirdNET-Go URL',
+  api_token: 'BirdNET-Go API token',
   data_source: 'Data source',
   history_days: 'History span',
   poll_seconds: 'Refresh interval',
+  live: 'Live updates',
   visits_sensors: 'Feeder visit sensors',
 };
 var HABIRD_HELPERS = {
@@ -370,9 +374,11 @@ var HABIRD_HELPERS = {
   collage_spacing: 'How much space sits between birds (any shape). Birds never overlap; lower packs them closer and a touch bigger, higher gives more breathing room.',
   image_base: 'Default (blank): artwork from the CDN. Use /local/habird-art/ for an offline copy.',
   birdnet_url: 'Default (blank): this host on port 8080, or HA ingress when remote.',
+  api_token: "Default (blank): none. Required if BirdNET-Go's Security > Private Mode is on - every API call 401s without it. Create a token in BirdNET-Go's own settings; sent as an Authorization: Bearer header, never to Wikipedia/Xeno-Canto/Home Assistant.",
   data_source: 'Automatic uses the API and falls back to the MQTT sensors.',
   history_days: 'How far MQTT history reaches; bounded by recorder retention.',
   poll_seconds: 'Safety-net refresh. MQTT pushes new detections instantly.',
+  live: "Opens a live connection to BirdNET-Go's own detection stream (in addition to the MQTT push above) so new calls refresh the card within a couple seconds. Falls back to the interval above alone if the stream is unavailable (older BirdNET-Go, or Private Mode).",
   visits_sensors: "Optional: a feeder camera's BirdNET-style “... scientific name” sensors (e.g. published by an LLM Vision automation). Their sightings blend in as per-species “visits” next to the audio “calls” - on hover, in the atlas and in the detail view.",
 };
 
@@ -396,6 +402,16 @@ class HABirdCard extends HTMLElement {
     // fresh app instance - cheapest correct thing is a full re-boot.
     if (this._booted) {
       this._booted = false;
+      // Tear down the old instance's live bits the same way
+      // disconnectedCallback does - otherwise its SSE connection, poll
+      // timer and document-level visibilitychange listener are orphaned
+      // (unreachable, but never closed) every time setConfig reboots the
+      // app, e.g. the dashboard editor calling setConfig on every keystroke
+      // during live preview.
+      if (this._stopLive) { this._stopLive(); this._stopLive = null; }
+      this._refresh = null;
+      this._watchIds = null;
+      this._lastStamp = null;
       if (this.shadowRoot) this.shadowRoot.innerHTML = '';
       if (this.isConnected) this._boot();
     }
@@ -462,6 +478,7 @@ class HABirdCard extends HTMLElement {
       selectorPosition: c.selector_position || 'bottom',
       windowHours: c.window || 24,           // hours, or 'all'
       birdnetGoUrl: c.birdnet_url || '',
+      apiToken: c.api_token || '',   // Bearer token for BirdNET-Go's "Private Mode"
       dataSource: c.data_source || 'auto',
       language: c.language || '',        // UI language override ('' = auto: hass -> browser)
       historyDays: c.history_days,
@@ -473,6 +490,12 @@ class HABirdCard extends HTMLElement {
       // MQTT sensor updates push refreshes (see _watchDetections), so the
       // timer is just a safety net - much longer than the page's 30s.
       pollSeconds: c.poll_seconds || 60,
+      // Live detections: an EventSource straight to BirdNET-Go's own
+      // stream, as a second (independent) push-refresh trigger alongside
+      // the MQTT watcher above. On by default; the off switch is for old
+      // BirdNET-Go builds or Private Mode installs, where the stream
+      // 404s/401s on every boot and there's no point retrying it.
+      live: c.live !== false,
       // How much of the card the flock fills (0.1-1.0, default 0.5). The
       // count curve in renderCollage nudges it per bird count.
       collageFill: (typeof c.collage_fill === 'number') ? c.collage_fill : 0.5,
@@ -501,6 +524,9 @@ class HABirdCard extends HTMLElement {
       tapAction: c.tap_action || 'both',          // both | info | call
       xenoCantoKey: c.xeno_canto_key || '',        // enables reference calls
       __exposeRefresh: function (fn) { self._refresh = fn; },
+      // Lets disconnectedCallback close the live SSE stream (if any) when
+      // the card leaves the dashboard, instead of it lingering forever.
+      __exposeLiveStop: function (fn) { self._stopLive = fn; },
       sitConfidence: (typeof c.sit_confidence === 'number') ? c.sit_confidence : 0.90,
       wall: {
         clock: !!c.clock,
@@ -529,6 +555,7 @@ class HABirdCard extends HTMLElement {
   }
   disconnectedCallback() {
     if (this._ro) { this._ro.disconnect(); this._ro = null; }
+    if (this._stopLive) { this._stopLive(); this._stopLive = null; }
   }
   getCardSize() { return 8; }
   // Sections-view sizing: full width, tall by default, never crushed.
@@ -565,7 +592,7 @@ class HABirdCardEditor extends HTMLElement {
       this.appendChild(this._form);
     }
     this._form.schema = HABIRD_EDITOR_SCHEMA;
-    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', collage_fill: 0.5, size_contrast: 0.5, paper_color: '', paper_color_dark: '', paper_texture: 0, audio_boost: 24 }, this._config);
+    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', collage_fill: 0.5, size_contrast: 0.5, paper_color: '', paper_color_dark: '', paper_texture: 0, audio_boost: 24, live: true }, this._config);
     this._form.hass = this._hass;
   }
 }
@@ -584,6 +611,30 @@ if (!window.customCards.some(function (c) { return c.type === 'habird-card'; }))
     name: 'Bird Card',
     description: 'Live bird collage from your BirdNET-Go detections, with optional clock and weather.',
     documentationURL: 'https://github.com/adamoberley/HABirdDashboard',
+    // HA 2026.6+ entity-picker card suggestions: when the user picks an
+    // entity that looks like one of BirdNET-Go's MQTT sensors, offer this
+    // card in the picker instead of leaving them to find it by name. {}
+    // is a fully valid config (the card auto-discovers every *_scientific_name
+    // sensor hass exposes) - no entity-specific config to build here.
+    // getEntitySuggestion is just an extra property on the registration
+    // object; older HA builds that don't know about it never call it, so
+    // its presence can't break them. Guarded in a try/catch anyway since a
+    // thrown error here runs inside HA's own picker UI, not this card.
+    getEntitySuggestion: function (hass, entityId) {
+      try {
+        var id = String(entityId || '').toLowerCase();
+        if (id.split('.')[0] !== 'sensor') return null;
+        var suffixes = ['_scientific_name', '_confidence', '_last_species', '_sound_level'];
+        for (var i = 0; i < suffixes.length; i++) {
+          if (id.slice(-suffixes[i].length) === suffixes[i]) {
+            return { config: { type: 'custom:habird-card' } };
+          }
+        }
+        return null;
+      } catch (e) {
+        return null;
+      }
+    },
   });
 }
 `;

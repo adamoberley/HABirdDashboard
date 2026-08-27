@@ -778,6 +778,9 @@
     display: block; font: 10px var(--av-font-mono); color: var(--ink-soft);
     letter-spacing: 0.06em; margin: 0 0 3px 12px;
   }
+  /* Sits under the By Period list rather than above it, so its own
+     top margin replaces the subtitle's bottom one. */
+  .stats-side .grp small.mic-note { margin: 6px 0 0 12px; }
   /* The whole list is one grid so counts share an aligned column, sized
      to the longest name (max-content) so that column sits right beside
      the names instead of stretching to a far edge. Each row is a subgrid

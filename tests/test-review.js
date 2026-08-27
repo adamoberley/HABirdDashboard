@@ -8,7 +8,7 @@ const fs = require('fs');
 const { JSDOM } = require('jsdom');
 const CARD = fs.readFileSync(ROOT + '/dist/habird-card.js', 'utf8');
 
-function boot({ ingress }) {
+function boot({ ingress, reviewStatus }) {
   const dom = new JSDOM('<!doctype html><html><body></body></html>', { url: 'http://ha.local:8123/x', runScripts: 'outside-only', pretendToBeVisual: true });
   const { window } = dom;
   const summary = [
@@ -24,6 +24,7 @@ function boot({ ingress }) {
     if (u.startsWith('https://en.wikipedia.org/')) return ok({ extract: 'A large bird.' });
     if (opts && opts.method === 'POST' && p.includes('/review')) {
       posts.push({ url: u, headers: opts.headers, body: JSON.parse(opts.body), cookie: window.document.cookie });
+      if (reviewStatus === 403) return Promise.resolve({ ok: false, status: 403, json: () => Promise.reject(403) });
       return ok({ success: true });
     }
     if (p.startsWith('/api/v2/analytics/species/summary')) return ok(summary);
@@ -80,13 +81,19 @@ let done = 0;
             assert.strictEqual(posts.length, 1, 'one POST');
             assert.ok(posts[0].url.startsWith('/api/hassio_ingress/TOK/api/v2/detections/42/review'), 'via ingress: ' + posts[0].url);
             assert.strictEqual(posts[0].body.verified, 'false_positive');
+            // Sent alongside the legacy field: BirdNET-Go's public API docs
+            // don't pin down the review body's field name, and the Apr 2026
+            // release renamed the search response's verdict field
+            // 'verified' -> 'correct' - unknown fields are ignored
+            // server-side, so sending both reads correctly either way.
+            assert.strictEqual(posts[0].body.correct, 'false_positive');
             const tok = posts[0].headers['X-CSRF-Token'];
             assert.ok(tok && tok.length > 10, 'token minted');
             assert.ok(posts[0].cookie.includes('csrf=' + tok), 'header equals the cookie (double-submit)');
             assert.strictEqual(flag.getAttribute('data-state'), 'done');
             assert.strictEqual(flag.textContent, '✓');
             console.log('A: ingress write-back OK (self-minted double-submit token)');
-            if (++done === 2) console.log('\nREVIEW V2 TESTS PASSED');
+            if (++done === 3) console.log('\nREVIEW V2 TESTS PASSED');
           } catch (e) { console.error('A FAIL:', e.message); process.exit(1); }
         }, 400);
       } catch (e) { console.error('A FAIL:', e.message); process.exit(1); }
@@ -114,13 +121,46 @@ let done = 0;
               try {
                 assert.strictEqual(flag.getAttribute('data-state'), 'idle', 'failure auto-resets');
                 console.log('B: cross-origin refusal + auto-reset OK');
-                if (++done === 2) console.log('\nREVIEW V2 TESTS PASSED');
-                setTimeout(() => process.exit(0), 100);
+                if (++done === 3) {
+                  console.log('\nREVIEW V2 TESTS PASSED');
+                  setTimeout(() => process.exit(0), 100);
+                }
               } catch (e) { console.error('B FAIL:', e.message); process.exit(1); }
             }, 5400);
           } catch (e) { console.error('B FAIL:', e.message); process.exit(1); }
         }, 400);
       } catch (e) { console.error('B FAIL:', e.message); process.exit(1); }
+    }, 900);
+  }, 1700);
+}
+
+// --- C: BirdNET-Go's Aug 2026 CSRF enforcement rejects the write (403) ---
+// -> the flag pill fails with a distinct "blocked" message, not the
+// generic error-code pill.
+{
+  const { window, card, posts } = boot({ ingress: true, reviewStatus: 403 });
+  setTimeout(() => {
+    const root = card.shadowRoot;
+    root.querySelector('.bird-card').dispatchEvent(new window.MouseEvent('click', { bubbles: true, composed: true }));
+    setTimeout(() => {
+      try {
+        const flag = root.querySelector('#modalRecordings .rec-row .flag');
+        flag.dispatchEvent(new window.MouseEvent('click', { bubbles: true, composed: true }));
+        flag.dispatchEvent(new window.MouseEvent('click', { bubbles: true, composed: true }));
+        setTimeout(() => {
+          try {
+            assert.strictEqual(posts.length, 1, 'one POST attempted');
+            assert.strictEqual(flag.getAttribute('data-state'), 'failed');
+            assert.strictEqual(flag.textContent, 'blocked', 'distinct 403 label, not a generic error code');
+            assert.ok(flag.title.includes('CSRF'), 'tooltip names the cause: ' + flag.title);
+            console.log('C: 403 CSRF rejection -> distinct "blocked" message OK');
+            if (++done === 3) {
+              console.log('\nREVIEW V2 TESTS PASSED');
+              setTimeout(() => process.exit(0), 100);
+            }
+          } catch (e) { console.error('C FAIL:', e.message); process.exit(1); }
+        }, 400);
+      } catch (e) { console.error('C FAIL:', e.message); process.exit(1); }
     }, 900);
   }, 1700);
 }

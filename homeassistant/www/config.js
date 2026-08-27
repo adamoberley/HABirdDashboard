@@ -21,6 +21,18 @@ window.AV_CONFIG = {
   // e.g. 'http://192.168.1.50:8080'.
   birdnetGoUrl: '',
 
+  // API token for BirdNET-Go's "Private Mode" (Security.PrivateMode). When
+  // that's on, BirdNET-Go requires a signed-in session for every API call -
+  // this page has no login flow, so every request 401s without a token.
+  // Create one in BirdNET-Go's own settings and paste it here; it rides an
+  // Authorization: Bearer header on every request to BirdNET-Go (never to
+  // Wikipedia, Xeno-Canto, or Home Assistant).
+  //
+  // SECURITY NOTE: like wall.haToken below, /config/www files are served
+  // without authentication, so this token is readable by anyone who can
+  // reach this page. Leave '' unless Private Mode is actually on.
+  apiToken: '',
+
   // Data source. 'auto' (default) reads BirdNET-Go's REST API and, if
   // that's unreachable from this browser, falls back to rebuilding the
   // detection stream from Home Assistant's history of the BirdNET-Go
@@ -31,6 +43,19 @@ window.AV_CONFIG = {
   // keeps history (historyDays, default 10).
   dataSource: 'auto',
   historyDays: 10,
+
+  // Live detections. When true (the default), this page opens one
+  // EventSource to BirdNET-Go's detections/stream endpoint after the
+  // first load, so a new detection refreshes the page within a couple
+  // seconds instead of waiting for the next 30s poll. It's purely a
+  // "something changed, refetch" signal - no data comes from the stream
+  // itself, so nothing else about the page depends on it. Reconnects
+  // automatically (with backoff) if the connection drops; gives up for
+  // the rest of this page load if the endpoint 404s (older BirdNET-Go)
+  // or 401s (Private Mode - EventSource can't carry apiToken's
+  // Authorization header). The 30s poll above always keeps working
+  // either way; set this false to skip the stream entirely.
+  live: true,
 
   // Feeder visits (optional). If a camera watches your feeder and an
   // automation (e.g. LLM Vision) publishes each identified visitor as a
