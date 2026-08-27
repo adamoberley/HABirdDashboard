@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.3.0 — 2026-08-27
 
 ### Added
 - **Feeder visits: blend a camera's sightings with the microphone's calls.**
@@ -17,6 +17,38 @@
   (a sighting is never double-counted as a call), visits match on
   scientific *or* common name, and species only ever *seen* don't join the
   collage. Implements #61.
+- **The card speaks your language.** The UI chrome (headings, tooltips,
+  stats, modal labels, empty states) is now translatable, and follows each
+  user's Home Assistant profile language automatically — falling back to
+  the browser language on the standalone page, and to English string-by-
+  string for anything untranslated. Ships **12 languages**: English,
+  Danish (tak, @felixdrud — the translation runtime, the Danish
+  translation, and the coverage tooling are his work, #63), Dutch,
+  Finnish, French, German, Italian, Norwegian (Bokmål), Polish,
+  Portuguese, Spanish, and Swedish. Numbers, dates, and the wall clock
+  format per locale; Wikipedia descriptions come from the matching
+  language's wiki with English fallback; bird names stay BirdNET-Go's.
+  Force a language with the card's `language:` option. Adding a language
+  is one file — `npm run i18n:new`, then translate; coverage tooling and
+  tests keep translations honest.
+- **Black-billed Magpie** (*Pica hudsonia*) joins the illustrated library
+  (866 species) — requested in #60 for a Calgary-area station. Cache-bust
+  versions bumped `r15`→`r16`.
+
+### Fixed
+- **"First heard" no longer renders a raw timestamp.** BirdNET-Go's ISO
+  `first_seen` values (e.g. `2026-07-09T04:47:17+02:00`) were split on a
+  space that isn't there, producing an invalid date and bailing to the raw
+  string. Full timestamps are now parsed whole. (#62, thanks @felixdrud)
+- **The pose toggle flips on every click.** Clicking the already-selected
+  pose now advances to the other available one instead of doing nothing.
+  (#62, thanks @felixdrud)
+- **Card CSS survived a build edge case**: HTML comments are stripped
+  before script tags in the card build, so prose mentioning `<script>`
+  can't eat the card's styles. (#63)
+- **Feeder-visit sensors documented with `force_update: true`** — without
+  it, Home Assistant's recorder collapses back-to-back sightings of the
+  same species and repeat visits are silently lost.
 
 ## v1.2.7 — 2026-07-24
 

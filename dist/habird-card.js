@@ -362,6 +362,1738 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
   'about.explore': 'udforsk fuglene →',
 };
 
+// HABirdDashboard - German (de) UI strings.
+//
+// A standalone, self-registering translation: keys mirror en.js exactly;
+// values are natural German. Any key omitted here falls back to the en
+// reference table by design. Scientific names and the stable rarity/label
+// CODES are never translated - only the display strings for existing keys.
+// {name} placeholders are preserved and filled by tt(key, {name: value}).
+(window.HABIRD_I18N = window.HABIRD_I18N || {}).de = {
+  // ---- View slider ----
+  'view.collage': 'Collage',
+  'view.stats': 'Statistik',
+  'view.atlas': 'Atlas',
+  'view.aria': 'Ansicht',
+
+  // ---- Window picker (abbreviations) ----
+  'winpick.1h': '1H',
+  'winpick.12h': '12H',
+  'winpick.24h': '24H',
+  'winpick.7d': '7T',
+  'winpick.all': 'ALLE',
+
+  // ---- Static head / about affordance ----
+  'head.about': 'deine Vögel',
+  // ---- View titles (dynamic, one per view) ----
+  'title.heardRecently': 'Kürzlich gehört',
+  'title.avianVisitors': 'Gefiederte Gäste',
+
+  // ---- Section aria-labels ----
+  'aria.collage': 'Vogelcollage',
+  'aria.stats': 'Statistik',
+  'aria.atlas': 'Atlas',
+
+  // ---- Time-window labels (windowLabel) ----
+  'window.thisHour': 'diese Stunde',
+  'window.past12h': 'letzte 12 Stunden',
+  'window.today': 'heute',
+  'window.thisWeek': 'diese Woche',
+  'window.allTime': 'insgesamt',
+
+  // ---- Collage tooltip units ----
+  'unit.call': 'Ruf',
+  'unit.calls': 'Rufe',
+  'unit.visit': 'Besuch',
+  'unit.visits': 'Besuche',
+
+  // ---- Stats: By Period ----
+  'stats.byPeriod': 'Nach Zeitraum',
+  'stats.byPeriodSub': 'Erkennungen, gruppiert nach Aktualität',
+  'stats.badgeNow': 'JETZT',
+  'stats.badgeToday': 'HEUTE',
+  'stats.badgeWeek': 'WOCHE',
+  'stats.badgeAll': 'ALLE',
+  'stats.lastHour': 'letzte Stunde',
+  'stats.today': 'heute',
+  'stats.last7days': 'letzte 7 Tage',
+  'stats.allTime': 'insgesamt',
+  // ---- Stats: Top Species ----
+  'stats.topSpecies': 'Top-Arten',
+  'stats.topSpecCap': 'am häufigsten gehört, {window}',
+  'stats.noneInWindow': 'keine Erkennungen in diesem Zeitraum',
+  // ---- Stats: First Detections ----
+  'stats.firstDetections': 'Erste Erkennungen',
+  'stats.firstDetectionsSub': 'neueste Ergänzungen der Artenliste',
+  'stats.daysAgo': 'vor {n}T',
+  'stats.noneYet': 'noch keine Erkennungen',
+  // ---- Stats: activity heatmap ----
+  'stats.heatmapEmpty': 'keine Erkennungen in diesem Zeitraum',
+  'stats.heatmapTotal': 'alle',
+  'stats.byHourCap': 'Erkennungen nach Stunde · {window}',
+  'stats.byHourDayCap': 'Erkennungen nach Tageszeit · letzte 7 Tage',
+  'stats.heatmapTrim': '{max} meistgehörte von {total}',
+
+  // ---- Atlas ----
+  'atlas.sort': 'Atlas sortieren',
+  'atlas.mostHeard': 'meistgehört',
+  'atlas.mostRecent': 'neueste',
+  'atlas.alphabetical': 'alphabetisch',
+  'atlas.atoz': 'a → z',
+  'atlas.emptyTitle': 'Noch keine Vögel erkannt.',
+  'atlas.emptyHint': 'Der Atlas füllt sich, sobald neue Arten identifiziert werden.',
+  'atlas.noWindowTitle': 'Keine Erkennungen in diesem Zeitraum.',
+  'atlas.noWindowHint': 'Versuche einen längeren Zeitraum.',
+  'atlas.allTime': 'insgesamt',
+  'atlas.new': 'neu',
+  'atlas.newTitle': 'diese Art wurde hier noch nie zuvor gehört',
+
+  // ---- Detail modal: chrome ----
+  'modal.close': 'Schließen',
+  'modal.pose': 'Haltung',
+  'modal.perched': 'sitzend',
+  'modal.inFlight': 'im Flug',
+  'modal.genus': 'Gattung',
+  'modal.rarity': 'Seltenheit',
+  'modal.allTime': 'insgesamt',
+  'modal.firstHeard': 'zuerst gehört',
+  'modal.visits': 'Besuche',
+  'modal.visitsWindow': 'Besuche {window}',
+  'modal.recordings': 'Aufnahmen',
+  'modal.refCall': 'Referenzruf',
+  'modal.playRefCall': 'Referenzruf abspielen',
+  'modal.wiki': 'wiki',
+  'modal.ebird': 'ebird',
+  // ---- Detail modal: dynamic ----
+  'modal.loadingDesc': 'Beschreibung wird geladen...',
+  'modal.loadingRecordings': 'Aufnahmen werden geladen...',
+  'modal.noRecordings': 'Noch keine Aufnahmen.',
+  'modal.recordingsFailed': 'Aufnahmen konnten nicht geladen werden.',
+  'modal.noDescription': 'Keine Beschreibung verfügbar.',
+  'modal.captured': '{n} aufgenommen',
+  'modal.play': 'abspielen',
+  // 'modal.scrub' deliberately omitted -> falls back to the en value.
+
+  // ---- Rarity labels ----
+  'rarity.common': 'häufig',
+  'rarity.regular': 'regelmäßig',
+  'rarity.occasional': 'gelegentlich',
+  'rarity.rare': 'selten',
+
+  // ---- Reference call (Xeno-Canto) ----
+  'refcall.none': 'kein Referenzruf auf Xeno-Canto für diese Art',
+  'refcall.busy': 'Xeno-Canto ist ausgelastet (Ratenbegrenzung) — versuch es gleich noch einmal',
+  'refcall.unavailableCode': 'Referenzruf nicht verfügbar (Xeno-Canto {code})',
+  'refcall.unavailable': 'Referenzruf nicht verfügbar',
+  'refcall.cantPlay': 'dieser Referenzruf konnte nicht abgespielt werden',
+  'refcall.credit': 'Referenzruf: Xeno-Canto',
+  'refcall.recBy': ' · Aufn. {rec}',
+  'refcall.license': 'Lizenz',
+
+  // ---- Spectrogram ----
+  'spectro.loading': 'Spektrogramm wird geladen...',
+  'spectro.rendering': 'Spektrogramm wird gerendert...',
+  'spectro.unavailable': 'Spektrogramm nicht verfügbar',
+  'spectro.noWebAudio': 'WebAudio nicht verfügbar',
+  'spectro.failed': 'Spektrogramm fehlgeschlagen: ',
+
+  // ---- False-positive flag pill ----
+  'flag.report': 'als Fehlerkennung melden',
+  'flag.armed': 'falsch erkannt?',
+  'flag.armedTitle': 'nochmal tippen, um als Fehlerkennung zu melden',
+  'flag.done': 'als Fehlerkennung gemeldet',
+  'flag.failed': 'fehlgeschlagen',
+  'flag.noPath': 'kein Pfad',
+  'flag.errCode': 'Fehler {code}',
+  'flag.couldNotSave': 'konnte nicht gespeichert werden: {why}',
+  'flag.needsIngress': 'benötigt die HA-Ingress-Verbindung - {detail}',
+  'flag.refused': 'BirdNET-Go hat abgelehnt ({err})',
+
+  // ---- Weather conditions (standalone / fallback path) ----
+  // Keyed by Home Assistant's weather condition slugs. In the card build HA's
+  // own localized text is preferred; this table is the standalone/fallback.
+  'weather.clear-night': 'klare Nacht',
+  'weather.cloudy': 'bewölkt',
+  'weather.exceptional': 'außergewöhnlich',
+  'weather.fog': 'Nebel',
+  'weather.hail': 'Hagel',
+  'weather.lightning': 'Blitze',
+  'weather.lightning-rainy': 'Gewitter mit Regen',
+  'weather.partlycloudy': 'teilweise bewölkt',
+  'weather.pouring': 'starker Regen',
+  'weather.rainy': 'regnerisch',
+  'weather.snowy': 'Schnee',
+  'weather.snowy-rainy': 'Schneeregen',
+  'weather.sunny': 'sonnig',
+  'weather.windy': 'windig',
+  'weather.windy-variant': 'windig',
+
+  // ---- About modal ----
+  'about.title': 'Die Vögel vor deinem Fenster',
+  // Rich string (assigned via innerHTML - static, trusted markup).
+  'about.body': 'Ein winziges Mikrofon erkennt jeden vorbeifliegenden Vogel mit <a href="https://github.com/tphakala/birdnet-go" target="_blank" rel="noopener">BirdNET-Go</a>, das auf Cornells <a href="https://birdnet.cornell.edu/" target="_blank" rel="noopener">BirdNET</a> aufbaut. Jede Art erscheint als Illustration in der Collage, deren Größe sich danach richtet, wie oft sie gehört wurde. Sichere Erkennungen sitzen, unsichere fliegen vorbei.',
+  'about.explore': 'die Vögel erkunden →',
+};
+
+// HABirdDashboard - Spanish (es) UI strings.
+//
+// A standalone, self-registering translation: keys mirror en.js exactly;
+// values are natural Spanish. Any key omitted here falls back to the en
+// reference table by design. Scientific names and the stable rarity/label
+// CODES are never translated - only the display strings for existing keys.
+// {name} placeholders are preserved and filled by tt(key, {name: value}).
+(window.HABIRD_I18N = window.HABIRD_I18N || {}).es = {
+  // ---- View slider ----
+  'view.collage': 'collage',
+  'view.stats': 'estadísticas',
+  'view.atlas': 'atlas',
+  'view.aria': 'Vista',
+
+  // ---- Window picker (abbreviations) ----
+  'winpick.1h': '1H',
+  'winpick.12h': '12H',
+  'winpick.24h': '24H',
+  'winpick.7d': '7D',
+  'winpick.all': 'TODO',
+
+  // ---- Static head / about affordance ----
+  'head.about': 'tus aves',
+  // ---- View titles (dynamic, one per view) ----
+  'title.heardRecently': 'Escuchado recientemente',
+  'title.avianVisitors': 'Visitantes alados',
+
+  // ---- Section aria-labels ----
+  'aria.collage': 'Collage de aves',
+  'aria.stats': 'Estadísticas',
+  'aria.atlas': 'Atlas',
+
+  // ---- Time-window labels (windowLabel) ----
+  'window.thisHour': 'esta hora',
+  'window.past12h': 'últimas 12h',
+  'window.today': 'hoy',
+  'window.thisWeek': 'esta semana',
+  'window.allTime': 'siempre',
+
+  // ---- Collage tooltip units ----
+  'unit.call': 'llamada',
+  'unit.calls': 'llamadas',
+  'unit.visit': 'visita',
+  'unit.visits': 'visitas',
+
+  // ---- Stats: By Period ----
+  'stats.byPeriod': 'Por período',
+  'stats.byPeriodSub': 'detecciones, agrupadas por antigüedad',
+  'stats.badgeNow': 'AHORA',
+  'stats.badgeToday': 'HOY',
+  'stats.badgeWeek': 'SEMANA',
+  'stats.badgeAll': 'TODO',
+  'stats.lastHour': 'última hora',
+  'stats.today': 'hoy',
+  'stats.last7days': 'últimos 7 días',
+  'stats.allTime': 'siempre',
+  // ---- Stats: Top Species ----
+  'stats.topSpecies': 'Especies principales',
+  'stats.topSpecCap': 'más escuchadas, {window}',
+  'stats.noneInWindow': 'sin detecciones en este período',
+  // ---- Stats: First Detections ----
+  'stats.firstDetections': 'Primeras detecciones',
+  'stats.firstDetectionsSub': 'incorporaciones más recientes a la lista de vida',
+  'stats.daysAgo': 'hace {n}d',
+  'stats.noneYet': 'todavía sin detecciones',
+  // ---- Stats: activity heatmap ----
+  'stats.heatmapEmpty': 'sin detecciones en este período',
+  'stats.heatmapTotal': 'todas',
+  'stats.byHourCap': 'detecciones por hora · {window}',
+  'stats.byHourDayCap': 'detecciones por hora del día · últimos 7 días',
+  'stats.heatmapTrim': '{max} más escuchadas de {total}',
+
+  // ---- Atlas ----
+  'atlas.sort': 'ordenar atlas',
+  'atlas.mostHeard': 'más escuchadas',
+  'atlas.mostRecent': 'más recientes',
+  'atlas.alphabetical': 'alfabético',
+  'atlas.atoz': 'a → z',
+  'atlas.emptyTitle': 'Aún no se ha detectado ninguna ave.',
+  'atlas.emptyHint': 'El atlas se completa a medida que se identifican nuevas especies.',
+  'atlas.noWindowTitle': 'Sin detecciones en este período.',
+  'atlas.noWindowHint': 'Prueba con un período más largo.',
+  'atlas.allTime': 'siempre',
+  'atlas.new': 'nueva',
+  'atlas.newTitle': 'primera vez que se escucha esta especie aquí',
+
+  // ---- Detail modal: chrome ----
+  'modal.close': 'Cerrar',
+  'modal.pose': 'Postura',
+  'modal.perched': 'posada',
+  'modal.inFlight': 'en vuelo',
+  'modal.genus': 'género',
+  'modal.rarity': 'rareza',
+  'modal.allTime': 'siempre',
+  'modal.firstHeard': 'primera vez escuchada',
+  'modal.visits': 'visitas',
+  'modal.visitsWindow': 'visitas {window}',
+  'modal.recordings': 'Grabaciones',
+  'modal.refCall': 'llamada de referencia',
+  'modal.playRefCall': 'reproducir llamada de referencia',
+  'modal.wiki': 'wiki',
+  'modal.ebird': 'ebird',
+  // ---- Detail modal: dynamic ----
+  'modal.loadingDesc': 'Cargando descripción...',
+  'modal.loadingRecordings': 'Cargando grabaciones...',
+  'modal.noRecordings': 'Aún no hay grabaciones.',
+  'modal.recordingsFailed': 'No se pudieron cargar las grabaciones.',
+  'modal.noDescription': 'No hay descripción disponible.',
+  'modal.captured': 'capturas: {n}',
+  'modal.play': 'reproducir',
+  // 'modal.scrub' deliberately omitted -> falls back to the en value.
+
+  // ---- Rarity labels ----
+  'rarity.common': 'común',
+  'rarity.regular': 'regular',
+  'rarity.occasional': 'ocasional',
+  'rarity.rare': 'rara',
+
+  // ---- Reference call (Xeno-Canto) ----
+  'refcall.none': 'no hay llamada de referencia en Xeno-Canto para esta especie',
+  'refcall.busy': 'Xeno-Canto está ocupado (límite de solicitudes) — inténtalo de nuevo en un momento',
+  'refcall.unavailableCode': 'llamada de referencia no disponible (Xeno-Canto {code})',
+  'refcall.unavailable': 'llamada de referencia no disponible',
+  'refcall.cantPlay': 'no se pudo reproducir esta llamada de referencia',
+  'refcall.credit': 'Llamada de referencia: Xeno-Canto',
+  'refcall.recBy': ' · grab. {rec}',
+  'refcall.license': 'licencia',
+
+  // ---- Spectrogram ----
+  'spectro.loading': 'cargando espectrograma...',
+  'spectro.rendering': 'generando espectrograma...',
+  'spectro.unavailable': 'espectrograma no disponible',
+  'spectro.noWebAudio': 'WebAudio no disponible',
+  'spectro.failed': 'error al generar el espectrograma: ',
+
+  // ---- False-positive flag pill ----
+  'flag.report': 'reportar como falso positivo',
+  'flag.armed': '¿no es esta?',
+  'flag.armedTitle': 'toca de nuevo para reportar como falso positivo',
+  'flag.done': 'reportado como falso positivo',
+  'flag.failed': 'error',
+  'flag.noPath': 'sin ruta',
+  'flag.errCode': 'error {code}',
+  'flag.couldNotSave': 'no se pudo guardar: {why}',
+  'flag.needsIngress': 'requiere la conexión ingress de HA - {detail}',
+  'flag.refused': 'BirdNET-Go rechazó la solicitud ({err})',
+
+  // ---- Weather conditions (standalone / fallback path) ----
+  // Keyed by Home Assistant's weather condition slugs. In the card build HA's
+  // own localized text is preferred; this table is the standalone/fallback.
+  'weather.clear-night': 'noche despejada',
+  'weather.cloudy': 'nublado',
+  'weather.exceptional': 'excepcional',
+  'weather.fog': 'niebla',
+  'weather.hail': 'granizo',
+  'weather.lightning': 'tormenta eléctrica',
+  'weather.lightning-rainy': 'tormenta con lluvia',
+  'weather.partlycloudy': 'parcialmente nublado',
+  'weather.pouring': 'fuertes lluvias',
+  'weather.rainy': 'lluvia',
+  'weather.snowy': 'nieve',
+  'weather.snowy-rainy': 'aguanieve',
+  'weather.sunny': 'despejado',
+  'weather.windy': 'ventoso',
+  'weather.windy-variant': 'ventoso',
+
+  // ---- About modal ----
+  'about.title': 'Las aves fuera de tu ventana',
+  // Rich string (assigned via innerHTML - static, trusted markup).
+  'about.body': 'Un pequeño micrófono identifica cada ave que pasa cerca con <a href="https://github.com/tphakala/birdnet-go" target="_blank" rel="noopener">BirdNET-Go</a>, construido sobre el <a href="https://birdnet.cornell.edu/" target="_blank" rel="noopener">BirdNET</a> de Cornell. Cada especie aparece como una ilustración en el collage, con un tamaño según la frecuencia con la que se ha escuchado. Las detecciones seguras aparecen posadas; las inciertas, en vuelo.',
+  'about.explore': 'explorar las aves →',
+};
+
+// HABirdDashboard - Finnish (fi) UI strings.
+//
+// A standalone, self-registering translation: keys mirror en.js exactly;
+// values are natural Finnish. Any key omitted here falls back to the en
+// reference table by design. Scientific names and the stable rarity/label
+// CODES are never translated - only the display strings for existing keys.
+// {name} placeholders are preserved and filled by tt(key, {name: value}).
+(window.HABIRD_I18N = window.HABIRD_I18N || {}).fi = {
+  // ---- View slider ----
+  'view.collage': 'kollaasi',
+  'view.stats': 'tilastot',
+  'view.atlas': 'atlas',
+  'view.aria': 'Näkymä',
+
+  // ---- Window picker (abbreviations) ----
+  'winpick.1h': '1T',
+  'winpick.12h': '12T',
+  'winpick.24h': '24T',
+  'winpick.7d': '7VRK',
+  'winpick.all': 'KAIKKI',
+
+  // ---- Static head / about affordance ----
+  'head.about': 'lintusi',
+  // ---- View titles (dynamic, one per view) ----
+  'title.heardRecently': 'Äskettäin kuultu',
+  'title.avianVisitors': 'Siivekkäät vieraat',
+
+  // ---- Section aria-labels ----
+  'aria.collage': 'Lintukollaasi',
+  'aria.stats': 'Tilastot',
+  'aria.atlas': 'Atlas',
+
+  // ---- Time-window labels (windowLabel) ----
+  'window.thisHour': 'tällä tunnilla',
+  'window.past12h': 'viimeiset 12 t',
+  'window.today': 'tänään',
+  'window.thisWeek': 'tällä viikolla',
+  'window.allTime': 'kautta aikojen',
+
+  // ---- Collage tooltip units ----
+  'unit.call': 'ääni',
+  'unit.calls': 'ääntä',
+  'unit.visit': 'käynti',
+  'unit.visits': 'käyntiä',
+
+  // ---- Stats: By Period ----
+  'stats.byPeriod': 'Ajanjaksoittain',
+  'stats.byPeriodSub': 'havainnot, ryhmitelty tuoreuden mukaan',
+  'stats.badgeNow': 'NYT',
+  'stats.badgeToday': 'TÄNÄÄN',
+  'stats.badgeWeek': 'VIIKKO',
+  'stats.badgeAll': 'KAIKKI',
+  'stats.lastHour': 'viimeinen tunti',
+  'stats.today': 'tänään',
+  'stats.last7days': 'viimeiset 7 päivää',
+  'stats.allTime': 'kautta aikojen',
+  // ---- Stats: Top Species ----
+  'stats.topSpecies': 'Suosituimmat lajit',
+  'stats.topSpecCap': 'eniten kuultu, {window}',
+  'stats.noneInWindow': 'ei havaintoja tällä aikavälillä',
+  // ---- Stats: First Detections ----
+  'stats.firstDetections': 'Ensihavainnot',
+  'stats.firstDetectionsSub': 'uusimmat lisäykset lajilistaan',
+  'stats.daysAgo': '{n} pv sitten',
+  'stats.noneYet': 'ei vielä havaintoja',
+  // ---- Stats: activity heatmap ----
+  'stats.heatmapEmpty': 'ei havaintoja tällä aikavälillä',
+  'stats.heatmapTotal': 'kaikki',
+  'stats.byHourCap': 'havainnot tunneittain · {window}',
+  'stats.byHourDayCap': 'havainnot vuorokaudenajan mukaan · viimeiset 7 päivää',
+  'stats.heatmapTrim': '{max} eniten kuultua {total}:sta',
+
+  // ---- Atlas ----
+  'atlas.sort': 'järjestä atlas',
+  'atlas.mostHeard': 'eniten kuultu',
+  'atlas.mostRecent': 'uusin',
+  'atlas.alphabetical': 'aakkosjärjestys',
+  'atlas.atoz': 'a → ö',
+  'atlas.emptyTitle': 'Ei vielä havaittuja lintuja.',
+  'atlas.emptyHint': 'Atlas täyttyy sitä mukaa kun uusia lajeja tunnistetaan.',
+  'atlas.noWindowTitle': 'Ei havaintoja tällä aikavälillä.',
+  'atlas.noWindowHint': 'Kokeile pidempää aikaväliä.',
+  'atlas.allTime': 'kautta aikojen',
+  'atlas.new': 'uusi',
+  'atlas.newTitle': 'ensimmäinen kerta, kun tämä laji on kuultu täällä',
+
+  // ---- Detail modal: chrome ----
+  'modal.close': 'Sulje',
+  'modal.pose': 'Asento',
+  'modal.perched': 'istuva',
+  'modal.inFlight': 'lennossa',
+  'modal.genus': 'suku',
+  'modal.rarity': 'harvinaisuus',
+  'modal.allTime': 'kautta aikojen',
+  'modal.firstHeard': 'ensi kerran kuultu',
+  'modal.visits': 'käynnit',
+  'modal.visitsWindow': 'käyntejä {window}',
+  'modal.recordings': 'Tallenteet',
+  'modal.refCall': 'vertailuääni',
+  'modal.playRefCall': 'toista vertailuääni',
+  'modal.wiki': 'wiki',
+  'modal.ebird': 'ebird',
+  // ---- Detail modal: dynamic ----
+  'modal.loadingDesc': 'Ladataan kuvausta...',
+  'modal.loadingRecordings': 'Ladataan tallenteita...',
+  'modal.noRecordings': 'Ei vielä tallenteita.',
+  'modal.recordingsFailed': 'Tallenteiden lataaminen epäonnistui.',
+  'modal.noDescription': 'Kuvausta ei ole saatavilla.',
+  'modal.captured': '{n} tallennetta',
+  'modal.play': 'toista',
+  // 'modal.scrub' deliberately omitted -> falls back to the en value.
+
+  // ---- Rarity labels ----
+  'rarity.common': 'yleinen',
+  'rarity.regular': 'säännöllinen',
+  'rarity.occasional': 'satunnainen',
+  'rarity.rare': 'harvinainen',
+
+  // ---- Reference call (Xeno-Canto) ----
+  'refcall.none': 'ei vertailuääntä Xeno-Cantossa tälle lajille',
+  'refcall.busy': 'Xeno-Canto on varattu (nopeusrajoitus) — yritä hetken kuluttua uudelleen',
+  'refcall.unavailableCode': 'vertailuääni ei ole saatavilla (Xeno-Canto {code})',
+  'refcall.unavailable': 'vertailuääni ei ole saatavilla',
+  'refcall.cantPlay': 'tätä vertailuääntä ei voitu toistaa',
+  'refcall.credit': 'Vertailuääni: Xeno-Canto',
+  'refcall.recBy': ' · ään. {rec}',
+  'refcall.license': 'lisenssi',
+
+  // ---- Spectrogram ----
+  'spectro.loading': 'ladataan spektrogrammia...',
+  'spectro.rendering': 'muodostetaan spektrogrammia...',
+  'spectro.unavailable': 'spektrogrammi ei ole saatavilla',
+  'spectro.noWebAudio': 'WebAudio ei ole käytettävissä',
+  'spectro.failed': 'spektrogrammi epäonnistui: ',
+
+  // ---- False-positive flag pill ----
+  'flag.report': 'ilmoita virhetunnistukseksi',
+  'flag.armed': 'ei tämä?',
+  'flag.armedTitle': 'napauta uudelleen ilmoittaaksesi virhetunnistuksena',
+  'flag.done': 'ilmoitettu virhetunnistuksena',
+  'flag.failed': 'epäonnistui',
+  'flag.noPath': 'ei polkua',
+  'flag.errCode': 'virhe {code}',
+  'flag.couldNotSave': 'tallennus epäonnistui: {why}',
+  'flag.needsIngress': 'vaatii HA:n ingress-yhteyden - {detail}',
+  'flag.refused': 'BirdNET-Go kieltäytyi ({err})',
+
+  // ---- Weather conditions (standalone / fallback path) ----
+  // Keyed by Home Assistant's weather condition slugs. In the card build HA's
+  // own localized text is preferred; this table is the standalone/fallback.
+  'weather.clear-night': 'selkeää',
+  'weather.cloudy': 'pilvistä',
+  'weather.exceptional': 'poikkeuksellista',
+  'weather.fog': 'sumuista',
+  'weather.hail': 'raekuuroja',
+  'weather.lightning': 'ukkosta',
+  'weather.lightning-rainy': 'ukkoskuuroja',
+  'weather.partlycloudy': 'puolipilvistä',
+  'weather.pouring': 'kaatosadetta',
+  'weather.rainy': 'sateista',
+  'weather.snowy': 'lumisadetta',
+  'weather.snowy-rainy': 'räntäsadetta',
+  'weather.sunny': 'aurinkoista',
+  'weather.windy': 'tuulista',
+  'weather.windy-variant': 'tuulista ja pilvistä',
+
+  // ---- About modal ----
+  'about.title': 'Linnut ikkunasi takana',
+  // Rich string (assigned via innerHTML - static, trusted markup).
+  'about.body': 'Pieni mikrofoni tunnistaa jokaisen ohilentävän linnun käyttäen sovellusta <a href="https://github.com/tphakala/birdnet-go" target="_blank" rel="noopener">BirdNET-Go</a>, joka perustuu Cornellin <a href="https://birdnet.cornell.edu/" target="_blank" rel="noopener">BirdNET</a>-malliin. Jokainen laji näkyy kollaasissa kuvituksena, jonka koko riippuu siitä, kuinka usein sitä on kuultu. Varmat havainnot istuvat; epävarmat lentävät ohi.',
+  'about.explore': 'tutustu lintuihin →',
+};
+
+// HABirdDashboard - French (fr) UI strings.
+//
+// A standalone, self-registering translation: keys mirror en.js exactly;
+// values are natural French. Any key omitted here falls back to the en
+// reference table by design. Scientific names and the stable rarity/label
+// CODES are never translated - only the display strings for existing keys.
+// {name} placeholders are preserved and filled by tt(key, {name: value}).
+(window.HABIRD_I18N = window.HABIRD_I18N || {}).fr = {
+  // ---- View slider ----
+  'view.collage': 'collage',
+  'view.stats': 'stats',
+  'view.atlas': 'atlas',
+  'view.aria': 'Vue',
+
+  // ---- Window picker (abbreviations) ----
+  'winpick.1h': '1H',
+  'winpick.12h': '12H',
+  'winpick.24h': '24H',
+  'winpick.7d': '7J',
+  'winpick.all': 'TOUT',
+
+  // ---- Static head / about affordance ----
+  'head.about': 'vos oiseaux',
+  // ---- View titles (dynamic, one per view) ----
+  'title.heardRecently': 'Entendus récemment',
+  'title.avianVisitors': 'Visiteurs ailés',
+
+  // ---- Section aria-labels ----
+  'aria.collage': 'Collage d’oiseaux',
+  'aria.stats': 'Statistiques',
+  'aria.atlas': 'Atlas',
+
+  // ---- Time-window labels (windowLabel) ----
+  'window.thisHour': 'cette heure',
+  'window.past12h': 'dernières 12h',
+  'window.today': 'aujourd’hui',
+  'window.thisWeek': 'cette semaine',
+  'window.allTime': 'depuis toujours',
+
+  // ---- Collage tooltip units ----
+  'unit.call': 'cri',
+  'unit.calls': 'cris',
+  'unit.visit': 'visite',
+  'unit.visits': 'visites',
+
+  // ---- Stats: By Period ----
+  'stats.byPeriod': 'Par période',
+  'stats.byPeriodSub': 'détections, groupées par ancienneté',
+  'stats.badgeNow': 'ACTUEL',
+  'stats.badgeToday': 'AUJOURD’HUI',
+  'stats.badgeWeek': 'SEMAINE',
+  'stats.badgeAll': 'TOUT',
+  'stats.lastHour': 'dernière heure',
+  'stats.today': 'aujourd’hui',
+  'stats.last7days': '7 derniers jours',
+  'stats.allTime': 'depuis toujours',
+  // ---- Stats: Top Species ----
+  'stats.topSpecies': 'Top espèces',
+  'stats.topSpecCap': 'les plus entendues, {window}',
+  'stats.noneInWindow': 'aucune détection sur cette période',
+  // ---- Stats: First Detections ----
+  'stats.firstDetections': 'Premières détections',
+  'stats.firstDetectionsSub': 'derniers ajouts à la liste des espèces',
+  'stats.daysAgo': 'il y a {n}j',
+  'stats.noneYet': 'aucune détection pour l’instant',
+  // ---- Stats: activity heatmap ----
+  'stats.heatmapEmpty': 'aucune détection sur cette période',
+  'stats.heatmapTotal': 'tout',
+  'stats.byHourCap': 'détections par heure · {window}',
+  'stats.byHourDayCap': 'détections par heure de la journée · 7 derniers jours',
+  'stats.heatmapTrim': '{max} plus entendues sur {total}',
+
+  // ---- Atlas ----
+  'atlas.sort': 'trier l’atlas',
+  'atlas.mostHeard': 'plus entendues',
+  'atlas.mostRecent': 'plus récentes',
+  'atlas.alphabetical': 'alphabétique',
+  'atlas.atoz': 'a → z',
+  'atlas.emptyTitle': 'Aucun oiseau détecté pour l’instant.',
+  'atlas.emptyHint': 'L’atlas se remplit au fur et à mesure que de nouvelles espèces sont identifiées.',
+  'atlas.noWindowTitle': 'Aucune détection sur cette période.',
+  'atlas.noWindowHint': 'Essayez une période plus longue.',
+  'atlas.allTime': 'depuis toujours',
+  'atlas.new': 'nouvelle',
+  'atlas.newTitle': 'première fois que cette espèce est entendue ici',
+
+  // ---- Detail modal: chrome ----
+  'modal.close': 'Fermer',
+  'modal.pose': 'Pose',
+  'modal.perched': 'perché',
+  'modal.inFlight': 'en vol',
+  'modal.genus': 'genre',
+  'modal.rarity': 'rareté',
+  'modal.allTime': 'depuis toujours',
+  'modal.firstHeard': 'première écoute',
+  'modal.visits': 'visites',
+  'modal.visitsWindow': 'visites {window}',
+  'modal.recordings': 'Enregistrements',
+  'modal.refCall': 'cri de référence',
+  'modal.playRefCall': 'écouter le cri de référence',
+  'modal.wiki': 'wiki',
+  'modal.ebird': 'ebird',
+  // ---- Detail modal: dynamic ----
+  'modal.loadingDesc': 'Chargement de la description...',
+  'modal.loadingRecordings': 'Chargement des enregistrements...',
+  'modal.noRecordings': 'Aucun enregistrement pour l’instant.',
+  'modal.recordingsFailed': 'Échec du chargement des enregistrements.',
+  'modal.noDescription': 'Aucune description disponible.',
+  'modal.captured': 'captures : {n}',
+  'modal.play': 'lecture',
+  // 'modal.scrub' deliberately omitted -> falls back to the en value.
+
+  // ---- Rarity labels ----
+  'rarity.common': 'commune',
+  'rarity.regular': 'régulière',
+  'rarity.occasional': 'occasionnelle',
+  'rarity.rare': 'rare',
+
+  // ---- Reference call (Xeno-Canto) ----
+  'refcall.none': 'aucun cri de référence sur Xeno-Canto pour cette espèce',
+  'refcall.busy': 'Xeno-Canto est occupé (limite de débit) — réessayez dans un instant',
+  'refcall.unavailableCode': 'cri de référence indisponible (Xeno-Canto {code})',
+  'refcall.unavailable': 'cri de référence indisponible',
+  'refcall.cantPlay': 'impossible de lire ce cri de référence',
+  'refcall.credit': 'Cri de référence : Xeno-Canto',
+  'refcall.recBy': ' · enr. {rec}',
+  'refcall.license': 'licence',
+
+  // ---- Spectrogram ----
+  'spectro.loading': 'chargement du spectrogramme...',
+  'spectro.rendering': 'génération du spectrogramme...',
+  'spectro.unavailable': 'spectrogramme indisponible',
+  'spectro.noWebAudio': 'WebAudio non disponible',
+  'spectro.failed': 'échec du spectrogramme : ',
+
+  // ---- False-positive flag pill ----
+  'flag.report': 'signaler comme faux positif',
+  'flag.armed': 'pas le bon ?',
+  'flag.armedTitle': 'appuyez à nouveau pour signaler comme faux positif',
+  'flag.done': 'signalé comme faux positif',
+  'flag.failed': 'échec',
+  'flag.noPath': 'aucun chemin',
+  'flag.errCode': 'erreur {code}',
+  'flag.couldNotSave': 'impossible d’enregistrer : {why}',
+  'flag.needsIngress': 'nécessite la connexion ingress HA - {detail}',
+  'flag.refused': 'BirdNET-Go a refusé ({err})',
+
+  // ---- Weather conditions (standalone / fallback path) ----
+  // Keyed by Home Assistant's weather condition slugs. In the card build HA's
+  // own localized text is preferred; this table is the standalone/fallback.
+  'weather.clear-night': 'nuit claire',
+  'weather.cloudy': 'nuageux',
+  'weather.exceptional': 'exceptionnel',
+  'weather.fog': 'brouillard',
+  'weather.hail': 'grêle',
+  'weather.lightning': 'orageux',
+  'weather.lightning-rainy': 'pluie orageuse',
+  'weather.partlycloudy': 'partiellement nuageux',
+  'weather.pouring': 'pluie battante',
+  'weather.rainy': 'pluvieux',
+  'weather.snowy': 'neigeux',
+  'weather.snowy-rainy': 'neige et pluie',
+  'weather.sunny': 'ensoleillé',
+  'weather.windy': 'venteux',
+  'weather.windy-variant': 'venteux',
+
+  // ---- About modal ----
+  'about.title': 'Les oiseaux à votre fenêtre',
+  // Rich string (assigned via innerHTML - static, trusted markup).
+  'about.body': 'Un minuscule microphone identifie chaque oiseau de passage grâce à <a href="https://github.com/tphakala/birdnet-go" target="_blank" rel="noopener">BirdNET-Go</a>, construit sur le <a href="https://birdnet.cornell.edu/" target="_blank" rel="noopener">BirdNET</a> de Cornell. Chaque espèce apparaît sous forme d’illustration dans le collage, dont la taille dépend de la fréquence à laquelle elle a été entendue. Les détections sûres se perchent ; les incertaines s’envolent.',
+  'about.explore': 'explorer les oiseaux →',
+};
+
+// HABirdDashboard - Italian (it) UI strings.
+//
+// A standalone, self-registering translation: keys mirror en.js exactly;
+// values are natural Italian. Any key omitted here falls back to the en
+// reference table by design. Scientific names and the stable rarity/label
+// CODES are never translated - only the display strings for existing keys.
+// {name} placeholders are preserved and filled by tt(key, {name: value}).
+(window.HABIRD_I18N = window.HABIRD_I18N || {}).it = {
+  // ---- View slider ----
+  'view.collage': 'collage',
+  'view.stats': 'statistiche',
+  'view.atlas': 'atlante',
+  'view.aria': 'Vista',
+
+  // ---- Window picker (abbreviations) ----
+  'winpick.1h': '1H',
+  'winpick.12h': '12H',
+  'winpick.24h': '24H',
+  'winpick.7d': '7G',
+  'winpick.all': 'TUTTO',
+
+  // ---- Static head / about affordance ----
+  'head.about': 'i tuoi uccelli',
+  // ---- View titles (dynamic, one per view) ----
+  'title.heardRecently': 'Ascoltati di recente',
+  'title.avianVisitors': 'Visitatori alati',
+
+  // ---- Section aria-labels ----
+  'aria.collage': 'Collage di uccelli',
+  'aria.stats': 'Statistiche',
+  'aria.atlas': 'Atlante',
+
+  // ---- Time-window labels (windowLabel) ----
+  'window.thisHour': 'quest’ora',
+  'window.past12h': 'ultime 12h',
+  'window.today': 'oggi',
+  'window.thisWeek': 'questa settimana',
+  'window.allTime': 'sempre',
+
+  // ---- Collage tooltip units ----
+  'unit.call': 'richiamo',
+  'unit.calls': 'richiami',
+  'unit.visit': 'visita',
+  'unit.visits': 'visite',
+
+  // ---- Stats: By Period ----
+  'stats.byPeriod': 'Per periodo',
+  'stats.byPeriodSub': 'rilevamenti, raggruppati per intervallo di tempo',
+  'stats.badgeNow': 'ORA',
+  'stats.badgeToday': 'OGGI',
+  'stats.badgeWeek': 'SETTIMANA',
+  'stats.badgeAll': 'TUTTO',
+  'stats.lastHour': 'ultima ora',
+  'stats.today': 'oggi',
+  'stats.last7days': 'ultimi 7 giorni',
+  'stats.allTime': 'sempre',
+  // ---- Stats: Top Species ----
+  'stats.topSpecies': 'Specie principali',
+  'stats.topSpecCap': 'più ascoltate, {window}',
+  'stats.noneInWindow': 'nessun rilevamento nel periodo',
+  // ---- Stats: First Detections ----
+  'stats.firstDetections': 'Primi rilevamenti',
+  'stats.firstDetectionsSub': 'le aggiunte più recenti alla lista specie',
+  'stats.daysAgo': '{n}g fa',
+  'stats.noneYet': 'ancora nessun rilevamento',
+  // ---- Stats: activity heatmap ----
+  'stats.heatmapEmpty': 'nessun rilevamento in questo periodo',
+  'stats.heatmapTotal': 'tutte',
+  'stats.byHourCap': 'rilevamenti per ora · {window}',
+  'stats.byHourDayCap': 'rilevamenti per ora del giorno · ultimi 7 giorni',
+  'stats.heatmapTrim': '{max} più ascoltate su {total}',
+
+  // ---- Atlas ----
+  'atlas.sort': 'ordina atlante',
+  'atlas.mostHeard': 'più ascoltate',
+  'atlas.mostRecent': 'più recenti',
+  'atlas.alphabetical': 'alfabetico',
+  'atlas.atoz': 'a → z',
+  'atlas.emptyTitle': 'Ancora nessun uccello rilevato.',
+  'atlas.emptyHint': 'L’atlante si riempie man mano che vengono identificate nuove specie.',
+  'atlas.noWindowTitle': 'Nessun rilevamento in questo periodo.',
+  'atlas.noWindowHint': 'Prova un intervallo di tempo più lungo.',
+  'atlas.allTime': 'sempre',
+  'atlas.new': 'nuovo',
+  'atlas.newTitle': 'prima volta che questa specie viene ascoltata qui',
+
+  // ---- Detail modal: chrome ----
+  'modal.close': 'Chiudi',
+  'modal.pose': 'Posa',
+  'modal.perched': 'appollaiato',
+  'modal.inFlight': 'in volo',
+  'modal.genus': 'genere',
+  'modal.rarity': 'rarità',
+  'modal.allTime': 'sempre',
+  'modal.firstHeard': 'primo ascolto',
+  'modal.visits': 'visite',
+  'modal.visitsWindow': 'visite {window}',
+  'modal.recordings': 'Registrazioni',
+  'modal.refCall': 'richiamo di riferimento',
+  'modal.playRefCall': 'riproduci richiamo di riferimento',
+  'modal.wiki': 'wiki',
+  'modal.ebird': 'ebird',
+  // ---- Detail modal: dynamic ----
+  'modal.loadingDesc': 'Caricamento descrizione...',
+  'modal.loadingRecordings': 'Caricamento registrazioni...',
+  'modal.noRecordings': 'Ancora nessuna registrazione.',
+  'modal.recordingsFailed': 'Impossibile caricare le registrazioni.',
+  'modal.noDescription': 'Nessuna descrizione disponibile.',
+  'modal.captured': 'catturate: {n}',
+  'modal.play': 'riproduci',
+  // 'modal.scrub' deliberately omitted -> falls back to the en value.
+
+  // ---- Rarity labels ----
+  'rarity.common': 'comune',
+  'rarity.regular': 'regolare',
+  'rarity.occasional': 'occasionale',
+  'rarity.rare': 'raro',
+
+  // ---- Reference call (Xeno-Canto) ----
+  'refcall.none': 'nessun richiamo di riferimento su Xeno-Canto per questa specie',
+  'refcall.busy': 'Xeno-Canto è occupato (limite di frequenza) — riprova tra un momento',
+  'refcall.unavailableCode': 'richiamo di riferimento non disponibile (Xeno-Canto {code})',
+  'refcall.unavailable': 'richiamo di riferimento non disponibile',
+  'refcall.cantPlay': 'non è stato possibile riprodurre questo richiamo di riferimento',
+  'refcall.credit': 'Richiamo di riferimento: Xeno-Canto',
+  'refcall.recBy': ' · reg. {rec}',
+  'refcall.license': 'licenza',
+
+  // ---- Spectrogram ----
+  'spectro.loading': 'caricamento spettrogramma...',
+  'spectro.rendering': 'generazione spettrogramma...',
+  'spectro.unavailable': 'spettrogramma non disponibile',
+  'spectro.noWebAudio': 'WebAudio non disponibile',
+  'spectro.failed': 'spettrogramma non riuscito: ',
+
+  // ---- False-positive flag pill ----
+  'flag.report': 'segnala come falso positivo',
+  'flag.armed': 'non è questo?',
+  'flag.armedTitle': 'tocca di nuovo per segnalare come falso positivo',
+  'flag.done': 'segnalato come falso positivo',
+  'flag.failed': 'non riuscito',
+  'flag.noPath': 'nessun percorso',
+  'flag.errCode': 'err {code}',
+  'flag.couldNotSave': 'impossibile salvare: {why}',
+  'flag.needsIngress': 'richiede la connessione ingress di HA - {detail}',
+  'flag.refused': 'BirdNET-Go ha rifiutato ({err})',
+
+  // ---- Weather conditions (standalone / fallback path) ----
+  // Keyed by Home Assistant's weather condition slugs. In the card build HA's
+  // own localized text is preferred; this table is the standalone/fallback.
+  'weather.clear-night': 'sereno notturno',
+  'weather.cloudy': 'nuvoloso',
+  'weather.exceptional': 'eccezionale',
+  'weather.fog': 'nebbia',
+  'weather.hail': 'grandine',
+  'weather.lightning': 'fulmini',
+  'weather.lightning-rainy': 'temporale',
+  'weather.partlycloudy': 'parzialmente nuvoloso',
+  'weather.pouring': 'pioggia intensa',
+  'weather.rainy': 'pioggia',
+  'weather.snowy': 'neve',
+  'weather.snowy-rainy': 'nevischio',
+  'weather.sunny': 'soleggiato',
+  'weather.windy': 'ventoso',
+  'weather.windy-variant': 'ventoso',
+
+  // ---- About modal ----
+  'about.title': 'Gli uccelli fuori dalla tua finestra',
+  // Rich string (assigned via innerHTML - static, trusted markup).
+  'about.body': 'Un piccolo microfono identifica ogni uccello di passaggio grazie a <a href="https://github.com/tphakala/birdnet-go" target="_blank" rel="noopener">BirdNET-Go</a>, basato sul <a href="https://birdnet.cornell.edu/" target="_blank" rel="noopener">BirdNET</a> di Cornell. Ogni specie compare come un’illustrazione nel collage, con una dimensione proporzionale a quanto spesso è stata ascoltata. I rilevamenti sicuri sono appollaiati; quelli incerti volano via.',
+  'about.explore': 'esplora gli uccelli →',
+};
+
+// HABirdDashboard - Norwegian Bokmål (nb) UI strings.
+//
+// A standalone, self-registering translation: keys mirror en.js exactly;
+// values are natural Norwegian Bokmål. Any key omitted here falls back to
+// the en reference table by design. Scientific names and the stable
+// rarity/label CODES are never translated - only the display strings for
+// existing keys. {name} placeholders are preserved and filled by
+// tt(key, {name: value}).
+(window.HABIRD_I18N = window.HABIRD_I18N || {}).nb = {
+  // ---- View slider ----
+  'view.collage': 'kollasje',
+  'view.stats': 'statistikk',
+  'view.atlas': 'atlas',
+  'view.aria': 'Visning',
+
+  // ---- Window picker (abbreviations) ----
+  'winpick.1h': '1T',
+  'winpick.12h': '12T',
+  'winpick.24h': '24T',
+  'winpick.7d': '7D',
+  'winpick.all': 'ALLE',
+
+  // ---- Static head / about affordance ----
+  'head.about': 'dine fugler',
+  // ---- View titles (dynamic, one per view) ----
+  'title.heardRecently': 'Hørt nylig',
+  'title.avianVisitors': 'Fjærkledde gjester',
+
+  // ---- Section aria-labels ----
+  'aria.collage': 'Fuglekollasje',
+  'aria.stats': 'Statistikk',
+  'aria.atlas': 'Atlas',
+
+  // ---- Time-window labels (windowLabel) ----
+  'window.thisHour': 'denne timen',
+  'window.past12h': 'siste 12t',
+  'window.today': 'i dag',
+  'window.thisWeek': 'denne uken',
+  'window.allTime': 'noensinne',
+
+  // ---- Collage tooltip units ----
+  'unit.call': 'lyd',
+  'unit.calls': 'lyder',
+  'unit.visit': 'besøk',
+  'unit.visits': 'besøk',
+
+  // ---- Stats: By Period ----
+  'stats.byPeriod': 'Etter periode',
+  'stats.byPeriodSub': 'registreringer, gruppert etter hvor nye de er',
+  'stats.badgeNow': 'NÅ',
+  'stats.badgeToday': 'I DAG',
+  'stats.badgeWeek': 'UKE',
+  'stats.badgeAll': 'ALLE',
+  'stats.lastHour': 'siste time',
+  'stats.today': 'i dag',
+  'stats.last7days': 'siste 7 dager',
+  'stats.allTime': 'noensinne',
+  // ---- Stats: Top Species ----
+  'stats.topSpecies': 'Mest hørte arter',
+  'stats.topSpecCap': 'mest hørt, {window}',
+  'stats.noneInWindow': 'ingen registreringer i perioden',
+  // ---- Stats: First Detections ----
+  'stats.firstDetections': 'Første registreringer',
+  'stats.firstDetectionsSub': 'nyeste tilskudd til artslisten',
+  'stats.daysAgo': 'for {n}d siden',
+  'stats.noneYet': 'ingen registreringer ennå',
+  // ---- Stats: activity heatmap ----
+  'stats.heatmapEmpty': 'ingen registreringer i denne perioden',
+  'stats.heatmapTotal': 'alle',
+  'stats.byHourCap': 'registreringer per time · {window}',
+  'stats.byHourDayCap': 'registreringer etter tid på dagen · siste 7 dager',
+  'stats.heatmapTrim': '{max} mest hørte av {total}',
+
+  // ---- Atlas ----
+  'atlas.sort': 'sorter atlas',
+  'atlas.mostHeard': 'mest hørt',
+  'atlas.mostRecent': 'nyeste',
+  'atlas.alphabetical': 'alfabetisk',
+  'atlas.atoz': 'a → å',
+  'atlas.emptyTitle': 'Ingen fugler registrert ennå.',
+  'atlas.emptyHint': 'Atlaset fylles opp etter hvert som nye arter identifiseres.',
+  'atlas.noWindowTitle': 'Ingen registreringer i denne perioden.',
+  'atlas.noWindowHint': 'Prøv en lengre tidsperiode.',
+  'atlas.allTime': 'noensinne',
+  'atlas.new': 'ny',
+  'atlas.newTitle': 'første gang denne arten noensinne er hørt her',
+
+  // ---- Detail modal: chrome ----
+  'modal.close': 'Lukk',
+  'modal.pose': 'Positur',
+  'modal.perched': 'sittende',
+  'modal.inFlight': 'i flukt',
+  'modal.genus': 'slekt',
+  'modal.rarity': 'sjeldenhet',
+  'modal.allTime': 'noensinne',
+  'modal.firstHeard': 'først hørt',
+  'modal.visits': 'besøk',
+  'modal.visitsWindow': 'besøk {window}',
+  'modal.recordings': 'Opptak',
+  'modal.refCall': 'referanselyd',
+  'modal.playRefCall': 'spill av referanselyd',
+  'modal.wiki': 'wiki',
+  'modal.ebird': 'ebird',
+  // ---- Detail modal: dynamic ----
+  'modal.loadingDesc': 'Laster beskrivelse...',
+  'modal.loadingRecordings': 'Laster opptak...',
+  'modal.noRecordings': 'Ingen opptak ennå.',
+  'modal.recordingsFailed': 'Kunne ikke laste opptak.',
+  'modal.noDescription': 'Ingen beskrivelse tilgjengelig.',
+  'modal.captured': '{n} fanget',
+  'modal.play': 'spill av',
+  // 'modal.scrub' deliberately omitted -> falls back to the en value.
+
+  // ---- Rarity labels ----
+  'rarity.common': 'vanlig',
+  'rarity.regular': 'regelmessig',
+  'rarity.occasional': 'leilighetsvis',
+  'rarity.rare': 'sjelden',
+
+  // ---- Reference call (Xeno-Canto) ----
+  'refcall.none': 'ingen referanselyd på Xeno-Canto for denne arten',
+  'refcall.busy': 'Xeno-Canto er opptatt (hastighetsgrense) — prøv igjen om et øyeblikk',
+  'refcall.unavailableCode': 'referanselyd utilgjengelig (Xeno-Canto {code})',
+  'refcall.unavailable': 'referanselyd utilgjengelig',
+  'refcall.cantPlay': 'kunne ikke spille av denne referanselyden',
+  'refcall.credit': 'Referanselyd: Xeno-Canto',
+  'refcall.recBy': ' · oppt. {rec}',
+  'refcall.license': 'lisens',
+
+  // ---- Spectrogram ----
+  'spectro.loading': 'laster spektrogram...',
+  'spectro.rendering': 'genererer spektrogram...',
+  'spectro.unavailable': 'spektrogram utilgjengelig',
+  'spectro.noWebAudio': 'WebAudio ikke tilgjengelig',
+  'spectro.failed': 'spektrogram mislyktes: ',
+
+  // ---- False-positive flag pill ----
+  'flag.report': 'rapporter som falsk positiv',
+  'flag.armed': 'ikke den?',
+  'flag.armedTitle': 'trykk igjen for å rapportere som falsk positiv',
+  'flag.done': 'rapportert som falsk positiv',
+  'flag.failed': 'mislyktes',
+  'flag.noPath': 'ingen sti',
+  'flag.errCode': 'feil {code}',
+  'flag.couldNotSave': 'kunne ikke lagre: {why}',
+  'flag.needsIngress': 'krever HA ingress-tilkoblingen - {detail}',
+  'flag.refused': 'BirdNET-Go avviste ({err})',
+
+  // ---- Weather conditions (standalone / fallback path) ----
+  // Keyed by Home Assistant's weather condition slugs. In the card build HA's
+  // own localized text is preferred; this table is the standalone/fallback.
+  'weather.clear-night': 'klar natt',
+  'weather.cloudy': 'skyet',
+  'weather.exceptional': 'eksepsjonelt',
+  'weather.fog': 'tåke',
+  'weather.hail': 'hagl',
+  'weather.lightning': 'lyn',
+  'weather.lightning-rainy': 'tordenvær og regn',
+  'weather.partlycloudy': 'delvis skyet',
+  'weather.pouring': 'styrtregn',
+  'weather.rainy': 'regn',
+  'weather.snowy': 'snø',
+  'weather.snowy-rainy': 'sludd',
+  'weather.sunny': 'sol',
+  'weather.windy': 'vind',
+  'weather.windy-variant': 'vind',
+
+  // ---- About modal ----
+  'about.title': 'Fuglene utenfor vinduet ditt',
+  // Rich string (assigned via innerHTML - static, trusted markup).
+  'about.body': 'En liten mikrofon identifiserer hver forbipasserende fugl med <a href="https://github.com/tphakala/birdnet-go" target="_blank" rel="noopener">BirdNET-Go</a>, bygget på Cornells <a href="https://birdnet.cornell.edu/" target="_blank" rel="noopener">BirdNET</a>. Hver art vises som en illustrasjon i kollasjen, i en størrelse etter hvor ofte den er hørt. Sikre registreringer sitter; usikre flyr forbi.',
+  'about.explore': 'utforsk fuglene →',
+};
+
+// HABirdDashboard - Dutch (nl) UI strings.
+//
+// A standalone, self-registering translation: keys mirror en.js exactly;
+// values are natural Dutch. Any key omitted here falls back to the en
+// reference table by design. Scientific names and the stable rarity/label
+// CODES are never translated - only the display strings for existing keys.
+// {name} placeholders are preserved and filled by tt(key, {name: value}).
+(window.HABIRD_I18N = window.HABIRD_I18N || {}).nl = {
+  // ---- View slider ----
+  'view.collage': 'collage',
+  'view.stats': 'statistieken',
+  'view.atlas': 'atlas',
+  'view.aria': 'Weergave',
+
+  // ---- Window picker (abbreviations) ----
+  'winpick.1h': '1U',
+  'winpick.12h': '12U',
+  'winpick.24h': '24U',
+  'winpick.7d': '7D',
+  'winpick.all': 'ALLE',
+
+  // ---- Static head / about affordance ----
+  'head.about': 'je vogels',
+  // ---- View titles (dynamic, one per view) ----
+  'title.heardRecently': 'Onlangs gehoord',
+  'title.avianVisitors': 'Gevederde gasten',
+
+  // ---- Section aria-labels ----
+  'aria.collage': 'Vogelcollage',
+  'aria.stats': 'Statistieken',
+  'aria.atlas': 'Atlas',
+
+  // ---- Time-window labels (windowLabel) ----
+  'window.thisHour': 'dit uur',
+  'window.past12h': 'afgelopen 12u',
+  'window.today': 'vandaag',
+  'window.thisWeek': 'deze week',
+  'window.allTime': 'ooit',
+
+  // ---- Collage tooltip units ----
+  'unit.call': 'roep',
+  'unit.calls': 'roepen',
+  'unit.visit': 'bezoek',
+  'unit.visits': 'bezoeken',
+
+  // ---- Stats: By Period ----
+  'stats.byPeriod': 'Per periode',
+  'stats.byPeriodSub': 'detecties, gegroepeerd op hoe recent ze zijn',
+  'stats.badgeNow': 'NU',
+  'stats.badgeToday': 'VANDAAG',
+  'stats.badgeWeek': 'WEEK',
+  'stats.badgeAll': 'ALLE',
+  'stats.lastHour': 'afgelopen uur',
+  'stats.today': 'vandaag',
+  'stats.last7days': 'afgelopen 7 dagen',
+  'stats.allTime': 'ooit',
+  // ---- Stats: Top Species ----
+  'stats.topSpecies': 'Topsoorten',
+  'stats.topSpecCap': 'meest gehoord, {window}',
+  'stats.noneInWindow': 'geen detecties in deze periode',
+  // ---- Stats: First Detections ----
+  'stats.firstDetections': 'Eerste detecties',
+  'stats.firstDetectionsSub': 'nieuwste toevoegingen aan de soortenlijst',
+  'stats.daysAgo': '{n}d geleden',
+  'stats.noneYet': 'nog geen detecties',
+  // ---- Stats: activity heatmap ----
+  'stats.heatmapEmpty': 'geen detecties in deze periode',
+  'stats.heatmapTotal': 'alle',
+  'stats.byHourCap': 'detecties per uur · {window}',
+  'stats.byHourDayCap': 'detecties per uur van de dag · afgelopen 7 dagen',
+  'stats.heatmapTrim': '{max} meest gehoorde van {total}',
+
+  // ---- Atlas ----
+  'atlas.sort': 'atlas sorteren',
+  'atlas.mostHeard': 'meest gehoord',
+  'atlas.mostRecent': 'meest recent',
+  'atlas.alphabetical': 'alfabetisch',
+  'atlas.atoz': 'a → z',
+  'atlas.emptyTitle': 'Nog geen vogels gedetecteerd.',
+  'atlas.emptyHint': 'De atlas vult zich naarmate nieuwe soorten worden herkend.',
+  'atlas.noWindowTitle': 'Geen detecties in deze periode.',
+  'atlas.noWindowHint': 'Probeer een langere periode.',
+  'atlas.allTime': 'ooit',
+  'atlas.new': 'nieuw',
+  'atlas.newTitle': 'eerste keer dat deze soort hier ooit is gehoord',
+
+  // ---- Detail modal: chrome ----
+  'modal.close': 'Sluiten',
+  'modal.pose': 'Houding',
+  'modal.perched': 'zittend',
+  'modal.inFlight': 'in vlucht',
+  'modal.genus': 'geslacht',
+  'modal.rarity': 'zeldzaamheid',
+  'modal.allTime': 'ooit',
+  'modal.firstHeard': 'voor het eerst gehoord',
+  'modal.visits': 'bezoeken',
+  'modal.visitsWindow': 'bezoeken {window}',
+  'modal.recordings': 'Opnames',
+  'modal.refCall': 'referentieroep',
+  'modal.playRefCall': 'referentieroep afspelen',
+  'modal.wiki': 'wiki',
+  'modal.ebird': 'ebird',
+  // ---- Detail modal: dynamic ----
+  'modal.loadingDesc': 'Beschrijving laden...',
+  'modal.loadingRecordings': 'Opnames laden...',
+  'modal.noRecordings': 'Nog geen opnames.',
+  'modal.recordingsFailed': 'Opnames laden mislukt.',
+  'modal.noDescription': 'Geen beschrijving beschikbaar.',
+  'modal.captured': '{n} vastgelegd',
+  'modal.play': 'afspelen',
+  // 'modal.scrub' deliberately omitted -> falls back to the en value.
+
+  // ---- Rarity labels ----
+  'rarity.common': 'algemeen',
+  'rarity.regular': 'regelmatig',
+  'rarity.occasional': 'incidenteel',
+  'rarity.rare': 'zeldzaam',
+
+  // ---- Reference call (Xeno-Canto) ----
+  'refcall.none': 'geen referentieroep op Xeno-Canto voor deze soort',
+  'refcall.busy': 'Xeno-Canto is overbelast (snelheidslimiet) — probeer het straks opnieuw',
+  'refcall.unavailableCode': 'referentieroep niet beschikbaar (Xeno-Canto {code})',
+  'refcall.unavailable': 'referentieroep niet beschikbaar',
+  'refcall.cantPlay': 'kon deze referentieroep niet afspelen',
+  'refcall.credit': 'Referentieroep: Xeno-Canto',
+  'refcall.recBy': ' · opn. {rec}',
+  'refcall.license': 'licentie',
+
+  // ---- Spectrogram ----
+  'spectro.loading': 'spectrogram laden...',
+  'spectro.rendering': 'spectrogram genereren...',
+  'spectro.unavailable': 'spectrogram niet beschikbaar',
+  'spectro.noWebAudio': 'WebAudio niet beschikbaar',
+  'spectro.failed': 'spectrogram mislukt: ',
+
+  // ---- False-positive flag pill ----
+  'flag.report': 'melden als fout-positief',
+  'flag.armed': 'niet de juiste?',
+  'flag.armedTitle': 'tik nogmaals om te melden als fout-positief',
+  'flag.done': 'gemeld als fout-positief',
+  'flag.failed': 'mislukt',
+  'flag.noPath': 'geen pad',
+  'flag.errCode': 'fout {code}',
+  'flag.couldNotSave': 'kon niet opslaan: {why}',
+  'flag.needsIngress': 'vereist de HA ingress-verbinding - {detail}',
+  'flag.refused': 'BirdNET-Go weigerde ({err})',
+
+  // ---- Weather conditions (standalone / fallback path) ----
+  // Keyed by Home Assistant's weather condition slugs. In the card build HA's
+  // own localized text is preferred; this table is the standalone/fallback.
+  'weather.clear-night': 'heldere nacht',
+  'weather.cloudy': 'bewolkt',
+  'weather.exceptional': 'uitzonderlijk',
+  'weather.fog': 'mist',
+  'weather.hail': 'hagel',
+  'weather.lightning': 'onweer',
+  'weather.lightning-rainy': 'onweer met regen',
+  'weather.partlycloudy': 'half bewolkt',
+  'weather.pouring': 'stortregen',
+  'weather.rainy': 'regenachtig',
+  'weather.snowy': 'sneeuw',
+  'weather.snowy-rainy': 'natte sneeuw',
+  'weather.sunny': 'zonnig',
+  'weather.windy': 'winderig',
+  'weather.windy-variant': 'winderig',
+
+  // ---- About modal ----
+  'about.title': 'De vogels buiten je raam',
+  // Rich string (assigned via innerHTML - static, trusted markup).
+  'about.body': 'Een piepklein microfoontje herkent elke voorbijkomende vogel met <a href="https://github.com/tphakala/birdnet-go" target="_blank" rel="noopener">BirdNET-Go</a>, gebouwd op Cornell’s <a href="https://birdnet.cornell.edu/" target="_blank" rel="noopener">BirdNET</a>. Elke soort verschijnt als illustratie in de collage, met een grootte die aangeeft hoe vaak hij gehoord is. Zekere detecties zitten; onzekere vliegen voorbij.',
+  'about.explore': 'ontdek de vogels →',
+};
+
+// HABirdDashboard - Polish (pl) UI strings.
+//
+// A standalone, self-registering translation: keys mirror en.js exactly;
+// values are natural Polish. Any key omitted here falls back to the en
+// reference table by design. Scientific names and the stable rarity/label
+// CODES are never translated - only the display strings for existing keys.
+// {name} placeholders are preserved and filled by tt(key, {name: value}).
+(window.HABIRD_I18N = window.HABIRD_I18N || {}).pl = {
+  // ---- View slider ----
+  'view.collage': 'kolaż',
+  'view.stats': 'statystyki',
+  'view.atlas': 'atlas',
+  'view.aria': 'Widok',
+
+  // ---- Window picker (abbreviations) ----
+  'winpick.1h': '1H',
+  'winpick.12h': '12H',
+  'winpick.24h': '24H',
+  'winpick.7d': '7D',
+  'winpick.all': 'WSZ',
+
+  // ---- Static head / about affordance ----
+  'head.about': 'twoje ptaki',
+  // ---- View titles (dynamic, one per view) ----
+  'title.heardRecently': 'Ostatnio słyszane',
+  'title.avianVisitors': 'Skrzydlaci goście',
+
+  // ---- Section aria-labels ----
+  'aria.collage': 'Kolaż ptaków',
+  'aria.stats': 'Statystyki',
+  'aria.atlas': 'Atlas',
+
+  // ---- Time-window labels (windowLabel) ----
+  'window.thisHour': 'ostatnia godzina',
+  'window.past12h': 'ostatnie 12 godz.',
+  'window.today': 'dziś',
+  'window.thisWeek': 'ten tydzień',
+  'window.allTime': 'zawsze',
+
+  // ---- Collage tooltip units ----
+  'unit.call': 'głos',
+  'unit.calls': 'głosów',
+  'unit.visit': 'wizyta',
+  'unit.visits': 'wizyt',
+
+  // ---- Stats: By Period ----
+  'stats.byPeriod': 'Według okresu',
+  'stats.byPeriodSub': 'wykrycia pogrupowane według aktualności',
+  'stats.badgeNow': 'TERAZ',
+  'stats.badgeToday': 'DZIŚ',
+  'stats.badgeWeek': 'TYDZIEŃ',
+  'stats.badgeAll': 'ZAWSZE',
+  'stats.lastHour': 'ostatnia godzina',
+  'stats.today': 'dziś',
+  'stats.last7days': 'ostatnie 7 dni',
+  'stats.allTime': 'zawsze',
+  // ---- Stats: Top Species ----
+  'stats.topSpecies': 'Top gatunki',
+  'stats.topSpecCap': 'najczęściej słyszane, {window}',
+  'stats.noneInWindow': 'brak wykryć w tym okresie',
+  // ---- Stats: First Detections ----
+  'stats.firstDetections': 'Pierwsze wykrycia',
+  'stats.firstDetectionsSub': 'najnowsze pozycje na liście życiowej',
+  'stats.daysAgo': '{n}d temu',
+  'stats.noneYet': 'brak wykryć',
+  // ---- Stats: activity heatmap ----
+  'stats.heatmapEmpty': 'brak wykryć w tym okresie',
+  'stats.heatmapTotal': 'wszystkie',
+  'stats.byHourCap': 'wykrycia według godzin · {window}',
+  'stats.byHourDayCap': 'wykrycia według pory dnia · ostatnie 7 dni',
+  'stats.heatmapTrim': '{max} najczęściej słyszanych z {total}',
+
+  // ---- Atlas ----
+  'atlas.sort': 'sortuj atlas',
+  'atlas.mostHeard': 'najczęściej słyszane',
+  'atlas.mostRecent': 'najnowsze',
+  'atlas.alphabetical': 'alfabetycznie',
+  'atlas.atoz': 'a → ż',
+  'atlas.emptyTitle': 'Nie wykryto jeszcze żadnych ptaków.',
+  'atlas.emptyHint': 'Atlas wypełnia się w miarę identyfikowania nowych gatunków.',
+  'atlas.noWindowTitle': 'Brak wykryć w tym okresie.',
+  'atlas.noWindowHint': 'Spróbuj dłuższego okresu.',
+  'atlas.allTime': 'zawsze',
+  'atlas.new': 'nowy',
+  'atlas.newTitle': 'pierwszy raz, gdy ten gatunek został tutaj usłyszany',
+
+  // ---- Detail modal: chrome ----
+  'modal.close': 'Zamknij',
+  'modal.pose': 'Poza',
+  'modal.perched': 'siedzący',
+  'modal.inFlight': 'w locie',
+  'modal.genus': 'rodzaj',
+  'modal.rarity': 'rzadkość',
+  'modal.allTime': 'zawsze',
+  'modal.firstHeard': 'pierwsze usłyszenie',
+  'modal.visits': 'wizyty',
+  'modal.visitsWindow': 'wizyty {window}',
+  'modal.recordings': 'Nagrania',
+  'modal.refCall': 'głos referencyjny',
+  'modal.playRefCall': 'odtwórz głos referencyjny',
+  'modal.wiki': 'wiki',
+  'modal.ebird': 'ebird',
+  // ---- Detail modal: dynamic ----
+  'modal.loadingDesc': 'Wczytywanie opisu...',
+  'modal.loadingRecordings': 'Wczytywanie nagrań...',
+  'modal.noRecordings': 'Brak nagrań.',
+  'modal.recordingsFailed': 'Nie udało się wczytać nagrań.',
+  'modal.noDescription': 'Brak dostępnego opisu.',
+  'modal.captured': 'zarejestrowano: {n}',
+  'modal.play': 'odtwórz',
+  // 'modal.scrub' deliberately omitted -> falls back to the en value.
+
+  // ---- Rarity labels ----
+  'rarity.common': 'pospolity',
+  'rarity.regular': 'regularny',
+  'rarity.occasional': 'sporadyczny',
+  'rarity.rare': 'rzadki',
+
+  // ---- Reference call (Xeno-Canto) ----
+  'refcall.none': 'brak głosu referencyjnego na Xeno-Canto dla tego gatunku',
+  'refcall.busy': 'Xeno-Canto jest zajęte (limit zapytań) — spróbuj ponownie za chwilę',
+  'refcall.unavailableCode': 'głos referencyjny niedostępny (Xeno-Canto {code})',
+  'refcall.unavailable': 'głos referencyjny niedostępny',
+  'refcall.cantPlay': 'nie udało się odtworzyć tego głosu referencyjnego',
+  'refcall.credit': 'Głos referencyjny: Xeno-Canto',
+  'refcall.recBy': ' · nagr. {rec}',
+  'refcall.license': 'licencja',
+
+  // ---- Spectrogram ----
+  'spectro.loading': 'wczytywanie spektrogramu...',
+  'spectro.rendering': 'renderowanie spektrogramu...',
+  'spectro.unavailable': 'spektrogram niedostępny',
+  'spectro.noWebAudio': 'WebAudio niedostępne',
+  'spectro.failed': 'błąd spektrogramu: ',
+
+  // ---- False-positive flag pill ----
+  'flag.report': 'zgłoś jako błędne wykrycie',
+  'flag.armed': 'to nie to?',
+  'flag.armedTitle': 'dotknij ponownie, aby zgłosić jako błędne wykrycie',
+  'flag.done': 'zgłoszono jako błędne wykrycie',
+  'flag.failed': 'niepowodzenie',
+  'flag.noPath': 'brak ścieżki',
+  'flag.errCode': 'błąd {code}',
+  'flag.couldNotSave': 'nie udało się zapisać: {why}',
+  'flag.needsIngress': 'wymaga połączenia HA ingress - {detail}',
+  'flag.refused': 'BirdNET-Go odmówiło ({err})',
+
+  // ---- Weather conditions (standalone / fallback path) ----
+  // Keyed by Home Assistant's weather condition slugs. In the card build HA's
+  // own localized text is preferred; this table is the standalone/fallback.
+  'weather.clear-night': 'bezchmurna noc',
+  'weather.cloudy': 'pochmurno',
+  'weather.exceptional': 'wyjątkowe',
+  'weather.fog': 'mgła',
+  'weather.hail': 'grad',
+  'weather.lightning': 'błyskawice',
+  'weather.lightning-rainy': 'burza z piorunami',
+  'weather.partlycloudy': 'częściowe zachmurzenie',
+  'weather.pouring': 'ulewa',
+  'weather.rainy': 'deszczowo',
+  'weather.snowy': 'śnieg',
+  'weather.snowy-rainy': 'deszcz ze śniegiem',
+  'weather.sunny': 'słonecznie',
+  'weather.windy': 'wietrznie',
+  'weather.windy-variant': 'wietrznie',
+
+  // ---- About modal ----
+  'about.title': 'Ptaki za twoim oknem',
+  // Rich string (assigned via innerHTML - static, trusted markup).
+  'about.body': 'Malutki mikrofon rozpoznaje każdego przelatującego ptaka dzięki <a href="https://github.com/tphakala/birdnet-go" target="_blank" rel="noopener">BirdNET-Go</a>, zbudowanemu na bazie <a href="https://birdnet.cornell.edu/" target="_blank" rel="noopener">BirdNET</a> Uniwersytetu Cornell. Każdy gatunek pojawia się w kolażu jako ilustracja, której rozmiar zależy od tego, jak często był słyszany. Pewne wykrycia siedzą, niepewne przelatują obok.',
+  'about.explore': 'poznaj ptaki →',
+};
+
+// HABirdDashboard - Portuguese (pt) UI strings.
+//
+// A standalone, self-registering translation: keys mirror en.js exactly;
+// values are natural European Portuguese. Any key omitted here falls back to
+// the en reference table by design. Scientific names and the stable
+// rarity/label CODES are never translated - only the display strings for
+// existing keys. {name} placeholders are preserved and filled by
+// tt(key, {name: value}).
+(window.HABIRD_I18N = window.HABIRD_I18N || {}).pt = {
+  // ---- View slider ----
+  'view.collage': 'colagem',
+  'view.stats': 'estatísticas',
+  'view.atlas': 'atlas',
+  'view.aria': 'Vista',
+
+  // ---- Window picker (abbreviations) ----
+  'winpick.1h': '1H',
+  'winpick.12h': '12H',
+  'winpick.24h': '24H',
+  'winpick.7d': '7D',
+  'winpick.all': 'TUDO',
+
+  // ---- Static head / about affordance ----
+  'head.about': 'as suas aves',
+  // ---- View titles (dynamic, one per view) ----
+  'title.heardRecently': 'Ouvidas recentemente',
+  'title.avianVisitors': 'Visitantes alados',
+
+  // ---- Section aria-labels ----
+  'aria.collage': 'Colagem de aves',
+  'aria.stats': 'Estatísticas',
+  'aria.atlas': 'Atlas',
+
+  // ---- Time-window labels (windowLabel) ----
+  'window.thisHour': 'esta hora',
+  'window.past12h': 'últimas 12h',
+  'window.today': 'hoje',
+  'window.thisWeek': 'esta semana',
+  'window.allTime': 'sempre',
+
+  // ---- Collage tooltip units ----
+  'unit.call': 'chamada',
+  'unit.calls': 'chamadas',
+  'unit.visit': 'visita',
+  'unit.visits': 'visitas',
+
+  // ---- Stats: By Period ----
+  'stats.byPeriod': 'Por período',
+  'stats.byPeriodSub': 'deteções, agrupadas por recência',
+  'stats.badgeNow': 'AGORA',
+  'stats.badgeToday': 'HOJE',
+  'stats.badgeWeek': 'SEMANA',
+  'stats.badgeAll': 'TUDO',
+  'stats.lastHour': 'última hora',
+  'stats.today': 'hoje',
+  'stats.last7days': 'últimos 7 dias',
+  'stats.allTime': 'sempre',
+  // ---- Stats: Top Species ----
+  'stats.topSpecies': 'Principais espécies',
+  'stats.topSpecCap': 'mais ouvidas, {window}',
+  'stats.noneInWindow': 'sem deteções no período',
+  // ---- Stats: First Detections ----
+  'stats.firstDetections': 'Primeiras deteções',
+  'stats.firstDetectionsSub': 'as adições mais recentes à lista de espécies',
+  'stats.daysAgo': 'há {n}d',
+  'stats.noneYet': 'ainda sem deteções',
+  // ---- Stats: activity heatmap ----
+  'stats.heatmapEmpty': 'sem deteções neste período',
+  'stats.heatmapTotal': 'tudo',
+  'stats.byHourCap': 'deteções por hora · {window}',
+  'stats.byHourDayCap': 'deteções por hora do dia · últimos 7 dias',
+  'stats.heatmapTrim': '{max} mais ouvidas de {total}',
+
+  // ---- Atlas ----
+  'atlas.sort': 'ordenar atlas',
+  'atlas.mostHeard': 'mais ouvidas',
+  'atlas.mostRecent': 'mais recentes',
+  'atlas.alphabetical': 'alfabética',
+  'atlas.atoz': 'a → z',
+  'atlas.emptyTitle': 'Ainda não foram detetadas aves.',
+  'atlas.emptyHint': 'O atlas preenche-se à medida que novas espécies são identificadas.',
+  'atlas.noWindowTitle': 'Sem deteções neste período.',
+  'atlas.noWindowHint': 'Experimente um período mais longo.',
+  'atlas.allTime': 'sempre',
+  'atlas.new': 'nova',
+  'atlas.newTitle': 'primeira vez que esta espécie foi ouvida aqui',
+
+  // ---- Detail modal: chrome ----
+  'modal.close': 'Fechar',
+  'modal.pose': 'Postura',
+  'modal.perched': 'pousada',
+  'modal.inFlight': 'em voo',
+  'modal.genus': 'género',
+  'modal.rarity': 'raridade',
+  'modal.allTime': 'sempre',
+  'modal.firstHeard': 'ouvida pela primeira vez',
+  'modal.visits': 'visitas',
+  'modal.visitsWindow': 'visitas {window}',
+  'modal.recordings': 'Gravações',
+  'modal.refCall': 'chamada de referência',
+  'modal.playRefCall': 'reproduzir chamada de referência',
+  'modal.wiki': 'wiki',
+  'modal.ebird': 'ebird',
+  // ---- Detail modal: dynamic ----
+  'modal.loadingDesc': 'A carregar descrição...',
+  'modal.loadingRecordings': 'A carregar gravações...',
+  'modal.noRecordings': 'Ainda sem gravações.',
+  'modal.recordingsFailed': 'Falha ao carregar gravações.',
+  'modal.noDescription': 'Sem descrição disponível.',
+  'modal.captured': 'capturas: {n}',
+  'modal.play': 'reproduzir',
+  'modal.scrub': 'arrastar',
+
+  // ---- Rarity labels ----
+  'rarity.common': 'comum',
+  'rarity.regular': 'regular',
+  'rarity.occasional': 'ocasional',
+  'rarity.rare': 'rara',
+
+  // ---- Reference call (Xeno-Canto) ----
+  'refcall.none': 'sem chamada de referência no Xeno-Canto para esta espécie',
+  'refcall.busy': 'o Xeno-Canto está ocupado (limite de taxa) — tente novamente dentro de momentos',
+  'refcall.unavailableCode': 'chamada de referência indisponível (Xeno-Canto {code})',
+  'refcall.unavailable': 'chamada de referência indisponível',
+  'refcall.cantPlay': 'não foi possível reproduzir esta chamada de referência',
+  'refcall.credit': 'Chamada de referência: Xeno-Canto',
+  'refcall.recBy': ' · grav. {rec}',
+  'refcall.license': 'licença',
+
+  // ---- Spectrogram ----
+  'spectro.loading': 'a carregar espectrograma...',
+  'spectro.rendering': 'a gerar espectrograma...',
+  'spectro.unavailable': 'espectrograma indisponível',
+  'spectro.noWebAudio': 'WebAudio não disponível',
+  'spectro.failed': 'falha no espectrograma: ',
+
+  // ---- False-positive flag pill ----
+  'flag.report': 'reportar como falso positivo',
+  'flag.armed': 'não é esta?',
+  'flag.armedTitle': 'toque novamente para reportar como falso positivo',
+  'flag.done': 'reportado como falso positivo',
+  'flag.failed': 'falhou',
+  'flag.noPath': 'sem caminho',
+  'flag.errCode': 'erro {code}',
+  'flag.couldNotSave': 'não foi possível guardar: {why}',
+  'flag.needsIngress': 'requer a ligação ingress do HA - {detail}',
+  'flag.refused': 'o BirdNET-Go recusou ({err})',
+
+  // ---- Weather conditions (standalone / fallback path) ----
+  // Keyed by Home Assistant's weather condition slugs. In the card build HA's
+  // own localized text is preferred; this table is the standalone/fallback.
+  'weather.clear-night': 'noite limpa',
+  'weather.cloudy': 'nublado',
+  'weather.exceptional': 'excecional',
+  'weather.fog': 'nevoeiro',
+  'weather.hail': 'granizo',
+  'weather.lightning': 'trovoada',
+  'weather.lightning-rainy': 'trovoada com chuva',
+  'weather.partlycloudy': 'parcialmente nublado',
+  'weather.pouring': 'chuva forte',
+  'weather.rainy': 'chuvoso',
+  'weather.snowy': 'nevoso',
+  'weather.snowy-rainy': 'neve e chuva',
+  'weather.sunny': 'ensolarado',
+  'weather.windy': 'ventoso',
+  'weather.windy-variant': 'ventoso',
+
+  // ---- About modal ----
+  'about.title': 'As aves do outro lado da sua janela',
+  // Rich string (assigned via innerHTML - static, trusted markup).
+  'about.body': 'Um pequeno microfone identifica cada ave que passa com o <a href="https://github.com/tphakala/birdnet-go" target="_blank" rel="noopener">BirdNET-Go</a>, construído sobre o <a href="https://birdnet.cornell.edu/" target="_blank" rel="noopener">BirdNET</a> da Cornell. Cada espécie surge como uma ilustração na colagem, com o tamanho proporcional à frequência com que foi ouvida. As deteções mais confiantes pousam; as incertas voam de passagem.',
+  'about.explore': 'explorar as aves →',
+};
+
+// HABirdDashboard - Swedish (sv) UI strings.
+//
+// A standalone, self-registering translation: keys mirror en.js exactly;
+// values are natural Swedish. Any key omitted here falls back to the en
+// reference table by design. Scientific names and the stable rarity/label
+// CODES are never translated - only the display strings for existing keys.
+// {name} placeholders are preserved and filled by tt(key, {name: value}).
+(window.HABIRD_I18N = window.HABIRD_I18N || {}).sv = {
+  // ---- View slider ----
+  'view.collage': 'collage',
+  'view.stats': 'statistik',
+  'view.atlas': 'atlas',
+  'view.aria': 'Vy',
+
+  // ---- Window picker (abbreviations) ----
+  'winpick.1h': '1H',
+  'winpick.12h': '12H',
+  'winpick.24h': '24H',
+  'winpick.7d': '7D',
+  'winpick.all': 'ALLA',
+
+  // ---- Static head / about affordance ----
+  'head.about': 'dina fåglar',
+  // ---- View titles (dynamic, one per view) ----
+  'title.heardRecently': 'Hörda nyligen',
+  'title.avianVisitors': 'Fjäderklädda gäster',
+
+  // ---- Section aria-labels ----
+  'aria.collage': 'Fågelcollage',
+  'aria.stats': 'Statistik',
+  'aria.atlas': 'Atlas',
+
+  // ---- Time-window labels (windowLabel) ----
+  'window.thisHour': 'denna timme',
+  'window.past12h': 'senaste 12 tim',
+  'window.today': 'idag',
+  'window.thisWeek': 'denna vecka',
+  'window.allTime': 'någonsin',
+
+  // ---- Collage tooltip units ----
+  'unit.call': 'läte',
+  'unit.calls': 'läten',
+  'unit.visit': 'besök',
+  'unit.visits': 'besök',
+
+  // ---- Stats: By Period ----
+  'stats.byPeriod': 'Efter period',
+  'stats.byPeriodSub': 'registreringar, grupperade efter hur nya de är',
+  'stats.badgeNow': 'NU',
+  'stats.badgeToday': 'IDAG',
+  'stats.badgeWeek': 'VECKA',
+  'stats.badgeAll': 'ALLA',
+  'stats.lastHour': 'senaste timmen',
+  'stats.today': 'idag',
+  'stats.last7days': 'senaste 7 dagarna',
+  'stats.allTime': 'någonsin',
+  // ---- Stats: Top Species ----
+  'stats.topSpecies': 'Toparter',
+  'stats.topSpecCap': 'mest hörda, {window}',
+  'stats.noneInWindow': 'inga registreringar i perioden',
+  // ---- Stats: First Detections ----
+  'stats.firstDetections': 'Första registreringar',
+  'stats.firstDetectionsSub': 'nyaste tillskotten till artlistan',
+  'stats.daysAgo': 'för {n}d sedan',
+  'stats.noneYet': 'inga registreringar än',
+  // ---- Stats: activity heatmap ----
+  'stats.heatmapEmpty': 'inga registreringar i denna period',
+  'stats.heatmapTotal': 'alla',
+  'stats.byHourCap': 'registreringar per timme · {window}',
+  'stats.byHourDayCap': 'registreringar efter tid på dygnet · senaste 7 dagarna',
+  'stats.heatmapTrim': '{max} mest hörda av {total}',
+
+  // ---- Atlas ----
+  'atlas.sort': 'sortera atlas',
+  'atlas.mostHeard': 'mest hörda',
+  'atlas.mostRecent': 'senaste',
+  'atlas.alphabetical': 'alfabetisk',
+  'atlas.atoz': 'a → ö',
+  'atlas.emptyTitle': 'Inga fåglar registrerade än.',
+  'atlas.emptyHint': 'Atlasen fylls på i takt med att nya arter identifieras.',
+  'atlas.noWindowTitle': 'Inga registreringar i denna period.',
+  'atlas.noWindowHint': 'Prova en längre tidsperiod.',
+  'atlas.allTime': 'någonsin',
+  'atlas.new': 'ny',
+  'atlas.newTitle': 'första gången denna art någonsin har hörts här',
+
+  // ---- Detail modal: chrome ----
+  'modal.close': 'Stäng',
+  'modal.pose': 'Positur',
+  'modal.perched': 'sittande',
+  'modal.inFlight': 'i flykt',
+  'modal.genus': 'släkte',
+  'modal.rarity': 'sällsynthet',
+  'modal.allTime': 'någonsin',
+  'modal.firstHeard': 'först hörd',
+  'modal.visits': 'besök',
+  'modal.visitsWindow': 'besök {window}',
+  'modal.recordings': 'Inspelningar',
+  'modal.refCall': 'referensläte',
+  'modal.playRefCall': 'spela upp referensläte',
+  'modal.wiki': 'wiki',
+  'modal.ebird': 'ebird',
+  // ---- Detail modal: dynamic ----
+  'modal.loadingDesc': 'Läser in beskrivning...',
+  'modal.loadingRecordings': 'Läser in inspelningar...',
+  'modal.noRecordings': 'Inga inspelningar än.',
+  'modal.recordingsFailed': 'Det gick inte att läsa in inspelningar.',
+  'modal.noDescription': 'Ingen beskrivning tillgänglig.',
+  'modal.captured': 'inspelningar: {n}',
+  'modal.play': 'spela upp',
+  // 'modal.scrub' deliberately omitted -> falls back to the en value.
+
+  // ---- Rarity labels ----
+  'rarity.common': 'vanlig',
+  'rarity.regular': 'regelbunden',
+  'rarity.occasional': 'tillfällig',
+  'rarity.rare': 'sällsynt',
+
+  // ---- Reference call (Xeno-Canto) ----
+  'refcall.none': 'inget referensläte på Xeno-Canto för denna art',
+  'refcall.busy': 'Xeno-Canto är upptaget (hastighetsgräns) — försök igen om en stund',
+  'refcall.unavailableCode': 'referensläte inte tillgängligt (Xeno-Canto {code})',
+  'refcall.unavailable': 'referensläte inte tillgängligt',
+  'refcall.cantPlay': 'det gick inte att spela upp detta referensläte',
+  'refcall.credit': 'Referensläte: Xeno-Canto',
+  'refcall.recBy': ' · insp. {rec}',
+  'refcall.license': 'licens',
+
+  // ---- Spectrogram ----
+  'spectro.loading': 'läser in spektrogram...',
+  'spectro.rendering': 'renderar spektrogram...',
+  'spectro.unavailable': 'spektrogram inte tillgängligt',
+  'spectro.noWebAudio': 'WebAudio inte tillgängligt',
+  'spectro.failed': 'spektrogram misslyckades: ',
+
+  // ---- False-positive flag pill ----
+  'flag.report': 'rapportera som falsk positiv',
+  'flag.armed': 'inte den?',
+  'flag.armedTitle': 'tryck igen för att rapportera som falsk positiv',
+  'flag.done': 'rapporterad som falsk positiv',
+  'flag.failed': 'misslyckades',
+  'flag.noPath': 'ingen sökväg',
+  'flag.errCode': 'fel {code}',
+  'flag.couldNotSave': 'det gick inte att spara: {why}',
+  'flag.needsIngress': 'kräver HA-ingress-anslutningen - {detail}',
+  'flag.refused': 'BirdNET-Go nekade ({err})',
+
+  // ---- Weather conditions (standalone / fallback path) ----
+  // Keyed by Home Assistant's weather condition slugs. In the card build HA's
+  // own localized text is preferred; this table is the standalone/fallback.
+  'weather.clear-night': 'klar natt',
+  'weather.cloudy': 'molnigt',
+  'weather.exceptional': 'exceptionellt',
+  'weather.fog': 'dimma',
+  'weather.hail': 'hagel',
+  'weather.lightning': 'åska',
+  'weather.lightning-rainy': 'åska med regn',
+  'weather.partlycloudy': 'delvis molnigt',
+  'weather.pouring': 'skyfall',
+  'weather.rainy': 'regnigt',
+  'weather.snowy': 'snöigt',
+  'weather.snowy-rainy': 'snöblandat regn',
+  'weather.sunny': 'soligt',
+  'weather.windy': 'blåsigt',
+  'weather.windy-variant': 'blåsigt',
+
+  // ---- About modal ----
+  'about.title': 'Fåglarna utanför ditt fönster',
+  // Rich string (assigned via innerHTML - static, trusted markup).
+  'about.body': 'En liten mikrofon identifierar varje förbipasserande fågel med <a href="https://github.com/tphakala/birdnet-go" target="_blank" rel="noopener">BirdNET-Go</a>, byggt på Cornells <a href="https://birdnet.cornell.edu/" target="_blank" rel="noopener">BirdNET</a>. Varje art visas som en illustration i collaget, med storlek efter hur ofta den har hörts. Säkra registreringar sitter; osäkra flyger förbi.',
+  'about.explore': 'utforska fåglarna →',
+};
+
 function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
   // ---- card-build shims (see homeassistant/card/build.js) ----
   var __realdoc = document;
@@ -5746,7 +7478,7 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
 // you copied the artwork locally (homeassistant/install.sh layout).
 var HABIRD_CDN_ASSETS = 'https://cdn.jsdelivr.net/gh/adamoberley/HABirdDashboard@HABirdDashboard/avian/assets/';
 
-var HABIRD_VERSION = '1.2.7';
+var HABIRD_VERSION = '1.3.0';
 
 var HABIRD_EDITOR_SCHEMA = [
   { name: 'dashboard', type: 'expandable', flatten: true, title: 'Dashboard', expanded: true, schema: [

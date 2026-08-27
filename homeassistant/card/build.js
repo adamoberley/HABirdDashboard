@@ -218,7 +218,7 @@ const wrapper = `
 // you copied the artwork locally (homeassistant/install.sh layout).
 var HABIRD_CDN_ASSETS = 'https://cdn.jsdelivr.net/gh/adamoberley/HABirdDashboard@HABirdDashboard/avian/assets/';
 
-var HABIRD_VERSION = '1.2.7';
+var HABIRD_VERSION = '1.3.0';
 
 var HABIRD_EDITOR_SCHEMA = [
   { name: 'dashboard', type: 'expandable', flatten: true, title: 'Dashboard', expanded: true, schema: [

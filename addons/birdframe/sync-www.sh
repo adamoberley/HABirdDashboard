@@ -9,4 +9,8 @@ set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
 src="$here/../../homeassistant/www"
 cp "$src/index.html" "$src/styles.css" "$src/masks.js" "$src/apt.js" "$src/favicon.png" "$here/www/"
+# Translation tables - index.html's i18n bootstrap loads these; without them
+# the page falls back to English.
+mkdir -p "$here/www/i18n"
+cp "$src/i18n/"*.js "$here/www/i18n/"
 echo "synced www/ from $src (config.js intentionally excluded)"
