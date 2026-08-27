@@ -312,6 +312,7 @@ var HABIRD_EDITOR_SCHEMA = [
       { name: 'history_days', selector: { number: { min: 1, max: 365, step: 1, mode: 'box', unit_of_measurement: 'days' } } },
       { name: 'poll_seconds', selector: { number: { min: 10, max: 3600, step: 10, mode: 'box', unit_of_measurement: 's' } } },
     ] },
+    { name: 'live', selector: { boolean: {} } },
     { name: 'visits_sensors', selector: { entity: { multiple: true, filter: [{ domain: 'sensor' }] } } },
   ] },
 ];
@@ -348,6 +349,7 @@ var HABIRD_LABELS = {
   data_source: 'Data source',
   history_days: 'History span',
   poll_seconds: 'Refresh interval',
+  live: 'Live updates',
   visits_sensors: 'Feeder visit sensors',
 };
 var HABIRD_HELPERS = {
@@ -376,6 +378,7 @@ var HABIRD_HELPERS = {
   data_source: 'Automatic uses the API and falls back to the MQTT sensors.',
   history_days: 'How far MQTT history reaches; bounded by recorder retention.',
   poll_seconds: 'Safety-net refresh. MQTT pushes new detections instantly.',
+  live: "Opens a live connection to BirdNET-Go's own detection stream (in addition to the MQTT push above) so new calls refresh the card within a couple seconds. Falls back to the interval above alone if the stream is unavailable (older BirdNET-Go, or Private Mode).",
   visits_sensors: "Optional: a feeder camera's BirdNET-style “... scientific name” sensors (e.g. published by an LLM Vision automation). Their sightings blend in as per-species “visits” next to the audio “calls” - on hover, in the atlas and in the detail view.",
 };
 
@@ -477,6 +480,12 @@ class HABirdCard extends HTMLElement {
       // MQTT sensor updates push refreshes (see _watchDetections), so the
       // timer is just a safety net - much longer than the page's 30s.
       pollSeconds: c.poll_seconds || 60,
+      // Live detections: an EventSource straight to BirdNET-Go's own
+      // stream, as a second (independent) push-refresh trigger alongside
+      // the MQTT watcher above. On by default; the off switch is for old
+      // BirdNET-Go builds or Private Mode installs, where the stream
+      // 404s/401s on every boot and there's no point retrying it.
+      live: c.live !== false,
       // How much of the card the flock fills (0.1-1.0, default 0.5). The
       // count curve in renderCollage nudges it per bird count.
       collageFill: (typeof c.collage_fill === 'number') ? c.collage_fill : 0.5,
@@ -505,6 +514,9 @@ class HABirdCard extends HTMLElement {
       tapAction: c.tap_action || 'both',          // both | info | call
       xenoCantoKey: c.xeno_canto_key || '',        // enables reference calls
       __exposeRefresh: function (fn) { self._refresh = fn; },
+      // Lets disconnectedCallback close the live SSE stream (if any) when
+      // the card leaves the dashboard, instead of it lingering forever.
+      __exposeLiveStop: function (fn) { self._stopLive = fn; },
       sitConfidence: (typeof c.sit_confidence === 'number') ? c.sit_confidence : 0.90,
       wall: {
         clock: !!c.clock,
@@ -533,6 +545,7 @@ class HABirdCard extends HTMLElement {
   }
   disconnectedCallback() {
     if (this._ro) { this._ro.disconnect(); this._ro = null; }
+    if (this._stopLive) { this._stopLive(); this._stopLive = null; }
   }
   getCardSize() { return 8; }
   // Sections-view sizing: full width, tall by default, never crushed.
@@ -569,7 +582,7 @@ class HABirdCardEditor extends HTMLElement {
       this.appendChild(this._form);
     }
     this._form.schema = HABIRD_EDITOR_SCHEMA;
-    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', collage_fill: 0.5, size_contrast: 0.5, paper_color: '', paper_color_dark: '', paper_texture: 0, audio_boost: 24 }, this._config);
+    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', collage_fill: 0.5, size_contrast: 0.5, paper_color: '', paper_color_dark: '', paper_texture: 0, audio_boost: 24, live: true }, this._config);
     this._form.hass = this._hass;
   }
 }

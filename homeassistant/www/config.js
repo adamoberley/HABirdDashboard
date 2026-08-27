@@ -44,6 +44,19 @@ window.AV_CONFIG = {
   dataSource: 'auto',
   historyDays: 10,
 
+  // Live detections. When true (the default), this page opens one
+  // EventSource to BirdNET-Go's detections/stream endpoint after the
+  // first load, so a new detection refreshes the page within a couple
+  // seconds instead of waiting for the next 30s poll. It's purely a
+  // "something changed, refetch" signal - no data comes from the stream
+  // itself, so nothing else about the page depends on it. Reconnects
+  // automatically (with backoff) if the connection drops; gives up for
+  // the rest of this page load if the endpoint 404s (older BirdNET-Go)
+  // or 401s (Private Mode - EventSource can't carry apiToken's
+  // Authorization header). The 30s poll above always keeps working
+  // either way; set this false to skip the stream entirely.
+  live: true,
+
   // Feeder visits (optional). If a camera watches your feeder and an
   // automation (e.g. LLM Vision) publishes each identified visitor as a
   // BirdNET-style MQTT sensor trio (*_scientific_name, *_confidence,

@@ -3273,8 +3273,10 @@
 
   // Kick off the initial fetch. Renders pull from DATA as soon as it
   // populates; until then the page sits with empty histograms + lists.
-  // animate=true so the collage blooms in on first load.
-  refreshAll(true);
+  // animate=true so the collage blooms in on first load. The live SSE
+  // stream (below) only opens once this settles, so it never races the
+  // very first render.
+  refreshAll(true).then(function () { startLive(); });
 
   // Hook into the window picker so the data refetches on change. Pass
   // animate=true so the collage blooms (the silent poll passes nothing).
@@ -3303,24 +3305,94 @@
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) {
       stopPolling();
+      stopLive();
     } else {
       // Force an immediate refresh on return so the user sees fresh
       // data right away, then resume normal polling cadence.
       refreshAll();
       startPolling();
+      startLive();
     }
   });
   startPolling();
 
-  // Card builds call this when a BirdNET-Go MQTT sensor updates: clear
-  // the short-TTL response memos (they'd otherwise serve the pre-event
-  // answer) and refresh immediately. No-op on the static page.
+  // Shared "something changed, refetch" path: clears the short-TTL
+  // response memos (they'd otherwise serve the pre-event answer) and
+  // refreshes right away. Card builds reach this via a BirdNET-Go MQTT
+  // sensor update (__exposeRefresh below); the live SSE stream (below)
+  // reaches it too - both are just triggers, neither carries any data.
+  function pushRefresh() {
+    _bgMemo = {};
+    _haMemo = {};
+    refreshAll();
+  }
+
+  // Card builds call this when a BirdNET-Go MQTT sensor updates. No-op
+  // on the static page.
   if (AV_CFG.__exposeRefresh) {
-    AV_CFG.__exposeRefresh(function () {
-      _bgMemo = {};
-      _haMemo = {};
-      refreshAll();
-    });
+    AV_CFG.__exposeRefresh(pushRefresh);
+  }
+
+  // ---- Live detections (SSE) ----
+  // BirdNET-Go's detections/stream endpoint (GET {base}/api/v2/detections/
+  // stream, an EventSource) pushes a 'detection' event the instant a new
+  // call lands. This is a REFRESH SIGNAL ONLY: the event payload is never
+  // parsed into DATA - only the polling fetches above ever populate it -
+  // so a server-version mismatch in the event's shape can't corrupt
+  // state, it can only fail to speed up a refresh that would have
+  // happened within POLL_MS anyway. Debounced 2s (a burst of near-
+  // simultaneous calls should trigger one refetch, not several).
+  var LIVE_ENABLED = AV_CFG.live !== false && typeof EventSource !== 'undefined';
+  var liveSource = null;
+  var liveReconnectT = null;
+  var liveDebounceT = null;
+  var liveReconnectDelay = 5000;  // 5s, doubles up to a 60s cap
+  var liveFailures = 0;           // consecutive drops since the last open
+  // Set on a 404 (server predates the stream endpoint) or 401 (BirdNET-Go
+  // Private Mode - EventSource can't carry the Authorization header this
+  // page would otherwise send) seen on the very first connection attempt.
+  // Both fail before the connection ever opens, which is the only signal
+  // EventSource exposes for "this endpoint will never work" - retrying a
+  // dead URL every few seconds would just be noise, so give up for the
+  // rest of this boot. Normal 30s polling is unaffected either way.
+  var liveGaveUp = false;
+
+  function liveDebouncedRefresh() {
+    clearTimeout(liveDebounceT);
+    liveDebounceT = setTimeout(pushRefresh, 2000);
+  }
+  function stopLive() {
+    clearTimeout(liveReconnectT);
+    liveReconnectT = null;
+    clearTimeout(liveDebounceT);
+    liveDebounceT = null;
+    if (liveSource) { liveSource.close(); liveSource = null; }
+  }
+  function startLive() {
+    if (!LIVE_ENABLED || liveGaveUp || liveSource || document.hidden) return;
+    var opened = false;
+    var es = new EventSource(bgUrl('/detections/stream'));
+    liveSource = es;
+    es.addEventListener('detection', liveDebouncedRefresh);
+    es.onopen = function () {
+      opened = true;
+      liveFailures = 0;
+      liveReconnectDelay = 5000;
+    };
+    es.onerror = function () {
+      if (liveSource !== es) return; // superseded by a later attempt already
+      stopLive();
+      if (!opened) { liveGaveUp = true; return; }
+      liveFailures++;
+      if (liveFailures >= 5) return; // stop retrying until the next card boot
+      liveReconnectT = setTimeout(startLive, liveReconnectDelay);
+      liveReconnectDelay = Math.min(60000, liveReconnectDelay * 2);
+    };
+  }
+  // Card builds call this from disconnectedCallback so a stream doesn't
+  // linger once the card leaves the dashboard. No-op on the static page.
+  if (AV_CFG.__exposeLiveStop) {
+    AV_CFG.__exposeLiveStop(stopLive);
   }
 
   // ---- Menu dropdown ----

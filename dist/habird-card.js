@@ -5405,8 +5405,10 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
 
   // Kick off the initial fetch. Renders pull from DATA as soon as it
   // populates; until then the page sits with empty histograms + lists.
-  // animate=true so the collage blooms in on first load.
-  refreshAll(true);
+  // animate=true so the collage blooms in on first load. The live SSE
+  // stream (below) only opens once this settles, so it never races the
+  // very first render.
+  refreshAll(true).then(function () { startLive(); });
 
   // Hook into the window picker so the data refetches on change. Pass
   // animate=true so the collage blooms (the silent poll passes nothing).
@@ -5435,24 +5437,94 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
   __realdoc.addEventListener('visibilitychange', function () {
     if (document.hidden) {
       stopPolling();
+      stopLive();
     } else {
       // Force an immediate refresh on return so the user sees fresh
       // data right away, then resume normal polling cadence.
       refreshAll();
       startPolling();
+      startLive();
     }
   });
   startPolling();
 
-  // Card builds call this when a BirdNET-Go MQTT sensor updates: clear
-  // the short-TTL response memos (they'd otherwise serve the pre-event
-  // answer) and refresh immediately. No-op on the static page.
+  // Shared "something changed, refetch" path: clears the short-TTL
+  // response memos (they'd otherwise serve the pre-event answer) and
+  // refreshes right away. Card builds reach this via a BirdNET-Go MQTT
+  // sensor update (__exposeRefresh below); the live SSE stream (below)
+  // reaches it too - both are just triggers, neither carries any data.
+  function pushRefresh() {
+    _bgMemo = {};
+    _haMemo = {};
+    refreshAll();
+  }
+
+  // Card builds call this when a BirdNET-Go MQTT sensor updates. No-op
+  // on the static page.
   if (AV_CFG.__exposeRefresh) {
-    AV_CFG.__exposeRefresh(function () {
-      _bgMemo = {};
-      _haMemo = {};
-      refreshAll();
-    });
+    AV_CFG.__exposeRefresh(pushRefresh);
+  }
+
+  // ---- Live detections (SSE) ----
+  // BirdNET-Go's detections/stream endpoint (GET {base}/api/v2/detections/
+  // stream, an EventSource) pushes a 'detection' event the instant a new
+  // call lands. This is a REFRESH SIGNAL ONLY: the event payload is never
+  // parsed into DATA - only the polling fetches above ever populate it -
+  // so a server-version mismatch in the event's shape can't corrupt
+  // state, it can only fail to speed up a refresh that would have
+  // happened within POLL_MS anyway. Debounced 2s (a burst of near-
+  // simultaneous calls should trigger one refetch, not several).
+  var LIVE_ENABLED = AV_CFG.live !== false && typeof EventSource !== 'undefined';
+  var liveSource = null;
+  var liveReconnectT = null;
+  var liveDebounceT = null;
+  var liveReconnectDelay = 5000;  // 5s, doubles up to a 60s cap
+  var liveFailures = 0;           // consecutive drops since the last open
+  // Set on a 404 (server predates the stream endpoint) or 401 (BirdNET-Go
+  // Private Mode - EventSource can't carry the Authorization header this
+  // page would otherwise send) seen on the very first connection attempt.
+  // Both fail before the connection ever opens, which is the only signal
+  // EventSource exposes for "this endpoint will never work" - retrying a
+  // dead URL every few seconds would just be noise, so give up for the
+  // rest of this boot. Normal 30s polling is unaffected either way.
+  var liveGaveUp = false;
+
+  function liveDebouncedRefresh() {
+    clearTimeout(liveDebounceT);
+    liveDebounceT = setTimeout(pushRefresh, 2000);
+  }
+  function stopLive() {
+    clearTimeout(liveReconnectT);
+    liveReconnectT = null;
+    clearTimeout(liveDebounceT);
+    liveDebounceT = null;
+    if (liveSource) { liveSource.close(); liveSource = null; }
+  }
+  function startLive() {
+    if (!LIVE_ENABLED || liveGaveUp || liveSource || document.hidden) return;
+    var opened = false;
+    var es = new EventSource(bgUrl('/detections/stream'));
+    liveSource = es;
+    es.addEventListener('detection', liveDebouncedRefresh);
+    es.onopen = function () {
+      opened = true;
+      liveFailures = 0;
+      liveReconnectDelay = 5000;
+    };
+    es.onerror = function () {
+      if (liveSource !== es) return; // superseded by a later attempt already
+      stopLive();
+      if (!opened) { liveGaveUp = true; return; }
+      liveFailures++;
+      if (liveFailures >= 5) return; // stop retrying until the next card boot
+      liveReconnectT = setTimeout(startLive, liveReconnectDelay);
+      liveReconnectDelay = Math.min(60000, liveReconnectDelay * 2);
+    };
+  }
+  // Card builds call this from disconnectedCallback so a stream doesn't
+  // linger once the card leaves the dashboard. No-op on the static page.
+  if (AV_CFG.__exposeLiveStop) {
+    AV_CFG.__exposeLiveStop(stopLive);
   }
 
   // ---- Menu dropdown ----
@@ -7727,6 +7799,7 @@ var HABIRD_EDITOR_SCHEMA = [
       { name: 'history_days', selector: { number: { min: 1, max: 365, step: 1, mode: 'box', unit_of_measurement: 'days' } } },
       { name: 'poll_seconds', selector: { number: { min: 10, max: 3600, step: 10, mode: 'box', unit_of_measurement: 's' } } },
     ] },
+    { name: 'live', selector: { boolean: {} } },
     { name: 'visits_sensors', selector: { entity: { multiple: true, filter: [{ domain: 'sensor' }] } } },
   ] },
 ];
@@ -7763,6 +7836,7 @@ var HABIRD_LABELS = {
   data_source: 'Data source',
   history_days: 'History span',
   poll_seconds: 'Refresh interval',
+  live: 'Live updates',
   visits_sensors: 'Feeder visit sensors',
 };
 var HABIRD_HELPERS = {
@@ -7791,6 +7865,7 @@ var HABIRD_HELPERS = {
   data_source: 'Automatic uses the API and falls back to the MQTT sensors.',
   history_days: 'How far MQTT history reaches; bounded by recorder retention.',
   poll_seconds: 'Safety-net refresh. MQTT pushes new detections instantly.',
+  live: "Opens a live connection to BirdNET-Go's own detection stream (in addition to the MQTT push above) so new calls refresh the card within a couple seconds. Falls back to the interval above alone if the stream is unavailable (older BirdNET-Go, or Private Mode).",
   visits_sensors: "Optional: a feeder camera's BirdNET-style “... scientific name” sensors (e.g. published by an LLM Vision automation). Their sightings blend in as per-species “visits” next to the audio “calls” - on hover, in the atlas and in the detail view.",
 };
 
@@ -7892,6 +7967,12 @@ class HABirdCard extends HTMLElement {
       // MQTT sensor updates push refreshes (see _watchDetections), so the
       // timer is just a safety net - much longer than the page's 30s.
       pollSeconds: c.poll_seconds || 60,
+      // Live detections: an EventSource straight to BirdNET-Go's own
+      // stream, as a second (independent) push-refresh trigger alongside
+      // the MQTT watcher above. On by default; the off switch is for old
+      // BirdNET-Go builds or Private Mode installs, where the stream
+      // 404s/401s on every boot and there's no point retrying it.
+      live: c.live !== false,
       // How much of the card the flock fills (0.1-1.0, default 0.5). The
       // count curve in renderCollage nudges it per bird count.
       collageFill: (typeof c.collage_fill === 'number') ? c.collage_fill : 0.5,
@@ -7920,6 +8001,9 @@ class HABirdCard extends HTMLElement {
       tapAction: c.tap_action || 'both',          // both | info | call
       xenoCantoKey: c.xeno_canto_key || '',        // enables reference calls
       __exposeRefresh: function (fn) { self._refresh = fn; },
+      // Lets disconnectedCallback close the live SSE stream (if any) when
+      // the card leaves the dashboard, instead of it lingering forever.
+      __exposeLiveStop: function (fn) { self._stopLive = fn; },
       sitConfidence: (typeof c.sit_confidence === 'number') ? c.sit_confidence : 0.90,
       wall: {
         clock: !!c.clock,
@@ -7948,6 +8032,7 @@ class HABirdCard extends HTMLElement {
   }
   disconnectedCallback() {
     if (this._ro) { this._ro.disconnect(); this._ro = null; }
+    if (this._stopLive) { this._stopLive(); this._stopLive = null; }
   }
   getCardSize() { return 8; }
   // Sections-view sizing: full width, tall by default, never crushed.
@@ -7984,7 +8069,7 @@ class HABirdCardEditor extends HTMLElement {
       this.appendChild(this._form);
     }
     this._form.schema = HABIRD_EDITOR_SCHEMA;
-    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', collage_fill: 0.5, size_contrast: 0.5, paper_color: '', paper_color_dark: '', paper_texture: 0, audio_boost: 24 }, this._config);
+    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', collage_fill: 0.5, size_contrast: 0.5, paper_color: '', paper_color_dark: '', paper_texture: 0, audio_boost: 24, live: true }, this._config);
     this._form.hass = this._hass;
   }
 }
