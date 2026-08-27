@@ -601,6 +601,30 @@ if (!window.customCards.some(function (c) { return c.type === 'habird-card'; }))
     name: 'Bird Card',
     description: 'Live bird collage from your BirdNET-Go detections, with optional clock and weather.',
     documentationURL: 'https://github.com/adamoberley/HABirdDashboard',
+    // HA 2026.6+ entity-picker card suggestions: when the user picks an
+    // entity that looks like one of BirdNET-Go's MQTT sensors, offer this
+    // card in the picker instead of leaving them to find it by name. {}
+    // is a fully valid config (the card auto-discovers every *_scientific_name
+    // sensor hass exposes) - no entity-specific config to build here.
+    // getEntitySuggestion is just an extra property on the registration
+    // object; older HA builds that don't know about it never call it, so
+    // its presence can't break them. Guarded in a try/catch anyway since a
+    // thrown error here runs inside HA's own picker UI, not this card.
+    getEntitySuggestion: function (hass, entityId) {
+      try {
+        var id = String(entityId || '').toLowerCase();
+        if (id.split('.')[0] !== 'sensor') return null;
+        var suffixes = ['_scientific_name', '_species', '_confidence', '_last_species', '_sound_level'];
+        for (var i = 0; i < suffixes.length; i++) {
+          if (id.slice(-suffixes[i].length) === suffixes[i]) {
+            return { config: { type: 'custom:habird-card' } };
+          }
+        }
+        return null;
+      } catch (e) {
+        return null;
+      }
+    },
   });
 }
 `;

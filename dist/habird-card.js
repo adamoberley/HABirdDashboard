@@ -73,6 +73,8 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
   // Shown only when >=1 auto-discovered HA microphone sensor is offline
   // (native MQTT discovery's availability topic reads 'unavailable').
   'stats.micsOffline': '{n} microphone(s) offline',
+  // Same note, but naming the one offline mic (HA formatEntityName available).
+  'stats.micOfflineNamed': '{name} is offline',
   // ---- Stats: Top Species ----
   'stats.topSpecies': 'Top Species',
   'stats.topSpecCap': 'most-heard, {window}',
@@ -3098,15 +3100,34 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
       });
   }
 
-  // How many discovered microphones are currently offline (their
-  // scientific-name sensor reads 'unavailable'/'unknown'). Resolves 0
-  // (never rejects) with no HA connection or no discovered sensors, so
-  // callers can use it unconditionally to drive a UI note.
-  function hhOfflineMicCount() {
-    if (!haAvailable()) return Promise.resolve(0);
+  // The currently-offline microphones (see hhSensorSets' `offline` flag).
+  // Resolves [] (never rejects) with no HA connection or no discovered
+  // sensors, so callers can use it unconditionally to drive a UI note.
+  function hhOfflineMics() {
+    if (!haAvailable()) return Promise.resolve([]);
     return hhSensorSets().then(function (sets) {
-      return sets.filter(function (s) { return s.offline; }).length;
-    }).catch(function () { return 0; });
+      return sets.filter(function (s) { return s.offline; });
+    }).catch(function () { return []; });
+  }
+  // How many discovered microphones are currently offline. Kept for
+  // callers that only need the count (see hhOfflineMics for the list).
+  function hhOfflineMicCount() {
+    return hhOfflineMics().then(function (list) { return list.length; });
+  }
+  // A sensor entity's display name, preferring HA's own entity-name
+  // formatter (hass.formatEntityName, added in HA 2026.6) over the raw
+  // entity id - it follows the user's HA naming/language settings the
+  // same way the picker itself does. Falls back to '' (not the id) so
+  // callers can tell "no nicer name available" apart from a real one and
+  // keep their own current behaviour in that case.
+  function haEntityLabel(hass, id) {
+    try {
+      var st = hass && hass.states && hass.states[id];
+      if (st && typeof hass.formatEntityName === 'function') {
+        return hass.formatEntityName(st) || '';
+      }
+    } catch (e) { /* fall through to '' below */ }
+    return '';
   }
 
   function hhFmtTs(ms) {
@@ -5010,14 +5031,23 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
   function renderMicOfflineNote() {
     var el = __root.getElementById('statsMicNote');
     if (!el) return;
-    hhOfflineMicCount().then(function (n) {
-      if (n > 0) {
-        el.hidden = false;
-        el.textContent = tt('stats.micsOffline', { n: n });
-      } else {
+    hhOfflineMics().then(function (offline) {
+      if (!offline.length) {
         el.hidden = true;
         el.textContent = '';
+        return;
       }
+      el.hidden = false;
+      // Name the mic when HA can format entity names and exactly one is
+      // offline - a name reads better than a count of one. Any other
+      // case (no formatter, or several mics down) keeps the plain count,
+      // which also reads fine as a list of names would get long.
+      var name = offline.length === 1
+        ? haEntityLabel(AV_CFG.__getHass && AV_CFG.__getHass(), offline[0].sci)
+        : '';
+      el.textContent = name
+        ? tt('stats.micOfflineNamed', { name: name })
+        : tt('stats.micsOffline', { n: offline.length });
     });
   }
 
@@ -8088,6 +8118,30 @@ if (!window.customCards.some(function (c) { return c.type === 'habird-card'; }))
     name: 'Bird Card',
     description: 'Live bird collage from your BirdNET-Go detections, with optional clock and weather.',
     documentationURL: 'https://github.com/adamoberley/HABirdDashboard',
+    // HA 2026.6+ entity-picker card suggestions: when the user picks an
+    // entity that looks like one of BirdNET-Go's MQTT sensors, offer this
+    // card in the picker instead of leaving them to find it by name. {}
+    // is a fully valid config (the card auto-discovers every *_scientific_name
+    // sensor hass exposes) - no entity-specific config to build here.
+    // getEntitySuggestion is just an extra property on the registration
+    // object; older HA builds that don't know about it never call it, so
+    // its presence can't break them. Guarded in a try/catch anyway since a
+    // thrown error here runs inside HA's own picker UI, not this card.
+    getEntitySuggestion: function (hass, entityId) {
+      try {
+        var id = String(entityId || '').toLowerCase();
+        if (id.split('.')[0] !== 'sensor') return null;
+        var suffixes = ['_scientific_name', '_species', '_confidence', '_last_species', '_sound_level'];
+        for (var i = 0; i < suffixes.length; i++) {
+          if (id.slice(-suffixes[i].length) === suffixes[i]) {
+            return { config: { type: 'custom:habird-card' } };
+          }
+        }
+        return null;
+      } catch (e) {
+        return null;
+      }
+    },
   });
 }
 

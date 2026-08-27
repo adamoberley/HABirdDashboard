@@ -59,6 +59,8 @@
   // Shown only when >=1 auto-discovered HA microphone sensor is offline
   // (native MQTT discovery's availability topic reads 'unavailable').
   'stats.micsOffline': '{n} microphone(s) offline',
+  // Same note, but naming the one offline mic (HA formatEntityName available).
+  'stats.micOfflineNamed': '{name} is offline',
   // ---- Stats: Top Species ----
   'stats.topSpecies': 'Top Species',
   'stats.topSpecCap': 'most-heard, {window}',
