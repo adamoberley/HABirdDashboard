@@ -19,7 +19,7 @@ const CARD = fs.readFileSync(ROOT + '/dist/habird-card.js', 'utf8');
 // Boot a <habird-card> in a fresh jsdom. `hassLang` (optional) becomes
 // hass.language, resolved once at card boot (LOCALE/BCP47/WIKI_LANG). The
 // built card inlines every i18n/*.js file, so en + da self-register at eval.
-function boot(hassLang, done) {
+function boot(hassLang, done, cardConfig) {
   const dom = new JSDOM('<!doctype html><html><body></body></html>', {
     url: 'http://ha.local:8123/lovelace/birds', runScripts: 'outside-only', pretendToBeVisual: true,
   });
@@ -48,7 +48,7 @@ function boot(hassLang, done) {
   const hass = { states: {} };
   if (hassLang) hass.language = hassLang;
   const card = window.document.createElement('habird-card');
-  card.setConfig({});
+  card.setConfig(cardConfig || {});
   card.hass = hass;
   window.document.body.appendChild(card);
 
@@ -77,6 +77,10 @@ boot(null, (window, card, errors) => {
     assert.ok(dbg, 'i18n debug hook exposed');
     assert.strictEqual(dbg.resolveLocale(), 'en', 'resolveLocale() falls back to en');
     assert.strictEqual(dbg.locale, 'en', 'active LOCALE is en');
+    // Formatting tag stays the *requested* locale (jsdom: en-US), decoupled
+    // from the translation-table fallback - so untranslated locales keep
+    // their native Intl number/date formatting.
+    assert.strictEqual(dbg.bcp47, window.navigator.language, 'BCP47 keeps the requested tag');
 
     // t() returns the English string, and unknown keys fall back to the key.
     assert.strictEqual(dbg.t('view.stats'), 'stats', 't() returns en string');
@@ -127,8 +131,30 @@ boot(null, (window, card, errors) => {
 
       assert.deepStrictEqual(errors, [], 'no boot errors (da): ' + errors.join('; '));
       console.log('I18N TEST (da): da table registered, resolveLocale()/WIKI_LANG -> da, chrome renders in Danish, en fallback works');
-      console.log('I18N TEST PASSED');
-      process.exit(0);
     } catch (e) { return fail(e, errors); }
+
+    // ---- en-GB boot: strings stay English, formatting keeps the GB tag ----
+    boot('en-GB', (window, card, errors) => {
+      try {
+        const dbg = window.__habirdI18n;
+        assert.strictEqual(dbg.locale, 'en', 'en-GB resolves to the en table');
+        assert.strictEqual(dbg.bcp47, 'en-GB', 'en-GB keeps its Intl formatting tag');
+        assert.deepStrictEqual(errors, [], 'no boot errors (en-GB): ' + errors.join('; '));
+        console.log('I18N TEST (en-GB): en strings + en-GB formatting tag');
+      } catch (e) { return fail(e, errors); }
+
+      // ---- card `language:` config override (no hass.language) ----
+      boot(null, (window, card, errors) => {
+        try {
+          const dbg = window.__habirdI18n;
+          assert.strictEqual(dbg.locale, 'da', 'card language: config override reaches the app');
+          assert.strictEqual(dbg.t('stats.byPeriod'), 'Efter periode', 'override renders Danish');
+          assert.deepStrictEqual(errors, [], 'no boot errors (override): ' + errors.join('; '));
+          console.log('I18N TEST (config override): language: da wins with no hass.language');
+          console.log('I18N TEST PASSED');
+          process.exit(0);
+        } catch (e) { return fail(e, errors); }
+      }, { language: 'da' });
+    });
   });
 });

@@ -66,20 +66,33 @@
   //   2. Home Assistant UI language (hass.language / hass.locale.language)
   //   3. navigator.language (standalone page)
   //   4. 'en'
-  function resolveLocale() {
+  // The locale the user asked for (config -> hass -> browser), before any
+  // fallback to the translation tables. Intl formatting keeps this tag, so
+  // a locale with no translation table (en-GB, de, ...) retains its native
+  // number/date/clock formatting exactly as before i18n; only the *strings*
+  // fall back to English.
+  function requestedLocale() {
     var hass = AV_CFG.__getHass && AV_CFG.__getHass();
-    var want = AV_CFG.language
+    return String(AV_CFG.language
       || (hass && (hass.language || (hass.locale && hass.locale.language)))
       || (typeof navigator !== 'undefined' && navigator.language)
-      || 'en';
-    want = String(want).toLowerCase();          // 'pt-BR' -> 'pt-br'
+      || 'en');
+  }
+  function resolveLocale() {
+    var want = requestedLocale().toLowerCase();  // 'pt-BR' -> 'pt-br'
     if (I18N[want]) return want;
     var base = want.split('-')[0];
     if (I18N[base]) return base;
     return 'en';
   }
   var LOCALE = resolveLocale();   // key into I18N ('da', 'en', ...)
-  var BCP47 = LOCALE;             // tag for Intl.* APIs (used from Step 2)
+  // Tag for the Intl.* APIs (used from Step 2): the requested locale,
+  // guarded once against malformed tags (a bad config value would make
+  // every toLocaleString throw RangeError).
+  var BCP47 = (function () {
+    var tag = requestedLocale();
+    try { new Intl.NumberFormat(tag); return tag; } catch (e) { return 'en'; }
+  })();
   // Wikipedia language subdomain for the active locale (used from Step 3).
   // Derive from the base subtag ('pt-br' -> 'pt'), with a small override
   // map for wikis whose code differs from the UI-language code (Norwegian
@@ -104,11 +117,12 @@
   // "2d ago", ... for non-English locales. English is deliberately NOT
   // routed through it: the card's own compact "5m ago" wording is kept
   // byte-identical to the pre-i18n literals (RTF would say "5 min. ago").
-  // So RTF stays null for BCP47='en' (and whenever Intl is unavailable),
-  // and every site falls back to its plain-English string in that case.
+  // So RTF stays null while the strings are English - i.e. whenever no
+  // translation table matched (LOCALE='en') or Intl is unavailable - and
+  // every site falls back to its plain-English string in that case.
   var RTF = null;
   try {
-    if (BCP47 !== 'en' && typeof Intl !== 'undefined' && Intl.RelativeTimeFormat) {
+    if (LOCALE !== 'en' && typeof Intl !== 'undefined' && Intl.RelativeTimeFormat) {
       RTF = new Intl.RelativeTimeFormat(BCP47, { numeric: 'always', style: 'short' });
     }
   } catch (e) { RTF = null; }
@@ -123,18 +137,25 @@
   // data-i18n-html -> innerHTML (trusted rich strings), data-i18n-aria ->
   // aria-label, data-i18n-placeholder -> placeholder. The English literal
   // stays in the markup too (readable source + a no-JS default).
+  // If a key resolves to itself (no table carried it - e.g. the i18n files
+  // failed to load), keep the inline English literal rather than stamping
+  // the raw key over it.
   function localizeStaticDom() {
     document.querySelectorAll('[data-i18n]').forEach(function (el) {
-      el.textContent = tt(el.getAttribute('data-i18n'));
+      var k = el.getAttribute('data-i18n'), v = tt(k);
+      if (v !== k) el.textContent = v;
     });
     document.querySelectorAll('[data-i18n-html]').forEach(function (el) {
-      el.innerHTML = tt(el.getAttribute('data-i18n-html'));
+      var k = el.getAttribute('data-i18n-html'), v = tt(k);
+      if (v !== k) el.innerHTML = v;
     });
     document.querySelectorAll('[data-i18n-aria]').forEach(function (el) {
-      el.setAttribute('aria-label', tt(el.getAttribute('data-i18n-aria')));
+      var k = el.getAttribute('data-i18n-aria'), v = tt(k);
+      if (v !== k) el.setAttribute('aria-label', v);
     });
     document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
-      el.setAttribute('placeholder', tt(el.getAttribute('data-i18n-placeholder')));
+      var k = el.getAttribute('data-i18n-placeholder'), v = tt(k);
+      if (v !== k) el.setAttribute('placeholder', v);
     });
   }
   if (typeof document !== 'undefined') localizeStaticDom();
@@ -142,7 +163,7 @@
   // assert the fallback anchor (resolveLocale() === 'en' with no
   // hass.language) without reaching into this closure. Harmless in prod.
   try {
-    window.__habirdI18n = { resolveLocale: resolveLocale, t: tt, get locale() { return LOCALE; }, get wikiLang() { return WIKI_LANG; } };
+    window.__habirdI18n = { resolveLocale: resolveLocale, t: tt, get locale() { return LOCALE; }, get bcp47() { return BCP47; }, get wikiLang() { return WIKI_LANG; } };
   } catch (e) {}
 
   // '' -> same host the dashboard is served from, port 8080 (the stock
@@ -2669,7 +2690,7 @@
 
     setHtml(tl,
       '<div class="stats-hm">' + head + rows + '</div>'
-      + '<div class="stats-hm-cap">' + cap + '</div>');
+      + '<div class="stats-hm-cap">' + esc(cap) + '</div>');
     if (animate) playStatsEntrance();
   }
 
@@ -4071,7 +4092,7 @@
         });
     loadWiki.then(function (j) {
       var desc = document.getElementById('modalDesc');
-      desc.textContent = j.extract || 'No description available.';
+      desc.textContent = j.extract || tt('modal.noDescription');
       desc.classList.toggle('placeholder', !j.extract);
       // Point the external link at the article the extract came from,
       // preferring the summary response's own url/title when present so a
@@ -4085,7 +4106,7 @@
       }
     }).catch(function () {
       var desc = document.getElementById('modalDesc');
-      desc.textContent = 'No description available.';
+      desc.textContent = tt('modal.noDescription');
       desc.classList.add('placeholder');
     });
   }

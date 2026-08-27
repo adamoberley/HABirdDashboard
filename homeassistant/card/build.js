@@ -463,6 +463,7 @@ class HABirdCard extends HTMLElement {
       windowHours: c.window || 24,           // hours, or 'all'
       birdnetGoUrl: c.birdnet_url || '',
       dataSource: c.data_source || 'auto',
+      language: c.language || '',        // UI language override ('' = auto: hass -> browser)
       historyDays: c.history_days,
       haSensors: c.ha_sensors,   // YAML-only: explicit *_scientific_name entity ids
       // Feeder-camera sightings: *_scientific_name entity ids of a second,

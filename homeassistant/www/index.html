@@ -217,7 +217,7 @@
 <div id="about-modal" aria-hidden="true" role="dialog" aria-labelledby="aboutTitle">
   <div class="modal-backdrop" data-close="1"></div>
   <div class="about-card" role="document">
-    <button type="button" class="modal-close" data-close="1" aria-label="close">×</button>
+    <button type="button" class="modal-close" data-close="1" aria-label="close" data-i18n-aria="modal.close">×</button>
     <p class="about-eyebrow" data-i18n="head.about">your birds</p>
     <h2 id="aboutTitle" data-i18n="about.title">The birds outside your window</h2>
     <p class="about-body" data-i18n-html="about.body">A tiny microphone identifies every passing bird with <a href="https://github.com/tphakala/birdnet-go" target="_blank" rel="noopener">BirdNET-Go</a>, built on Cornell's <a href="https://birdnet.cornell.edu/" target="_blank" rel="noopener">BirdNET</a>. Each species shows up as an illustration in the collage, sized by how often it's been heard. Confident detections perch; uncertain ones fly past.</p>
@@ -253,9 +253,14 @@
      new language needs a new i18n/<code>.js file and no edit here. -->
 <script>
 (function () {
-  var want = (window.AV_CONFIG && AV_CONFIG.language)
-    || (navigator.language || 'en').toLowerCase().split('-')[0];
-  var files = (want && want !== 'en') ? ['en', want] : ['en'];
+  // Same normalization as the app's resolveLocale: lowercase, and try the
+  // base subtag alongside any regional one ('pt-BR' -> pt-br.js + pt.js).
+  var want = String((window.AV_CONFIG && AV_CONFIG.language)
+    || navigator.language || 'en').toLowerCase();
+  var base = want.split('-')[0];
+  var files = ['en'];
+  if (base && base !== 'en') files.push(base);
+  if (want !== base && want !== 'en') files.push(want);
   var left = files.length;
   files.forEach(function (code) {
     var s = document.createElement('script');
