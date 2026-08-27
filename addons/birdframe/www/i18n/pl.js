@@ -13,9 +13,9 @@
   'view.aria': 'Widok',
 
   // ---- Window picker (abbreviations) ----
-  'winpick.1h': '1G',
-  'winpick.12h': '12G',
-  'winpick.24h': '24G',
+  'winpick.1h': '1H',
+  'winpick.12h': '12H',
+  'winpick.24h': '24H',
   'winpick.7d': '7D',
   'winpick.all': 'WSZ',
 
@@ -106,7 +106,7 @@
   'modal.noRecordings': 'Brak nagrań.',
   'modal.recordingsFailed': 'Nie udało się wczytać nagrań.',
   'modal.noDescription': 'Brak dostępnego opisu.',
-  'modal.captured': '{n} zarejestrowanych',
+  'modal.captured': 'zarejestrowano: {n}',
   'modal.play': 'odtwórz',
   // 'modal.scrub' deliberately omitted -> falls back to the en value.
 

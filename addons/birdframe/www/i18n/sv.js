@@ -13,9 +13,9 @@
   'view.aria': 'Vy',
 
   // ---- Window picker (abbreviations) ----
-  'winpick.1h': '1T',
-  'winpick.12h': '12T',
-  'winpick.24h': '24T',
+  'winpick.1h': '1H',
+  'winpick.12h': '12H',
+  'winpick.24h': '24H',
   'winpick.7d': '7D',
   'winpick.all': 'ALLA',
 
@@ -106,7 +106,7 @@
   'modal.noRecordings': 'Inga inspelningar än.',
   'modal.recordingsFailed': 'Det gick inte att läsa in inspelningar.',
   'modal.noDescription': 'Ingen beskrivning tillgänglig.',
-  'modal.captured': '{n} inspelade',
+  'modal.captured': 'inspelningar: {n}',
   'modal.play': 'spela upp',
   // 'modal.scrub' deliberately omitted -> falls back to the en value.
 
@@ -148,9 +148,9 @@
   // ---- Weather conditions (standalone / fallback path) ----
   // Keyed by Home Assistant's weather condition slugs. In the card build HA's
   // own localized text is preferred; this table is the standalone/fallback.
-  'weather.clear-night': 'klart',
+  'weather.clear-night': 'klar natt',
   'weather.cloudy': 'molnigt',
-  'weather.exceptional': 'extremt',
+  'weather.exceptional': 'exceptionellt',
   'weather.fog': 'dimma',
   'weather.hail': 'hagel',
   'weather.lightning': 'åska',

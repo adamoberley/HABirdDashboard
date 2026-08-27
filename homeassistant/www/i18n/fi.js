@@ -1,4 +1,10 @@
 // HABirdDashboard - Finnish (fi) UI strings.
+//
+// A standalone, self-registering translation: keys mirror en.js exactly;
+// values are natural Finnish. Any key omitted here falls back to the en
+// reference table by design. Scientific names and the stable rarity/label
+// CODES are never translated - only the display strings for existing keys.
+// {name} placeholders are preserved and filled by tt(key, {name: value}).
 (window.HABIRD_I18N = window.HABIRD_I18N || {}).fi = {
   // ---- View slider ----
   'view.collage': 'kollaasi',
@@ -32,8 +38,8 @@
   'window.allTime': 'kautta aikojen',
 
   // ---- Collage tooltip units ----
-  'unit.call': 'kutsu',
-  'unit.calls': 'kutsua',
+  'unit.call': 'ääni',
+  'unit.calls': 'ääntä',
   'unit.visit': 'käynti',
   'unit.visits': 'käyntiä',
 
@@ -100,7 +106,7 @@
   'modal.noRecordings': 'Ei vielä tallenteita.',
   'modal.recordingsFailed': 'Tallenteiden lataaminen epäonnistui.',
   'modal.noDescription': 'Kuvausta ei ole saatavilla.',
-  'modal.captured': '{n} otosta',
+  'modal.captured': '{n} tallennetta',
   'modal.play': 'toista',
   // 'modal.scrub' deliberately omitted -> falls back to the en value.
 

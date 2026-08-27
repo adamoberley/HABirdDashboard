@@ -499,7 +499,7 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
 
   // ---- False-positive flag pill ----
   'flag.report': 'als Fehlerkennung melden',
-  'flag.armed': 'nicht die?',
+  'flag.armed': 'falsch erkannt?',
   'flag.armedTitle': 'nochmal tippen, um als Fehlerkennung zu melden',
   'flag.done': 'als Fehlerkennung gemeldet',
   'flag.failed': 'fehlgeschlagen',
@@ -582,7 +582,7 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
 
   // ---- Stats: By Period ----
   'stats.byPeriod': 'Por período',
-  'stats.byPeriodSub': 'detecciones, agrupadas por recencia',
+  'stats.byPeriodSub': 'detecciones, agrupadas por antigüedad',
   'stats.badgeNow': 'AHORA',
   'stats.badgeToday': 'HOY',
   'stats.badgeWeek': 'SEMANA',
@@ -643,7 +643,7 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
   'modal.noRecordings': 'Aún no hay grabaciones.',
   'modal.recordingsFailed': 'No se pudieron cargar las grabaciones.',
   'modal.noDescription': 'No hay descripción disponible.',
-  'modal.captured': '{n} capturadas',
+  'modal.captured': 'capturas: {n}',
   'modal.play': 'reproducir',
   // 'modal.scrub' deliberately omitted -> falls back to the en value.
 
@@ -709,6 +709,12 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
 };
 
 // HABirdDashboard - Finnish (fi) UI strings.
+//
+// A standalone, self-registering translation: keys mirror en.js exactly;
+// values are natural Finnish. Any key omitted here falls back to the en
+// reference table by design. Scientific names and the stable rarity/label
+// CODES are never translated - only the display strings for existing keys.
+// {name} placeholders are preserved and filled by tt(key, {name: value}).
 (window.HABIRD_I18N = window.HABIRD_I18N || {}).fi = {
   // ---- View slider ----
   'view.collage': 'kollaasi',
@@ -742,8 +748,8 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
   'window.allTime': 'kautta aikojen',
 
   // ---- Collage tooltip units ----
-  'unit.call': 'kutsu',
-  'unit.calls': 'kutsua',
+  'unit.call': 'ääni',
+  'unit.calls': 'ääntä',
   'unit.visit': 'käynti',
   'unit.visits': 'käyntiä',
 
@@ -810,7 +816,7 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
   'modal.noRecordings': 'Ei vielä tallenteita.',
   'modal.recordingsFailed': 'Tallenteiden lataaminen epäonnistui.',
   'modal.noDescription': 'Kuvausta ei ole saatavilla.',
-  'modal.captured': '{n} otosta',
+  'modal.captured': '{n} tallennetta',
   'modal.play': 'toista',
   // 'modal.scrub' deliberately omitted -> falls back to the en value.
 
@@ -958,7 +964,7 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
   'atlas.noWindowTitle': 'Aucune détection sur cette période.',
   'atlas.noWindowHint': 'Essayez une période plus longue.',
   'atlas.allTime': 'depuis toujours',
-  'atlas.new': 'nouveau',
+  'atlas.new': 'nouvelle',
   'atlas.newTitle': 'première fois que cette espèce est entendue ici',
 
   // ---- Detail modal: chrome ----
@@ -983,7 +989,7 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
   'modal.noRecordings': 'Aucun enregistrement pour l’instant.',
   'modal.recordingsFailed': 'Échec du chargement des enregistrements.',
   'modal.noDescription': 'Aucune description disponible.',
-  'modal.captured': '{n} capturés',
+  'modal.captured': 'captures : {n}',
   'modal.play': 'lecture',
   // 'modal.scrub' deliberately omitted -> falls back to the en value.
 
@@ -1049,6 +1055,12 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
 };
 
 // HABirdDashboard - Italian (it) UI strings.
+//
+// A standalone, self-registering translation: keys mirror en.js exactly;
+// values are natural Italian. Any key omitted here falls back to the en
+// reference table by design. Scientific names and the stable rarity/label
+// CODES are never translated - only the display strings for existing keys.
+// {name} placeholders are preserved and filled by tt(key, {name: value}).
 (window.HABIRD_I18N = window.HABIRD_I18N || {}).it = {
   // ---- View slider ----
   'view.collage': 'collage',
@@ -1150,7 +1162,7 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
   'modal.noRecordings': 'Ancora nessuna registrazione.',
   'modal.recordingsFailed': 'Impossibile caricare le registrazioni.',
   'modal.noDescription': 'Nessuna descrizione disponibile.',
-  'modal.captured': '{n} catturati',
+  'modal.captured': 'catturate: {n}',
   'modal.play': 'riproduci',
   // 'modal.scrub' deliberately omitted -> falls back to the en value.
 
@@ -1256,8 +1268,8 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
   'window.allTime': 'noensinne',
 
   // ---- Collage tooltip units ----
-  'unit.call': 'kall',
-  'unit.calls': 'kall',
+  'unit.call': 'lyd',
+  'unit.calls': 'lyder',
   'unit.visit': 'besøk',
   'unit.visits': 'besøk',
 
@@ -1314,8 +1326,8 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
   'modal.visits': 'besøk',
   'modal.visitsWindow': 'besøk {window}',
   'modal.recordings': 'Opptak',
-  'modal.refCall': 'referansekall',
-  'modal.playRefCall': 'spill av referansekall',
+  'modal.refCall': 'referanselyd',
+  'modal.playRefCall': 'spill av referanselyd',
   'modal.wiki': 'wiki',
   'modal.ebird': 'ebird',
   // ---- Detail modal: dynamic ----
@@ -1335,12 +1347,12 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
   'rarity.rare': 'sjelden',
 
   // ---- Reference call (Xeno-Canto) ----
-  'refcall.none': 'ingen referansekall på Xeno-Canto for denne arten',
+  'refcall.none': 'ingen referanselyd på Xeno-Canto for denne arten',
   'refcall.busy': 'Xeno-Canto er opptatt (hastighetsgrense) — prøv igjen om et øyeblikk',
-  'refcall.unavailableCode': 'referansekall utilgjengelig (Xeno-Canto {code})',
-  'refcall.unavailable': 'referansekall utilgjengelig',
-  'refcall.cantPlay': 'kunne ikke spille av dette referansekallet',
-  'refcall.credit': 'Referansekall: Xeno-Canto',
+  'refcall.unavailableCode': 'referanselyd utilgjengelig (Xeno-Canto {code})',
+  'refcall.unavailable': 'referanselyd utilgjengelig',
+  'refcall.cantPlay': 'kunne ikke spille av denne referanselyden',
+  'refcall.credit': 'Referanselyd: Xeno-Canto',
   'refcall.recBy': ' · oppt. {rec}',
   'refcall.license': 'lisens',
 
@@ -1368,10 +1380,10 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
   // own localized text is preferred; this table is the standalone/fallback.
   'weather.clear-night': 'klar natt',
   'weather.cloudy': 'skyet',
-  'weather.exceptional': 'ekstremvær',
+  'weather.exceptional': 'eksepsjonelt',
   'weather.fog': 'tåke',
   'weather.hail': 'hagl',
-  'weather.lightning': 'tordenvær',
+  'weather.lightning': 'lyn',
   'weather.lightning-rainy': 'tordenvær og regn',
   'weather.partlycloudy': 'delvis skyet',
   'weather.pouring': 'styrtregn',
@@ -1509,7 +1521,7 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
 
   // ---- Reference call (Xeno-Canto) ----
   'refcall.none': 'geen referentieroep op Xeno-Canto voor deze soort',
-  'refcall.busy': 'Xeno-Canto is bezet (snelheidslimiet) — probeer het straks opnieuw',
+  'refcall.busy': 'Xeno-Canto is overbelast (snelheidslimiet) — probeer het straks opnieuw',
   'refcall.unavailableCode': 'referentieroep niet beschikbaar (Xeno-Canto {code})',
   'refcall.unavailable': 'referentieroep niet beschikbaar',
   'refcall.cantPlay': 'kon deze referentieroep niet afspelen',
@@ -1577,9 +1589,9 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
   'view.aria': 'Widok',
 
   // ---- Window picker (abbreviations) ----
-  'winpick.1h': '1G',
-  'winpick.12h': '12G',
-  'winpick.24h': '24G',
+  'winpick.1h': '1H',
+  'winpick.12h': '12H',
+  'winpick.24h': '24H',
   'winpick.7d': '7D',
   'winpick.all': 'WSZ',
 
@@ -1670,7 +1682,7 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
   'modal.noRecordings': 'Brak nagrań.',
   'modal.recordingsFailed': 'Nie udało się wczytać nagrań.',
   'modal.noDescription': 'Brak dostępnego opisu.',
-  'modal.captured': '{n} zarejestrowanych',
+  'modal.captured': 'zarejestrowano: {n}',
   'modal.play': 'odtwórz',
   // 'modal.scrub' deliberately omitted -> falls back to the en value.
 
@@ -1844,7 +1856,7 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
   'modal.noRecordings': 'Ainda sem gravações.',
   'modal.recordingsFailed': 'Falha ao carregar gravações.',
   'modal.noDescription': 'Sem descrição disponível.',
-  'modal.captured': '{n} capturadas',
+  'modal.captured': 'capturas: {n}',
   'modal.play': 'reproduzir',
   'modal.scrub': 'arrastar',
 
@@ -1852,7 +1864,7 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
   'rarity.common': 'comum',
   'rarity.regular': 'regular',
   'rarity.occasional': 'ocasional',
-  'rarity.rare': 'raro',
+  'rarity.rare': 'rara',
 
   // ---- Reference call (Xeno-Canto) ----
   'refcall.none': 'sem chamada de referência no Xeno-Canto para esta espécie',
@@ -1924,9 +1936,9 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
   'view.aria': 'Vy',
 
   // ---- Window picker (abbreviations) ----
-  'winpick.1h': '1T',
-  'winpick.12h': '12T',
-  'winpick.24h': '24T',
+  'winpick.1h': '1H',
+  'winpick.12h': '12H',
+  'winpick.24h': '24H',
   'winpick.7d': '7D',
   'winpick.all': 'ALLA',
 
@@ -2017,7 +2029,7 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
   'modal.noRecordings': 'Inga inspelningar än.',
   'modal.recordingsFailed': 'Det gick inte att läsa in inspelningar.',
   'modal.noDescription': 'Ingen beskrivning tillgänglig.',
-  'modal.captured': '{n} inspelade',
+  'modal.captured': 'inspelningar: {n}',
   'modal.play': 'spela upp',
   // 'modal.scrub' deliberately omitted -> falls back to the en value.
 
@@ -2059,9 +2071,9 @@ var DIRS = {"acanthis-flammea-2":213,"acanthiza-chrysorrhoa-2":208,"acanthiza-li
   // ---- Weather conditions (standalone / fallback path) ----
   // Keyed by Home Assistant's weather condition slugs. In the card build HA's
   // own localized text is preferred; this table is the standalone/fallback.
-  'weather.clear-night': 'klart',
+  'weather.clear-night': 'klar natt',
   'weather.cloudy': 'molnigt',
-  'weather.exceptional': 'extremt',
+  'weather.exceptional': 'exceptionellt',
   'weather.fog': 'dimma',
   'weather.hail': 'hagel',
   'weather.lightning': 'åska',

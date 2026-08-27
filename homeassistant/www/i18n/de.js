@@ -135,7 +135,7 @@
 
   // ---- False-positive flag pill ----
   'flag.report': 'als Fehlerkennung melden',
-  'flag.armed': 'nicht die?',
+  'flag.armed': 'falsch erkannt?',
   'flag.armedTitle': 'nochmal tippen, um als Fehlerkennung zu melden',
   'flag.done': 'als Fehlerkennung gemeldet',
   'flag.failed': 'fehlgeschlagen',

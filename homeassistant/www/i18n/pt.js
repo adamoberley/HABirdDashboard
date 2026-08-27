@@ -107,7 +107,7 @@
   'modal.noRecordings': 'Ainda sem gravações.',
   'modal.recordingsFailed': 'Falha ao carregar gravações.',
   'modal.noDescription': 'Sem descrição disponível.',
-  'modal.captured': '{n} capturadas',
+  'modal.captured': 'capturas: {n}',
   'modal.play': 'reproduzir',
   'modal.scrub': 'arrastar',
 
@@ -115,7 +115,7 @@
   'rarity.common': 'comum',
   'rarity.regular': 'regular',
   'rarity.occasional': 'ocasional',
-  'rarity.rare': 'raro',
+  'rarity.rare': 'rara',
 
   // ---- Reference call (Xeno-Canto) ----
   'refcall.none': 'sem chamada de referência no Xeno-Canto para esta espécie',

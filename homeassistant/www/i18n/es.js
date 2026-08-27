@@ -45,7 +45,7 @@
 
   // ---- Stats: By Period ----
   'stats.byPeriod': 'Por período',
-  'stats.byPeriodSub': 'detecciones, agrupadas por recencia',
+  'stats.byPeriodSub': 'detecciones, agrupadas por antigüedad',
   'stats.badgeNow': 'AHORA',
   'stats.badgeToday': 'HOY',
   'stats.badgeWeek': 'SEMANA',
@@ -106,7 +106,7 @@
   'modal.noRecordings': 'Aún no hay grabaciones.',
   'modal.recordingsFailed': 'No se pudieron cargar las grabaciones.',
   'modal.noDescription': 'No hay descripción disponible.',
-  'modal.captured': '{n} capturadas',
+  'modal.captured': 'capturas: {n}',
   'modal.play': 'reproducir',
   // 'modal.scrub' deliberately omitted -> falls back to the en value.
 

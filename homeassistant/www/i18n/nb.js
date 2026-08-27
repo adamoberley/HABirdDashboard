@@ -39,8 +39,8 @@
   'window.allTime': 'noensinne',
 
   // ---- Collage tooltip units ----
-  'unit.call': 'kall',
-  'unit.calls': 'kall',
+  'unit.call': 'lyd',
+  'unit.calls': 'lyder',
   'unit.visit': 'besøk',
   'unit.visits': 'besøk',
 
@@ -97,8 +97,8 @@
   'modal.visits': 'besøk',
   'modal.visitsWindow': 'besøk {window}',
   'modal.recordings': 'Opptak',
-  'modal.refCall': 'referansekall',
-  'modal.playRefCall': 'spill av referansekall',
+  'modal.refCall': 'referanselyd',
+  'modal.playRefCall': 'spill av referanselyd',
   'modal.wiki': 'wiki',
   'modal.ebird': 'ebird',
   // ---- Detail modal: dynamic ----
@@ -118,12 +118,12 @@
   'rarity.rare': 'sjelden',
 
   // ---- Reference call (Xeno-Canto) ----
-  'refcall.none': 'ingen referansekall på Xeno-Canto for denne arten',
+  'refcall.none': 'ingen referanselyd på Xeno-Canto for denne arten',
   'refcall.busy': 'Xeno-Canto er opptatt (hastighetsgrense) — prøv igjen om et øyeblikk',
-  'refcall.unavailableCode': 'referansekall utilgjengelig (Xeno-Canto {code})',
-  'refcall.unavailable': 'referansekall utilgjengelig',
-  'refcall.cantPlay': 'kunne ikke spille av dette referansekallet',
-  'refcall.credit': 'Referansekall: Xeno-Canto',
+  'refcall.unavailableCode': 'referanselyd utilgjengelig (Xeno-Canto {code})',
+  'refcall.unavailable': 'referanselyd utilgjengelig',
+  'refcall.cantPlay': 'kunne ikke spille av denne referanselyden',
+  'refcall.credit': 'Referanselyd: Xeno-Canto',
   'refcall.recBy': ' · oppt. {rec}',
   'refcall.license': 'lisens',
 
@@ -151,10 +151,10 @@
   // own localized text is preferred; this table is the standalone/fallback.
   'weather.clear-night': 'klar natt',
   'weather.cloudy': 'skyet',
-  'weather.exceptional': 'ekstremvær',
+  'weather.exceptional': 'eksepsjonelt',
   'weather.fog': 'tåke',
   'weather.hail': 'hagl',
-  'weather.lightning': 'tordenvær',
+  'weather.lightning': 'lyn',
   'weather.lightning-rainy': 'tordenvær og regn',
   'weather.partlycloudy': 'delvis skyet',
   'weather.pouring': 'styrtregn',

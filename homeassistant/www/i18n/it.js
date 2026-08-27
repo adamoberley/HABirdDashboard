@@ -1,4 +1,10 @@
 // HABirdDashboard - Italian (it) UI strings.
+//
+// A standalone, self-registering translation: keys mirror en.js exactly;
+// values are natural Italian. Any key omitted here falls back to the en
+// reference table by design. Scientific names and the stable rarity/label
+// CODES are never translated - only the display strings for existing keys.
+// {name} placeholders are preserved and filled by tt(key, {name: value}).
 (window.HABIRD_I18N = window.HABIRD_I18N || {}).it = {
   // ---- View slider ----
   'view.collage': 'collage',
@@ -100,7 +106,7 @@
   'modal.noRecordings': 'Ancora nessuna registrazione.',
   'modal.recordingsFailed': 'Impossibile caricare le registrazioni.',
   'modal.noDescription': 'Nessuna descrizione disponibile.',
-  'modal.captured': '{n} catturati',
+  'modal.captured': 'catturate: {n}',
   'modal.play': 'riproduci',
   // 'modal.scrub' deliberately omitted -> falls back to the en value.
 

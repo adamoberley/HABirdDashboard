@@ -118,7 +118,7 @@
 
   // ---- Reference call (Xeno-Canto) ----
   'refcall.none': 'geen referentieroep op Xeno-Canto voor deze soort',
-  'refcall.busy': 'Xeno-Canto is bezet (snelheidslimiet) — probeer het straks opnieuw',
+  'refcall.busy': 'Xeno-Canto is overbelast (snelheidslimiet) — probeer het straks opnieuw',
   'refcall.unavailableCode': 'referentieroep niet beschikbaar (Xeno-Canto {code})',
   'refcall.unavailable': 'referentieroep niet beschikbaar',
   'refcall.cantPlay': 'kon deze referentieroep niet afspelen',

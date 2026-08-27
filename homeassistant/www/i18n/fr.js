@@ -81,7 +81,7 @@
   'atlas.noWindowTitle': 'Aucune détection sur cette période.',
   'atlas.noWindowHint': 'Essayez une période plus longue.',
   'atlas.allTime': 'depuis toujours',
-  'atlas.new': 'nouveau',
+  'atlas.new': 'nouvelle',
   'atlas.newTitle': 'première fois que cette espèce est entendue ici',
 
   // ---- Detail modal: chrome ----
@@ -106,7 +106,7 @@
   'modal.noRecordings': 'Aucun enregistrement pour l’instant.',
   'modal.recordingsFailed': 'Échec du chargement des enregistrements.',
   'modal.noDescription': 'Aucune description disponible.',
-  'modal.captured': '{n} capturés',
+  'modal.captured': 'captures : {n}',
   'modal.play': 'lecture',
   // 'modal.scrub' deliberately omitted -> falls back to the en value.
 
