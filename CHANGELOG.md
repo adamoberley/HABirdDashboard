@@ -1,5 +1,37 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- **Live detections.** The card now subscribes to BirdNET-Go's SSE stream
+  (`/api/v2/detections/stream`, `live: true` by default) as a push signal:
+  a new detection refreshes the card within seconds instead of on the next
+  30s poll. Falls back silently on servers without the endpoint (or with
+  Private Mode enabled); the polling safety net is unchanged. Bounded
+  reconnects with backoff; the stream pauses while the tab is hidden.
+- **Private Mode support.** New `api_token` option (card YAML, visual
+  editor, and `AV_CONFIG.apiToken` on the standalone page) sends a Bearer
+  token on every BirdNET-Go API call — including clip playback, which is
+  fetched as a blob so the `<audio>` element can carry the auth. A 401
+  without a token shows a clear "BirdNET-Go requires sign-in" hint instead
+  of a silently empty card.
+- **Native MQTT auto-discovery, first-class.** BirdNET-Go's own Home
+  Assistant MQTT discovery sensors (Jan 2026) are picked up automatically,
+  and a microphone whose sensors go `unavailable` is now surfaced with a
+  quiet "{n} microphone(s) offline" note in the stats view (named when HA
+  can format the entity name). README documents the one-toggle
+  `mqtt_auto_config` zero-YAML setup for the alexbelgium add-on.
+- **HA 2026.6 card-picker suggestions.** Selecting any BirdNET-Go sensor
+  in the new dashboard card picker now suggests Bird Card with a live
+  preview (`getEntitySuggestion`).
+
+### Fixed
+- **Hardened against 2026 BirdNET-Go API changes**: the false-positive
+  report sends both the old and new review field names and surfaces the
+  new CSRF 403 distinctly; detection `source` is accepted as string or
+  object; audio requests honor `503 + Retry-After` while a clip is still
+  being written.
+
 ## v1.3.0 — 2026-08-27
 
 ### Added
