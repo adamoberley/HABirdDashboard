@@ -175,6 +175,29 @@
 
   function bgUrl(path) { return BG_BASE + '/api/v2' + path; }
 
+  // ---- API token (Private Mode) ----
+  // BirdNET-Go's "Private Mode" (Security.PrivateMode, mid-2026+) locks the
+  // ENTIRE v2 API behind login - every unauthenticated request 401s, even
+  // the previously-public detections/analytics routes this adapter relies
+  // on. api_token carries a personal token minted in BirdNET-Go's own
+  // settings; when set, every request that touches the BirdNET-Go API
+  // (reads AND the review write-back) rides an Authorization: Bearer
+  // header. This is the ONLY place that header gets added - Wikipedia,
+  // Xeno-Canto and Home Assistant fetches call the platform fetch()
+  // directly (see bgWiki, the XC helpers below, and haJson further down)
+  // and never see it. With no token set this is a transparent passthrough.
+  function bgFetch(url, opts) {
+    opts = opts || {};
+    if (!AV_CFG.apiToken) return fetch(url, opts);
+    var headers = {}, k;
+    for (k in (opts.headers || {})) headers[k] = opts.headers[k];
+    headers.Authorization = 'Bearer ' + AV_CFG.apiToken;
+    var merged = {};
+    for (k in opts) merged[k] = opts[k];
+    merged.headers = headers;
+    return fetch(url, merged);
+  }
+
   // ---- HTTPS / Nabu Casa: route the API through HA ingress ----
   // Remote access tunnels only HA itself, and the browser blocks an
   // https page from calling a plain-http LAN URL (mixed content) - so
@@ -310,7 +333,13 @@
           (location.protocol === 'https:' ? ';Secure' : '');
       }
       function post() {
-        return fetch(base + '/api/v2/detections/' + encodeURIComponent(id) + '/review', {
+        // Field name: BirdNET-Go's public API reference documents this
+        // route (POST /detections/:id/review) but not its request body -
+        // and the Apr 2026 release renamed the SEARCH response's verdict
+        // field 'verified' -> 'correct'. Send both; BirdNET-Go ignores
+        // unknown JSON fields, so this reads correctly on either side of
+        // the rename without needing to sniff the server version first.
+        return bgFetch(base + '/api/v2/detections/' + encodeURIComponent(id) + '/review', {
           method: 'POST',
           credentials: 'same-origin',
           cache: 'no-store',
@@ -318,7 +347,7 @@
             'Content-Type': 'application/json',
             'X-CSRF-Token': tok,
           },
-          body: JSON.stringify({ verified: verified }),
+          body: JSON.stringify({ verified: verified, correct: verified }),
         }).then(function (r) { return r.ok ? r : Promise.reject(r.status); });
       }
       return post().catch(function (status) {
@@ -338,11 +367,41 @@
   // CORS-clean audio (crossOrigin=anonymous; BirdNET-Go's media endpoints
   // send permissive CORS, and ingress is same-origin anyway).
   var _boostCtx = null;
+  // Private Mode: a plain `<audio src>` can never carry the Authorization
+  // header BirdNET-Go now requires (see bgFetch) - clip playback would 401
+  // even with a correctly configured api_token, unlike the spectrogram
+  // decode path (bgAudioFetch) which already goes through fetch(). Only
+  // detour through a fetched blob when a token is actually configured -
+  // the common (no token) case keeps the cheap direct <audio src>, and
+  // reuses bgAudioFetch's 503+Retry-After retry for free.
   function makeAudio(url) {
     var audio = new Audio();
     var db = +AV_CFG.audioBoostDb || 0;
     if (db > 0) audio.crossOrigin = 'anonymous';
-    audio.src = url;
+    if (AV_CFG.apiToken) {
+      // Deliberately never revoke this object URL: the 'emptied' event
+      // (the obvious hook) fires as part of the same load algorithm that
+      // sets audio.src in the first place, which would revoke the blob
+      // before the browser ever fetches it. Rows also keep their <audio>
+      // around after playback ends so the user can replay without
+      // re-fetching (see the 'ended' handler above), so there's no safe
+      // "done with this clip" moment short of the element being GC'd -
+      // one clip's worth of blob per play is an acceptable trade for
+      // Private Mode installs actually being able to play clips at all.
+      bgAudioFetch(url).then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.blob();
+      }).then(function (blob) {
+        audio.src = URL.createObjectURL(blob);
+      }).catch(function () {
+        // Surface the same failure state a bare <audio src> 401/404 would -
+        // existing 'error' listeners (e.g. the play button's "missing"
+        // state) still fire even though this never touched audio.src.
+        try { audio.dispatchEvent(new Event('error')); } catch (e2) {}
+      });
+    } else {
+      audio.src = url;
+    }
     if (db > 0) {
       var Ctx = window.AudioContext || window.webkitAudioContext;
       if (Ctx) {
@@ -364,7 +423,7 @@
 
   function bgJson(path) {
     return BG_READY.then(function () {
-      return fetch(bgUrl(path), { cache: 'no-store' });
+      return bgFetch(bgUrl(path), { cache: 'no-store' });
     }).then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); });
   }
   // Short-TTL memo so one refreshAll() fan-out (stats + lifelist + recent +
@@ -638,6 +697,18 @@
     });
   }
 
+  // DetectionResponse.source changed from a plain string to an object
+  // {id, type, displayName} in BirdNET-Go's Aug 2026 release (per the API
+  // docs, unauthenticated clients only ever get the anonymized id form
+  // either way - full displayName needs an authenticated request). Route
+  // every read of a detection's source through here so it resolves to a
+  // display string regardless of which shape the server sends.
+  function sourceDisplayName(source) {
+    if (source == null) return '';
+    if (typeof source === 'string') return source;
+    return source.displayName || source.id || '';
+  }
+
   // Per-species detail: the detection list that powers the modal's
   // Recordings section. queryType=search matches sci OR common name with
   // LIKE, so re-filter to the exact scientific name (keeps subspecies and
@@ -651,7 +722,7 @@
       var dets = ((parts[0] || {}).data || []).filter(function (d) {
         return d.scientificName === sci;
       }).map(function (d) {
-        return { d: d.date, t: d.time, file: String(d.id), conf: +d.confidence || 0 };
+        return { d: d.date, t: d.time, file: String(d.id), conf: +d.confidence || 0, src: sourceDisplayName(d.source) };
       });
       var row = parts[1].species.filter(function (s) { return s.sci === sci; })[0] || {};
       return {
@@ -699,6 +770,23 @@
   // BirdNET-Go serves each detection's clip at /api/v2/audio/:id.
   function bgAudioUrl(fileId) {
     return bgUrl('/audio/' + encodeURIComponent(fileId));
+  }
+
+  // Extended-capture clips answer 503 + Retry-After while BirdNET-Go is
+  // still writing the file to disk. Wait the advertised delay (capped at
+  // 10s so a bad/huge header can't hang the UI) and retry exactly once;
+  // a second failure (or a 503 with no Retry-After) falls through to the
+  // caller's existing error handling unchanged. Used for the spectrogram
+  // decode fetches only - playback itself goes through a plain <audio>
+  // element (see makeAudio), which can't retry a load this way.
+  function bgAudioFetch(url) {
+    return bgFetch(url).then(function (r) {
+      if (r.status !== 503) return r;
+      var ra = parseFloat(r.headers.get('Retry-After'));
+      var wait = Math.min((ra > 0 ? ra : 1), 10) * 1000;
+      return new Promise(function (res) { setTimeout(res, wait); })
+        .then(function () { return bgFetch(url); });
+    });
   }
 
   // Latest clip for a species (the atlas cards' play button). Resolved
@@ -857,32 +945,80 @@
   function hhDays() { return Math.max(1, +AV_CFG.historyDays || 10); }
 
   // The MQTT sensor trios, one per microphone. Explicit via AV_CFG.haSensors
-  // (a list of *_scientific_name entity ids) or discovered by suffix.
+  // (a list of *_scientific_name entity ids) or discovered by suffix. This
+  // also picks up BirdNET-Go's native HA MQTT auto-discovery sensors
+  // (shipped Jan 2026, e.g. via the alexbelgium add-on's mqtt_auto_config)
+  // without any change - they publish the same *_scientific_name /
+  // *_confidence suffix convention as a manually-wired MQTT sensor.
+  //
+  // Each returned set carries `offline`: true when the scientific-name
+  // sensor's current HA state is 'unavailable' or 'unknown' - the state
+  // native discovery's device availability topic flips it to when the
+  // source (RTSP stream, USB mic, ...) drops. The mic stays listed (its
+  // history is never dropped - hhJoinHistory already ignores unavailable/
+  // unknown readings when it walks that history, offline or not) but
+  // callers can use the flag to exclude it from "is everything live"
+  // checks. `offline` is false when we have no current-state info to
+  // judge from (the AV_CFG.haSensors override without a live hass).
   function hhSensorSets() {
     // Feeder-visit sensors (see vvSensorIds below) share the
     // *_scientific_name suffix but are a different stream - never count
     // a camera sighting as a microphone call.
     var skip = {};
     vvSensorIds().forEach(function (id) { skip[id] = 1; });
-    function fromIds(ids) {
+    function fromIds(ids, stateOf) {
+      stateOf = stateOf || function () { return null; };
       return ids.filter(function (id) { return /_scientific_name$/.test(id) && !skip[id]; })
         .map(function (id) {
+          var st = stateOf(id);
           return {
             sci: id,
             conf: id.replace(/_scientific_name$/, '_confidence'),
             com: id.replace(/_scientific_name$/, '_last_species'),
+            offline: st === 'unavailable' || st === 'unknown',
           };
         });
     }
-    if (AV_CFG.haSensors && AV_CFG.haSensors.length) {
-      return Promise.resolve(fromIds(AV_CFG.haSensors));
-    }
     var hass = AV_CFG.__getHass && AV_CFG.__getHass();
-    if (hass && hass.states) return Promise.resolve(fromIds(Object.keys(hass.states)));
+    var stateOfHass = (hass && hass.states)
+      ? function (id) { return hass.states[id] && hass.states[id].state; }
+      : null;
+    if (AV_CFG.haSensors && AV_CFG.haSensors.length) {
+      return Promise.resolve(fromIds(AV_CFG.haSensors, stateOfHass));
+    }
+    if (hass && hass.states) return Promise.resolve(fromIds(Object.keys(hass.states), stateOfHass));
     return haMemo('states', 60000, function () { return haApi('states'); })
       .then(function (all) {
-        return fromIds((all || []).map(function (e) { return e.entity_id; }));
+        var byId = {};
+        (all || []).forEach(function (e) { byId[e.entity_id] = e.state; });
+        return fromIds((all || []).map(function (e) { return e.entity_id; }),
+          function (id) { return byId[id]; });
       });
+  }
+
+  // The currently-offline microphones (see hhSensorSets' `offline` flag).
+  // Resolves [] (never rejects) with no HA connection or no discovered
+  // sensors, so callers can use it unconditionally to drive a UI note.
+  function hhOfflineMics() {
+    if (!haAvailable()) return Promise.resolve([]);
+    return hhSensorSets().then(function (sets) {
+      return sets.filter(function (s) { return s.offline; });
+    }).catch(function () { return []; });
+  }
+  // A sensor entity's display name, preferring HA's own entity-name
+  // formatter (hass.formatEntityName, added in HA 2026.6) over the raw
+  // entity id - it follows the user's HA naming/language settings the
+  // same way the picker itself does. Falls back to '' (not the id) so
+  // callers can tell "no nicer name available" apart from a real one and
+  // keep their own current behaviour in that case.
+  function haEntityLabel(hass, id) {
+    try {
+      var st = hass && hass.states && hass.states[id];
+      if (st && typeof hass.formatEntityName === 'function') {
+        return hass.formatEntityName(st) || '';
+      }
+    } catch (e) { /* fall through to '' below */ }
+    return '';
   }
 
   function hhFmtTs(ms) {
@@ -2509,6 +2645,12 @@
     activity: null,     // ./avian/api/birdnet-api.php?action=activity&hours=N (per-species hourly heatmap)
     visits: null,       // vvRecent(hours) - feeder-camera sightings, when configured
   };
+  // Set by the most recent refreshAll() when the stats/lifelist fetches
+  // (the primary summary/daily calls) came back 401 - BirdNET-Go's
+  // "Private Mode" gating the whole API behind login with no api_token
+  // configured. Read by renderAtlas to swap its normal empty state for a
+  // message that says what's actually wrong, instead of a silent blank.
+  var apiPrivateMode = false;
 
   // Derived chart arrays, backfilled so 30 buckets always exist.
   var STATS = {
@@ -2768,6 +2910,36 @@
           return liRow(label, s.com, '', s.sci);
         }).join('')
       : liRow('-', tt('stats.noneYet'), ''));
+
+    renderMicOfflineNote();
+  }
+
+  // Discovered-microphone availability note - a small muted line under
+  // "By Period" that only appears while at least one auto-discovered mic
+  // sensor is offline (native HA MQTT discovery flips it to 'unavailable'
+  // when the source drops). Silent (element stays hidden) the rest of the
+  // time, including when the card isn't using any HA sensors at all.
+  function renderMicOfflineNote() {
+    var el = document.getElementById('statsMicNote');
+    if (!el) return;
+    hhOfflineMics().then(function (offline) {
+      if (!offline.length) {
+        el.hidden = true;
+        el.textContent = '';
+        return;
+      }
+      el.hidden = false;
+      // Name the mic when HA can format entity names and exactly one is
+      // offline - a name reads better than a count of one. Any other
+      // case (no formatter, or several mics down) keeps the plain count,
+      // which also reads fine as a list of names would get long.
+      var name = offline.length === 1
+        ? haEntityLabel(AV_CFG.__getHass && AV_CFG.__getHass(), offline[0].sci)
+        : '';
+      el.textContent = name
+        ? tt('stats.micOfflineNamed', { name: name })
+        : tt('stats.micsOffline', { n: offline.length });
+    });
   }
 
   // ---- Atlas: field-guide card grid ----
@@ -2821,10 +2993,15 @@
     recent.forEach(function (s) { winBySci[s.sci] = +s.n; });
 
     if (!lifelist.length) {
-      setHtml(grid, '<div class="atlas-empty">' +
-        '<p>' + esc(tt('atlas.emptyTitle')) + '</p>' +
-        '<p class="hint">' + esc(tt('atlas.emptyHint')) + '</p>' +
-        '</div>');
+      // Private Mode (401 on the primary summary/daily fetches) gets its
+      // own message instead of the generic "nothing yet" copy - the fix
+      // (set api_token) is different from "wait for detections".
+      setHtml(grid, apiPrivateMode
+        ? '<div class="atlas-empty"><p>' + esc(tt('error.privateMode')) + '</p></div>'
+        : '<div class="atlas-empty">' +
+          '<p>' + esc(tt('atlas.emptyTitle')) + '</p>' +
+          '<p class="hint">' + esc(tt('atlas.emptyHint')) + '</p>' +
+          '</div>');
       return;
     }
 
@@ -2988,7 +3165,7 @@
           } else {
             var actx = getSpecCtx();
             if (actx) {
-              fetch(aurl)
+              bgAudioFetch(aurl)
                 .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); })
                 .then(function (b) { return actx.decodeAudioData(b); })
                 .then(function (buf) {
@@ -3107,9 +3284,20 @@
   }
   function refreshAll(animate) {
     var forHours = currentHours;
+    // Only the primary summary/daily fetches (stats + lifelist) flip the
+    // Private Mode message - a 401 from a secondary call (timeseries,
+    // visits, ...) still means "not signed in", but stats/lifelist always
+    // fire together and their failure alone is enough to tell the story.
+    var authFailed = false;
+    function watchAuth(p) {
+      return p.catch(function (e) {
+        if (e === 401) authFailed = true;
+        return null;
+      });
+    }
     return Promise.all([
-      fetchJson('./avian/api/birdnet-api.php?action=stats').catch(function () { return null; }),
-      fetchJson('./avian/api/birdnet-api.php?action=lifelist').catch(function () { return null; }),
+      watchAuth(fetchJson('./avian/api/birdnet-api.php?action=stats')),
+      watchAuth(fetchJson('./avian/api/birdnet-api.php?action=lifelist')),
       fetchJson('./avian/api/birdnet-api.php?action=timeseries&days=30').catch(function () { return null; }),
       fetchJson('./avian/api/birdnet-api.php?action=firstseen&limit=10').catch(function () { return null; }),
       fetchJson('./avian/api/birdnet-api.php?action=recent&hours=' + forHours).catch(function () { return null; }),
@@ -3118,6 +3306,7 @@
         ? vvRecent(forHours).catch(function () { return null; })
         : Promise.resolve(null),
     ]).then(function (parts) {
+      apiPrivateMode = authFailed;
       DATA.stats = parts[0];
       DATA.lifelist = parts[1];
       DATA.timeseries = parts[2];
@@ -3137,8 +3326,10 @@
 
   // Kick off the initial fetch. Renders pull from DATA as soon as it
   // populates; until then the page sits with empty histograms + lists.
-  // animate=true so the collage blooms in on first load.
-  refreshAll(true);
+  // animate=true so the collage blooms in on first load. The live SSE
+  // stream (below) only opens once this settles, so it never races the
+  // very first render.
+  refreshAll(true).then(function () { startLive(); });
 
   // Hook into the window picker so the data refetches on change. Pass
   // animate=true so the collage blooms (the silent poll passes nothing).
@@ -3167,24 +3358,103 @@
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) {
       stopPolling();
+      stopLive();
     } else {
       // Force an immediate refresh on return so the user sees fresh
       // data right away, then resume normal polling cadence.
       refreshAll();
       startPolling();
+      startLive();
     }
   });
   startPolling();
 
-  // Card builds call this when a BirdNET-Go MQTT sensor updates: clear
-  // the short-TTL response memos (they'd otherwise serve the pre-event
-  // answer) and refresh immediately. No-op on the static page.
+  // Shared "something changed, refetch" path: clears the short-TTL
+  // response memos (they'd otherwise serve the pre-event answer) and
+  // refreshes right away. Card builds reach this via a BirdNET-Go MQTT
+  // sensor update (__exposeRefresh below); the live SSE stream (below)
+  // reaches it too - both are just triggers, neither carries any data.
+  function pushRefresh() {
+    _bgMemo = {};
+    _haMemo = {};
+    refreshAll();
+  }
+
+  // Card builds call this when a BirdNET-Go MQTT sensor updates. No-op
+  // on the static page.
   if (AV_CFG.__exposeRefresh) {
-    AV_CFG.__exposeRefresh(function () {
-      _bgMemo = {};
-      _haMemo = {};
-      refreshAll();
-    });
+    AV_CFG.__exposeRefresh(pushRefresh);
+  }
+
+  // ---- Live detections (SSE) ----
+  // BirdNET-Go's detections/stream endpoint (GET {base}/api/v2/detections/
+  // stream, an EventSource) pushes a 'detection' event the instant a new
+  // call lands. This is a REFRESH SIGNAL ONLY: the event payload is never
+  // parsed into DATA - only the polling fetches above ever populate it -
+  // so a server-version mismatch in the event's shape can't corrupt
+  // state, it can only fail to speed up a refresh that would have
+  // happened within POLL_MS anyway. Debounced 2s (a burst of near-
+  // simultaneous calls should trigger one refetch, not several).
+  var LIVE_ENABLED = AV_CFG.live !== false && typeof EventSource !== 'undefined';
+  var liveSource = null;
+  var liveReconnectT = null;
+  var liveDebounceT = null;
+  var liveReconnectDelay = 5000;  // 5s, doubles up to a 60s cap
+  var liveFailures = 0;           // consecutive drops since the last open
+  // Failing before the connection ever opens usually means a 404 (server
+  // predates the stream endpoint) or 401 (BirdNET-Go Private Mode -
+  // EventSource can't carry the Authorization header this page would
+  // otherwise send) - EventSource exposes no HTTP status, so that's
+  // indistinguishable from a one-off transient failure (BirdNET-Go/HA
+  // still starting up, a brief network blip). Retry once with the normal
+  // backoff before concluding it's permanent, so a startup race doesn't
+  // silently disable the feature for the rest of this boot. Normal 30s
+  // polling is unaffected either way.
+  var livePreOpenFailures = 0;
+  var liveGaveUp = false;
+
+  function liveDebouncedRefresh() {
+    clearTimeout(liveDebounceT);
+    liveDebounceT = setTimeout(pushRefresh, 2000);
+  }
+  function stopLive() {
+    clearTimeout(liveReconnectT);
+    liveReconnectT = null;
+    clearTimeout(liveDebounceT);
+    liveDebounceT = null;
+    if (liveSource) { liveSource.close(); liveSource = null; }
+  }
+  function startLive() {
+    if (!LIVE_ENABLED || liveGaveUp || liveSource || document.hidden) return;
+    var opened = false;
+    var es = new EventSource(bgUrl('/detections/stream'));
+    liveSource = es;
+    es.addEventListener('detection', liveDebouncedRefresh);
+    es.onopen = function () {
+      opened = true;
+      liveFailures = 0;
+      liveReconnectDelay = 5000;
+    };
+    es.onerror = function () {
+      if (liveSource !== es) return; // superseded by a later attempt already
+      stopLive();
+      if (!opened) {
+        livePreOpenFailures++;
+        if (livePreOpenFailures >= 2) { liveGaveUp = true; return; }
+        liveReconnectT = setTimeout(startLive, liveReconnectDelay);
+        liveReconnectDelay = Math.min(60000, liveReconnectDelay * 2);
+        return;
+      }
+      liveFailures++;
+      if (liveFailures >= 5) return; // stop retrying until the next card boot
+      liveReconnectT = setTimeout(startLive, liveReconnectDelay);
+      liveReconnectDelay = Math.min(60000, liveReconnectDelay * 2);
+    };
+  }
+  // Card builds call this from disconnectedCallback so a stream doesn't
+  // linger once the card leaves the dashboard. No-op on the static page.
+  if (AV_CFG.__exposeLiveStop) {
+    AV_CFG.__exposeLiveStop(stopLive);
   }
 
   // ---- Menu dropdown ----
@@ -4060,7 +4330,12 @@
       document.getElementById('modalRecCount').textContent = tt('modal.captured', { n: dets.length });
       document.getElementById('modalRecordings').innerHTML = dets.length
         ? dets.map(function (d) {
-            return '<li class="rec-row" data-file="' + esc(d.file || '') + '" data-date="' + esc(d.d || '') + '">'
+            return '<li class="rec-row" data-file="' + esc(d.file || '') + '" data-date="' + esc(d.d || '') + '"'
+              // Multi-source stations (several RTSP/mic inputs) tag each
+              // detection with which one heard it; exposed as a data
+              // attribute (no dedicated UI yet) so it survives round-trip
+              // and can be styled/queried later without another API audit.
+              + (d.src ? ' data-source="' + esc(d.src) + '"' : '') + '>'
               + '<button class="play" type="button" aria-label="' + esc(tt('modal.play')) + '">' + ICON_PLAY + '</button>'
               + '<span class="when">' + esc(fmtRecTime(d.d, d.t)) + '<small>' + esc(fmtDateLine(d.d, d.t)) + '</small></span>'
               // Review write-back needs a detection id - present with the
@@ -4871,7 +5146,7 @@
     }
     var ctx = getSpecCtx();
     if (!ctx) { fail(tt('spectro.noWebAudio')); return; }
-    fetch(bgAudioUrl(file))
+    bgAudioFetch(bgAudioUrl(file))
       .then(function (r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.arrayBuffer();
@@ -4934,10 +5209,16 @@
         flagBtn.disabled = false;
         // Tooltips don't exist on touch - put a short reason IN the pill.
         var isPath = typeof err === 'string' && err.indexOf('needs-ingress') === 0;
+        // 403 is BirdNET-Go's Aug 2026 CSRF enforcement rejecting the
+        // write (a stale self-minted token, or a proxy that stripped the
+        // cookie) - distinct enough from a generic error code to say so.
+        var isForbidden = err === 403;
         var label = isPath ? tt('flag.noPath')
+          : isForbidden ? tt('flag.forbidden')
           : (typeof err === 'number' ? tt('flag.errCode', { code: err }) : tt('flag.failed'));
         var why = isPath
           ? tt('flag.needsIngress', { detail: err.slice('needs-ingress: '.length) })
+          : isForbidden ? tt('flag.forbiddenDetail')
           : tt('flag.refused', { err: err });
         try { console.warn('[bird-card] review write failed:', err); } catch (e) {}
         setFlag('failed', label, tt('flag.couldNotSave', { why: why }));
