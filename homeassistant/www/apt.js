@@ -1,7 +1,8 @@
 (function () {
   // Bumped whenever the offline sketch build changes, so the browser
   // doesn't keep a stale cache after we regenerate the sketches.
-  var SKETCH_VERSION = 'r15'; // r15: 64 new Australian species (BirdNET-Go
+  var SKETCH_VERSION = 'r16'; // r16: Black-billed Magpie (#60).
+                              // r15: 64 new Australian species (BirdNET-Go
                               // station list) + fox/frog non-bird detections.
                               // r14: silhouette masks for the 466 European
                               // (eBird DE) species so the collage can place
@@ -13,7 +14,8 @@
   // equivalent to a global cache purge for /api/img. (caches.default
   // .delete() in the worker only affects ONE colo at a time, so a
   // versioned URL is the only reliable way to invalidate everywhere.)
-  var IMG_VERSION = 'r15'; // r15: 64 new Australian species (BirdNET-Go
+  var IMG_VERSION = 'r16'; // r16: Black-billed Magpie (#60).
+                           // r15: 64 new Australian species (BirdNET-Go
                            // station list) + fox/frog non-bird detections.
                            // r14: European (eBird DE) species masks land in
                            // the collage. r13: 2K House Sparrow flight + House
