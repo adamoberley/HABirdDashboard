@@ -2,6 +2,14 @@
 // Loaded before apt.js so the dashboard knows where your BirdNET-Go
 // instance lives and how to choose each bird's pose.
 window.AV_CONFIG = {
+  // UI language override (optional). Leave unset to auto-detect: the HACS
+  // card follows Home Assistant's UI language, and this standalone page
+  // follows the browser (navigator.language). Set a code here to force it,
+  // e.g. 'da' or 'pt-BR'. Any string the card's own UI hasn't been
+  // translated to falls back to English. (Bird names come from BirdNET-Go
+  // and are not affected by this setting.)
+  // language: 'da',
+
   // Base URL of your BirdNET-Go instance (no trailing slash).
   //
   // Leave '' (empty) to auto-derive it as the host this page is served

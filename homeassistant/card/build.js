@@ -34,11 +34,32 @@ const masksSrc = fs.readFileSync(path.join(WWW, 'masks.js'), 'utf8');
 const cssSrc = fs.readFileSync(path.join(WWW, 'styles.css'), 'utf8');
 const htmlSrc = fs.readFileSync(path.join(WWW, 'index.html'), 'utf8');
 
+// Translation tables: one self-registering file per language under
+// homeassistant/www/i18n/. Inline every file (en first so it's the base
+// the others fall back to). A new-language PR is a single new file here -
+// no build.js edit needed. Text is a few KB per language, negligible next
+// to masks.js (~2 MB).
+const i18nDir = path.join(WWW, 'i18n');
+const i18nSrc = fs.readdirSync(i18nDir)
+  .filter(function (f) { return f.endsWith('.js'); })
+  .sort(function (a, b) { return a === 'en.js' ? -1 : b === 'en.js' ? 1 : a.localeCompare(b); })
+  .map(function (f) { return fs.readFileSync(path.join(i18nDir, f), 'utf8'); })
+  .join('\n');
+
 // ---------- Template: <body> contents, scripts stripped, in a shell div ----------
 const bodyMatch = htmlSrc.match(/<body[^>]*>([\s\S]*)<\/body>/);
 if (!bodyMatch) throw new Error('no <body> in index.html');
+// Strip HTML comments BEFORE scripts: some comments (e.g. the i18n
+// bootstrap note) contain literal "<script ...>" as prose. The script-tag
+// strip below is a naive regex that would otherwise latch onto that
+// in-comment "<script>", eat through to the next real </script>, and leave
+// the comment's "<!--" unterminated - which then swallows the <style> block
+// _boot appends after this template, killing all card CSS. Dropping
+// comments first makes the script strip see only real tags.
 const template = '<div class="av-shell av-local">'
-  + bodyMatch[1].replace(/<script[\s\S]*?<\/script>/g, '')
+  + bodyMatch[1]
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .replace(/<script[\s\S]*?<\/script>/g, '')
   + '</div>';
 
 // ---------- CSS: scope to the shadow root / card box ----------
@@ -442,6 +463,7 @@ class HABirdCard extends HTMLElement {
       windowHours: c.window || 24,           // hours, or 'all'
       birdnetGoUrl: c.birdnet_url || '',
       dataSource: c.data_source || 'auto',
+      language: c.language || '',        // UI language override ('' = auto: hass -> browser)
       historyDays: c.history_days,
       haSensors: c.ha_sensors,   // YAML-only: explicit *_scientific_name entity ids
       // Feeder-camera sightings: *_scientific_name entity ids of a second,
@@ -574,6 +596,7 @@ var HABIRD_TEMPLATE = ${JSON.stringify(template)};
 var HABIRD_CSS = ${JSON.stringify(css)};
 
 ${masksSrc}
+${i18nSrc}
 ${app}
 ${wrapper}
 })();

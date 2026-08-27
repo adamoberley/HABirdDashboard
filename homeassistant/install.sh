@@ -31,6 +31,10 @@ mkdir -p "$TARGET/assets"
 for f in index.html apt.js masks.js styles.css favicon.png; do
   cp "$REPO_ROOT/homeassistant/www/$f" "$TARGET/$f"
 done
+# Translation tables - the page's i18n bootstrap loads these; without them
+# every UI string falls back to English (and older pages would show keys).
+mkdir -p "$TARGET/i18n"
+cp "$REPO_ROOT/homeassistant/www/i18n/"*.js "$TARGET/i18n/"
 if [ -f "$TARGET/config.js" ]; then
   echo "Keeping existing config.js (new defaults at homeassistant/www/config.js)"
 else
