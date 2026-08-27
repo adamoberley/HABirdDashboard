@@ -53,16 +53,17 @@ const historyByEntity = [
   entityRows(B + '_last_species', [['Common Raven', iso(2 * 3600000)]]),
 ];
 
-function makeHass(bOffline) {
-  return {
+function makeHass(bOffline, opts) {
+  opts = opts || {};
+  const hass = {
     themes: { darkMode: false },
     states: {
-      [A + '_scientific_name']: { state: 'Calypte anna' },
-      [A + '_confidence']: { state: '99.0' },
-      [A + '_last_species']: { state: "Anna's Hummingbird" },
-      [B + '_scientific_name']: { state: bOffline ? 'unavailable' : 'Corvus corax' },
-      [B + '_confidence']: { state: bOffline ? 'unavailable' : '71.0' },
-      [B + '_last_species']: { state: bOffline ? 'unavailable' : 'Common Raven' },
+      [A + '_scientific_name']: { entity_id: A + '_scientific_name', state: 'Calypte anna' },
+      [A + '_confidence']: { entity_id: A + '_confidence', state: '99.0' },
+      [A + '_last_species']: { entity_id: A + '_last_species', state: "Anna's Hummingbird" },
+      [B + '_scientific_name']: { entity_id: B + '_scientific_name', state: bOffline ? 'unavailable' : 'Corvus corax' },
+      [B + '_confidence']: { entity_id: B + '_confidence', state: bOffline ? 'unavailable' : '71.0' },
+      [B + '_last_species']: { entity_id: B + '_last_species', state: bOffline ? 'unavailable' : 'Common Raven' },
       'sun.sun': { attributes: {} },
     },
     callApi: (method, p) => {
@@ -70,6 +71,8 @@ function makeHass(bOffline) {
       return Promise.reject(404);
     },
   };
+  if (opts.formatEntityName) hass.formatEntityName = opts.formatEntityName;
+  return hass;
 }
 
 const assert = require('assert');
@@ -105,6 +108,37 @@ function runOfflineCase(done) {
   }, 2000);
 }
 
+// hass.formatEntityName (HA 2026.6+) is defined and exactly one mic is
+// offline - the note must name that mic (stats.micOfflineNamed), not fall
+// back to the plain count. Regression test: the mock hass never used to
+// define formatEntityName, so this branch (haEntityLabel's "no formatter"
+// fallback vs. its actual formatter path) had zero coverage - a wrong
+// entity id, an inverted offline.length===1 check, or a typo'd tt() key
+// would all still render fine and slip through.
+function runNamedOfflineCase(done) {
+  const { window, errors } = boot();
+  const hass = makeHass(true, {
+    formatEntityName: (st) => (st.entity_id === B + '_scientific_name' ? 'Garden Mic' : null),
+  });
+  const card = window.document.createElement('habird-card');
+  card.setConfig({});
+  card.hass = hass;
+  window.document.body.appendChild(card);
+  setTimeout(() => {
+    try {
+      const root = card.shadowRoot;
+      const note = root.getElementById('statsMicNote');
+      assert.ok(note, 'mic note element present');
+      assert.strictEqual(note.hidden, false, 'note shown with 1 mic offline');
+      assert.strictEqual(note.textContent, 'Garden Mic is offline',
+        'note names the offline mic via formatEntityName: ' + note.textContent);
+      assert.deepStrictEqual(errors, [], 'errors: ' + errors.join('; '));
+      console.log('NAMED MIC OFFLINE NOTE TEST PASSED');
+      done();
+    } catch (e) { console.error('FAIL:', e.message); process.exit(1); }
+  }, 2000);
+}
+
 function runAllOnlineCase() {
   const { window, errors } = boot();
   const hass = makeHass(false);
@@ -126,4 +160,4 @@ function runAllOnlineCase() {
   }, 2000);
 }
 
-runOfflineCase(runAllOnlineCase);
+runOfflineCase(() => runNamedOfflineCase(runAllOnlineCase));

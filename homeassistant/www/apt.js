@@ -367,11 +367,41 @@
   // CORS-clean audio (crossOrigin=anonymous; BirdNET-Go's media endpoints
   // send permissive CORS, and ingress is same-origin anyway).
   var _boostCtx = null;
+  // Private Mode: a plain `<audio src>` can never carry the Authorization
+  // header BirdNET-Go now requires (see bgFetch) - clip playback would 401
+  // even with a correctly configured api_token, unlike the spectrogram
+  // decode path (bgAudioFetch) which already goes through fetch(). Only
+  // detour through a fetched blob when a token is actually configured -
+  // the common (no token) case keeps the cheap direct <audio src>, and
+  // reuses bgAudioFetch's 503+Retry-After retry for free.
   function makeAudio(url) {
     var audio = new Audio();
     var db = +AV_CFG.audioBoostDb || 0;
     if (db > 0) audio.crossOrigin = 'anonymous';
-    audio.src = url;
+    if (AV_CFG.apiToken) {
+      // Deliberately never revoke this object URL: the 'emptied' event
+      // (the obvious hook) fires as part of the same load algorithm that
+      // sets audio.src in the first place, which would revoke the blob
+      // before the browser ever fetches it. Rows also keep their <audio>
+      // around after playback ends so the user can replay without
+      // re-fetching (see the 'ended' handler above), so there's no safe
+      // "done with this clip" moment short of the element being GC'd -
+      // one clip's worth of blob per play is an acceptable trade for
+      // Private Mode installs actually being able to play clips at all.
+      bgAudioFetch(url).then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.blob();
+      }).then(function (blob) {
+        audio.src = URL.createObjectURL(blob);
+      }).catch(function () {
+        // Surface the same failure state a bare <audio src> 401/404 would -
+        // existing 'error' listeners (e.g. the play button's "missing"
+        // state) still fire even though this never touched audio.src.
+        try { audio.dispatchEvent(new Event('error')); } catch (e2) {}
+      });
+    } else {
+      audio.src = url;
+    }
     if (db > 0) {
       var Ctx = window.AudioContext || window.webkitAudioContext;
       if (Ctx) {
@@ -974,11 +1004,6 @@
     return hhSensorSets().then(function (sets) {
       return sets.filter(function (s) { return s.offline; });
     }).catch(function () { return []; });
-  }
-  // How many discovered microphones are currently offline. Kept for
-  // callers that only need the count (see hhOfflineMics for the list).
-  function hhOfflineMicCount() {
-    return hhOfflineMics().then(function (list) { return list.length; });
   }
   // A sensor entity's display name, preferring HA's own entity-name
   // formatter (hass.formatEntityName, added in HA 2026.6) over the raw
@@ -3376,13 +3401,16 @@
   var liveDebounceT = null;
   var liveReconnectDelay = 5000;  // 5s, doubles up to a 60s cap
   var liveFailures = 0;           // consecutive drops since the last open
-  // Set on a 404 (server predates the stream endpoint) or 401 (BirdNET-Go
-  // Private Mode - EventSource can't carry the Authorization header this
-  // page would otherwise send) seen on the very first connection attempt.
-  // Both fail before the connection ever opens, which is the only signal
-  // EventSource exposes for "this endpoint will never work" - retrying a
-  // dead URL every few seconds would just be noise, so give up for the
-  // rest of this boot. Normal 30s polling is unaffected either way.
+  // Failing before the connection ever opens usually means a 404 (server
+  // predates the stream endpoint) or 401 (BirdNET-Go Private Mode -
+  // EventSource can't carry the Authorization header this page would
+  // otherwise send) - EventSource exposes no HTTP status, so that's
+  // indistinguishable from a one-off transient failure (BirdNET-Go/HA
+  // still starting up, a brief network blip). Retry once with the normal
+  // backoff before concluding it's permanent, so a startup race doesn't
+  // silently disable the feature for the rest of this boot. Normal 30s
+  // polling is unaffected either way.
+  var livePreOpenFailures = 0;
   var liveGaveUp = false;
 
   function liveDebouncedRefresh() {
@@ -3410,7 +3438,13 @@
     es.onerror = function () {
       if (liveSource !== es) return; // superseded by a later attempt already
       stopLive();
-      if (!opened) { liveGaveUp = true; return; }
+      if (!opened) {
+        livePreOpenFailures++;
+        if (livePreOpenFailures >= 2) { liveGaveUp = true; return; }
+        liveReconnectT = setTimeout(startLive, liveReconnectDelay);
+        liveReconnectDelay = Math.min(60000, liveReconnectDelay * 2);
+        return;
+      }
       liveFailures++;
       if (liveFailures >= 5) return; // stop retrying until the next card boot
       liveReconnectT = setTimeout(startLive, liveReconnectDelay);

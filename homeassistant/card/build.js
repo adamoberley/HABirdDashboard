@@ -402,6 +402,16 @@ class HABirdCard extends HTMLElement {
     // fresh app instance - cheapest correct thing is a full re-boot.
     if (this._booted) {
       this._booted = false;
+      // Tear down the old instance's live bits the same way
+      // disconnectedCallback does - otherwise its SSE connection, poll
+      // timer and document-level visibilitychange listener are orphaned
+      // (unreachable, but never closed) every time setConfig reboots the
+      // app, e.g. the dashboard editor calling setConfig on every keystroke
+      // during live preview.
+      if (this._stopLive) { this._stopLive(); this._stopLive = null; }
+      this._refresh = null;
+      this._watchIds = null;
+      this._lastStamp = null;
       if (this.shadowRoot) this.shadowRoot.innerHTML = '';
       if (this.isConnected) this._boot();
     }
@@ -614,7 +624,7 @@ if (!window.customCards.some(function (c) { return c.type === 'habird-card'; }))
       try {
         var id = String(entityId || '').toLowerCase();
         if (id.split('.')[0] !== 'sensor') return null;
-        var suffixes = ['_scientific_name', '_species', '_confidence', '_last_species', '_sound_level'];
+        var suffixes = ['_scientific_name', '_confidence', '_last_species', '_sound_level'];
         for (var i = 0; i < suffixes.length; i++) {
           if (id.slice(-suffixes[i].length) === suffixes[i]) {
             return { config: { type: 'custom:habird-card' } };

@@ -2,10 +2,13 @@
 // detections/stream endpoint after the first successful load and treats
 // each 'detection' event as a pure "something changed, refetch" signal -
 // same push-refresh path the MQTT sensor watcher uses (test-mqtt.js).
-// Three scenarios: a detection event triggers a debounced refresh; an
-// endpoint that fails before ever opening (404/401) never reconnects
-// (no retry storm); config live:false never constructs an EventSource
-// at all.
+// Four scenarios: a detection event triggers a debounced refresh; an
+// endpoint that fails before ever opening (404/401) gets exactly one
+// retry (a startup race looks identical to a real 404/401 - EventSource
+// exposes no HTTP status) and then gives up, no unbounded retry storm;
+// config live:false never constructs an EventSource at all; and a second
+// setConfig call while the card stays connected tears down the previous
+// instance's live stream instead of leaking it.
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const fs = require('fs');
@@ -97,7 +100,7 @@ function boot(config, ESClass) {
 }
 
 const assert = require('assert');
-let remaining = 3;
+let remaining = 4;
 function scenarioDone(label) {
   console.log(label);
   if (--remaining === 0) { console.log('\nLIVE SSE TESTS PASSED'); process.exit(0); }
@@ -128,21 +131,28 @@ function scenarioDone(label) {
   }, 1700);
 }
 
-// --- Scenario B: immediate failure (404/401) -> no reconnect storm ---
+// --- Scenario B: immediate failure (404/401) -> one retry, then gives up ---
 {
   const FailES = makeImmediateFailES();
   const { errors } = boot({}, FailES); // default config: live defaults true
   setTimeout(() => {
     try {
-      // First backoff attempt would land at 5s; wait well past it and
-      // confirm nothing retried - a connection that fails before ever
-      // opening is treated as permanent for this boot (old BirdNET-Go /
-      // Private Mode), not a transient drop.
-      assert.strictEqual(FailES.instances.length, 1, 'exactly one attempt, no retry storm: ' + FailES.instances.length);
-      assert.deepStrictEqual(errors, [], 'errors: ' + errors.join('; '));
-      scenarioDone('B: immediate 404/401 -> no reconnect OK');
+      // A failure before the very first onopen is indistinguishable from a
+      // one-off startup race (BirdNET-Go/HA still coming up), so it gets
+      // exactly one retry (first backoff ~5s) before being treated as
+      // permanent. Wait past that retry and confirm there were exactly two
+      // attempts total, then confirm no third ever follows (no unbounded
+      // retry storm).
+      assert.strictEqual(FailES.instances.length, 2, 'exactly one retry after the first pre-open failure: ' + FailES.instances.length);
+      setTimeout(() => {
+        try {
+          assert.strictEqual(FailES.instances.length, 2, 'gives up after the second pre-open failure, no further attempts: ' + FailES.instances.length);
+          assert.deepStrictEqual(errors, [], 'errors: ' + errors.join('; '));
+          scenarioDone('B: immediate 404/401 -> one retry then gives up OK');
+        } catch (e) { console.error('B FAIL:', e.message); process.exit(1); }
+      }, 15000);
     } catch (e) { console.error('B FAIL:', e.message); process.exit(1); }
-  }, 7000);
+  }, 9000);
 }
 
 // --- Scenario C: live:false -> EventSource never constructed ---
@@ -155,5 +165,32 @@ function scenarioDone(label) {
       assert.deepStrictEqual(errors, [], 'errors: ' + errors.join('; '));
       scenarioDone('C: live:false -> no EventSource OK');
     } catch (e) { console.error('C FAIL:', e.message); process.exit(1); }
+  }, 1700);
+}
+
+// --- Scenario D: setConfig while connected tears down the old live stream ---
+// Regression test for the setConfig reboot path leaking the previous
+// instance's EventSource (it only ever closed on disconnectedCallback,
+// never on a reconfigure-while-connected - the dashboard editor's live
+// preview calls setConfig on every keystroke).
+{
+  const StubES = makeStubES();
+  const { card, errors } = boot({}, StubES); // default config: live defaults true
+  setTimeout(() => {
+    try {
+      assert.strictEqual(StubES.instances.length, 1, 'one EventSource opened after first boot: ' + StubES.instances.length);
+      const first = StubES.instances[0];
+      first.__open();
+      card.setConfig({ title: 'renamed' });
+      assert.strictEqual(first.closed, true, 'previous EventSource closed by the reconfigure, not orphaned');
+      setTimeout(() => {
+        try {
+          assert.strictEqual(StubES.instances.length, 2, 'the rebooted instance opens its own EventSource: ' + StubES.instances.length);
+          assert.notStrictEqual(StubES.instances[1], first, 'a fresh EventSource, not the old one reused');
+          assert.deepStrictEqual(errors, [], 'errors: ' + errors.join('; '));
+          scenarioDone('D: setConfig reconfigure closes the previous live stream OK');
+        } catch (e) { console.error('D FAIL:', e.message); process.exit(1); }
+      }, 1700);
+    } catch (e) { console.error('D FAIL:', e.message); process.exit(1); }
   }, 1700);
 }

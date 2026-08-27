@@ -33,7 +33,7 @@ try {
     'suggests custom:habird-card for a BirdNET-Go sensor: ' + JSON.stringify(yes));
 
   // Every documented BirdNET-Go suffix, and case-insensitively.
-  ['sensor.back_yard_species', 'sensor.back_yard_confidence',
+  ['sensor.back_yard_confidence',
    'sensor.back_yard_last_species', 'sensor.back_yard_sound_level',
    'sensor.BACK_YARD_SCIENTIFIC_NAME'].forEach((id) => {
     const s = entry.getEntitySuggestion(hass, id);
@@ -42,6 +42,12 @@ try {
 
   const no = entry.getEntitySuggestion(hass, 'sensor.kitchen_temperature');
   assert.ok(no === null || no === undefined, 'no suggestion for an unrelated sensor: ' + JSON.stringify(no));
+
+  // The bare '_species' suffix was dropped (too generic - matched any
+  // unrelated sensor ending in "_species", not just BirdNET-Go's own).
+  const bareSpecies = entry.getEntitySuggestion(hass, 'sensor.back_yard_species');
+  assert.ok(bareSpecies === null || bareSpecies === undefined,
+    'bare _species suffix no longer suggested: ' + JSON.stringify(bareSpecies));
 
   // A non-sensor domain sharing the suffix text shouldn't match either.
   const otherDomain = entry.getEntitySuggestion(hass, 'binary_sensor.back_yard_scientific_name');
