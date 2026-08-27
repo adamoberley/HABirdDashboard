@@ -56,6 +56,11 @@
   'stats.today': 'today',
   'stats.last7days': 'last 7 days',
   'stats.allTime': 'all time',
+  // Shown only when >=1 auto-discovered HA microphone sensor is offline
+  // (native MQTT discovery's availability topic reads 'unavailable').
+  'stats.micsOffline': '{n} microphone(s) offline',
+  // Same note, but naming the one offline mic (HA formatEntityName available).
+  'stats.micOfflineNamed': '{name} is offline',
   // ---- Stats: Top Species ----
   'stats.topSpecies': 'Top Species',
   'stats.topSpecCap': 'most-heard, {window}',
@@ -85,6 +90,9 @@
   'atlas.allTime': 'all time',
   'atlas.new': 'new',
   'atlas.newTitle': 'first time this species has ever been heard here',
+
+  // ---- API errors ----
+  'error.privateMode': 'BirdNET-Go requires sign-in (Private Mode) — set api_token in the card config',
 
   // ---- Detail modal: chrome ----
   'modal.close': 'Close',
@@ -146,6 +154,8 @@
   'flag.couldNotSave': 'could not save: {why}',
   'flag.needsIngress': 'needs the HA ingress connection - {detail}',
   'flag.refused': 'BirdNET-Go refused ({err})',
+  'flag.forbidden': 'blocked',
+  'flag.forbiddenDetail': 'BirdNET-Go rejected the request (CSRF) - reload the card and try again',
 
   // ---- Weather conditions (standalone / fallback path) ----
   // Keyed by Home Assistant's weather condition slugs. The card build

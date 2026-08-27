@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.4.0 — 2026-08-27
 
 ### Added
 - **Live detections.** The card now subscribes to BirdNET-Go's SSE stream
