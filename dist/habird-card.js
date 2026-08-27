@@ -3421,10 +3421,14 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
   var modalRecBtn = null;
   var __modalSci = null;   // species currently shown in the detail modal
   function fmtRecTime(d, t) {
-    // d="2026-05-15", t="20:25:29"
+    // Either a date "2026-05-15" with a separate time t="20:25:29", or a
+    // single full timestamp that already carries its own time - e.g.
+    // "2026-07-09T04:47:17+02:00" (ISO, offset) or "2026-07-09 04:47:17".
+    // When d already holds a time, parse the whole string; otherwise the
+    // ISO 'T'/offset would be mangled by appending 'T'+t.
     if (!d) return '-';
-    var date = new Date((d || '') + 'T' + (t || '00:00:00'));
-    if (isNaN(date.getTime())) return d + ' ' + (t || '');
+    var date = /[T ]\d\d:/.test(d) ? new Date(d) : new Date((d || '') + 'T' + (t || '00:00:00'));
+    if (isNaN(date.getTime())) return t ? (d + ' ' + t) : d;
     var now = Date.now();
     var ago = Math.floor((now - date.getTime()) / 1000);
     if (ago < 60) return ago + 's ago';
@@ -3820,7 +3824,7 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
       __root.getElementById('modalAllTime').textContent = fmtN(+s.total || 0);
       var winRow = ((DATA.recent && DATA.recent.species) || []).filter(function (x) { return x.sci === sci; })[0];
       __root.getElementById('modalWindow').textContent = fmtN(winRow ? +winRow.n : 0);
-      __root.getElementById('modalFirstSeen').textContent = s.first_seen ? fmtRecTime(s.first_seen.split(' ')[0], s.first_seen.split(' ')[1]) : '-';
+      __root.getElementById('modalFirstSeen').textContent = s.first_seen ? fmtRecTime(s.first_seen) : '-';
       var rar = rarityLabel(+s.total || 0, s.first_seen);
       var rarEl = __root.getElementById('modalRarity');
       rarEl.textContent = rar;
@@ -3987,10 +3991,20 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
   // (default) and in-flight alt pose. A short opacity transition makes
   // the swap feel intentional rather than a hard cut.
   __root.getElementById('modalPoseToggle').addEventListener('click', function (ev) {
+    var toggle = __root.getElementById('modalPoseToggle');
     var btn = ev.target.closest && ev.target.closest('button');
     if (!btn || btn.getAttribute('data-unavailable') === 'true') return;
+    // Doubles as a toggle: this control's two buttons tile its whole width,
+    // so there's no open space for wireToggleAdvance to catch. Clicking the
+    // already-active pose therefore advances to the other available one.
+    if (btn.getAttribute('aria-current') === 'true') {
+      var avail = [].slice.call(toggle.querySelectorAll('button')).filter(function (b) {
+        return !b.disabled && b.getAttribute('data-unavailable') !== 'true';
+      });
+      if (avail.length < 2) return;   // only one pose exists - nothing to flip to
+      btn = avail[(avail.indexOf(btn) + 1) % avail.length];
+    }
     var pose = +btn.dataset.pose;
-    var toggle = __root.getElementById('modalPoseToggle');
     [].slice.call(toggle.querySelectorAll('button')).forEach(function (b) {
       b.setAttribute('aria-current', b === btn ? 'true' : 'false');
     });
