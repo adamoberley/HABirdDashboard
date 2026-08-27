@@ -234,6 +234,8 @@ paper_color: ""              # background: paper - light-mode page colour (hex);
 paper_color_dark: ""         # background: paper - dark-mode page colour (hex); "" = theme default
 paper_texture: 0             # background: paper - faint paper grain (0 = off, ~0.06 = subtle washi)
 font: system                 # system (HA's font) | serif (the original look)
+language: ""                 # UI language override, e.g. "da" - empty = follow
+                             #   each user's HA language (see Languages below)
 birdnet_url: ""              # empty = this host, port 8080 (the stock app)
 data_source: auto            # auto | api | ha (see Data sources below)
 history_days: 10             # ha-source span; bounded by recorder retention
@@ -263,6 +265,17 @@ visits_sensors: []           # feeder-camera sensors - blends per-species
 
 The card follows Home Assistant's light/dark theme automatically, and
 its height tracks HA's card sizing - neither is a configurable option.
+
+**Languages**: the card's own UI (headings, tooltips, stats, modals) follows
+each user's Home Assistant profile language automatically - nothing to
+configure. Shipped translations: **English, Danish, Dutch, Finnish, French,
+German, Italian, Norwegian, Polish, Portuguese, Spanish, and Swedish**; any
+string a translation lacks falls back to English, and regional variants
+degrade sensibly (`de-AT` uses `de`; `en-GB` stays English but keeps British
+time/date formatting). Bird names come from BirdNET-Go in its own locale and
+are not affected. Force a language with the `language:` option (or
+`AV_CONFIG.language` on the standalone page). Adding a new language is a
+single file - see [the translator guide](homeassistant/www/i18n/README.md).
 
 **Weather** reads your Home Assistant weather integration directly through
 the card's own connection - no access token, in your HA units, with
