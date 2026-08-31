@@ -1,7 +1,7 @@
 (function () {
   // Bumped whenever the offline sketch build changes, so the browser
   // doesn't keep a stale cache after we regenerate the sketches.
-  var SKETCH_VERSION = 'r16'; // r16: Black-billed Magpie (#60).
+  var SKETCH_VERSION = 'r18'; // r18: fixed/removed species per manual QA review (species_to_review.csv).'
                               // r15: 64 new Australian species (BirdNET-Go
                               // station list) + fox/frog non-bird detections.
                               // r14: silhouette masks for the 466 European
@@ -14,7 +14,7 @@
   // equivalent to a global cache purge for /api/img. (caches.default
   // .delete() in the worker only affects ONE colo at a time, so a
   // versioned URL is the only reliable way to invalidate everywhere.)
-  var IMG_VERSION = 'r16'; // r16: Black-billed Magpie (#60).
+  var IMG_VERSION = 'r18'; // r18: fixed/removed species per manual QA review (species_to_review.csv).'
                            // r15: 64 new Australian species (BirdNET-Go
                            // station list) + fox/frog non-bird detections.
                            // r14: European (eBird DE) species masks land in
