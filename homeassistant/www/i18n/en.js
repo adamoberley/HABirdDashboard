@@ -31,6 +31,8 @@
   'aria.collage': 'Bird collage',
   'aria.stats': 'Stats',
   'aria.atlas': 'Atlas',
+  // aria-label of the optional species-name strip along the collage's bottom.
+  'names.aria': 'Species heard',
 
   // ---- Time-window labels (windowLabel) ----
   'window.thisHour': 'this hour',

@@ -29,6 +29,7 @@
   'aria.collage': 'Fågelcollage',
   'aria.stats': 'Statistik',
   'aria.atlas': 'Atlas',
+  'names.aria': 'Hörda arter',
 
   // ---- Time-window labels (windowLabel) ----
   'window.thisHour': 'denna timme',

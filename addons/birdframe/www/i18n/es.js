@@ -29,6 +29,7 @@
   'aria.collage': 'Collage de aves',
   'aria.stats': 'Estadísticas',
   'aria.atlas': 'Atlas',
+  'names.aria': 'Especies escuchadas',
 
   // ---- Time-window labels (windowLabel) ----
   'window.thisHour': 'esta hora',

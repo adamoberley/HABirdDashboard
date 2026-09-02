@@ -72,6 +72,18 @@ configuration:
     description: >-
       Show a small "Heard Recently" title above the collage. Off (default) for a
       pure edge-to-edge painting.
+  show_names:
+    name: Species names
+    description: >-
+      List every species in the window as a line of names along the bottom of
+      the painting - a legend for birds you don't recognise, and the one place
+      a species with no artwork yet still appears. Off (default) for pure art;
+      or common names, scientific names, or both.
+  names_size:
+    name: Species names size
+    description: >-
+      Font size of the species-name strip, in pixels at the panel resolution.
+      36 reads well on a 4K Frame from across the room; try ~18 on 1920x1080.
   matte:
     name: Frame matte
     description: >-
