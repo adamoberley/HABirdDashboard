@@ -196,8 +196,27 @@ This re-shows each new illustration to Gemini Vision *without* telling it the
 species and flags wrong-species drift, anatomy errors, and stray perches into
 `verify-results.csv`. Also eyeball the new PNGs in `avian/assets/illustrations/`.
 
+`verify.py` is a *bird* check, so it will flag every intentional non-bird in
+your list as an error — expect noise, don't act on it blindly.
+
+**Screen the non-birds separately — ASK THE USER to look at these.** Your
+station's list almost certainly includes frogs, insects, bats or mammals, and
+those fail in two ways that a quick scroll through thumbnails will not catch:
+a genus the model doesn't recognise comes back as a *songbird* (a nice-looking
+warbler captioned as a cicada), and a non-flyer's `-2` pose comes back with
+*feathered wings grafted on*. Pull the non-avian species out of your list and
+review just those renders, at full size.
+
 To redo a bad one, add a one-line diagnostic note to
-`avian/scripts/species-notes.json` (it carries forward), then regenerate just it:
+`avian/scripts/species-notes.json` (it carries forward), then regenerate just
+it. For a non-bird the note has to countermand the bird prompt outright —
+copy the `Vulpes vulpes` entry's shape: state what the animal is, say to ignore
+every instruction about wings/feathers/beaks/perching, and redefine both poses
+("perched" = at rest, "in flight" = moving on the ground). For something that
+simply cannot fly, deleting the `-2` file is cleaner than fixing it — the card
+falls back to the perched pose; just prune the slug from
+`avian/scripts/dirs.json` at the same time so no stale flight heading is left
+behind.
 
 ```bash
 .venv/bin/python avian/scripts/pregen.py --species "Genus species|Common Name" --force
@@ -247,10 +266,21 @@ artwork into `/config/www/habird/`; no card build needed.)
   homeassistant/card/build.js`) *and* load that rebuilt file. New PNGs alone
   aren't enough.
 - **Style looks off / inconsistent** — you skipped the style references (Step 2).
+- **A frog / cicada / cricket came back as a songbird** — the model didn't
+  recognise the genus and fell back on the rest of the prompt, which describes a
+  bird. Nothing errors; the render just isn't the right animal. Needs a
+  `species-notes.json` entry shaped like `Vulpes vulpes` (Step 4).
+- **A mammal's flight pose has wings** — same root cause from the other side:
+  `-2` asks for "wings spread" and the model obliges, so you get a winged dog or
+  a winged echidna. Usually the right answer is to delete the `-2` file (the card
+  falls back to perched) and prune that slug from `dirs.json`.
 - **New birds fly upright in the ring "flow" layout** — you skipped
   `build_dirs.py` (or it omitted them as ambiguous). They have no heading in the
   `DIRS` table, so the renderer can't bank them. Harmless for the default
   collage; re-run `build_dirs.py` to annotate them.
+- **A deleted `-2` still shows up in `DIRS`** — `dirs.json` is a cache keyed by
+  slug and is not pruned automatically. Drop entries whose PNG no longer exists,
+  then `build_dirs.py --check` (rebuilds the table from cache, no API calls).
 
 ---
 

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.5.0 — 2026-09-02
 
 ### Added
 - **Species-name strip.** New `names` option (card YAML + visual editor;

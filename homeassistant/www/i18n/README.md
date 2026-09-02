@@ -83,10 +83,10 @@ npm run i18n:report
 Example:
 
 ```
-i18n coverage — reference: en (170 keys)
+i18n coverage — reference: en (132 keys)
 
-da  99%  (169/170 translated)
-  missing (1): modal.scrub
+da  95%  (126/132 translated)
+  missing (6): error.privateMode, flag.forbidden, flag.forbiddenDetail, modal.scrub, stats.micOfflineNamed, stats.micsOffline
 ```
 
 To get the untranslated keys pre-filled with their English value, ready to

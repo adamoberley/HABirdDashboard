@@ -43,7 +43,7 @@ fi
 
 # Bundled artwork: kachō-e illustrations (perched + flight) and the
 # photo-cutout fallbacks.
-echo "Copying illustrations (~350MB of PNGs, may take a minute)..."
+echo "Copying illustrations (~1.1GB of PNGs, may take a few minutes)..."
 cp -r "$REPO_ROOT/avian/assets/illustrations" "$TARGET/assets/"
 cp -r "$REPO_ROOT/avian/assets/cutouts" "$TARGET/assets/"
 

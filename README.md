@@ -342,11 +342,13 @@ something to plan around: generate illustrations for that whole list once
 and every bird your station can ever report has one. The list only changes
 if you move the station, loosen the range-filter threshold, or BirdNET-Go
 ships a new model - and then it's the same one-off pass for the handful of
-additions. (Two caveats: the model's list includes a few **non-bird
-labels** - dog, engine, siren, some frogs and insects such as crickets -
-which will show up as names with no illustration; either add them to
-BirdNET-Go's *excluded species* or, if you want to see them, generate art
-for them the same way. And any species the range filter *doesn't* list can
+additions. (Two caveats: the model's list includes **non-bird labels** -
+frogs, insects such as crickets and cicadas, bats, mammals, and a few
+mechanical ones like engine and siren. The bundled library illustrates a
+lot of these already, especially for eBird region AU, and the pipeline
+draws them like anything else; the purely mechanical labels never will
+be. Add whatever you don't want to BirdNET-Go's *excluded species*. And
+any species the range filter *doesn't* list can
 still slip through as a low-confidence misidentification; it will count and
 be listed by name, but that's a false positive to flag, not a gap to fill.)
 Turn on the [species-name strip](#card-options) (`names`) to see any such
@@ -614,7 +616,7 @@ Before it was a card, this dashboard was a static page served from
 
 ```bash
 git clone https://github.com/adamoberley/HABirdDashboard.git /tmp/habird
-/tmp/habird/homeassistant/install.sh     # copies page + artwork (~350MB)
+/tmp/habird/homeassistant/install.sh     # copies page + artwork (~1.1GB)
 rm -rf /tmp/habird
 ```
 
@@ -625,7 +627,10 @@ card; weather defaults to BirdNET-Go's built-in support, or set
 ring layout). Add it with a **Webpage** dashboard pointing at
 `/local/habird/index.html`, and dress up a specific display with URL params:
 `?wall` / `?corner=top-left` for the clock block, `?ring` / `?hole=0.5` for the
-ring layout.
+ring layout, `?names` (or `?names=scientific` / `?names=both`) plus
+`?names_size=18` for the species-name strip. Each has a `config.js` equivalent
+(`AV_CONFIG.names`, `AV_CONFIG.namesSize`); the URL param wins, so one shared
+`config.js` can drive several displays that differ only in how they're dressed.
 
 ---
 
@@ -643,9 +648,10 @@ ring layout.
      an [artwork request](../../issues/new/choose) with your eBird
      region code. Your station's possible species are a fixed, known list
      (BirdNET-Go's **Species** page), so this is a one-time fix, not an
-     ongoing one. If the nameless "species" is a cricket, frog, dog or
-     engine, that's one of the model's non-bird labels - exclude it in
-     BirdNET-Go if you don't want to see it.
+     ongoing one. If the nameless "species" is a cricket, frog, bat or
+     engine, that's one of the model's non-bird labels - many of those are
+     illustrated too (see the AU set), the mechanical ones never will be.
+     Exclude it in BirdNET-Go if you don't want to see it.
   2. *Is it ALL species?* The artwork loads from a CDN
      (`cdn.jsdelivr.net`), so the browser viewing the dashboard needs
      internet access - on an isolated/offline network, host the art
