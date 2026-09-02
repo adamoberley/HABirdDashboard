@@ -1791,22 +1791,6 @@
 "y": 0.45
 }
 },
-"aquila-audax-2": {
-"ambiguous": false,
-"ambiguous2": false,
-"beak": {
-"x": 0.401,
-"y": 0.295
-},
-"confidence": "high",
-"confidence2": "high",
-"heading": 175,
-"heading2": 175,
-"tail": {
-"x": 0.968,
-"y": 0.245
-}
-},
 "aquila-chrysaetos-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -14457,19 +14441,6 @@
 "tail": {
 "x": 0.5,
 "y": 0.06
-}
-},
-"pseudorhynchus-lessonii-2": {
-"ambiguous": false,
-"beak": {
-"x": 0.038,
-"y": 0.548
-},
-"confidence": "high",
-"heading": 205,
-"tail": {
-"x": 0.878,
-"y": 0.943
 }
 },
 "psittacula-cyanocephala-2": {
