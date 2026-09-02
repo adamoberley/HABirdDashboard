@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- **425 species from eBird region AU** (contributed by @daniel-c-ctrl,
+  [#70](https://github.com/adamoberley/HABirdDashboard/pull/70)) - 805 new
+  kachō-e illustrations covering the Southeast Australian list, taking the
+  bundled library from 866 to 1,291 species (1,732 -> 2,537 illustrations).
+  Alongside the birds it fills in the non-bird detections BirdNET-Go reports
+  in that region: frogs, cicadas and crickets, bats, and the usual
+  marsupials and introduced mammals. Silhouette masks and flight-direction
+  headings rebuilt; cache-bust r16 -> r17.
+
 ## v1.4.0 — 2026-08-27
 
 ### Added
