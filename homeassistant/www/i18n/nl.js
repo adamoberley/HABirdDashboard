@@ -29,6 +29,7 @@
   'aria.collage': 'Vogelcollage',
   'aria.stats': 'Statistieken',
   'aria.atlas': 'Atlas',
+  'names.aria': 'Gehoorde soorten',
 
   // ---- Time-window labels (windowLabel) ----
   'window.thisHour': 'dit uur',

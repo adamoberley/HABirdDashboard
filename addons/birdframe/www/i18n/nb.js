@@ -30,6 +30,7 @@
   'aria.collage': 'Fuglekollasje',
   'aria.stats': 'Statistikk',
   'aria.atlas': 'Atlas',
+  'names.aria': 'Arter hørt',
 
   // ---- Time-window labels (windowLabel) ----
   'window.thisHour': 'denne timen',

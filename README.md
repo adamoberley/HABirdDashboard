@@ -62,6 +62,10 @@ at home [pushed to a Samsung Frame TV](#display-it-on-a-samsung-frame-tv-optiona
   treats it as one of the flock: grow enough birds and they nest around the
   numerals. Weather comes from your HA weather integration, in your HA
   units, with sunrise/sunset from HA's sun - no tokens, no API keys.
+- **Species names** (optional) - a line of names along the bottom of the
+  collage, common and/or scientific at any size, so a bird you don't
+  recognise can be looked up (tap a name for its details). Also lists any
+  species the library has no artwork for yet.
 - **Stats** - an editorial detection timeline plus by-period counts, top
   species, and the newest additions to your life list.
 - **Atlas** - a field-guide card grid of every species ever heard, with
@@ -228,6 +232,9 @@ view_selector: true          # false hides the switcher (single-view cards;
                              #   atlas card on one dashboard if you like)
 title: ""                    # empty = no title; set any text for a heading
                              #   (birds pack around it, clock-style)
+names: off                   # species-name strip along the bottom of the
+                             #   collage: off | common | scientific | both
+names_size: 13               # font size of that strip, in px
 window: "24"                 # time window in hours, or "all" - the card has
                              #   no on-screen picker; this is the window
 background: transparent      # transparent (blend with dashboard) | paper
@@ -278,6 +285,19 @@ are not affected. Force a language with the `language:` option (or
 `AV_CONFIG.language` on the standalone page). Adding a new language is a
 single file - see [the translator guide](homeassistant/www/i18n/README.md).
 
+**Species names** (`names`, default off): a line of names along the bottom
+of the collage listing every species in the current window, most-heard
+first - common names, scientific names, or both, at the size you set with
+`names_size`. It's a legend for the birds you don't recognise (tap a name
+to open that bird's details; hovering one lights up its illustration), and
+the birds pack above it the same way they pack around the clock. It is also
+the one place on the collage where a species the library has *no artwork
+for yet* still shows up - normally such a bird counts everywhere but is
+simply not drawn. There is deliberately no "missing artwork" badge, because
+that isn't an open-ended situation: see [Missing artwork for your
+area?](#missing-artwork-for-your-area) - your station's species list is
+finite, so one pass of the art pipeline closes every gap for good.
+
 **Weather** reads your Home Assistant weather integration directly through
 the card's own connection - no access token, in your HA units, with
 sunrise/sunset from HA's `sun.sun`. If HA has no weather entity, the card
@@ -310,7 +330,29 @@ each, cached by the browser. For a fully offline install, copy
 The bundled library covers 1,291 species (North American + European / eBird
 region DE + Australian / eBird region AU), so other regions may still have gaps. (Plain photos are deliberately not used as a
 stand-in - they'd break the kachō-e style and have no silhouette masks
-for the collage packing.) Two remedies, neither needs code changes:
+for the collage packing.)
+
+**The good news: your list is finite, and you can see it in advance.**
+BirdNET-Go doesn't hear an open-ended set of birds. It can only ever report
+a species that is on its label list *and* passes the range filter for your
+configured location and threshold - and that filtered list is what its
+**Species** page shows (and exports as CSV), whether or not each bird has
+been heard yet. So a "mysterious new species with no picture" is not
+something to plan around: generate illustrations for that whole list once
+and every bird your station can ever report has one. The list only changes
+if you move the station, loosen the range-filter threshold, or BirdNET-Go
+ships a new model - and then it's the same one-off pass for the handful of
+additions. (Two caveats: the model's list includes a few **non-bird
+labels** - dog, engine, siren, some frogs and insects such as crickets -
+which will show up as names with no illustration; either add them to
+BirdNET-Go's *excluded species* or, if you want to see them, generate art
+for them the same way. And any species the range filter *doesn't* list can
+still slip through as a low-confidence misidentification; it will count and
+be listed by name, but that's a false positive to flag, not a gap to fill.)
+Turn on the [species-name strip](#card-options) (`names`) to see any such
+gap by name in the meantime - unillustrated species are still listed there.
+
+Two remedies, neither needs code changes:
 
 > 🤖 **Easiest: let an agent do it.** Open this repo in an AI coding agent
 > (Claude Code, Cursor, …) and tell it: *"Follow AGENTS.md to generate bird
@@ -590,15 +632,20 @@ ring layout.
 ## Troubleshooting
 
 - **Some birds have no picture.** The most common question, and usually
-  not a bug: the bundled library covers **801 species (North American +
-  European / eBird region DE)**, so detections outside it simply have no illustration yet
+  not a bug: the bundled library covers **1,291 species (North American +
+  European / eBird region DE + Australian / eBird region AU)**, so detections
+  outside it simply have no illustration yet
   (the bird still counts everywhere - it just isn't drawn in the
-  collage). Three checks, then the fix:
+  collage; turn on `names` to see it listed by name). Three checks, then the fix:
   1. *Is it just certain species?* That's coverage, not breakage - see
      [Missing artwork for your area?](#missing-artwork-for-your-area)
      to generate matching art for exactly your station's birds, or open
      an [artwork request](../../issues/new/choose) with your eBird
-     region code.
+     region code. Your station's possible species are a fixed, known list
+     (BirdNET-Go's **Species** page), so this is a one-time fix, not an
+     ongoing one. If the nameless "species" is a cricket, frog, dog or
+     engine, that's one of the model's non-bird labels - exclude it in
+     BirdNET-Go if you don't want to see it.
   2. *Is it ALL species?* The artwork loads from a CDN
      (`cdn.jsdelivr.net`), so the browser viewing the dashboard needs
      internet access - on an isolated/offline network, host the art
@@ -653,7 +700,7 @@ homeassistant/
     ├── styles.css
     └── favicon.png
 avian/
-├── assets/          # 1,602 bundled illustrations + photo-cutout fallbacks
+├── assets/          # 2,537 bundled illustrations + photo-cutout fallbacks
 └── scripts/         # generate -> cutout -> masks pipeline (Gemini + BiRefNet)
 addons/
 └── birdframe/       # optional app: push the collage to a Samsung Frame TV

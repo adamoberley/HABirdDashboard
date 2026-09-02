@@ -35,6 +35,11 @@ Pick one:
 
 **A. Download the CSV from the BirdNET-Go dashboard** *(recommended — covers
 every species likely at your location, not just what's been heard so far).*
+This list is the **complete** set of species BirdNET-Go can report at this
+location (its label list filtered by the range filter), so illustrating it once
+means no bird will ever show up without artwork — there is no open-ended
+"new bird" case to handle later, short of the user moving the station or
+loosening the range-filter threshold.
 
 1. Open your BirdNET-Go web UI (e.g. `http://homeassistant.local:8080`).
 2. Go to the **Species** page — the per-location species list (each with an

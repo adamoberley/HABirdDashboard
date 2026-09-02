@@ -60,6 +60,8 @@ options:
   collage_flow_strength: 1.0
   collage_spacing: 0.0
   show_caption: false
+  show_names: "off"
+  names_size: 36
   matte: "none"
   # --- What it shows ---
   window_hours: 24
@@ -116,6 +118,13 @@ schema:
   collage_spacing: "float(0,1)"
   # Show the small "Heard Recently" title (off = pure edge-to-edge art).
   show_caption: "bool"
+  # Species-name strip along the bottom of the painting: every species in
+  # the window as a line of names (a legend for birds you don't recognise;
+  # also where a species without artwork still shows). off = pure art.
+  show_names: "list(off|common|scientific|both)"
+  # Font size of that strip in px at panel resolution (36 reads well on a
+  # 4K Frame from across a room; ~18 for 1920x1080).
+  names_size: "int(8,200)"
   # TV border around the image: "none" fills the panel; a Samsung matte name
   # (e.g. "shadowbox") gives a framed-print look.
   matte: "str"

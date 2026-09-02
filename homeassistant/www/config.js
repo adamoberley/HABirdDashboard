@@ -175,6 +175,20 @@ window.AV_CONFIG = {
   // gentle grain, higher is coarser.
   paperTexture: 0,
 
+  // Species-name strip: a line of names along the bottom of the collage
+  // listing every species in the current window (most-heard first), each
+  // tappable like its bird. A legend for birds you don't recognise - and
+  // the one place a species the library has no artwork for still shows on
+  // the collage view. Note there's nothing "mysterious" to flag here:
+  // BirdNET-Go can only ever report the species on its (finite, per-
+  // location) list, so if you've generated art for that whole list, every
+  // name in the strip has a bird above it (README: "Missing artwork").
+  //   'off' (default) | 'common' | 'scientific' | 'both'
+  // namesSize is the strip's font size in CSS px. Per-display URL overrides
+  // on this static page: ?names (=common), ?names=both, ?names_size=18.
+  names: 'off',
+  namesSize: 13,
+
   // Wall-mounted display extras. All off by default for desk browsing.
   //
   // The clock/weather block lives in a corner of the collage itself, and
