@@ -1946,6 +1946,7 @@
       collage.innerHTML = '';   // blank, rather than an empty-state message
       collagePlaced = [];
       _collageSig = 'empty';
+      renderNameStrip(items);   // nothing heard -> no names either
       return;
     }
     var W = collage.clientWidth, H = collage.clientHeight;
@@ -1966,6 +1967,13 @@
     }
     var wwEl = document.getElementById('wallWidgets');
     if (wwEl && !wwEl.hidden) addObstacle(wwEl);
+    // The optional species-name strip along the bottom (issue #69). Filled
+    // from the same item list FIRST so its settled height is what gets
+    // stamped into the grid - a long list on a busy day pushes the flock
+    // up rather than hiding birds behind the names.
+    renderNameStrip(items);
+    var nsEl = document.getElementById('nameStrip');
+    if (nsEl && !nsEl.hidden) addObstacle(nsEl);
     if (document.body.classList.contains('av-title-overlay') && staticTitle) addObstacle(staticTitle);
     // The view picker too: the collage view keeps no reserved band for
     // it (the box is the whole card, so the flock centres truly), and
@@ -5393,6 +5401,100 @@
     var s = readHash();
     if (s) highlightAtlas(s);
   };
+
+  // ===========================================================================
+  // Species-name strip (issue #69)
+  // ===========================================================================
+  // Optional line of species names along the bottom of the collage: every
+  // species in the current window, most-heard first (the collage's own
+  // order), each a button that does what tapping the bird does. A legend
+  // for people who don't recognise every illustration - and the one place
+  // on the collage view where a species the library has NO artwork for
+  // still shows up (its tile is otherwise invisible). Nothing is flagged as
+  // "missing art": BirdNET-Go's species list for a location is finite and
+  // known up front, so the fix for a gap is generating that species' art
+  // once (README: "Missing artwork for your area?"), not a permanent badge.
+  //
+  // Config (card: names / names_size; static page: AV_CONFIG.names /
+  // namesSize): mode 'off' (default) | 'common' | 'scientific' | 'both',
+  // and a font size in CSS px (default 13). Static-page URL overrides, so
+  // one install can serve a desk browser and a wall display: ?names
+  // (= common), ?names=both, ?names=scientific, ?names_size=18.
+  // renderCollage fills the strip and stamps its box into the packing grid
+  // as an obstacle, so birds pack above the names rather than under them.
+  var NAME_MODES = ['off', 'common', 'scientific', 'both'];
+  function nameStripMode() {
+    var mode = String(AV_CFG.names || 'off').toLowerCase();
+    if (window.AV_CONFIG) {
+      var m = location.search.match(/[?&]names(?:=([a-z]*))?(?:&|$)/);
+      if (m) mode = m[1] || 'common';
+    }
+    return NAME_MODES.indexOf(mode) > 0 ? mode : 'off';
+  }
+  function nameStripSize() {
+    var size = +AV_CFG.namesSize;
+    if (window.AV_CONFIG) {
+      var m = location.search.match(/[?&]names_size=(\d+(?:\.\d+)?)/);
+      if (m) size = parseFloat(m[1]);
+    }
+    if (!(size > 0)) size = 13;
+    return Math.max(6, Math.min(200, size));
+  }
+  function renderNameStrip(items) {
+    var el = document.getElementById('nameStrip');
+    if (!el) return;
+    var mode = nameStripMode();
+    if (mode === 'off' || !items || !items.length) {
+      if (!el.hidden) { el.hidden = true; el.innerHTML = ''; el.__lastHtml = ''; }
+      return;
+    }
+    el.style.setProperty('--ns-size', nameStripSize() + 'px');
+    el.setAttribute('data-mode', mode);
+    var html = items.map(function (s) {
+      var sci = s.sci || '', com = s.com || sci;
+      var inner = '';
+      if (mode !== 'scientific') inner += '<span class="ns-com">' + esc(com) + '</span>';
+      if (mode !== 'common') inner += '<span class="ns-sci">' + esc(sci || com) + '</span>';
+      return '<button type="button" class="ns-item" data-sci="' + esc(sci) + '">' + inner + '</button>';
+    }).join('<i class="ns-sep" aria-hidden="true">\u00b7</i>');
+    el.hidden = false;
+    setHtml(el, html);   // identical list on the silent poll = no DOM churn
+  }
+  // Hovering a name lights up its bird (same .is-hover the mask hit-test
+  // uses); tapping a name routes through the bird-tap dispatcher.
+  (function nameStripEvents() {
+    var el = document.getElementById('nameStrip');
+    if (!el) return;
+    var lit = null;
+    function itemOf(target) {
+      while (target && target !== el) {
+        if (target.classList && target.classList.contains('ns-item')) return target;
+        target = target.parentNode;
+      }
+      return null;
+    }
+    function tileFor(btn) {
+      var sci = btn && btn.getAttribute('data-sci');
+      if (!sci) return null;
+      var tiles = collage.querySelectorAll('.gtile');
+      for (var i = 0; i < tiles.length; i++) {
+        if (tiles[i].getAttribute('data-sci') === sci) return tiles[i];
+      }
+      return null;
+    }
+    function unlight() { if (lit) { lit.classList.remove('is-hover'); lit = null; } }
+    el.addEventListener('mouseover', function (ev) {
+      var t = tileFor(itemOf(ev.target));
+      if (t === lit) return;
+      unlight();
+      if (t) { t.classList.add('is-hover'); lit = t; }
+    });
+    el.addEventListener('mouseleave', unlight);
+    el.addEventListener('click', function (ev) {
+      var btn = itemOf(ev.target);
+      if (btn) handleBirdTap(btn.getAttribute('data-sci'));
+    });
+  })();
 
   // ===========================================================================
   // Wall-display extras (HA build)

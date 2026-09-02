@@ -29,6 +29,7 @@
   'aria.collage': 'Lintukollaasi',
   'aria.stats': 'Tilastot',
   'aria.atlas': 'Atlas',
+  'names.aria': 'Kuullut lajit',
 
   // ---- Time-window labels (windowLabel) ----
   'window.thisHour': 'tällä tunnilla',

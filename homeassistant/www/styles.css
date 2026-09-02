@@ -1724,6 +1724,42 @@ body.av-picker-top .slider { top: 10px; bottom: auto; }
 body.av-picker-top .view { padding-bottom: 28px; }
 body.av-picker-top .view#v0, body.av-picker-top .view#v1 { padding-bottom: 24px; }
 
+/* ---- Species-name strip (issue #69) ---- */
+/* A centred, wrapping line of names along the bottom of the collage
+   view - a legend for the flock. Sits just above the view picker (or on
+   the bottom edge when the picker is hidden / pinned to the top).
+   renderCollage stamps its box into the packing grid, so the flock packs
+   above it. Font size is the user's names_size, via --ns-size; common
+   names in the display face, scientific names italic and a step quieter,
+   like the atlas cards and the detail modal. Capped at under half the
+   view so a huge ALL-time list can't swallow the painting. */
+.name-strip {
+  position: absolute; left: 0; right: 0; bottom: 78px; z-index: 6;
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline;
+  gap: 0.15em 0; padding: 0 32px;
+  max-height: 45%; overflow: hidden;
+  font-size: var(--ns-size, 13px); line-height: 1.35;
+  color: var(--ink); text-align: center;
+}
+.name-strip[hidden] { display: none; }
+body.av-no-picker .name-strip, body.av-picker-top .name-strip { bottom: 18px; }
+.ns-item {
+  background: none; border: 0; padding: 0 0.15em; margin: 0;
+  font: inherit; color: inherit; cursor: pointer;
+  border-radius: 4px; white-space: nowrap;
+  transition: color 140ms ease;
+}
+.ns-item:hover, .ns-item:focus-visible { color: var(--accent-2); text-decoration: underline; text-underline-offset: 0.18em; text-decoration-thickness: 1px; outline: 0; }
+.ns-com { font-family: var(--av-font-display); }
+.ns-sci { font-family: var(--av-font-display); font-style: italic; color: var(--ink-2); }
+.name-strip[data-mode="both"] .ns-sci { margin-left: 0.4em; font-size: 0.86em; }
+.name-strip[data-mode="scientific"] .ns-sci { color: var(--ink); }
+.ns-sep { font-style: normal; color: var(--ink-soft); padding: 0 0.35em; user-select: none; }
+@media (max-width: 700px) {
+  .name-strip { padding: 0 16px; bottom: 74px; }
+  body.av-no-picker .name-strip, body.av-picker-top .name-strip { bottom: 12px; }
+}
+
 /* ---- Recording-row review flag ---- */
 /* Writes a false-positive review back to BirdNET-Go. A quiet ghost x
    beside the confidence; first tap arms it into a labelled pill, second

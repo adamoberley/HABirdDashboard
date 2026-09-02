@@ -82,6 +82,15 @@
           <span class="ww-cap" id="wwSun"></span>
         </div>
       </div>
+      <!-- Optional species-name strip (issue #69): every species in the
+           current window as a line of names along the bottom of the
+           collage, so a bird you don't recognise can be looked up by
+           name - including any species the library has no artwork for
+           yet (those are otherwise invisible in the collage). Hidden
+           unless enabled in config (names: 'common' | 'scientific' |
+           'both') or via ?names on the URL. renderCollage fills it and
+           stamps its box into the packing grid, like the clock. -->
+      <div class="name-strip" id="nameStrip" aria-label="Species heard" data-i18n-aria="names.aria" hidden></div>
     </section>
 
     <!-- ========== View 2 - Stats ========== -->

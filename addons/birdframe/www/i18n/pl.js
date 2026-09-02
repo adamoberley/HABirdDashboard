@@ -29,6 +29,7 @@
   'aria.collage': 'Kolaż ptaków',
   'aria.stats': 'Statystyki',
   'aria.atlas': 'Atlas',
+  'names.aria': 'Usłyszane gatunki',
 
   // ---- Time-window labels (windowLabel) ----
   'window.thisHour': 'ostatnia godzina',

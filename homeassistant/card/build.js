@@ -110,6 +110,10 @@ css += `
 }
 /* The view picker hugs the card's bottom edge (the page floats it higher). */
 .slider { bottom: 10px; }
+/* ...and the species-name strip rides just above it (or on the edge when
+   the picker is hidden / at the top). */
+.name-strip { bottom: 58px; }
+.av-shell.av-no-picker .name-strip, .av-shell.av-picker-top .name-strip { bottom: 12px; }
 /* The collage owns the WHOLE card - no reserved band for the picker
    (it's stamped into the packing grid as an obstacle instead), so the
    flock centres in the true middle of the card. */
@@ -224,6 +228,15 @@ var HABIRD_EDITOR_SCHEMA = [
   { name: 'dashboard', type: 'expandable', flatten: true, title: 'Dashboard', expanded: true, schema: [
     { name: 'title', selector: { text: {} } },
     { name: '', type: 'grid', schema: [
+      { name: 'names', selector: { select: { mode: 'dropdown', options: [
+        { value: 'off', label: 'Off' },
+        { value: 'common', label: 'Common names' },
+        { value: 'scientific', label: 'Scientific names' },
+        { value: 'both', label: 'Common + scientific' },
+      ] } } },
+      { name: 'names_size', selector: { number: { min: 8, max: 40, step: 1, mode: 'slider', unit_of_measurement: 'px' } } },
+    ] },
+    { name: '', type: 'grid', schema: [
       { name: 'background', selector: { select: { mode: 'dropdown', options: [
         { value: 'transparent', label: 'Transparent' },
         { value: 'paper', label: 'Paper' },
@@ -320,6 +333,8 @@ var HABIRD_LABELS = {
   view: 'View',
   window: 'Time window',
   title: 'Title',
+  names: 'Species names',
+  names_size: 'Species names size',
   view_selector: 'Show the view switcher',
   selector_position: 'Switcher position',
   background: 'Background',
@@ -354,6 +369,8 @@ var HABIRD_LABELS = {
 };
 var HABIRD_HELPERS = {
   title: 'Default (blank): no heading. Any text adds a title the birds pack around, clock-style.',
+  names: "Default: off. Lists every species in the window as a line of names along the bottom of the collage - a legend for birds you don't recognise (tap a name for its details). Also the one place a species without artwork still appears.",
+  names_size: 'Font size of the species-name strip, in pixels (default 13).',
   view_selector: 'Turn off to lock this card to one view.',
   selector_position: 'Top pairs poorly with a title - both sit centred up top.',
   weather_entity: 'Default (blank): the first weather.* entity found.',
@@ -390,6 +407,12 @@ class HABirdCard extends HTMLElement {
     }
     if (config.window && config.window !== 'all' && !(+config.window > 0)) {
       throw new Error("window must be a positive number of hours or 'all'");
+    }
+    if (config.names != null && ['off', 'common', 'scientific', 'both'].indexOf(config.names) < 0) {
+      throw new Error("names must be 'off', 'common', 'scientific' or 'both'");
+    }
+    if (config.names_size != null && !(+config.names_size > 0)) {
+      throw new Error('names_size must be a positive number of pixels');
     }
     if (config.sit_confidence != null &&
         (typeof config.sit_confidence !== 'number' || config.sit_confidence < 0 || config.sit_confidence > 1.01)) {
@@ -473,6 +496,10 @@ class HABirdCard extends HTMLElement {
     var self = this;
     var avConfig = {
       title: c.title || '',                  // '' = no title block
+      // Species-name strip along the bottom of the collage (issue #69):
+      // off (default) | common | scientific | both, and its font size in px.
+      names: c.names || 'off',
+      namesSize: (c.names_size != null && +c.names_size > 0) ? +c.names_size : 13,
       view: c.view || 'collage',             // which view this card shows
       viewSelector: c.view_selector !== false,
       selectorPosition: c.selector_position || 'bottom',
@@ -592,7 +619,7 @@ class HABirdCardEditor extends HTMLElement {
       this.appendChild(this._form);
     }
     this._form.schema = HABIRD_EDITOR_SCHEMA;
-    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', collage_fill: 0.5, size_contrast: 0.5, paper_color: '', paper_color_dark: '', paper_texture: 0, audio_boost: 24, live: true }, this._config);
+    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', names: 'off', names_size: 13, collage_fill: 0.5, size_contrast: 0.5, paper_color: '', paper_color_dark: '', paper_texture: 0, audio_boost: 24, live: true }, this._config);
     this._form.hass = this._hass;
   }
 }

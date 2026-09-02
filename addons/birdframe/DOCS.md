@@ -81,6 +81,8 @@ already look like a painting, so most setups change little. Most-touched:
 | `collage_flow_strength` | Ring flow strength (0–1). 1 = full wheel; lower = gentler bank. |
 | `collage_spacing` | Gap between birds (0–1, any shape). Lower = closer/bigger, higher = airier. They never overlap. |
 | `show_caption` | Off (default) = edge-to-edge art, no title. |
+| `show_names` | `off` (default), `common`, `scientific`, or `both`: list every species in the window as a line of names along the bottom of the painting — a legend for birds you don't recognise. Also the one place a species with no artwork yet still appears. |
+| `names_size` | Font size of that strip in px at panel resolution (36 for 4K; ~18 for 1920x1080). |
 | `window_hours` | Time window: `1`/`12`/`24`/`168`/`1000000` (ALL). |
 | `interval_minutes` | How often the collage refreshes on the TV. |
 | `active_hours` | e.g. `06:30-22:00`; blank = 24/7. |
@@ -132,7 +134,11 @@ A manual push renders even outside `active_hours`, so you can test any time.
   `birdnet_go_url` from the app and has recent detections. Set `log_level:
   debug` to see the render and TV steps.
 - **Birds missing from the collage** — their art is fetched on first sight; the
-  next cycle will include them. Needs internet for that first fetch.
+  next cycle will include them. Needs internet for that first fetch. If a
+  species *never* appears, the library has no illustration for it yet: turn
+  on `show_names` to see it listed by name, and see the project README's
+  "Missing artwork for your area?" — BirdNET-Go's species list for your
+  location is finite, so generating art for that list once closes every gap.
 - **Wrong architecture** — Chromium needs `amd64`/`aarch64`. armhf/armv7/i386
   can't run it.
 

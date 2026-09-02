@@ -32,6 +32,8 @@ class Options:
     paper_color_dark: str
     paper_texture: float
     show_caption: bool
+    show_names: str
+    names_size: int
     window_hours: int
     collage_fill: float
     size_contrast: float
@@ -91,6 +93,10 @@ def load() -> Options:
         # Grayscale grain overlaid on the paper (0 = off, ~0.06 = subtle washi).
         paper_texture=float(raw.get("paper_texture", 0.06)),
         show_caption=bool(raw.get("show_caption", True)),
+        # Species-name strip along the bottom: "off" | "common" | "scientific"
+        # | "both", and its font size in px at panel resolution.
+        show_names=str(raw.get("show_names", "off")).strip().lower(),
+        names_size=int(raw.get("names_size", 36)),
         window_hours=int(raw.get("window_hours", 24)),
         collage_fill=float(raw.get("collage_fill", 0.5)),
         # How much bigger the most-heard birds draw than the rest (0-0.8;

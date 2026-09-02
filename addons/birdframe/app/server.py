@@ -182,6 +182,9 @@ def _config_js(opts: Options, birdnet_url: str) -> bytes:
         "collageFlowStrength": opts.collage_flow_strength,
         "collageSpacing": opts.collage_spacing,
         "sitConfidence": opts.sit_confidence,
+        # Species-name strip (names / namesSize in the page's AV_CONFIG).
+        "names": opts.show_names,
+        "namesSize": opts.names_size,
         "audioBoostDb": 0,
         "tapAction": "info",
         "xenoCantoKey": "",

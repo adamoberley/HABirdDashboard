@@ -1,5 +1,26 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- **Species-name strip.** New `names` option (card YAML + visual editor;
+  `AV_CONFIG.names` / `?names=` on the standalone page; `show_names` on the
+  Bird Frame app) lists every species in the current window as a line of
+  names along the bottom of the collage - common, scientific, or both - at
+  a configurable `names_size`. Names are tappable (same as tapping the
+  bird) and hovering one lights up its illustration; the flock packs above
+  the strip like it does around the clock. It is also where a species the
+  library has no artwork for still appears on the collage view.
+  Implements the list half of #69.
+
+### Docs
+- README, AGENTS.md and the Bird Frame docs now spell out that a station's
+  species list is finite and visible in advance (BirdNET-Go's Species page
+  / CSV), so missing artwork is a one-time fix - generate the whole list
+  once - rather than something to flag forever; plus a note on the model's
+  non-bird labels (crickets, frogs, dog, engine) showing up as unillustrated
+  names. Closes the "highlight missing images" half of #69 by explanation.
+
 ## v1.4.0 — 2026-08-27
 
 ### Added
