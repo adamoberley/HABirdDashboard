@@ -2303,22 +2303,6 @@
 "y": 0.857
 }
 },
-"atrapsalta-corticina-2": {
-"ambiguous": false,
-"ambiguous2": null,
-"beak": {
-"x": 0.232,
-"y": 0.762
-},
-"confidence": "high",
-"confidence2": null,
-"heading": 125,
-"heading2": null,
-"tail": {
-"x": 0.7,
-"y": 0.09
-}
-},
 "atrichornis-rufescens-2": {
 "ambiguous": false,
 "ambiguous2": null,
@@ -2589,38 +2573,6 @@
 "tail": {
 "x": 0.91,
 "y": 0.97
-}
-},
-"birrima-castanea-2": {
-"ambiguous": false,
-"ambiguous2": null,
-"beak": {
-"x": 0.03,
-"y": 0.725
-},
-"confidence": "high",
-"confidence2": null,
-"heading": 174,
-"heading2": null,
-"tail": {
-"x": 0.96,
-"y": 0.625
-}
-},
-"birrima-varians-2": {
-"ambiguous": false,
-"ambiguous2": null,
-"beak": {
-"x": 0.362,
-"y": 0.235
-},
-"confidence": "high",
-"confidence2": null,
-"heading": 253,
-"heading2": null,
-"tail": {
-"x": 0.58,
-"y": 0.94
 }
 },
 "biziura-lobata-2": {

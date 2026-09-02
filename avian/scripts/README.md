@@ -1,7 +1,7 @@
 # Generating illustrations
 
-The collage art is generated, not hand-drawn. The repo ships 2,531 kachō-e
-illustrations covering 1,288 species — a perched pose for every one, plus a
+The collage art is generated, not hand-drawn. The repo ships 2,525 kachō-e
+illustrations covering 1,285 species — a perched pose for every one, plus a
 flight pose for everything that flies. To restyle them or build a set for your
 own region, the pipeline is a handful of scripts in this directory.
 
