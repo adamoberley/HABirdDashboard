@@ -1,7 +1,7 @@
 (function () {
   // Bumped whenever the offline sketch build changes, so the browser
   // doesn't keep a stale cache after we regenerate the sketches.
-  var SKETCH_VERSION = 'r17'; // r17: 422 species from eBird region AU (#70).
+  var SKETCH_VERSION = 'r17'; // r17: 417 species from eBird region AU (#70).
                               // r16: Black-billed Magpie (#60).
                               // r15: 64 new Australian species (BirdNET-Go
                               // station list) + fox/frog non-bird detections.
@@ -15,7 +15,7 @@
   // equivalent to a global cache purge for /api/img. (caches.default
   // .delete() in the worker only affects ONE colo at a time, so a
   // versioned URL is the only reliable way to invalidate everywhere.)
-  var IMG_VERSION = 'r17'; // r17: 422 species from eBird region AU (#70).
+  var IMG_VERSION = 'r17'; // r17: 417 species from eBird region AU (#70).
                            // r16: Black-billed Magpie (#60).
                            // r15: 64 new Australian species (BirdNET-Go
                            // station list) + fox/frog non-bird detections.

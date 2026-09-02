@@ -6,7 +6,7 @@
 # Frame TV's Art Mode - replacing the previous upload in place so the TV's art
 # library never accumulates duplicates.
 name: Bird Frame (Samsung Frame TV)
-version: "1.4.0"
+version: "1.5.0"
 slug: birdframe
 description: >-
   Render the live Bird collage and push it to a Samsung Frame TV as Art Mode

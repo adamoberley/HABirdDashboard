@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.5.0 — 2026-09-02
 
 ### Added
 - **Species-name strip.** New `names` option (card YAML + visual editor;
@@ -12,10 +12,10 @@
   the strip like it does around the clock. It is also where a species the
   library has no artwork for still appears on the collage view.
   Implements the list half of #69.
-- **422 species from eBird region AU** (contributed by @daniel-c-ctrl,
-  [#70](https://github.com/adamoberley/HABirdDashboard/pull/70)) - 799 new
+- **417 species from eBird region AU** (contributed by @daniel-c-ctrl,
+  [#70](https://github.com/adamoberley/HABirdDashboard/pull/70)) - 789 new
   kachō-e illustrations covering the Southeast Australian list, taking the
-  bundled library from 866 to 1,288 species (1,732 -> 2,531 illustrations).
+  bundled library from 866 to 1,283 species (1,732 -> 2,521 illustrations).
   Alongside the birds it fills in the non-bird detections BirdNET-Go reports
   in that region: frogs, cicadas and crickets, bats, and the usual
   marsupials and introduced mammals. Silhouette masks and flight-direction

@@ -8,6 +8,8 @@ in place, so the TV's art library never accumulates duplicates.
 - Uploads → selects → **deletes the one it replaced** (safe ordering, retried)
 - Downloads only your station's bird art, cached locally
 - Adjustable interval, time window, theme, clock/weather, active hours
+- Optional species-name strip along the bottom (`show_names`), sized for the
+  panel — a legend for the birds you don't recognise
 
 See **[DOCS.md](DOCS.md)** for setup (including the one-time pairing tap on the
 TV) and options.

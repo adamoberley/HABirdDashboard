@@ -1,9 +1,14 @@
 # Generating illustrations
 
-The collage art is generated, not hand-drawn. The repo ships 1,602 kachō-e
-illustrations (801 species, a perched and a flight pose each). To restyle
-them or build a set for your own region, the pipeline is a handful of scripts
-in this directory.
+The collage art is generated, not hand-drawn. The repo ships 2,521 kachō-e
+illustrations covering 1,283 species — a perched pose for every one, plus a
+flight pose for everything that flies. To restyle them or build a set for your
+own region, the pipeline is a handful of scripts in this directory.
+
+Not everything in the set is a bird: BirdNET's labels include frogs, insects,
+mammals and a few domestic animals, and those are illustrated too. See
+[Non-birds](#non-birds) — they are the single most common source of bad
+renders.
 
 ## Pipeline
 
@@ -80,6 +85,45 @@ gets wrong. Each note names the field marks that matter and the look-alikes to
 avoid, and is appended to the prompt for that species. Add entries as you find
 drift; they carry forward to every future regeneration of that bird.
 
+## Non-birds
+
+`prompt.template.md` is a *bird* prompt — it talks about wings, beaks, feathers
+and perching throughout. BirdNET's label set is not all birds, so for a frog,
+cicada, cricket, bat or kangaroo that prompt is actively wrong, and the model
+resolves the contradiction in one of two ways:
+
+- **Unrecognised genus → it draws a songbird.** Give it a name it has no image
+  prior for (`Psaltoda claripennis`, `Uperoleia fusca`) and it falls back on
+  the rest of the prompt, which describes a bird. You get a perfectly nice
+  warbler captioned as a cicada. This is silent — the render looks good, it is
+  just the wrong animal.
+- **Recognised genus, `-2` pose → it grows feathered wings.** The flight pose
+  asks for "wings spread", so a dog, goat, echidna or pademelon comes back
+  airborne with a pair of wings grafted on.
+
+Neither is caught by eyeballing thumbnails of a large batch, and `verify.py`
+is tuned for birds, so it flags every intentional non-bird as an error. Screen
+non-birds deliberately: pull the non-avian genera out of your species list and
+look at those renders on their own.
+
+The fix is a `species-notes.json` entry that countermands the bird prompt.
+The `Vulpes vulpes` entry is the template — it states the animal is a mammal,
+says outright to *ignore every instruction elsewhere in the prompt about wings,
+feathers, beaks, perching and flight*, and then redefines what both poses mean
+for something that does not fly (typically: "perched" = at rest, "in flight" =
+moving on the ground). Copy that shape, then regenerate:
+
+```bash
+python3 pregen.py --species "Genus species|Common Name" --force
+python3 cutout.py <slug> <slug>-2
+python3 build_masks.py && node ../../homeassistant/card/build.js
+```
+
+For a species that genuinely cannot fly, the cleanest result is often no `-2`
+file at all — delete it and the card falls back to the perched pose. If you do,
+prune the slug from `dirs.json` too, or its stale flight heading lingers in the
+`DIRS` table and blocks re-annotation later.
+
 ## Flight directions
 
 The ring **flow** layout banks every in-flight bird so it follows the circle's
@@ -127,8 +171,12 @@ python3 verify.py --labels labels.txt calypte-anna
 - **Sticks.** Perched raptors often come back gripping a twig the prompt
   forbade. Generate 2-3 and keep the clean one.
 - **Species drift.** The model collapses an uncommon species toward a common
-  look-alike (a swift becomes a swallow). Fixes, in order: a sharper
-  `species-notes.json` note with anti-feature language; an anti-reference; a
-  different style print; a one-off `--species` regen.
+  look-alike (a swift becomes a swallow; a Nankeen Kestrel becomes an American
+  Kestrel). Fixes, in order: a sharper `species-notes.json` note with
+  anti-feature language; an anti-reference; a different style print; a one-off
+  `--species` regen.
+- **Wrong animal entirely.** A non-bird whose genus the model doesn't know
+  comes back as a songbird, and a non-flyer's `-2` pose comes back with wings.
+  See [Non-birds](#non-birds).
 - **Matched pair.** The perched and flight poses must read as the same
   individual. Review them side by side before locking.
