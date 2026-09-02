@@ -7201,19 +7201,6 @@
 "y": 0.94
 }
 },
-"falco-cenchroides-2": {
-"ambiguous": false,
-"beak": {
-"x": 0.381,
-"y": 0.555
-},
-"confidence": "high",
-"heading": 214,
-"tail": {
-"x": 0.855,
-"y": 0.88
-}
-},
 "falco-columbarius-2": {
 "ambiguous": false,
 "ambiguous2": false,
@@ -8996,19 +8983,6 @@
 "tail": {
 "x": 0.83,
 "y": 0.79
-}
-},
-"icthyophaga-leucogaster-2": {
-"ambiguous": false,
-"beak": {
-"x": 0.359,
-"y": 0.675
-},
-"confidence": "high",
-"heading": 202,
-"tail": {
-"x": 0.765,
-"y": 0.835
 }
 },
 "iduna-caligata-2": {
@@ -12582,19 +12556,6 @@
 "tail": {
 "x": 0.92,
 "y": 0.88
-}
-},
-"pelecanus-conspicillatus-2": {
-"ambiguous": false,
-"beak": {
-"x": 0.089,
-"y": 0.605
-},
-"confidence": "high",
-"heading": 199,
-"tail": {
-"x": 0.74,
-"y": 0.83
 }
 },
 "pelecanus-erythrorhynchos-2": {
