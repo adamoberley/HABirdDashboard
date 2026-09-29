@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.6.2 — 2026-09-29
+
+### Fixed
+- **Middle Spotted Woodpecker no longer flies with three wings**
+  ([#81](https://github.com/adamoberley/HABirdDashboard/issues/81), reported
+  by @felixdrud). The extra wing is removed from the flight pose
+  (`dendrocoptes-medius-2.png`) and its collage mask rebuilt; the flight
+  heading is unchanged. A `species-notes.json` entry keeps a future
+  regeneration from bringing it back. Cache-bust r17 -> r18.
+
 ## v1.6.1 — 2026-09-29
 
 ### Fixed
