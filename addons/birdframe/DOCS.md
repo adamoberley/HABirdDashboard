@@ -148,4 +148,4 @@ Talks to the TV with [`samsungtvws`](https://github.com/NickWaterton/samsung-tv-
 the upload/select/delete approach and image fitting are adapted from
 [vivalatech's frametv-artchanger](https://github.com/vivalatech/homeassistant-addons).
 The collage and illustrations are the Bird Card / AvianVisitors work
-(CC BY-NC-SA 4.0).
+(MIT, see the repository's LICENSE).

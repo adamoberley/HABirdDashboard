@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.6.0 — 2026-09-29
+
+### Changed
+- **Relicensed from CC-BY-NC-SA-4.0 to MIT**, code and artwork alike, with
+  the agreement of Teddy Warner (AvianVisitors) and the contributors whose
+  work is in the repo. The NonCommercial license had come along with
+  AvianVisitors' BirdNET-Pi fork history; no BirdNET-Pi code remains here.
+  BirdNET's species labels (`avian/scripts/labels.txt`) and BirdNET-Go's
+  taxonomy aliases keep their original CC BY-NC-SA license - see
+  `THIRD_PARTY_NOTICES.md`. The HACS validation workflow no longer skips
+  the license check.
+
 ## v1.5.1 — 2026-09-29
 
 ### Fixed

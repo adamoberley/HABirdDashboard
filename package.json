@@ -1,9 +1,9 @@
 {
   "name": "habird-dashboard",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "private": true,
   "description": "Bird Card - a live bird collage card for Home Assistant, fed by BirdNET-Go",
-  "license": "CC-BY-NC-SA-4.0",
+  "license": "MIT",
   "scripts": {
     "build": "node homeassistant/card/build.js",
     "test": "node tests/run.js",
