@@ -676,6 +676,16 @@ ring layout, `?names` (or `?names=scientific` / `?names=both`) plus
   included) through it. Ingress discovery needs an admin HA user and the
   default `birdnet_url` (leave it empty); if it can't be set up, data
   still flows via the MQTT sensors - only audio playback is lost.
+- **HA in Docker / Core (no Supervisor), remote or on a VPN.** Ingress
+  discovery needs the Supervisor, so on these installs there is no
+  automatic remote path yet ([#73](https://github.com/adamoberley/HABirdDashboard/issues/73)).
+  Put BirdNET-Go behind the same HTTPS reverse proxy as HA (Traefik,
+  Caddy, nginx...) and set `birdnet_url` to that `https://` hostname: no
+  mixed content, and it works anywhere that hostname resolves.
+- **"Can't reach BirdNET-Go from this browser."** The card gave up on
+  the API after 15 seconds and had no MQTT history to fall back on. Work
+  through the two items above; with MQTT enabled the card falls back to
+  HA history instead of showing this.
 - **The "not it?" flag fails.** The pill shows a short reason: `no path`
   means the card couldn't reach HA ingress (writes need it - check
   you're an admin user); `err 401/403/405` means BirdNET-Go refused -

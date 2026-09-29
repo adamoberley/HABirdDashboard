@@ -1709,8 +1709,262 @@
     return (maskCache[slug] = { w: w, h: h, cells: cells });
   }
 
-  function slugify(sci) {
+  // BirdNET-Go canonicalises some species to their current name instead
+  // of the BirdNET V2.4 label (e.g. Corvus monedula -> Coloeus monedula),
+  // so art filed under the other name was never found (#76). Pairs are
+  // "V2.4 label": "current name", copied from BirdNET-Go's
+  // internal/openfauna/data/aliases.json (tphakala/birdnet-go@5a94fc78).
+  var TAXON_ALIASES = {
+    "Accipiter badius": "Tachyspiza badia",
+    "Accipiter bicolor": "Astur bicolor",
+    "Accipiter cirrocephalus": "Tachyspiza cirrocephala",
+    "Accipiter cooperii": "Astur cooperii",
+    "Accipiter fasciatus": "Tachyspiza fasciata",
+    "Accipiter gentilis": "Astur gentilis",
+    "Accipiter gularis": "Tachyspiza gularis",
+    "Accipiter hiogaster": "Tachyspiza hiogaster",
+    "Accipiter melanoleucus": "Astur melanoleucus",
+    "Accipiter minullus": "Tachyspiza minulla",
+    "Accipiter novaehollandiae": "Tachyspiza novaehollandiae",
+    "Accipiter soloensis": "Tachyspiza soloensis",
+    "Accipiter superciliosus": "Microspizias superciliosus",
+    "Accipiter tachiro": "Aerospiza tachiro",
+    "Accipiter trinotatus": "Tachyspiza trinotata",
+    "Accipiter trivirgatus": "Lophospiza trivirgata",
+    "Accipiter virgatus": "Tachyspiza virgata",
+    "Alophoixus finschii": "Iole finschii",
+    "Amblyornis newtoniana": "Prionodura newtoniana",
+    "Anthropoides paradiseus": "Grus paradiseus",
+    "Anthropoides virgo": "Grus virgo", "Anthus lutescens": "Anthus chii",
+    "Antilophia bokermanni": "Chiroxiphia bokermanni",
+    "Antilophia galeata": "Chiroxiphia galeata",
+    "Anurolimnas fasciatus": "Rufirallus fasciatus",
+    "Anurolimnas viridis": "Rufirallus viridis",
+    "Apus melba": "Tachymarptis melba",
+    "Basileuterus lachrymosus": "Euthlypis lachrymosa",
+    "Brachypodius eutilotus": "Microtarsus eutilotus",
+    "Brachypodius melanocephalos": "Microtarsus melanocephalos",
+    "Brachypodius melanoleucos": "Microtarsus melanoleucos",
+    "Brachypodius priocephalus": "Microtarsus priocephalus",
+    "Brachypodius urostictus": "Microtarsus urostictus",
+    "Bubo coromandus": "Ketupa coromanda", "Bubo lacteus": "Ketupa lactea",
+    "Bubo nipalensis": "Ketupa nipalensis",
+    "Bubo sumatranus": "Ketupa sumatrana", "Bubulcus ibis": "Ardea ibis",
+    "Buceros vigil": "Rhinoplax vigil",
+    "Buphagus erythrorynchus": "Buphagus erythroryncha",
+    "Burhinus bistriatus": "Hesperoburhinus bistriatus",
+    "Burhinus superciliaris": "Hesperoburhinus superciliaris",
+    "Cacomantis pallidus": "Heteroscenes pallidus",
+    "Calocitta colliei": "Cyanocorax colliei",
+    "Calocitta formosa": "Cyanocorax formosus",
+    "Calyptorhynchus funereus": "Zanda funerea",
+    "Calyptorhynchus latirostris": "Zanda latirostris",
+    "Campethera cailliautii": "Campethera maculosa",
+    "Cercotrichas barbata": "Tychaedon barbata",
+    "Cercotrichas coryphoeus": "Tychaedon coryphoeus",
+    "Cercotrichas quadrivirgata": "Tychaedon quadrivirgata",
+    "Cercotrichas signata": "Tychaedon signata",
+    "Charadrius alexandrinus": "Anarhynchus alexandrinus",
+    "Charadrius bicinctus": "Anarhynchus bicinctus",
+    "Charadrius collaris": "Anarhynchus collaris",
+    "Charadrius dubius": "Thinornis dubius",
+    "Charadrius falklandicus": "Anarhynchus falklandicus",
+    "Charadrius javanicus": "Anarhynchus javanicus",
+    "Charadrius leschenaultii": "Anarhynchus leschenaultii",
+    "Charadrius modestus": "Zonibyx modestus",
+    "Charadrius montanus": "Anarhynchus montanus",
+    "Charadrius morinellus": "Eudromias morinellus",
+    "Charadrius nivosus": "Anarhynchus nivosus",
+    "Charadrius peronii": "Anarhynchus peronii",
+    "Charadrius placidus": "Thinornis placidus",
+    "Charadrius tricollaris": "Thinornis tricollaris",
+    "Charadrius veredus": "Anarhynchus veredus",
+    "Charadrius wilsonia": "Anarhynchus wilsonia",
+    "Chloropicus fuscescens": "Dendropicos fuscescens",
+    "Chloropicus goertae": "Dendropicos goertae",
+    "Chloropicus griseocephalus": "Dendropicos griseocephalus",
+    "Chloropicus spodocephalus": "Dendropicos spodocephalus",
+    "Cholornis unicolor": "Paradoxornis unicolor",
+    "Chrysococcyx basalis": "Chalcites basalis",
+    "Chrysococcyx lucidus": "Chalcites lucidus",
+    "Chrysococcyx osculans": "Chalcites osculans",
+    "Ciccaba albitarsis": "Strix albitarsis",
+    "Ciccaba huhula": "Strix huhula",
+    "Ciccaba nigrolineata": "Strix nigrolineata",
+    "Ciccaba virgata": "Strix virgata",
+    "Cicinnurus magnificus": "Diphyllodes magnificus",
+    "Cicinnurus respublica": "Diphyllodes respublica",
+    "Clytolaema rubricauda": "Heliodoxa rubricauda",
+    "Coccothraustes abeillei": "Hesperiphona abeillei",
+    "Coccothraustes vespertinus": "Hesperiphona vespertina",
+    "Columba larvata": "Aplopelia larvata",
+    "Conostoma aemodium": "Paradoxornis aemodius",
+    "Coracina caesia": "Ceblepyris caesius",
+    "Coracina cinerea": "Ceblepyris cinereus",
+    "Coracina pectoralis": "Ceblepyris pectoralis",
+    "Corvus dauuricus": "Coloeus dauuricus",
+    "Corvus monedula": "Coloeus monedula",
+    "Corythaixoides concolor": "Crinifer concolor",
+    "Corythaixoides leucogaster": "Crinifer leucogaster",
+    "Cossypha anomala": "Dessonornis anomalus",
+    "Cossypha archeri": "Dessonornis archeri",
+    "Cossypha caffra": "Dessonornis caffer",
+    "Cossypha humeralis": "Dessonornis humeralis",
+    "Cossypha polioptera": "Sheppardia polioptera",
+    "Cracticus quoyi": "Melloria quoyi",
+    "Cranioleuca gutturata": "Thripophaga gutturata",
+    "Crateroscelis murina": "Origma murina",
+    "Crateroscelis robusta": "Origma robusta",
+    "Cyornis concretus": "Leucoptilon concretum",
+    "Cyornis hoevelli": "Eumyias hoevelli",
+    "Dicaeum agile": "Pachyglossa agilis",
+    "Dicaeum chrysorrheum": "Pachyglossa chrysorrhea",
+    "Dicrurus divaricatus": "Dicrurus adsimilis",
+    "Dinopium rafflesii": "Gecinulus rafflesii",
+    "Dryobates affinis": "Veniliornis affinis",
+    "Dryobates albolarvatus": "Leuconotopicus albolarvatus",
+    "Dryobates arizonae": "Leuconotopicus arizonae",
+    "Dryobates borealis": "Leuconotopicus borealis",
+    "Dryobates callonotus": "Veniliornis callonotus",
+    "Dryobates cassini": "Veniliornis cassini",
+    "Dryobates dignus": "Veniliornis dignus",
+    "Dryobates frontalis": "Veniliornis frontalis",
+    "Dryobates fumigatus": "Leuconotopicus fumigatus",
+    "Dryobates kirkii": "Veniliornis kirkii",
+    "Dryobates lignarius": "Veniliornis lignarius",
+    "Dryobates maculifrons": "Veniliornis maculifrons",
+    "Dryobates mixtus": "Veniliornis mixtus",
+    "Dryobates nigriceps": "Veniliornis nigriceps",
+    "Dryobates passerinus": "Veniliornis passerinus",
+    "Dryobates spilogaster": "Veniliornis spilogaster",
+    "Dryobates stricklandi": "Leuconotopicus stricklandi",
+    "Dryobates villosus": "Leuconotopicus villosus",
+    "Dryotriorchis spectabilis": "Circaetus spectabilis",
+    "Elseyornis melanops": "Thinornis melanops",
+    "Eupodotis afra": "Afrotis afra",
+    "Eupodotis afraoides": "Afrotis afraoides",
+    "Eupodotis ruficrista": "Lophotis ruficrista",
+    "Eupodotis vigorsii": "Heterotetrax vigorsii",
+    "Glossopsitta concinna": "Trichoglossus concinnus",
+    "Habia atrimaxillaris": "Driophlox atrimaxillaris",
+    "Habia cristata": "Driophlox cristata",
+    "Habia fuscicauda": "Driophlox fuscicauda",
+    "Habia gutturalis": "Driophlox gutturalis",
+    "Haliaeetus humilis": "Icthyophaga humilis",
+    "Haliaeetus ichthyaetus": "Icthyophaga ichthyaetus",
+    "Haliaeetus leucogaster": "Icthyophaga leucogaster",
+    "Haliaeetus vocifer": "Icthyophaga vocifer",
+    "Hapalocrex flaviventer": "Laterallus flaviventer",
+    "Herpsilochmus sellowi": "Radinopsyche sellowi",
+    "Hydropsalis maculicaudus": "Antiurus maculicaudus",
+    "Hyliola regilla": "Pseudacris regilla",
+    "Iole indica": "Acritillas indica",
+    "Ixobrychus cinnamomeus": "Botaurus cinnamomeus",
+    "Ixobrychus dubius": "Botaurus dubius",
+    "Ixobrychus eurhythmus": "Botaurus eurhythmus",
+    "Ixobrychus exilis": "Botaurus exilis",
+    "Ixobrychus flavicollis": "Botaurus flavicollis",
+    "Ixobrychus involucris": "Botaurus involucris",
+    "Ixobrychus minutus": "Botaurus minutus",
+    "Ixobrychus sinensis": "Botaurus sinensis",
+    "Lanius corvinus": "Corvinella corvina",
+    "Laterallus leucopyrrhus": "Rufirallus leucopyrrhus",
+    "Laterallus xenopterus": "Rufirallus xenopterus",
+    "Leucolia violiceps": "Ramosomyia violiceps",
+    "Lophochroa leadbeateri": "Cacatua leadbeateri",
+    "Lybius bidentatus": "Pogonornis bidentatus",
+    "Melaenornis silens": "Sigelus silens",
+    "Micropygia schomburgkii": "Rufirallus schomburgkii",
+    "Milvago chimachima": "Daptrius chimachima",
+    "Milvago chimango": "Daptrius chimango",
+    "Mirafra affinis": "Plocealauda affinis",
+    "Mirafra africana": "Corypha africana",
+    "Mirafra apiata": "Corypha apiata",
+    "Mirafra assamica": "Plocealauda assamica",
+    "Mirafra cantillans": "Mirafra javanica",
+    "Mirafra erythrocephala": "Plocealauda erythrocephala",
+    "Mirafra erythroptera": "Plocealauda erythroptera",
+    "Mirafra fasciolata": "Corypha fasciolata",
+    "Mirafra rufocinnamomea": "Amirafra rufocinnamomea",
+    "Montifringilla blanfordi": "Pyrgilauda blanfordi",
+    "Montifringilla taczanowskii": "Onychostruthus taczanowskii",
+    "Musophaga rossae": "Tauraco rossae",
+    "Neocossyphus finschi": "Stizorhina finschi",
+    "Neocossyphus fraseri": "Stizorhina fraseri",
+    "Neopelma chrysolophum": "Protopelma chrysolophum",
+    "Nyctibius bracteatus": "Phyllaemulor bracteatus",
+    "Ochthoeca diadema": "Silvicultrix diadema",
+    "Ochthoeca frontalis": "Silvicultrix frontalis",
+    "Ochthoeca jelskii": "Silvicultrix jelskii",
+    "Ochthoeca pulchella": "Silvicultrix pulchella",
+    "Orocharis saltator": "Hapithus saltator",
+    "Otocichla mupinensis": "Turdus mupinensis",
+    "Parvipsitta porphyrocephala": "Psitteuteles porphyrocephalus",
+    "Parvipsitta pusilla": "Psitteuteles pusillus",
+    "Peneothello cyanus": "Melanodryas cyanus",
+    "Peneothello sigillata": "Melanodryas sigillata",
+    "Phaeomyias murina": "Nesotriccus murinus",
+    "Philydor erythrocercum": "Neophilydor erythrocercum",
+    "Philydor fuscipenne": "Neophilydor fuscipenne",
+    "Phyllomyias burmeisteri": "Acrochordopus burmeisteri",
+    "Phyllomyias cinereiceps": "Tyranniscus cinereiceps",
+    "Phyllomyias nigrocapillus": "Tyranniscus nigrocapillus",
+    "Phyllomyias uropygialis": "Tyranniscus uropygialis",
+    "Phylloscartes difficilis": "Pogonotriccus difficilis",
+    "Phylloscartes eximius": "Pogonotriccus eximius",
+    "Phylloscartes lanyoni": "Pogonotriccus lanyoni",
+    "Phylloscartes ophthalmicus": "Pogonotriccus ophthalmicus",
+    "Phylloscartes paulista": "Pogonotriccus paulista",
+    "Phylloscartes poecilotis": "Pogonotriccus poecilotis",
+    "Pitangus lictor": "Philohydor lictor",
+    "Platysteira castanea": "Dyaphorophyia castanea",
+    "Porzana spiloptera": "Laterallus spiloptera",
+    "Psephotus varius": "Psephotellus varius",
+    "Pseudeos cardinalis": "Chalcopsitta cardinalis",
+    "Psilorhinus morio": "Cyanocorax morio",
+    "Psittiparus gularis": "Paradoxornis gularis",
+    "Psophocichla litsitsirupa": "Turdus litsitsirupa",
+    "Ptilinopus magnificus": "Megaloprepia magnifica",
+    "Ptilinopus occipitalis": "Ramphiculus occipitalis",
+    "Pycnonotus striatus": "Alcurus striatus",
+    "Reinwardtipicus validus": "Chrysocolaptes validus",
+    "Rhodothraupis celaeno": "Periporphyrus celaeno",
+    "Sakesphorus cristatus": "Sakesphoroides cristatus",
+    "Sericornis citreogularis": "Neosericornis citreogularis",
+    "Sericornis papuensis": "Aethomyias papuensis",
+    "Sinosuthora webbiana": "Suthora webbiana",
+    "Spodiornis rusticus": "Haplospiza rustica",
+    "Sporophila murallae": "Sporophila americana",
+    "Stactolaema olivacea": "Cryptolybia olivacea",
+    "Streptopelia chinensis": "Spilopelia chinensis",
+    "Streptopelia senegalensis": "Spilopelia senegalensis",
+    "Systellura decussata": "Quechuavis decussata",
+    "Tauraco leucotis": "Menelikornis leucotis",
+    "Tauraco porphyreolophus": "Gallirex porphyreolophus",
+    "Telophorus bocagei": "Chlorophoneus bocagei",
+    "Telophorus nigrifrons": "Chlorophoneus nigrifrons",
+    "Telophorus olivaceus": "Chlorophoneus olivaceus",
+    "Telophorus sulfureopectus": "Chlorophoneus sulfureopectus",
+    "Tregellasia capito": "Eopsaltria capito",
+    "Tumbezia salvini": "Ochthoeca salvini",
+    "Urosphena pallidipes": "Hemitesia pallidipes", "noise-us": "Noise"
+  };
+  var ALIAS_SLUG = {};
+  Object.keys(TAXON_ALIASES).forEach(function (k) {
+    var a = rawSlug(k), b = rawSlug(TAXON_ALIASES[k]);
+    ALIAS_SLUG[a] = b; ALIAS_SLUG[b] = a;
+  });
+  function rawSlug(sci) {
     return sci.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+  // The slug every artwork / mask / flight-direction lookup keys on: the
+  // reported name's, unless only its alias has art in the library - either
+  // direction, so it holds whichever name BirdNET-Go and the art use.
+  function slugify(sci) {
+    var s = rawSlug(sci);
+    if (typeof DIMS === 'undefined' || DIMS[s]) return s;
+    var alt = ALIAS_SLUG && ALIAS_SLUG[s];   // undefined if called before init
+    return (alt && DIMS[alt]) ? alt : s;
   }
   function aspect(sci) {
     var d = DIMS[slugify(sci)];
@@ -1945,7 +2199,10 @@
   var _collageSig = null;
   function renderCollage(items, animate) {
     if (!items.length) {
-      collage.innerHTML = '';   // blank, rather than an empty-state message
+      // Blank rather than an empty-state message when there's simply
+      // nothing heard yet - but a broken connection says so.
+      var errText = apiErrorText();
+      collage.innerHTML = errText ? '<p class="empty collage-error">' + esc(errText) + '</p>' : '';
       collagePlaced = [];
       _collageSig = 'empty';
       renderNameStrip(items);   // nothing heard -> no names either
@@ -2661,6 +2918,14 @@
   // configured. Read by renderAtlas to swap its normal empty state for a
   // message that says what's actually wrong, instead of a silent blank.
   var apiPrivateMode = false;
+  // Same idea when those primary fetches failed for any other reason
+  // (unreachable host, timeout, no HA fallback data) - the collage and
+  // atlas say so instead of sitting blank (#73).
+  var apiUnreachable = false;
+  function apiErrorText() {
+    return apiPrivateMode ? tt('error.privateMode')
+      : apiUnreachable ? tt('error.unreachable') : '';
+  }
 
   // Derived chart arrays, backfilled so 30 buckets always exist.
   var STATS = {
@@ -2706,7 +2971,20 @@
         // falling back to HA history when the REST call fails (e.g. the
         // add-on's port isn't reachable from this browser).
         var mode = AV_CFG.dataSource || 'auto';
-        var pick = function (api, ha) {
+        var API_TIMEOUT_MS = 15000;
+        var pick = function (apiRaw, ha) {
+          // A BirdNET-Go host that never answers (VPN without internal
+          // DNS, a dropped LAN route) used to hang refreshAll() for a
+          // minute or more with a blank card (#73). Give up after
+          // API_TIMEOUT_MS so 'auto' can fall back to HA history and the
+          // card can say what's wrong.
+          var api = function () {
+            return new Promise(function (resolve, reject) {
+              var t = setTimeout(function () { reject('timeout'); }, API_TIMEOUT_MS);
+              apiRaw().then(function (v) { clearTimeout(t); resolve(v); },
+                            function (e) { clearTimeout(t); reject(e); });
+            });
+          };
           if (mode === 'ha') return haAvailable() ? ha() : Promise.reject('HA data source needs the card (hass) or a haToken');
           if (mode === 'api' || !haAvailable()) return api();
           return api().catch(function (apiErr) {
@@ -3006,8 +3284,8 @@
       // Private Mode (401 on the primary summary/daily fetches) gets its
       // own message instead of the generic "nothing yet" copy - the fix
       // (set api_token) is different from "wait for detections".
-      setHtml(grid, apiPrivateMode
-        ? '<div class="atlas-empty"><p>' + esc(tt('error.privateMode')) + '</p></div>'
+      setHtml(grid, apiErrorText()
+        ? '<div class="atlas-empty"><p>' + esc(apiErrorText()) + '</p></div>'
         : '<div class="atlas-empty">' +
           '<p>' + esc(tt('atlas.emptyTitle')) + '</p>' +
           '<p class="hint">' + esc(tt('atlas.emptyHint')) + '</p>' +
@@ -3298,10 +3576,11 @@
     // Private Mode message - a 401 from a secondary call (timeseries,
     // visits, ...) still means "not signed in", but stats/lifelist always
     // fire together and their failure alone is enough to tell the story.
-    var authFailed = false;
+    var authFailed = false, primaryFailed = 0;
     function watchAuth(p) {
       return p.catch(function (e) {
         if (e === 401) authFailed = true;
+        primaryFailed++;
         return null;
       });
     }
@@ -3317,6 +3596,8 @@
         : Promise.resolve(null),
     ]).then(function (parts) {
       apiPrivateMode = authFailed;
+      apiUnreachable = !authFailed && primaryFailed === 2;
+      if (apiUnreachable) { try { console.warn('[bird-card] BirdNET-Go API unreachable'); } catch (e) {} }
       DATA.stats = parts[0];
       DATA.lifelist = parts[1];
       DATA.timeseries = parts[2];

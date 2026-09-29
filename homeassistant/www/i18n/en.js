@@ -95,6 +95,7 @@
 
   // ---- API errors ----
   'error.privateMode': 'BirdNET-Go requires sign-in (Private Mode) — set api_token in the card config',
+  'error.unreachable': "Can't reach BirdNET-Go from this browser. Check birdnet_url, or see Troubleshooting in the README.",
 
   // ---- Detail modal: chrome ----
   'modal.close': 'Close',
