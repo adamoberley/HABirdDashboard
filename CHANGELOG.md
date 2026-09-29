@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.5.1 — 2026-09-29
 
 ### Fixed
 - **Card no longer spills onto the next section** in a sections dashboard
@@ -17,6 +17,15 @@
   their illustration and collage mask were never found. The card now
   carries BirdNET-Go's 237 taxonomy aliases and, when the reported name has
   no artwork, uses the other name's - in either direction.
+- **No more silent blank card when BirdNET-Go can't be reached**
+  ([#73](https://github.com/adamoberley/HABirdDashboard/issues/73)). API
+  calls now give up after 15 seconds instead of hanging (a VPN without
+  internal DNS could stall the first render for a minute or more), so
+  `data_source: auto` falls back to HA history promptly. If there's no
+  fallback either, the collage and atlas say *"Can't reach BirdNET-Go from
+  this browser"* instead of staying empty. README troubleshooting now
+  covers Docker / Core installs, which have no ingress path for remote
+  access.
 
 ## v1.5.0 — 2026-09-02
 

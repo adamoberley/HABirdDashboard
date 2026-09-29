@@ -2199,7 +2199,10 @@
   var _collageSig = null;
   function renderCollage(items, animate) {
     if (!items.length) {
-      collage.innerHTML = '';   // blank, rather than an empty-state message
+      // Blank rather than an empty-state message when there's simply
+      // nothing heard yet - but a broken connection says so.
+      var errText = apiErrorText();
+      collage.innerHTML = errText ? '<p class="empty collage-error">' + esc(errText) + '</p>' : '';
       collagePlaced = [];
       _collageSig = 'empty';
       renderNameStrip(items);   // nothing heard -> no names either
@@ -2915,6 +2918,14 @@
   // configured. Read by renderAtlas to swap its normal empty state for a
   // message that says what's actually wrong, instead of a silent blank.
   var apiPrivateMode = false;
+  // Same idea when those primary fetches failed for any other reason
+  // (unreachable host, timeout, no HA fallback data) - the collage and
+  // atlas say so instead of sitting blank (#73).
+  var apiUnreachable = false;
+  function apiErrorText() {
+    return apiPrivateMode ? tt('error.privateMode')
+      : apiUnreachable ? tt('error.unreachable') : '';
+  }
 
   // Derived chart arrays, backfilled so 30 buckets always exist.
   var STATS = {
@@ -2960,7 +2971,20 @@
         // falling back to HA history when the REST call fails (e.g. the
         // add-on's port isn't reachable from this browser).
         var mode = AV_CFG.dataSource || 'auto';
-        var pick = function (api, ha) {
+        var API_TIMEOUT_MS = 15000;
+        var pick = function (apiRaw, ha) {
+          // A BirdNET-Go host that never answers (VPN without internal
+          // DNS, a dropped LAN route) used to hang refreshAll() for a
+          // minute or more with a blank card (#73). Give up after
+          // API_TIMEOUT_MS so 'auto' can fall back to HA history and the
+          // card can say what's wrong.
+          var api = function () {
+            return new Promise(function (resolve, reject) {
+              var t = setTimeout(function () { reject('timeout'); }, API_TIMEOUT_MS);
+              apiRaw().then(function (v) { clearTimeout(t); resolve(v); },
+                            function (e) { clearTimeout(t); reject(e); });
+            });
+          };
           if (mode === 'ha') return haAvailable() ? ha() : Promise.reject('HA data source needs the card (hass) or a haToken');
           if (mode === 'api' || !haAvailable()) return api();
           return api().catch(function (apiErr) {
@@ -3260,8 +3284,8 @@
       // Private Mode (401 on the primary summary/daily fetches) gets its
       // own message instead of the generic "nothing yet" copy - the fix
       // (set api_token) is different from "wait for detections".
-      setHtml(grid, apiPrivateMode
-        ? '<div class="atlas-empty"><p>' + esc(tt('error.privateMode')) + '</p></div>'
+      setHtml(grid, apiErrorText()
+        ? '<div class="atlas-empty"><p>' + esc(apiErrorText()) + '</p></div>'
         : '<div class="atlas-empty">' +
           '<p>' + esc(tt('atlas.emptyTitle')) + '</p>' +
           '<p class="hint">' + esc(tt('atlas.emptyHint')) + '</p>' +
@@ -3552,10 +3576,11 @@
     // Private Mode message - a 401 from a secondary call (timeseries,
     // visits, ...) still means "not signed in", but stats/lifelist always
     // fire together and their failure alone is enough to tell the story.
-    var authFailed = false;
+    var authFailed = false, primaryFailed = 0;
     function watchAuth(p) {
       return p.catch(function (e) {
         if (e === 401) authFailed = true;
+        primaryFailed++;
         return null;
       });
     }
@@ -3571,6 +3596,8 @@
         : Promise.resolve(null),
     ]).then(function (parts) {
       apiPrivateMode = authFailed;
+      apiUnreachable = !authFailed && primaryFailed === 2;
+      if (apiUnreachable) { try { console.warn('[bird-card] BirdNET-Go API unreachable'); } catch (e) {} }
       DATA.stats = parts[0];
       DATA.lifelist = parts[1];
       DATA.timeseries = parts[2];

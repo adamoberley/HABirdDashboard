@@ -616,6 +616,8 @@
     padding: 120px 0; text-align: center; letter-spacing: 0.18em;
     text-transform: uppercase;
   }
+  /* Connection error in place of the flock (#73): centred in the collage. */
+  .collage-error { position: absolute; inset: 0; margin: auto; height: fit-content; padding: 0 24px; }
 
   /* Page header is now shared at .stage > .static-head - see top of CSS. */
   /* Stats grid: the activity heatmap on the LEFT, text sections on the
