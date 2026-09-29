@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.6.1 — 2026-09-29
+
+### Fixed
+- **The connection error now says why the fallback found nothing**
+  ([#73](https://github.com/adamoberley/HABirdDashboard/issues/73)). With
+  `data_source: auto`, when BirdNET-Go can't be reached and Home Assistant
+  has no BirdNET-Go MQTT sensors (`*_scientific_name`) to fall back on, the
+  card says exactly that and points at the MQTT setup, instead of the
+  generic "Can't reach BirdNET-Go" message.
+
 ## v1.6.0 — 2026-09-29
 
 ### Changed

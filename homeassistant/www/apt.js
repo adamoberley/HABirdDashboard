@@ -2924,8 +2924,11 @@
   // atlas say so instead of sitting blank (#73).
   var apiUnreachable = false;
   function apiErrorText() {
-    return apiPrivateMode ? tt('error.privateMode')
-      : apiUnreachable ? tt('error.unreachable') : '';
+    if (apiPrivateMode) return tt('error.privateMode');
+    if (!apiUnreachable) return '';
+    // 'auto' tried HA history too: say when that found no sensors at all.
+    return fetchJson.haWhy === 'no BirdNET-Go MQTT sensors found'
+      ? tt('error.unreachableNoMqtt') : tt('error.unreachable');
   }
 
   // Derived chart arrays, backfilled so 30 buckets always exist.
@@ -2989,7 +2992,10 @@
           if (mode === 'ha') return haAvailable() ? ha() : Promise.reject('HA data source needs the card (hass) or a haToken');
           if (mode === 'api' || !haAvailable()) return api();
           return api().catch(function (apiErr) {
-            return ha().catch(function () { return Promise.reject(apiErr); });
+            // Keep the fallback's own reason so the card can explain why
+            // it found nothing (#73) - read by apiErrorText().
+            return ha().then(function (v) { fetchJson.haWhy = ''; return v; },
+              function (haErr) { fetchJson.haWhy = haErr; return Promise.reject(apiErr); });
           });
         };
         var hours, sci2, days2, lim;

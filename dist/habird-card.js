@@ -110,6 +110,7 @@ var DIRS = {"acanthagenys-rufogularis-2":208,"acanthis-flammea-2":213,"acanthiza
   // ---- API errors ----
   'error.privateMode': 'BirdNET-Go requires sign-in (Private Mode) — set api_token in the card config',
   'error.unreachable': "Can't reach BirdNET-Go from this browser. Check birdnet_url, or see Troubleshooting in the README.",
+  'error.unreachableNoMqtt': "Can't reach BirdNET-Go from this browser, and Home Assistant has no BirdNET-Go MQTT sensors to fall back on. Check birdnet_url, or turn on BirdNET-Go's MQTT (see Data sources in the README).",
 
   // ---- Detail modal: chrome ----
   'modal.close': 'Close',
@@ -5072,8 +5073,11 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
   // atlas say so instead of sitting blank (#73).
   var apiUnreachable = false;
   function apiErrorText() {
-    return apiPrivateMode ? tt('error.privateMode')
-      : apiUnreachable ? tt('error.unreachable') : '';
+    if (apiPrivateMode) return tt('error.privateMode');
+    if (!apiUnreachable) return '';
+    // 'auto' tried HA history too: say when that found no sensors at all.
+    return fetchJson.haWhy === 'no BirdNET-Go MQTT sensors found'
+      ? tt('error.unreachableNoMqtt') : tt('error.unreachable');
   }
 
   // Derived chart arrays, backfilled so 30 buckets always exist.
@@ -5137,7 +5141,10 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
           if (mode === 'ha') return haAvailable() ? ha() : Promise.reject('HA data source needs the card (hass) or a haToken');
           if (mode === 'api' || !haAvailable()) return api();
           return api().catch(function (apiErr) {
-            return ha().catch(function () { return Promise.reject(apiErr); });
+            // Keep the fallback's own reason so the card can explain why
+            // it found nothing (#73) - read by apiErrorText().
+            return ha().then(function (v) { fetchJson.haWhy = ''; return v; },
+              function (haErr) { fetchJson.haWhy = haErr; return Promise.reject(apiErr); });
           });
         };
         var hours, sci2, days2, lim;
@@ -8169,7 +8176,7 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
 // you copied the artwork locally (homeassistant/install.sh layout).
 var HABIRD_CDN_ASSETS = 'https://cdn.jsdelivr.net/gh/adamoberley/HABirdDashboard@HABirdDashboard/avian/assets/';
 
-var HABIRD_VERSION = '1.6.0';
+var HABIRD_VERSION = '1.6.1';
 
 var HABIRD_EDITOR_SCHEMA = [
   { name: 'dashboard', type: 'expandable', flatten: true, title: 'Dashboard', expanded: true, schema: [
