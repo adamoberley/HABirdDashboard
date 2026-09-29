@@ -96,6 +96,7 @@
   // ---- API errors ----
   'error.privateMode': 'BirdNET-Go requires sign-in (Private Mode) — set api_token in the card config',
   'error.unreachable': "Can't reach BirdNET-Go from this browser. Check birdnet_url, or see Troubleshooting in the README.",
+  'error.unreachableNoMqtt': "Can't reach BirdNET-Go from this browser, and Home Assistant has no BirdNET-Go MQTT sensors to fall back on. Check birdnet_url, or turn on BirdNET-Go's MQTT (see Data sources in the README).",
 
   // ---- Detail modal: chrome ----
   'modal.close': 'Close',

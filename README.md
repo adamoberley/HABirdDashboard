@@ -685,7 +685,10 @@ ring layout, `?names` (or `?names=scientific` / `?names=both`) plus
 - **"Can't reach BirdNET-Go from this browser."** The card gave up on
   the API after 15 seconds and had no MQTT history to fall back on. Work
   through the two items above; with MQTT enabled the card falls back to
-  HA history instead of showing this.
+  HA history instead of showing this. If the message adds that Home
+  Assistant has **no BirdNET-Go MQTT sensors**, the fallback looked for
+  `*_scientific_name` sensors and found none - see
+  [Enabling MQTT](#enabling-mqtt-recommended).
 - **The "not it?" flag fails.** The pill shows a short reason: `no path`
   means the card couldn't reach HA ingress (writes need it - check
   you're an admin user); `err 401/403/405` means BirdNET-Go refused -

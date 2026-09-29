@@ -2,7 +2,8 @@
 // DNS, dead LAN route) used to leave the card blank indefinitely, with only
 // a console.warn. The API calls must now time out and the collage + atlas
 // must say the API can't be reached. A card that simply has no detections
-// yet must stay blank, as before.
+// yet must stay blank, as before. With data_source: auto and a Home
+// Assistant that has no BirdNET-Go MQTT sensors, the message says so.
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const fs = require('fs');
@@ -10,7 +11,7 @@ const assert = require('assert');
 const { JSDOM } = require('jsdom');
 const CARD = fs.readFileSync(ROOT + '/dist/habird-card.js', 'utf8');
 
-function mount(fetchImpl) {
+function mount(fetchImpl, hass) {
   const dom = new JSDOM('<!doctype html><html><body></body></html>', {
     url: 'http://ha.local:8123/lovelace/birds', runScripts: 'outside-only', pretendToBeVisual: true,
   });
@@ -26,7 +27,7 @@ function mount(fetchImpl) {
   window.eval(CARD);
   const card = window.document.createElement('habird-card');
   card.setConfig({ birdnet_url: 'http://birdnet.lan:8080', live: false });
-  card.hass = { themes: { darkMode: false }, states: {} };
+  card.hass = hass || { themes: { darkMode: false }, states: {} };
   window.document.body.appendChild(card);
   return { card, errors };
 }
@@ -42,6 +43,14 @@ const quiet = mount((url) => {
   return ok({ data: [], total: 0 });
 });
 
+// 3. BirdNET-Go hangs and HA (reachable, via callApi) has no BirdNET-Go sensors.
+const noMqtt = mount((url) => new Promise(() => {}), {
+  themes: { darkMode: false },
+  states: { 'sensor.outdoor_temp': { entity_id: 'sensor.outdoor_temp', state: '12', attributes: {} } },
+  callApi: () => Promise.resolve([]),
+  callWS: () => Promise.resolve([]),
+});
+
 setTimeout(() => {
   try {
     const root = hung.card.shadowRoot;
@@ -49,10 +58,13 @@ setTimeout(() => {
     assert.ok(msg, 'collage shows an error instead of staying blank');
     assert.ok(/reach BirdNET-Go/.test(msg.textContent), 'collage message: ' + msg.textContent);
     assert.ok(/reach BirdNET-Go/.test(root.querySelector('.atlas-empty').textContent), 'atlas message');
+    assert.ok(!/MQTT sensors/.test(msg.textContent), 'no HA fallback -> generic message');
+    const nm = noMqtt.card.shadowRoot.querySelector('#collage .collage-error');
+    assert.ok(nm && /no BirdNET-Go MQTT sensors/.test(nm.textContent), 'no-MQTT reason shown: ' + (nm && nm.textContent));
     const q = quiet.card.shadowRoot;
     assert.strictEqual(q.getElementById('collage').innerHTML, '', 'no detections yet -> still blank');
     assert.ok(!/reach BirdNET-Go/.test(q.querySelector('.atlas-empty').textContent), 'no error when the API answered');
-    assert.deepStrictEqual(hung.errors.concat(quiet.errors), [], 'no page errors');
+    assert.deepStrictEqual(hung.errors.concat(quiet.errors, noMqtt.errors), [], 'no page errors');
     console.log('unreachable API OK');
     process.exit(0);
   } catch (e) {
