@@ -97,6 +97,12 @@ css += `
      cq units resolve against. */
   container: av-card / size;
 }
+/* Sections view (#74): the grid slot owns the height (getGridOptions
+   rows, resizable by the user), so the masonry floor above must not
+   apply - 560px is taller than the default 8-row slot, which pushed the
+   card's bottom edge, and the view picker with it, onto the next
+   section. */
+:host([av-grid]) { min-height: 0; }
 .av-shell { position: absolute; inset: 0; overflow: hidden; }
 /* Card default: transparent, so the collage sits directly on the HA
    dashboard. background: paper restores the page's warm ground. */
@@ -372,7 +378,7 @@ var HABIRD_HELPERS = {
   names: "Default: off. Lists every species in the window as a line of names along the bottom of the collage - a legend for birds you don't recognise (tap a name for its details). Also the one place a species without artwork still appears.",
   names_size: 'Font size of the species-name strip, in pixels (default 13).',
   view_selector: 'Turn off to lock this card to one view.',
-  selector_position: 'Top pairs poorly with a title - both sit centred up top.',
+  selector_position: 'At the top, a title moves down to sit below the switcher.',
   weather_entity: 'Default (blank): the first weather.* entity found.',
   hide_cursor: 'For wall displays: pointer disappears after 8 s idle.',
   sit_confidence: 'Birds perch at or above this detection confidence and fly below it. 0 = always perched, 1.01 = always flying.',
@@ -483,7 +489,19 @@ class HABirdCard extends HTMLElement {
       else this.removeAttribute('data-theme');
     }
   }
-  connectedCallback() { this._boot(); }
+  // HA hands every card in a sections view layout = 'grid' (#74).
+  set layout(v) { this._layout = v; this._syncGrid(); }
+  get layout() { return this._layout; }
+  _syncGrid() {
+    // Older HA builds don't set layout, so also look for a sections-view
+    // ancestor (crossing shadow roots on the way up).
+    var grid = this._layout === 'grid';
+    for (var n = this; !grid && n; n = n.parentNode || n.host) {
+      if (/^HUI-(GRID-SECTION|SECTIONS-VIEW)$/.test(n.tagName || '')) grid = true;
+    }
+    this.toggleAttribute('av-grid', grid);
+  }
+  connectedCallback() { this._syncGrid(); this._boot(); }
   _boot() {
     if (this._booted) return;
     this._booted = true;

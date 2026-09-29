@@ -1723,6 +1723,11 @@ body.av-title-overlay .view#v2 { padding-top: 96px; }
 body.av-picker-top .slider { top: 10px; bottom: auto; }
 body.av-picker-top .view { padding-bottom: 28px; }
 body.av-picker-top .view#v0, body.av-picker-top .view#v1 { padding-bottom: 24px; }
+/* ...and a floated title steps down below it instead of sitting under
+   the pill (#74). The collage packer measures the h1 wherever it lands. */
+body.av-title-overlay.av-picker-top .static-head { top: 50px; }
+body.av-title-overlay.av-picker-top .view#v1,
+body.av-title-overlay.av-picker-top .view#v2 { padding-top: 140px; }
 
 /* ---- Species-name strip (issue #69) ---- */
 /* A centred, wrapping line of names along the bottom of the collage

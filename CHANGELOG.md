@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **Card no longer spills onto the next section** in a sections dashboard
+  ([#74](https://github.com/adamoberley/HABirdDashboard/issues/74)). The
+  card's 560px minimum height, meant for masonry views, was taller than
+  its default 8-row grid slot, so the view switcher landed on whatever came
+  next. In a sections view the grid slot now sets the height. With the
+  switcher at the top, a card title now moves down below it instead of
+  sitting under it.
+- **Species renamed by BirdNET-Go get their artwork back**
+  ([#76](https://github.com/adamoberley/HABirdDashboard/issues/76)).
+  BirdNET-Go reports some species under their current name rather than the
+  BirdNET V2.4 label (e.g. *Coloeus monedula* for *Corvus monedula*), so
+  their illustration and collage mask were never found. The card now
+  carries BirdNET-Go's 237 taxonomy aliases and, when the reported name has
+  no artwork, uses the other name's - in either direction.
+
 ## v1.5.0 — 2026-09-02
 
 ### Added
