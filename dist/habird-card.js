@@ -3861,7 +3861,8 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
   // of the BirdNET V2.4 label (e.g. Corvus monedula -> Coloeus monedula),
   // so art filed under the other name was never found (#76). Pairs are
   // "V2.4 label": "current name", copied from BirdNET-Go's
-  // internal/openfauna/data/aliases.json (tphakala/birdnet-go@5a94fc78).
+  // internal/openfauna/data/aliases.json (tphakala/birdnet-go@5a94fc78),
+  // CC BY-NC-SA 4.0 - see THIRD_PARTY_NOTICES.md.
   var TAXON_ALIASES = {
     "Accipiter badius": "Tachyspiza badia",
     "Accipiter bicolor": "Astur bicolor",
@@ -8168,7 +8169,7 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
 // you copied the artwork locally (homeassistant/install.sh layout).
 var HABIRD_CDN_ASSETS = 'https://cdn.jsdelivr.net/gh/adamoberley/HABirdDashboard@HABirdDashboard/avian/assets/';
 
-var HABIRD_VERSION = '1.5.1';
+var HABIRD_VERSION = '1.6.0';
 
 var HABIRD_EDITOR_SCHEMA = [
   { name: 'dashboard', type: 'expandable', flatten: true, title: 'Dashboard', expanded: true, schema: [

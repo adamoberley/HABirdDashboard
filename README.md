@@ -3,7 +3,7 @@
 *Bird Card: a live bird collage for Home Assistant, fed by BirdNET-Go.*
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
-[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/license-CC_BY_NC_SA_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 <img alt="HABirdDashboard collage" src="https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-collage.png" />
 
@@ -30,8 +30,8 @@ Bird Card began life as a fork of
 [AvianVisitors](https://github.com/Twarner491/AvianVisitors) (a BirdNET-Pi
 project for a dedicated Raspberry Pi) and is now maintained as an
 independent project. The illustrations and the silhouette-masking collage
-layout are AvianVisitors' work, used and adapted with attribution under
-CC-BY-NC-SA; everything else - the data layer, the confidence-based poses,
+layout are AvianVisitors' work, used and adapted with attribution;
+everything else - the data layer, the confidence-based poses,
 the Home Assistant card - was built here for Home Assistant + BirdNET-Go.
 
 <img alt="The ring collage layout on a wall display" src="https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docs/screenshot-ring.png" />
@@ -741,7 +741,10 @@ are load-bearing, not polite:
   silhouette-mask collage layout, and the visual design originate there.
   This repo adapts them (Home Assistant card packaging, BirdNET-Go data
   layer, confidence-based poses, and the changes described in the commit
-  history) under the terms below.
+  history).
+- **The artwork contributors** - marathonfrank, daniel-c-ctrl (the
+  Southeast Australian set), Digitalferns and others - who generated,
+  cut out and submitted most of today's 2,500+ illustrations.
 - **[BirdNET-Go](https://github.com/tphakala/birdnet-go)** by Tomi P.
   Hakala - the detection engine this card displays - packaged for Home
   Assistant by [alexbelgium](https://github.com/alexbelgium/hassio-addons).
@@ -749,9 +752,11 @@ are load-bearing, not polite:
   Chemnitz University of Technology) - the bird-identification model
   underneath it all.
 
-**License:
-[CC-BY-NC-SA-4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)**
-(see [LICENSE](LICENSE)), carried forward from AvianVisitors / BirdNET-Pi
-under share-alike. The whole repo - artwork and code - is non-commercial
-use only, and anything built on it must keep this license and these
-credits.
+**License: [MIT](LICENSE)** - code and artwork alike. Through v1.5.1
+the project was CC-BY-NC-SA-4.0, a license it had inherited from
+BirdNET-Pi through AvianVisitors' fork history (no BirdNET-Pi code remains
+here). From v1.6.0 it is MIT, with the agreement of Teddy Warner and the
+contributors whose work is in the repo. Two small third-party data files
+(BirdNET's species labels and BirdNET-Go's taxonomy aliases) keep their
+original CC BY-NC-SA license - see
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

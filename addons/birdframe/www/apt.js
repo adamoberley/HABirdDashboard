@@ -1713,7 +1713,8 @@
   // of the BirdNET V2.4 label (e.g. Corvus monedula -> Coloeus monedula),
   // so art filed under the other name was never found (#76). Pairs are
   // "V2.4 label": "current name", copied from BirdNET-Go's
-  // internal/openfauna/data/aliases.json (tphakala/birdnet-go@5a94fc78).
+  // internal/openfauna/data/aliases.json (tphakala/birdnet-go@5a94fc78),
+  // CC BY-NC-SA 4.0 - see THIRD_PARTY_NOTICES.md.
   var TAXON_ALIASES = {
     "Accipiter badius": "Tachyspiza badia",
     "Accipiter bicolor": "Astur bicolor",
