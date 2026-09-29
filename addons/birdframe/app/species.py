@@ -14,12 +14,18 @@ from __future__ import annotations
 import logging
 import re
 from concurrent.futures import ThreadPoolExecutor
+from urllib.parse import urlparse
 
 import requests
 
 from server import AssetCache
 
 log = logging.getLogger("birdframe.species")
+
+# Only plain http/https BirdNET-Go addresses are ever expected here; reject
+# anything else (e.g. file:// or an unparsable value) before it is used to
+# build an outbound request.
+_ALLOWED_SCHEMES = ("http", "https")
 
 
 def slugify(sci: str) -> str:
@@ -28,6 +34,10 @@ def slugify(sci: str) -> str:
 
 
 def _fetch_species(birdnet_go_url: str) -> list[str]:
+    parsed = urlparse(birdnet_go_url)
+    if parsed.scheme not in _ALLOWED_SCHEMES or not parsed.hostname:
+        log.warning("refusing to fetch species summary from invalid URL: %s", birdnet_go_url)
+        return []
     url = birdnet_go_url + "/api/v2/analytics/species/summary"
     try:
         resp = requests.get(url, timeout=20)
