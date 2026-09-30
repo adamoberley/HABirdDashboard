@@ -70,6 +70,7 @@ setTimeout(() => {
     assert.ok(srcs.some(s => s.includes('illustrations/corvus-corax-2.png')), 'flight pose: ' + srcs);
     // Atlas + stats live too.
     assert.ok(root.querySelectorAll('.bird-card').length === 2, 'atlas cards');
+    assert.ok([...root.querySelectorAll('.bird-card .chip.play')].every(b => !b.disabled), 'play chips enabled with the API');
     assert.ok(root.getElementById('statsTopSpec').textContent.includes('Hummingbird'), 'stats render');
     // Clock + hass weather (no fetch to HA - read from the hass object).
     assert.ok(/\d/.test(root.getElementById('wwTime').textContent), 'clock');
