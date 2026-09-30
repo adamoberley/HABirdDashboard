@@ -228,7 +228,7 @@ const wrapper = `
 // you copied the artwork locally (homeassistant/install.sh layout).
 var HABIRD_CDN_ASSETS = 'https://cdn.jsdelivr.net/gh/adamoberley/HABirdDashboard@HABirdDashboard/avian/assets/';
 
-var HABIRD_VERSION = '1.6.3';
+var HABIRD_VERSION = '1.7.0';
 
 var HABIRD_EDITOR_SCHEMA = [
   { name: 'dashboard', type: 'expandable', flatten: true, title: 'Dashboard', expanded: true, schema: [
@@ -417,6 +417,9 @@ class HABirdCard extends HTMLElement {
     if (config.names != null && ['off', 'common', 'scientific', 'both'].indexOf(config.names) < 0) {
       throw new Error("names must be 'off', 'common', 'scientific' or 'both'");
     }
+    if (config.proxy != null && typeof config.proxy !== 'boolean') {
+      throw new Error('proxy must be true or false');
+    }
     if (config.names_size != null && !(+config.names_size > 0)) {
       throw new Error('names_size must be a positive number of pixels');
     }
@@ -524,6 +527,7 @@ class HABirdCard extends HTMLElement {
       windowHours: c.window || 24,           // hours, or 'all'
       birdnetGoUrl: c.birdnet_url || '',
       apiToken: c.api_token || '',   // Bearer token for BirdNET-Go's "Private Mode"
+      proxy: c.proxy,                // false = ignore the Bird Card Proxy integration
       dataSource: c.data_source || 'auto',
       language: c.language || '',        // UI language override ('' = auto: hass -> browser)
       historyDays: c.history_days,

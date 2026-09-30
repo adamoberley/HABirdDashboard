@@ -246,6 +246,8 @@ language: ""                 # UI language override, e.g. "da" - empty = follow
                              #   each user's HA language (see Languages below)
 birdnet_url: ""              # empty = this host, port 8080 (the stock app)
 data_source: auto            # auto | api | ha (see Data sources below)
+proxy: true                  # use the Bird Card Proxy integration when it's installed
+                             #   (see Remote access below); false = always direct
 history_days: 10             # ha-source span; bounded by recorder retention
 sit_confidence: 0.90         # perched at/above, flying below
 collage_fill: 0.5            # screen fill 0.1-1.0 (0.5 = half, 1.0 = full; busier = wider)
@@ -410,9 +412,26 @@ The card can feed from two places:
    their history - the card rebuilds the full detection stream (time,
    species, confidence per detection) from it through its own HA
    connection. No extra URL, no port, no token. The trade-offs: audio
-   clips can't travel over MQTT (play buttons show "no audio"), and the
+   clips can't travel over MQTT (play buttons grey out), and the
    life list / ALL window reach back only as far as your recorder
    retention (default ~10 days; `history_days` caps the query).
+
+### Remote access with Bird Card Proxy (optional)
+
+The REST API is reached **from your browser**, so away from home it only
+works if your browser can reach BirdNET-Go. Otherwise the card falls back
+to MQTT history, which has no recordings. On Home Assistant OS with the
+BirdNET-Go add-on, the card routes through add-on ingress automatically
+(admin users only).
+
+For every other setup, including HA in Docker / Core, VPNs, and non-admin
+users, install the companion integration
+**[Bird Card Proxy](https://github.com/adamoberley/HABirdDashboard-proxy)**
+(HACS custom repository, type *Integration*). It serves BirdNET-Go's API
+on Home Assistant's own address, so recordings, the live feed and the
+"not it?" review work anywhere Home Assistant does. The card detects it
+automatically; set `proxy: false` on a card to keep that card talking to
+BirdNET-Go directly.
 
 ### Enabling MQTT (recommended)
 
@@ -677,9 +696,10 @@ ring layout, `?names` (or `?names=scientific` / `?names=both`) plus
   default `birdnet_url` (leave it empty); if it can't be set up, data
   still flows via the MQTT sensors - only audio playback is lost.
 - **HA in Docker / Core (no Supervisor), remote or on a VPN.** Ingress
-  discovery needs the Supervisor, so on these installs there is no
-  automatic remote path yet ([#73](https://github.com/adamoberley/HABirdDashboard/issues/73)).
-  Put BirdNET-Go behind the same HTTPS reverse proxy as HA (Traefik,
+  discovery needs the Supervisor, so install
+  [Bird Card Proxy](https://github.com/adamoberley/HABirdDashboard-proxy)
+  (see [Remote access](#remote-access-with-bird-card-proxy-optional)).
+  Alternatively, put BirdNET-Go behind an HTTPS reverse proxy (Traefik,
   Caddy, nginx...) and set `birdnet_url` to that `https://` hostname: no
   mixed content, and it works anywhere that hostname resolves.
 - **"Can't reach BirdNET-Go from this browser."** The card gave up on

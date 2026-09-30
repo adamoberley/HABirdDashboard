@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.7.0 — 2026-09-30
+
+### Added
+- **Remote access through Home Assistant, recordings included**
+  ([#73](https://github.com/adamoberley/HABirdDashboard/issues/73),
+  requested by @nowagner). The new, optional companion integration
+  [Bird Card Proxy](https://github.com/adamoberley/HABirdDashboard-proxy)
+  serves BirdNET-Go's API on Home Assistant's own address. When it's
+  installed, the card routes every BirdNET-Go call through it: reads and
+  audio via HA's authenticated fetch, the live feed via an HA signed URL,
+  and the "not it?" review as a plain POST (the proxy handles BirdNET-Go's
+  CSRF check and only lets admins write). That makes the card fully work
+  over Nabu Casa, VPNs and `https://` dashboards on every install type,
+  including HA in Docker / Core, which has no add-on ingress. BirdNET-Go's
+  API token lives in the integration, never in the browser. New card
+  option `proxy: false` keeps a card on the direct connection.
+
 ## v1.6.3 — 2026-09-30
 
 ### Changed
