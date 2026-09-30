@@ -2328,6 +2328,23 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
 
   function bgUrl(path) { return BG_BASE + '/api/v2' + path; }
 
+  // ---- Bird Card Proxy (#73) ----
+  // The optional habird_proxy integration
+  // (github.com/adamoberley/HABirdDashboard-proxy) serves BirdNET-Go's API
+  // on HA's own origin, so the card works anywhere HA does - remote, VPN,
+  // https - with audio. When it's loaded, route EVERY BirdNET-Go call
+  // through it (unless the card sets proxy: false): reads and audio via
+  // hass.fetchWithAuth, the live stream via an HA signed URL. BirdNET-Go's
+  // own token lives in the integration, so api_token isn't sent from here.
+  var PROXY_BASE = '/api/habird_proxy';
+  function proxyHass() {
+    var h = AV_CFG.proxy !== false && AV_CFG.__getHass && AV_CFG.__getHass();
+    var comps = (h && h.config && h.config.components) || [];
+    return (h && h.fetchWithAuth && comps.indexOf('habird_proxy') >= 0) ? h : null;
+  }
+  var PROXY_MODE = !!proxyHass();
+  if (PROXY_MODE) BG_BASE = PROXY_BASE;
+
   // ---- API token (Private Mode) ----
   // BirdNET-Go's "Private Mode" (Security.PrivateMode, mid-2026+) locks the
   // ENTIRE v2 API behind login - every unauthenticated request 401s, even
@@ -2341,6 +2358,10 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
   // and never see it. With no token set this is a transparent passthrough.
   function bgFetch(url, opts) {
     opts = opts || {};
+    if (PROXY_MODE && url.indexOf(PROXY_BASE + '/') === 0) {
+      // HA login instead of BirdNET-Go's token (the proxy adds that).
+      return proxyHass().fetchWithAuth(url, opts);
+    }
     if (!AV_CFG.apiToken) return fetch(url, opts);
     var headers = {}, k;
     for (k in (opts.headers || {})) headers[k] = opts.headers[k];
@@ -2452,7 +2473,7 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
   // rebase ALL reads onto ingress. On plain http the direct LAN base is
   // faster and stays; ingress is still resolved on demand for writes.
   var BG_READY = Promise.resolve();
-  if (!AV_CFG.birdnetGoUrl && location.protocol === 'https:' && AV_CFG.__getHass) {
+  if (!PROXY_MODE && !AV_CFG.birdnetGoUrl && location.protocol === 'https:' && AV_CFG.__getHass) {
     BG_READY = ingressApiBase().then(function (b) { if (b) BG_BASE = b; });
   }
 
@@ -2468,6 +2489,16 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
   // that's the nature of double-submit; the protection is that cross-site
   // JS can't set this origin's cookies, and we're legitimately same-origin.
   function bgReview(id, verified) {
+    if (PROXY_MODE) {
+      // The proxy handles BirdNET-Go's CSRF check server-side (and only
+      // lets HA admins write, like ingress does).
+      return bgFetch(PROXY_BASE + '/api/v2/detections/' + encodeURIComponent(id) + '/review', {
+        method: 'POST',
+        cache: 'no-store',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ verified: verified, correct: verified }),
+      }).then(function (r) { return r.ok ? r : Promise.reject(r.status); });
+    }
     return ingressApiBase().then(function (ib) {
       var sameOrigin = !!ib ||
         BG_BASE.indexOf(location.protocol + '//' + location.host) === 0 ||
@@ -2531,7 +2562,8 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     var audio = new Audio();
     var db = +AV_CFG.audioBoostDb || 0;
     if (db > 0) audio.crossOrigin = 'anonymous';
-    if (AV_CFG.apiToken) {
+    // Through the proxy, the clip request needs HA's login header too.
+    if (AV_CFG.apiToken || PROXY_MODE) {
       // Deliberately never revoke this object URL: the 'emptied' event
       // (the obvious hook) fires as part of the same load algorithm that
       // sets audio.src in the first place, which would revoke the blob
@@ -5885,10 +5917,27 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     liveDebounceT = null;
     if (liveSource) { liveSource.close(); liveSource = null; }
   }
+  var liveSigning = false;
   function startLive() {
-    if (!LIVE_ENABLED || liveGaveUp || liveSource || document.hidden) return;
+    if (!LIVE_ENABLED || liveGaveUp || liveSource || liveSigning || document.hidden) return;
+    var ph = PROXY_MODE && proxyHass();
+    if (PROXY_MODE) {
+      // EventSource can't send HA's login header, so ask HA for a signed
+      // URL (valid 5 minutes - it's only checked when the stream opens;
+      // every reconnect signs a fresh one).
+      if (!ph || !ph.callWS) { liveGaveUp = true; return; }
+      liveSigning = true;
+      ph.callWS({ type: 'auth/sign_path', path: bgUrl('/detections/stream'), expires: 300 })
+        .then(function (r) { liveSigning = false; openLive(r.path); },
+              function () { liveSigning = false; liveGaveUp = true; });
+      return;
+    }
+    openLive(bgUrl('/detections/stream'));
+  }
+  function openLive(url) {
+    if (liveSource || document.hidden) return;
     var opened = false;
-    var es = new EventSource(bgUrl('/detections/stream'));
+    var es = new EventSource(url);
     liveSource = es;
     es.addEventListener('detection', liveDebouncedRefresh);
     es.onopen = function () {
@@ -8195,7 +8244,7 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
 // you copied the artwork locally (homeassistant/install.sh layout).
 var HABIRD_CDN_ASSETS = 'https://cdn.jsdelivr.net/gh/adamoberley/HABirdDashboard@HABirdDashboard/avian/assets/';
 
-var HABIRD_VERSION = '1.6.3';
+var HABIRD_VERSION = '1.7.0';
 
 var HABIRD_EDITOR_SCHEMA = [
   { name: 'dashboard', type: 'expandable', flatten: true, title: 'Dashboard', expanded: true, schema: [
@@ -8384,6 +8433,9 @@ class HABirdCard extends HTMLElement {
     if (config.names != null && ['off', 'common', 'scientific', 'both'].indexOf(config.names) < 0) {
       throw new Error("names must be 'off', 'common', 'scientific' or 'both'");
     }
+    if (config.proxy != null && typeof config.proxy !== 'boolean') {
+      throw new Error('proxy must be true or false');
+    }
     if (config.names_size != null && !(+config.names_size > 0)) {
       throw new Error('names_size must be a positive number of pixels');
     }
@@ -8491,6 +8543,7 @@ class HABirdCard extends HTMLElement {
       windowHours: c.window || 24,           // hours, or 'all'
       birdnetGoUrl: c.birdnet_url || '',
       apiToken: c.api_token || '',   // Bearer token for BirdNET-Go's "Private Mode"
+      proxy: c.proxy,                // false = ignore the Bird Card Proxy integration
       dataSource: c.data_source || 'auto',
       language: c.language || '',        // UI language override ('' = auto: hass -> browser)
       historyDays: c.history_days,
