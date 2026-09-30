@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.6.3 — 2026-09-30
+
+### Changed
+- **Recordings say why they can't play over MQTT**
+  ([#73](https://github.com/adamoberley/HABirdDashboard/issues/73),
+  suggested by @nowagner). Audio never travels over MQTT, so when the card
+  is showing Home Assistant's MQTT history (remote access without a direct
+  BirdNET-Go connection, or `data_source: ha`), the atlas play buttons are
+  greyed out with an explanation instead of failing after a wait. The
+  detail view still lists every detection, without play buttons or
+  spectrogram strips, under a one-line note.
+
 ## v1.6.2 — 2026-09-29
 
 ### Fixed

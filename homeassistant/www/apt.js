@@ -2989,12 +2989,22 @@
                             function (e) { clearTimeout(t); reject(e); });
             });
           };
-          if (mode === 'ha') return haAvailable() ? ha() : Promise.reject('HA data source needs the card (hass) or a haToken');
-          if (mode === 'api' || !haAvailable()) return api();
-          return api().catch(function (apiErr) {
+          // fetchJson.viaHa: the data on screen came from HA's MQTT history,
+          // which carries no audio - the atlas and detail view then say
+          // recordings need the direct connection instead of offering play
+          // buttons that can only fail (#73).
+          var viaHa = function () {
+            return ha().then(function (v) { fetchJson.viaHa = true; return v; });
+          };
+          var viaApi = function () {
+            return api().then(function (v) { fetchJson.viaHa = false; return v; });
+          };
+          if (mode === 'ha') return haAvailable() ? viaHa() : Promise.reject('HA data source needs the card (hass) or a haToken');
+          if (mode === 'api' || !haAvailable()) return viaApi();
+          return viaApi().catch(function (apiErr) {
             // Keep the fallback's own reason so the card can explain why
             // it found nothing (#73) - read by apiErrorText().
-            return ha().then(function (v) { fetchJson.haWhy = ''; return v; },
+            return viaHa().then(function (v) { fetchJson.haWhy = ''; return v; },
               function (haErr) { fetchJson.haWhy = haErr; return Promise.reject(apiErr); });
           });
         };
@@ -3367,7 +3377,9 @@
         +   '<div class="sci">' + esc(s.sci) + '</div>'
         +   '<div class="spectro-wrap" aria-hidden="true"></div>'
         +   '<div class="actions">'
-        +     '<button type="button" class="chip play" data-action="play" aria-label="play recording">'
+        +     (fetchJson.viaHa
+                ? '<button type="button" class="chip play" data-action="play" disabled title="' + esc(tt('audio.mqttOnly')) + '" aria-label="' + esc(tt('audio.mqttOnly')) + '">'
+                : '<button type="button" class="chip play" data-action="play" aria-label="play recording">')
         +       ICON_PLAY + '<span>play</span>'
         +     '</button>'
         +     '<a class="chip ext" href="' + wikiUrl(s.sci) + '" target="_blank" rel="noopener" aria-label="Wikipedia">wiki</a>'
@@ -4626,7 +4638,9 @@
       if (rar === 'rare') rarEl.classList.add('rare');
       var dets = j.detections || [];
       document.getElementById('modalRecCount').textContent = tt('modal.captured', { n: dets.length });
-      document.getElementById('modalRecordings').innerHTML = dets.length
+      document.getElementById('modalRecordings').innerHTML = (dets.length && fetchJson.viaHa
+        ? '<li class="rec-empty rec-no-audio">' + esc(tt('audio.mqttOnly')) + '</li>' : '')
+        + (dets.length
         ? dets.map(function (d) {
             return '<li class="rec-row" data-file="' + esc(d.file || '') + '" data-date="' + esc(d.d || '') + '"'
               // Multi-source stations (several RTSP/mic inputs) tag each
@@ -4634,22 +4648,25 @@
               // attribute (no dedicated UI yet) so it survives round-trip
               // and can be styled/queried later without another API audit.
               + (d.src ? ' data-source="' + esc(d.src) + '"' : '') + '>'
-              + '<button class="play" type="button" aria-label="' + esc(tt('modal.play')) + '">' + ICON_PLAY + '</button>'
+              // No clip file (MQTT history): no play button or spectrogram
+              // strip - the note above the list says why.
+              + (d.file ? '<button class="play" type="button" aria-label="' + esc(tt('modal.play')) + '">' + ICON_PLAY + '</button>' : '<span class="play-none" aria-hidden="true"></span>')
               + '<span class="when">' + esc(fmtRecTime(d.d, d.t)) + '<small>' + esc(fmtDateLine(d.d, d.t)) + '</small></span>'
               // Review write-back needs a detection id - present with the
               // API data source, absent over MQTT history. Sits just left
               // of the confidence; a ghost x that arms on first tap.
               + (d.file ? '<button class="flag" type="button" data-state="idle" title="' + esc(tt('flag.report')) + '" aria-label="' + esc(tt('flag.report')) + '">\u2715</button>' : '')
               + '<span class="conf">' + ((+d.conf || 0) * 100).toFixed(0) + '%</span>'
-              + '<div class="rec-spectro" aria-hidden="true">'
+              + (d.file
+              ? '<div class="rec-spectro" aria-hidden="true">'
               +   '<div class="rec-spectro-loading">' + esc(tt('spectro.loading')) + '</div>'
               +   '<div class="rec-spectro-played"></div>'
               +   '<div class="rec-spectro-cursor"></div>'
               +   '<div class="rec-spectro-scrub" role="slider" aria-label="' + esc(tt('modal.scrub')) + '" tabindex="0"></div>'
-              + '</div>'
+              + '</div>' : '')
               + '</li>';
           }).join('')
-        : '<li class="rec-empty">' + esc(tt('modal.noRecordings')) + '</li>';
+        : '<li class="rec-empty">' + esc(tt('modal.noRecordings')) + '</li>');
     }).catch(function () {
       document.getElementById('modalRecordings').innerHTML = '<li class="rec-empty">' + esc(tt('modal.recordingsFailed')) + '</li>';
     });

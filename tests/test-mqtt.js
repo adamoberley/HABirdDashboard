@@ -95,6 +95,27 @@ setTimeout(() => {
     assert.ok(historyCalls >= 1 && historyCalls <= 4, 'history calls: ' + historyCalls);
     assert.deepStrictEqual(errors, [], 'errors: ' + errors.join('; '));
     console.log('MQTT-HISTORY FALLBACK TEST PASSED (' + historyCalls + ' history fetches)');
+    // --- No audio over MQTT (#73): play chips disabled, detail view explains ---
+    const plays = [...root.querySelectorAll('.bird-card .chip.play')];
+    assert.ok(plays.length === 2 && plays.every(b => b.disabled), 'atlas play chips disabled over MQTT');
+    assert.ok(/direct connection/.test(plays[0].title), 'play chip says why: ' + plays[0].title);
+    root.querySelector('.bird-card').dispatchEvent(new window.MouseEvent('click', { bubbles: true, composed: true }));
+    setTimeout(() => {
+      try {
+        const recs = root.getElementById('modalRecordings');
+        assert.ok(recs.querySelector('.rec-no-audio'), 'recordings note shown');
+        assert.ok(recs.querySelectorAll('.rec-row').length >= 1, 'detections still listed');
+        assert.strictEqual(recs.querySelectorAll('.rec-row .play, .rec-row .rec-spectro').length, 0, 'no play buttons / spectrogram strips');
+        console.log('MQTT NO-AUDIO TEST PASSED');
+        pushTest();
+      } catch (e) { console.error('FAIL:', e.message); process.exit(1); }
+    }, 600);
+  } catch (e) { console.error('FAIL:', e.message); process.exit(1); }
+}, 1700);
+
+function pushTest() {
+  const assert = require('assert');
+  try {
     // --- MQTT push: a sensor update must trigger a refresh (debounced) ---
     const callsBefore = historyCalls;
     const hass2 = JSON.parse(JSON.stringify(hass));
@@ -109,4 +130,4 @@ setTimeout(() => {
       } catch (e) { console.error('FAIL:', e.message); process.exit(1); }
     }, 2300);
   } catch (e) { console.error('FAIL:', e.message); process.exit(1); }
-}, 1700);
+}

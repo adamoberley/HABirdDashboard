@@ -119,6 +119,8 @@
   'modal.loadingRecordings': 'Loading recordings...',
   'modal.noRecordings': 'No recordings yet.',
   'modal.recordingsFailed': 'Failed to load recordings.',
+  // Shown when the card is on Home Assistant's MQTT history (no audio travels over MQTT).
+  'audio.mqttOnly': "Recordings need a direct connection to BirdNET-Go - this card is showing Home Assistant's MQTT history.",
   'modal.noDescription': 'No description available.',
   'modal.captured': '{n} captured',
   'modal.play': 'play',

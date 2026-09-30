@@ -954,6 +954,8 @@
   }
   .bird-card .chip svg { width: 10px; height: 10px; display: block; }
   .bird-card .chip.play { padding-left: 7px; }
+  /* MQTT history carries no audio (#73): the play chip greys out. */
+  .bird-card .chip.play[disabled] { opacity: 0.4; cursor: not-allowed; transform: none; }
   .bird-card .chip.ext::after { content: '↗'; opacity: 0.6; font-size: 11px; }
 
   /* Selected card highlight - matches the page-slider and time-window
@@ -1557,6 +1559,8 @@
     padding: 0;
   }
   .rec-row .play svg { width: 8px; height: 8px; }
+  /* Keeps the grid column when a row has no clip (MQTT history). */
+  .rec-row .play-none { width: 24px; height: 24px; }
   .rec-row .play[data-active="true"] {
     background: var(--ink); color: var(--paper);
   }
