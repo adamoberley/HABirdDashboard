@@ -3646,7 +3646,7 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     // Stats + atlas drop the shared title so their content gets the full height.
     __shell.classList.toggle('av-view-stats', i === 1);
     __shell.classList.toggle('av-view-atlas', i === 2);
-    views.style.transform = 'translateX(-' + (i * 100) + '%)';
+    views.style.transform = 'translateX(' + (getComputedStyle(views).direction === 'rtl' ? '' : '-') + (i * 100) + '%)';
     btns.forEach(function (b, j) { b.setAttribute('aria-current', j === i ? 'true' : 'false'); });
     syncPill(slider);
     setTitleForView(i);

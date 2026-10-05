@@ -1495,7 +1495,7 @@
     // Stats + atlas drop the shared title so their content gets the full height.
     document.body.classList.toggle('av-view-stats', i === 1);
     document.body.classList.toggle('av-view-atlas', i === 2);
-    views.style.transform = 'translateX(-' + (i * 100) + '%)';
+    views.style.transform = 'translateX(' + (getComputedStyle(views).direction === 'rtl' ? '' : '-') + (i * 100) + '%)';
     btns.forEach(function (b, j) { b.setAttribute('aria-current', j === i ? 'true' : 'false'); });
     syncPill(slider);
     setTitleForView(i);
