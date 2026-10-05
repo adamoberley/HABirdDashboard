@@ -25,6 +25,15 @@
   also works on plain `http://` installs, where the browser's clipboard API
   isn't available.
 
+### Fixed
+- **The Eurasian Magpie's white body is no longer see-through**
+  ([#86](https://github.com/adamoberley/HABirdDashboard/issues/86), reported
+  by @karhumusta). Both poses (`pica-pica.png`, `pica-pica-2.png`) are
+  re-cut with the white belly, flanks and shoulder patches solid. Their
+  collage masks are rebuilt, so other birds no longer pack into the gap, and
+  a `species-notes.json` entry keeps a future regeneration from losing the
+  white again. Cache-bust r18 -> r19.
+
 ### Changed
 - **The rolling 24-hour window no longer calls itself "today".** Labels
   for it now read "past 24h", in all 12 languages. "Today" means the new
