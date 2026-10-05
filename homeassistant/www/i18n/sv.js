@@ -16,6 +16,7 @@
   'winpick.1h': '1H',
   'winpick.12h': '12H',
   'winpick.24h': '24H',
+  'winpick.today': 'IDAG',
   'winpick.7d': '7D',
   'winpick.all': 'ALLA',
 
@@ -34,6 +35,7 @@
   // ---- Time-window labels (windowLabel) ----
   'window.thisHour': 'denna timme',
   'window.past12h': 'senaste 12 tim',
+  'window.past24h': 'senaste 24 tim',
   'window.today': 'idag',
   'window.thisWeek': 'denna vecka',
   'window.allTime': 'någonsin',
@@ -87,6 +89,8 @@
 
   // ---- Detail modal: chrome ----
   'modal.close': 'Stäng',
+  'modal.copyLink': 'Kopiera länk till den här fågeln',
+  'modal.linkCopied': 'Länk kopierad',
   'modal.pose': 'Positur',
   'modal.perched': 'sittande',
   'modal.inFlight': 'i flykt',

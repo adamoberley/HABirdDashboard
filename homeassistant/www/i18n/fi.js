@@ -16,6 +16,7 @@
   'winpick.1h': '1T',
   'winpick.12h': '12T',
   'winpick.24h': '24T',
+  'winpick.today': 'TÄNÄÄN',
   'winpick.7d': '7VRK',
   'winpick.all': 'KAIKKI',
 
@@ -34,6 +35,7 @@
   // ---- Time-window labels (windowLabel) ----
   'window.thisHour': 'tällä tunnilla',
   'window.past12h': 'viimeiset 12 t',
+  'window.past24h': 'viimeiset 24 t',
   'window.today': 'tänään',
   'window.thisWeek': 'tällä viikolla',
   'window.allTime': 'kautta aikojen',
@@ -87,6 +89,8 @@
 
   // ---- Detail modal: chrome ----
   'modal.close': 'Sulje',
+  'modal.copyLink': 'Kopioi linkki tähän lintuun',
+  'modal.linkCopied': 'Linkki kopioitu',
   'modal.pose': 'Asento',
   'modal.perched': 'istuva',
   'modal.inFlight': 'lennossa',

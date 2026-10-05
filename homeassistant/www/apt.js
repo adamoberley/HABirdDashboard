@@ -1584,16 +1584,36 @@
   })();
 
   var winBtns = [].slice.call(winPick.querySelectorAll('button'));
-  var currentHours = +readLS('bird:window', '24') || 24;
+  // "Today" (#85): the calendar day so far, reset at local midnight,
+  // rather than the rolling 24 hours (which shows yesterday evening's birds
+  // all morning). It's carried as hours-since-midnight in currentHours,
+  // re-derived before every fetch, so every data path - the BirdNET-Go
+  // API, the live feed and HA's MQTT history - works unchanged.
+  var windowToday = false;
+  function hoursSinceMidnight() {
+    var now = new Date();
+    var midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return Math.max((now - midnight) / 3600000, 1 / 60);
+  }
+  function syncTodayWindow() { if (windowToday) currentHours = hoursSinceMidnight(); }
+  // What a fetch was issued for: an in-flight response is dropped if the
+  // window changed meanwhile. 'today' rather than its hour count, which
+  // grows by the second.
+  function windowKey() { return windowToday ? 'today' : currentHours; }
+  var savedWindow = readLS('bird:window', '24');
+  var currentHours = +savedWindow || 24;
+  if (savedWindow === 'today') windowToday = true;
   // Card builds fix the time window from card config and hide the
   // segmented picker - the window is a card setting there, not an
-  // on-screen control. 'all' or any hour count works.
+  // on-screen control. 'all', 'today' or any hour count works.
   if (AV_CFG && AV_CFG.windowHours != null && AV_CFG.windowHours !== '') {
+    windowToday = AV_CFG.windowHours === 'today';
     currentHours = AV_CFG.windowHours === 'all'
       ? 1000000
       : Math.max(1, +AV_CFG.windowHours || 24);
     if (winPick) winPick.style.display = 'none';
   }
+  syncTodayWindow();
   // Card builds: pin the starting view, and optionally hide the
   // collage/stats/atlas selector so a card can BE a single view (one
   // dashboard can then mix a collage card, a stats card, an atlas card).
@@ -1611,13 +1631,15 @@
     document.body.classList.add('av-picker-top');
   }
   winBtns.forEach(function (b) {
-    b.setAttribute('aria-current', (+b.dataset.h === currentHours) ? 'true' : 'false');
+    var on = b.dataset.h === 'today' ? windowToday : (!windowToday && +b.dataset.h === currentHours);
+    b.setAttribute('aria-current', on ? 'true' : 'false');
   });
   winBtns.forEach(function (b) {
     b.addEventListener('click', function () {
       winBtns.forEach(function (x) { x.setAttribute('aria-current', x === b ? 'true' : 'false'); });
-      currentHours = +b.dataset.h;
-      writeLS('bird:window', String(currentHours));
+      windowToday = b.dataset.h === 'today';
+      currentHours = windowToday ? hoursSinceMidnight() : +b.dataset.h;
+      writeLS('bird:window', b.dataset.h);
       syncPill(winPick);
       // Actual data refresh is wired below via refreshRecent().
     });
@@ -2925,9 +2947,10 @@
   // a bare "window" with the span it actually covers. Thresholds match
   // the winPick buttons (1H / 12H / 24H / 7D / ALL).
   function windowLabel(h) {
+    if (windowToday) return tt('window.today');
     if (h <= 1) return tt('window.thisHour');
     if (h <= 12) return tt('window.past12h');
-    if (h <= 24) return tt('window.today');
+    if (h <= 24) return tt('window.past24h');
     if (h <= 168) return tt('window.thisWeek');
     return tt('window.allTime');
   }
@@ -3047,10 +3070,10 @@
           case 'lifelist':
             return pick(bgLifelist, hhLifelist);
           case 'recent':
-            hours = Math.max(1, Math.min(1000000, +q.hours || 24));
+            hours = Math.max(1 / 60, Math.min(1000000, +q.hours || 24));
             return pick(function () { return bgRecent(hours); }, function () { return hhRecent(hours); });
           case 'activity':
-            hours = Math.max(1, Math.min(1000000, +q.hours || 24));
+            hours = Math.max(1 / 60, Math.min(1000000, +q.hours || 24));
             return pick(function () { return bgActivity(hours); }, function () { return hhActivity(hours); });
           case 'species':
             sci2 = q.sci || '';
@@ -3377,7 +3400,7 @@
     // to the life list this 1h / 12h / 24h / 7d. Never shown for the ALL
     // window (every species would qualify against an open-ended span).
     var now = Date.now();
-    var windowStartMs = now - currentHours * 3600000;
+    var windowStartMs = now - (windowToday ? hoursSinceMidnight() : currentHours) * 3600000;
     var atlasHtml = species.map(function (s) {
       var total = +s.n || 0;
       var win = winBySci[s.sci] || 0;
@@ -3604,7 +3627,8 @@
     // changes the picker again before it resolves - or a slower poll
     // lands later - we discard the stale response so the collage
     // never reverts to a different window.
-    var forHours = currentHours;
+    syncTodayWindow();
+    var forHours = currentHours, forKey = windowKey();
     return Promise.all([
       fetchJson('./avian/api/birdnet-api.php?action=recent&hours=' + forHours),
       fetchJson('./avian/api/birdnet-api.php?action=activity&hours=' + forHours)
@@ -3613,7 +3637,7 @@
         ? vvRecent(forHours).catch(function () { return null; })
         : Promise.resolve(null),
     ]).then(function (parts) {
-        if (forHours !== currentHours) return; // window changed mid-flight
+        if (forKey !== windowKey()) return; // window changed mid-flight
         DATA.recent = parts[0];
         DATA.activity = parts[1];
         DATA.visits = parts[2];
@@ -3622,7 +3646,8 @@
       .catch(function (e) { console.warn('recent fetch failed', e); });
   }
   function refreshAll(animate) {
-    var forHours = currentHours;
+    syncTodayWindow();
+    var forHours = currentHours, forKey = windowKey();
     // Only the primary summary/daily fetches (stats + lifelist) flip the
     // Private Mode message - a 401 from a secondary call (timeseries,
     // visits, ...) still means "not signed in", but stats/lifelist always
@@ -3655,7 +3680,7 @@
       DATA.firstseen = parts[3];
       // Only accept the window-scoped slices if the window hasn't changed
       // since this poll started - otherwise keep what's there.
-      if (forHours === currentHours) {
+      if (forKey === windowKey()) {
         if (parts[4]) DATA.recent = parts[4];
         if (parts[5]) DATA.activity = parts[5];
         if (parts[6]) DATA.visits = parts[6];
@@ -5307,6 +5332,40 @@
   });
   document.getElementById('aboutLink').addEventListener('click', function () {
     location.hash = '#about';
+  });
+
+  // Copy a link to the open bird (#87): this page's own address plus
+  // #sci=<name> - what a notification's tap action needs to open it here.
+  // HA served over plain http on a LAN has no async clipboard API, so fall
+  // back to a selected textarea, and as a last resort show the link.
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) {}
+      ta.remove();
+      if (ok) resolve(); else reject();
+    });
+  }
+  document.getElementById('modalLink').addEventListener('click', function () {
+    var btn = this;
+    var sci = (document.getElementById('modalSci').textContent || '').trim();
+    if (!sci) return;
+    var url = location.origin + location.pathname + location.search + '#sci=' + encodeURIComponent(sci);
+    copyText(url).then(function () {
+      btn.setAttribute('data-copied', 'true');
+      btn.setAttribute('aria-label', tt('modal.linkCopied'));
+      setTimeout(function () {
+        btn.removeAttribute('data-copied');
+        btn.setAttribute('aria-label', tt('modal.copyLink'));
+      }, 1600);
+    }, function () { window.prompt(tt('modal.copyLink'), url); });
   });
 
   // Shared decode context for spectrogram generation. Lives once for

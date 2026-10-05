@@ -83,7 +83,7 @@ already look like a painting, so most setups change little. Most-touched:
 | `show_caption` | Off (default) = edge-to-edge art, no title. |
 | `show_names` | `off` (default), `common`, `scientific`, or `both`: list every species in the window as a line of names along the bottom of the painting — a legend for birds you don't recognise. Also the one place a species with no artwork yet still appears. |
 | `names_size` | Font size of that strip in px at panel resolution (36 for 4K; ~18 for 1920x1080). |
-| `window_hours` | Time window: `1`/`12`/`24`/`168`/`1000000` (ALL). |
+| `window_hours` | Time window: `1`/`12`/`today`/`24`/`168`/`1000000` (ALL). `today` is the calendar day so far (resets at midnight); `24` is the rolling 24 hours. |
 | `interval_minutes` | How often the collage refreshes on the TV. |
 | `active_hours` | e.g. `06:30-22:00`; blank = 24/7. |
 | `resolution` | `3840x2160` (4K Frames) or `1920x1080` (32"/older). |

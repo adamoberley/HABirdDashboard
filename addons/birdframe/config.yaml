@@ -6,7 +6,7 @@
 # Frame TV's Art Mode - replacing the previous upload in place so the TV's art
 # library never accumulates duplicates.
 name: Bird Frame (Samsung Frame TV)
-version: "1.7.0"
+version: "1.8.0"
 slug: birdframe
 description: >-
   Render the live Bird collage and push it to a Samsung Frame TV as Art Mode
@@ -129,8 +129,9 @@ schema:
   # (e.g. "shadowbox") gives a framed-print look.
   matte: "str"
   # ---- What it shows ----
-  # Time window the collage summarises: 1H / 12H / 24H / 7D / ALL.
-  window_hours: "list(1|12|24|168|1000000)"
+  # Time window the collage summarises: 1H / 12H / TODAY / 24H / 7D / ALL.
+  # "today" is the calendar day so far (resets at local midnight).
+  window_hours: "list(1|12|today|24|168|1000000)"
   # Best-confidence threshold above which a species perches (else it flies).
   sit_confidence: "float(0,1.01)"
   # ---- Updating ----
