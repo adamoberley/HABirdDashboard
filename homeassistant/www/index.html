@@ -35,6 +35,7 @@
     <i class="seg-pill" aria-hidden="true"></i>
     <button data-h="1"   type="button" data-i18n="winpick.1h">1H</button>
     <button data-h="12"  type="button" data-i18n="winpick.12h">12H</button>
+    <button data-h="today" type="button" data-i18n="winpick.today">TODAY</button>
     <button data-h="24"  type="button" aria-current="true" data-i18n="winpick.24h">24H</button>
     <button data-h="168" type="button" data-i18n="winpick.7d">7D</button>
     <button data-h="1000000" type="button" data-i18n="winpick.all">ALL</button>
@@ -161,6 +162,13 @@
   <div class="modal-backdrop" data-close="1"></div>
   <article class="modal-card">
     <button class="modal-close" type="button" aria-label="Close" data-i18n-aria="modal.close" data-close="1">×</button>
+    <button class="modal-link" id="modalLink" type="button" aria-label="Copy link to this bird" data-i18n-aria="modal.copyLink">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M6.6 9.4 L 9.4 6.6"/>
+        <path d="M7.4 4.6 L 8.6 3.4 a 2.6 2.6 0 0 1 3.7 3.7 L 11.1 8.3"/>
+        <path d="M8.6 11.4 L 7.4 12.6 a 2.6 2.6 0 0 1 -3.7 -3.7 L 4.9 7.7"/>
+      </svg>
+    </button>
     <div class="modal-grid">
       <div class="modal-img">
         <img id="modalImg" src="" alt="" loading="eager">

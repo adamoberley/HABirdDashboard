@@ -17,6 +17,7 @@
   'winpick.1h': '1T',
   'winpick.12h': '12T',
   'winpick.24h': '24T',
+  'winpick.today': 'I DAG',
   'winpick.7d': '7D',
   'winpick.all': 'ALLE',
 
@@ -35,6 +36,7 @@
   // ---- Time-window labels (windowLabel) ----
   'window.thisHour': 'denne timen',
   'window.past12h': 'siste 12t',
+  'window.past24h': 'siste 24t',
   'window.today': 'i dag',
   'window.thisWeek': 'denne uken',
   'window.allTime': 'noensinne',
@@ -88,6 +90,8 @@
 
   // ---- Detail modal: chrome ----
   'modal.close': 'Lukk',
+  'modal.copyLink': 'Kopier lenke til denne fuglen',
+  'modal.linkCopied': 'Lenke kopiert',
   'modal.pose': 'Positur',
   'modal.perched': 'sittende',
   'modal.inFlight': 'i flukt',

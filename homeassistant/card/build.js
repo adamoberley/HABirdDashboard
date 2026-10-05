@@ -182,6 +182,10 @@ const PREAMBLE = `function runHABirdApp(__root, __shell, __cardConfig, __imgBase
       setTimeout(function () { if (self.onchange) self.onchange(); }, 0);
     },
   };
+  // Deep links (#87): seeded from the dashboard URL's #sci=<name> before the
+  // app's boot-time route check runs, and handed later ones by the wrapper.
+  if (__cardConfig.initialRoute) __route._h = __cardConfig.initialRoute;
+  if (__cardConfig.__exposeRoute) __cardConfig.__exposeRoute(function (h) { __route.hash = h; });
   // Resize plumbing: handlers registered here run on window resizes AND
   // card-box resizes (the wrapper wires a ResizeObserver to __fireResize).
   var __resizeFns = [];
@@ -216,7 +220,9 @@ app = app.replace(/\}\)\(\);\s*$/, '}\n');
 
 // Anything still touching `document.` must be on the whitelist.
 const leftover = [...app.matchAll(/document\.(\w+)/g)].map((m) => m[1]);
-const allowed = new Set(['createElement', 'fonts', 'hidden', 'cookie']);
+// execCommand is page-global by nature (it acts on the current selection,
+// which can sit inside the shadow root) - the copy-link fallback needs it.
+const allowed = new Set(['createElement', 'fonts', 'hidden', 'cookie', 'execCommand']);
 const bad = leftover.filter((name) => !allowed.has(name));
 if (bad.length) throw new Error('unscoped document usage: ' + [...new Set(bad)].join(', '));
 
@@ -228,7 +234,7 @@ const wrapper = `
 // you copied the artwork locally (homeassistant/install.sh layout).
 var HABIRD_CDN_ASSETS = 'https://cdn.jsdelivr.net/gh/adamoberley/HABirdDashboard@HABirdDashboard/avian/assets/';
 
-var HABIRD_VERSION = '1.7.0';
+var HABIRD_VERSION = '1.8.0';
 
 var HABIRD_EDITOR_SCHEMA = [
   { name: 'dashboard', type: 'expandable', flatten: true, title: 'Dashboard', expanded: true, schema: [
@@ -260,6 +266,7 @@ var HABIRD_EDITOR_SCHEMA = [
       { name: 'window', selector: { select: { mode: 'dropdown', options: [
         { value: '1', label: 'Last hour' },
         { value: '12', label: 'Last 12 hours' },
+        { value: 'today', label: 'Today (since midnight)' },
         { value: '24', label: 'Last 24 hours' },
         { value: '72', label: 'Last 3 days' },
         { value: '168', label: 'Last 7 days' },
@@ -405,14 +412,38 @@ var HABIRD_HELPERS = {
   visits_sensors: "Optional: a feeder camera's BirdNET-style “... scientific name” sensors (e.g. published by an LLM Vision automation). Their sightings blend in as per-species “visits” next to the audio “calls” - on hover, in the atlas and in the detail view.",
 };
 
+// Deep links (#87): a dashboard URL ending in #sci=<scientific name> - from
+// a notification, say - opens that bird's detail view, as if it had been
+// tapped in the collage. The card only reads the URL, never writes it. One
+// card per link: on a dashboard with several bird cards the first to see a
+// link claims it, so it doesn't open a modal in each of them.
+var HABIRD_LINK = { link: '', owner: null };
+function habirdSpeciesLink(hash) {
+  var m = /^#sci=([^&]+)/.exec(hash || '');
+  if (!m) return '';
+  var sci;
+  try { sci = decodeURIComponent(m[1].replace(/\\+/g, ' ')); } catch (e) { return ''; }
+  sci = sci.replace(/\\s+/g, ' ').trim();
+  return sci ? '#sci=' + encodeURIComponent(sci) : '';
+}
+function habirdClaimLink(card, link) {
+  var cur = HABIRD_LINK;
+  if (cur.link === link && cur.owner && cur.owner !== card && cur.owner.isConnected) return false;
+  HABIRD_LINK = { link: link, owner: card };
+  return true;
+}
+
 class HABirdCard extends HTMLElement {
   setConfig(config) {
     config = config || {};
     if (config.view && ['collage', 'stats', 'atlas'].indexOf(config.view) < 0) {
       throw new Error("view must be 'collage', 'stats' or 'atlas'");
     }
-    if (config.window && config.window !== 'all' && !(+config.window > 0)) {
-      throw new Error("window must be a positive number of hours or 'all'");
+    if (config.window && config.window !== 'all' && config.window !== 'today' && !(+config.window > 0)) {
+      throw new Error("window must be a positive number of hours, 'today' or 'all'");
+    }
+    if (config.deep_link != null && typeof config.deep_link !== 'boolean') {
+      throw new Error('deep_link must be true or false');
     }
     if (config.names != null && ['off', 'common', 'scientific', 'both'].indexOf(config.names) < 0) {
       throw new Error("names must be 'off', 'common', 'scientific' or 'both'");
@@ -504,7 +535,31 @@ class HABirdCard extends HTMLElement {
     }
     this.toggleAttribute('av-grid', grid);
   }
-  connectedCallback() { this._syncGrid(); this._boot(); }
+  connectedCallback() {
+    this._syncGrid();
+    this._boot();
+    // HA's own navigation (a notification tap while the dashboard is open)
+    // uses pushState and fires location-changed, not hashchange.
+    if (!this._onUrl) this._onUrl = this._followLink.bind(this);
+    ['location-changed', 'popstate', 'hashchange'].forEach(function (ev) {
+      window.addEventListener(ev, this._onUrl);
+    }, this);
+  }
+  // A link this card hasn't seen yet (the first boot, or a navigation since)
+  // and is allowed to act on, or ''. Seen links are remembered so a stale
+  // #sci= left in the address bar doesn't reopen the bird on every reboot.
+  _newLink() {
+    var hash = window.location.hash;
+    if (hash === this._linkSeen) return '';
+    this._linkSeen = hash;
+    if ((this._config || {}).deep_link === false) return '';
+    var link = habirdSpeciesLink(hash);
+    return link && habirdClaimLink(this, link) ? link : '';
+  }
+  _followLink() {
+    var link = this._newLink();
+    if (link && this._setRoute) this._setRoute(link);
+  }
   _boot() {
     if (this._booted) return;
     this._booted = true;
@@ -524,7 +579,7 @@ class HABirdCard extends HTMLElement {
       view: c.view || 'collage',             // which view this card shows
       viewSelector: c.view_selector !== false,
       selectorPosition: c.selector_position || 'bottom',
-      windowHours: c.window || 24,           // hours, or 'all'
+      windowHours: c.window || 24,           // hours, 'today' or 'all'
       birdnetGoUrl: c.birdnet_url || '',
       apiToken: c.api_token || '',   // Bearer token for BirdNET-Go's "Private Mode"
       proxy: c.proxy,                // false = ignore the Bird Card Proxy integration
@@ -586,6 +641,8 @@ class HABirdCard extends HTMLElement {
         fahrenheit: !!c.fahrenheit,   // BirdNET-Go fallback only; hass uses HA units
       },
       __getHass: function () { return self._hass; },
+      initialRoute: this._newLink(),
+      __exposeRoute: function (fn) { self._setRoute = fn; },
     };
     var imgBase = (c.image_base || HABIRD_CDN_ASSETS).replace(/\\/?$/, '/');
     runHABirdApp(root, shell, avConfig, imgBase);
@@ -603,6 +660,11 @@ class HABirdCard extends HTMLElement {
     }
   }
   disconnectedCallback() {
+    if (this._onUrl) {
+      ['location-changed', 'popstate', 'hashchange'].forEach(function (ev) {
+        window.removeEventListener(ev, this._onUrl);
+      }, this);
+    }
     if (this._ro) { this._ro.disconnect(); this._ro = null; }
     if (this._stopLive) { this._stopLive(); this._stopLive = null; }
   }

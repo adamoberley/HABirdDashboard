@@ -93,7 +93,8 @@ configuration:
   window_hours:
     name: Time window
     description: >-
-      How far back the collage summarises: 1 = 1H, 12 = 12H, 24 = 24H,
+      How far back the collage summarises: 1 = 1H, 12 = 12H, today = the
+      calendar day so far (resets at midnight), 24 = the rolling 24 hours,
       168 = 7D, 1000000 = ALL.
   sit_confidence:
     name: Perch confidence

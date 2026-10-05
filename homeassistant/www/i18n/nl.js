@@ -16,6 +16,7 @@
   'winpick.1h': '1U',
   'winpick.12h': '12U',
   'winpick.24h': '24U',
+  'winpick.today': 'VANDAAG',
   'winpick.7d': '7D',
   'winpick.all': 'ALLE',
 
@@ -34,6 +35,7 @@
   // ---- Time-window labels (windowLabel) ----
   'window.thisHour': 'dit uur',
   'window.past12h': 'afgelopen 12u',
+  'window.past24h': 'afgelopen 24u',
   'window.today': 'vandaag',
   'window.thisWeek': 'deze week',
   'window.allTime': 'ooit',
@@ -87,6 +89,8 @@
 
   // ---- Detail modal: chrome ----
   'modal.close': 'Sluiten',
+  'modal.copyLink': 'Link naar deze vogel kopiëren',
+  'modal.linkCopied': 'Link gekopieerd',
   'modal.pose': 'Houding',
   'modal.perched': 'zittend',
   'modal.inFlight': 'in vlucht',

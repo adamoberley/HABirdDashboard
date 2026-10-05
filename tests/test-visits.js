@@ -123,7 +123,7 @@ setTimeout(() => {
         const stat = root.getElementById('modalVisitsStat');
         assert.notStrictEqual(stat.style.display, 'none', 'modal visits stat visible');
         assert.strictEqual(root.getElementById('modalVisits').textContent, '2', 'modal visit count');
-        assert.strictEqual(root.getElementById('modalVisitsLbl').textContent, 'visits today', 'modal visit label');
+        assert.strictEqual(root.getElementById('modalVisitsLbl').textContent, 'visits past 24h', 'modal visit label (rolling 24h, not "today" - #85)');
         assert.deepStrictEqual(errors, [], 'errors: ' + errors.join('; '));
         console.log('VISITS MODAL TEST PASSED');
         process.exit(0);

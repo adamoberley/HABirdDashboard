@@ -1,5 +1,44 @@
 # Changelog
 
+## v1.8.0 — 2026-10-05
+
+### Added
+- **A "today" time window**
+  ([#85](https://github.com/adamoberley/HABirdDashboard/issues/85),
+  requested by @karhumusta). `window: today` (or **Today (since midnight)**
+  in the card editor, **TODAY** on the standalone page's picker, and
+  `window_hours: today` in the Frame TV app) shows the calendar day so far
+  and starts over at local midnight. The rolling 24 hours is still there,
+  and is still the default.
+- **Link straight to a bird**
+  ([#87](https://github.com/adamoberley/HABirdDashboard/issues/87),
+  requested by @nowagner). A dashboard address ending in
+  `#sci=<scientific name>` opens that bird's details, as if it had been
+  tapped in the collage. That makes it possible to send a notification that
+  lands on the bird it's about. It works when the dashboard opens and when
+  you're already on it (HA's in-app navigation). The card only reads the
+  address, never writes it. On a dashboard with several bird cards only the
+  first one opens the link. New option `deep_link: false` makes a card
+  ignore links. The README has an example notification.
+- **Copy a link to any bird.** A link button next to × in a bird's details
+  copies the address that opens it, ready to paste into a notification. It
+  also works on plain `http://` installs, where the browser's clipboard API
+  isn't available.
+
+### Fixed
+- **The Eurasian Magpie's white body is no longer see-through**
+  ([#86](https://github.com/adamoberley/HABirdDashboard/issues/86), reported
+  by @karhumusta). Both poses (`pica-pica.png`, `pica-pica-2.png`) are
+  re-cut with the white belly, flanks and shoulder patches solid. Their
+  collage masks are rebuilt, so other birds no longer pack into the gap, and
+  a `species-notes.json` entry keeps a future regeneration from losing the
+  white again. Cache-bust r18 -> r19.
+
+### Changed
+- **The rolling 24-hour window no longer calls itself "today".** Labels
+  for it now read "past 24h", in all 12 languages. "Today" means the new
+  calendar-day window.
+
 ## v1.7.0 — 2026-09-30
 
 ### Added

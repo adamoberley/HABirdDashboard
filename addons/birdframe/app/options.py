@@ -34,7 +34,7 @@ class Options:
     show_caption: bool
     show_names: str
     names_size: int
-    window_hours: int
+    window_hours: int | str  # hours, or "today" (since local midnight)
     collage_fill: float
     size_contrast: float
     collage_shape: str
@@ -64,6 +64,13 @@ def _load_raw() -> dict:
         return {}
     with open(OPTIONS_PATH, "r", encoding="utf-8") as fh:
         return json.load(fh)
+
+
+def _window(value) -> int | str:
+    """A window option: an hour count, or "today" (the page's TODAY button)."""
+    if str(value).strip().lower() == "today":
+        return "today"
+    return int(value)
 
 
 def load() -> Options:
@@ -97,7 +104,7 @@ def load() -> Options:
         # | "both", and its font size in px at panel resolution.
         show_names=str(raw.get("show_names", "off")).strip().lower(),
         names_size=int(raw.get("names_size", 36)),
-        window_hours=int(raw.get("window_hours", 24)),
+        window_hours=_window(raw.get("window_hours", 24)),
         collage_fill=float(raw.get("collage_fill", 0.5)),
         # How much bigger the most-heard birds draw than the rest (0-0.8;
         # 0 = all essentially the same size).

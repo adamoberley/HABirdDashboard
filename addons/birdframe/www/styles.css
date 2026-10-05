@@ -1191,6 +1191,7 @@
        sits in its own corner instead of on the artwork. */
     .modal-card { padding: 44px 18px 18px; border-radius: 10px; }
     .modal-close { top: 10px; right: 10px; }
+    .modal-link { top: 10px; right: 48px; }
     .modal-info h2 { font-size: 22px; }
     .modal-img { height: 160px; padding: 10px; }
     .modal-grid { gap: 18px; }
@@ -1320,6 +1321,17 @@
     cursor: pointer; z-index: 1;
   }
   .modal-close:hover { color: var(--accent-2); }
+  /* Copy a deep link to this bird (#87), beside the close button. */
+  .modal-link {
+    position: absolute; top: 16px; right: 56px;
+    background: var(--paper-2); border: 0;
+    width: 30px; height: 30px; border-radius: 999px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--ink); box-shadow: var(--raised);
+    cursor: pointer; z-index: 1;
+  }
+  .modal-link svg { width: 14px; height: 14px; }
+  .modal-link:hover, .modal-link[data-copied="true"] { color: var(--accent-2); }
   .modal-grid {
     display: grid; grid-template-columns: 1fr 1.15fr; gap: 32px;
     align-items: start;

@@ -18,6 +18,7 @@
   'winpick.1h': '1H',
   'winpick.12h': '12H',
   'winpick.24h': '24H',
+  'winpick.today': 'TODAY',
   'winpick.7d': '7D',
   'winpick.all': 'ALL',
 
@@ -37,6 +38,7 @@
   // ---- Time-window labels (windowLabel) ----
   'window.thisHour': 'this hour',
   'window.past12h': 'past 12h',
+  'window.past24h': 'past 24h',
   'window.today': 'today',
   'window.thisWeek': 'this week',
   'window.allTime': 'all time',
@@ -100,6 +102,8 @@
 
   // ---- Detail modal: chrome ----
   'modal.close': 'Close',
+  'modal.copyLink': 'Copy link to this bird',
+  'modal.linkCopied': 'Link copied',
   'modal.pose': 'Pose',
   'modal.perched': 'perched',
   'modal.inFlight': 'in flight',

@@ -235,8 +235,11 @@ title: ""                    # empty = no title; set any text for a heading
 names: off                   # species-name strip along the bottom of the
                              #   collage: off | common | scientific | both
 names_size: 13               # font size of that strip, in px
-window: "24"                 # time window in hours, or "all" - the card has
-                             #   no on-screen picker; this is the window
+window: "24"                 # time window in hours, "today" or "all" - the
+                             #   card has no on-screen picker; this is the
+                             #   window. "24" is the rolling 24 hours;
+                             #   "today" is the calendar day so far (resets
+                             #   at local midnight)
 background: transparent      # transparent (blend with dashboard) | paper
 paper_color: ""              # background: paper - light-mode page colour (hex); "" = theme default
 paper_color_dark: ""         # background: paper - dark-mode page colour (hex); "" = theme default
@@ -271,6 +274,8 @@ image_base: ""               # empty = artwork from CDN (see below)
 visits_sensors: []           # feeder-camera sensors - blends per-species
                              #   "visits" next to the audio "calls"
                              #   (see Blending feeder visits below)
+deep_link: true              # open a bird from the URL (#sci=...); false
+                             #   ignores links (see Linking to a bird below)
 ```
 
 The card follows Home Assistant's light/dark theme automatically, and
@@ -286,6 +291,32 @@ time/date formatting). Bird names come from BirdNET-Go in its own locale and
 are not affected. Force a language with the `language:` option (or
 `AV_CONFIG.language` on the standalone page). Adding a new language is a
 single file - see [the translator guide](homeassistant/www/i18n/README.md).
+
+**Linking to a bird**: add `#sci=<scientific name>` to the dashboard's
+address and the card opens that bird's details, exactly as if you'd tapped
+it in the collage - handy for a notification that should land on the bird
+it's about. The link button in a bird's details (next to ×) copies one for
+you. It works when the dashboard first opens and when you're already on it,
+the card only reads the address (closing the bird leaves it as it is), and
+on a dashboard with several bird cards only the first one opens it - set
+`deep_link: false` on any card that should never react. For example, a
+notification for each species heard for the first time:
+
+```yaml
+triggers:
+  - trigger: state
+    entity_id: sensor.birdnet_go_scientific_name   # your BirdNET-Go MQTT sensor
+conditions:
+  - "{{ trigger.to_state.state not in ['unknown', 'unavailable', ''] }}"
+  # ...plus whatever decides it's new to you
+actions:
+  - action: notify.mobile_app_your_phone
+    data:
+      message: "New bird: {{ trigger.to_state.state }}"
+      data:
+        url: "/lovelace-birds/0#sci={{ trigger.to_state.state | urlencode }}"   # iOS
+        clickAction: "/lovelace-birds/0#sci={{ trigger.to_state.state | urlencode }}"   # Android
+```
 
 **Species names** (`names`, default off): a line of names along the bottom
 of the collage listing every species in the current window, most-heard
