@@ -104,8 +104,7 @@
   'modal.recordings': 'Opptak',
   'modal.refCall': 'referanselyd',
   'modal.playRefCall': 'spill av referanselyd',
-  'modal.wiki': 'wiki',
-  'modal.ebird': 'ebird',
+  'modal.wikipedia': 'Les mer på Wikipedia',
   // ---- Detail modal: dynamic ----
   'modal.loadingDesc': 'Laster beskrivelse...',
   'modal.loadingRecordings': 'Laster opptak...',

@@ -71,8 +71,8 @@ at home [pushed to a Samsung Frame TV](#display-it-on-a-samsung-frame-tv-optiona
 - **Atlas** - a field-guide card grid of every species ever heard, with
   playback of the latest recording and client-rendered spectrograms.
 - **Detail modals** - per-species recording history with scrubbable
-  spectrograms, Wikipedia descriptions, rarity, and links out to Wikipedia
-  and eBird, plus an optional **reference call** (from Xeno-Canto) to
+  spectrograms, Wikipedia descriptions, rarity, and an info button that opens
+  the Wikipedia article, plus an optional **reference call** (from Xeno-Canto) to
   compare against your own recordings. A tap can open the details, play
   the call, or both.
 - **2,521 illustrations** - 1,283 species (North American + European /

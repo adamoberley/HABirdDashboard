@@ -1984,6 +1984,8 @@
     "Ptilinopus magnificus": "Megaloprepia magnifica",
     "Ptilinopus occipitalis": "Ramphiculus occipitalis",
     "Pycnonotus striatus": "Alcurus striatus",
+    // Not in BirdNET-Go's aliases.json; the AOS/eBird genus split (#90).
+    "Regulus calendula": "Corthylio calendula",
     "Reinwardtipicus validus": "Chrysocolaptes validus",
     "Rhodothraupis celaeno": "Periporphyrus celaeno",
     "Sakesphorus cristatus": "Sakesphoroides cristatus",
@@ -3305,34 +3307,11 @@
   }
 
   // ---- Atlas: field-guide card grid ----
-  // eBird species codes for placeholder birds. eBird's URL scheme is
-  // https://ebird.org/species/<code>/, where <code> is a stable 6-char
-  // taxonomy code. Hardcoded here for the local-California demo set;
-  // a real implementation can look these up via the eBird taxon API.
-  var EBIRD_CODES = {
-    'Calypte anna':           'annhum',
-    'Passer domesticus':      'houspa',
-    'Haemorhous mexicanus':   'houfin',
-    'Turdus migratorius':     'amerob',
-    'Zenaida macroura':       'moudov',
-    'Spinus psaltria':        'lesgol',
-    'Zonotrichia leucophrys': 'whcspa',
-    'Aphelocoma californica': 'cascj1',
-    'Mimus polyglottos':      'normoc',
-    'Sayornis nigricans':     'blkpho',
-    'Larus occidentalis':     'wegull',
-    'Corvus brachyrhynchos':  'amecro'
-  };
-
   // External "read more" link. Points at the active locale's Wikipedia so
   // the link lands on the same-language article as the fetched summary;
   // with WIKI_LANG='en' this is byte-identical to the original.
   function wikiUrl(sci, lang) {
     return 'https://' + (lang || WIKI_LANG) + '.wikipedia.org/wiki/' + encodeURIComponent(sci.replace(/ /g, '_'));
-  }
-  function ebirdUrl(sci) {
-    var code = EBIRD_CODES[sci];
-    return code ? 'https://ebird.org/species/' + code : 'https://ebird.org/explore';
   }
 
   // Tiny inline icons - monochrome, ink-only, match the page palette.
@@ -3439,8 +3418,6 @@
                 : '<button type="button" class="chip play" data-action="play" aria-label="play recording">')
         +       ICON_PLAY + '<span>play</span>'
         +     '</button>'
-        +     '<a class="chip ext" href="' + wikiUrl(s.sci) + '" target="_blank" rel="noopener" aria-label="Wikipedia">wiki</a>'
-        +     '<a class="chip ext" href="' + ebirdUrl(s.sci) + '" target="_blank" rel="noopener" aria-label="eBird">ebird</a>'
         +   '</div>'
         + '</article>';
     }).join('');
@@ -4674,7 +4651,6 @@
     }
     setRefCredit('');
     document.getElementById('modalWiki').href = wikiUrl(sci);
-    document.getElementById('modalEbird').href = ebirdUrl(sci);
     // FLIP-style morph: scale + translate the modal-card from the
     // clicked atlas card's position to its natural centered size, so
     // the card *expands* into the detail view instead of just fading

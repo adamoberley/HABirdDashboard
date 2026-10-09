@@ -812,8 +812,8 @@
 
   /* ============ View 3 - Atlas ============
      Field-guide grid: one card per species, each card holds the cutout,
-     names, window/all-time detection counts, and small action chips for
-     audio playback, Wikipedia, and eBird. */
+     names, window/all-time detection counts, and a play chip for
+     audio playback. */
   .atlas-controls {
     max-width: 1280px; margin: 0 auto 18px;
     display: flex; justify-content: flex-end; align-items: center;
@@ -851,8 +851,8 @@
   }
   /* Mobile atlas: a compact 2-up grid instead of one giant card per row,
      so you can scan many birds and tap easily. Inline actions are hidden -
-     tapping the card opens the detail modal, which has play/wiki/ebird +
-     recordings - making the whole card one big touch target. */
+     tapping the card opens the detail modal, which has play, the wiki link
+     and recordings - making the whole card one big touch target. */
   @media (max-width: 700px) {
     /* minmax(0,1fr) lets the columns shrink below their content's intrinsic
        width (otherwise the chips force overflow). Selectors are scoped under
@@ -956,7 +956,6 @@
   .bird-card .chip.play { padding-left: 7px; }
   /* MQTT history carries no audio (#73): the play chip greys out. */
   .bird-card .chip.play[disabled] { opacity: 0.4; cursor: not-allowed; transform: none; }
-  .bird-card .chip.ext::after { content: '↗'; opacity: 0.6; font-size: 11px; }
 
   /* Selected card highlight - matches the page-slider and time-window
      pill aesthetic: the active element is a slightly *brighter* paper
@@ -1192,11 +1191,12 @@
     .modal-card { padding: 44px 18px 18px; border-radius: 10px; }
     .modal-close { top: 10px; right: 10px; }
     .modal-link { top: 10px; right: 48px; }
+    .modal-wiki { top: 10px; right: 86px; }
     .modal-info h2 { font-size: 22px; }
     .modal-img { height: 160px; padding: 10px; }
     .modal-grid { gap: 18px; }
     /* Keep the description short so the recordings are in reach - the
-       full text is one tap away on the wiki link. */
+       full text is one tap away on the info button. */
     .modal-info .desc {
       font-size: 12px; line-height: 1.5;
       display: -webkit-box; -webkit-line-clamp: 4;
@@ -1322,7 +1322,8 @@
   }
   .modal-close:hover { color: var(--accent-2); }
   /* Copy a deep link to this bird (#87), beside the close button. */
-  .modal-link {
+  /* Wikipedia article for this bird (#92), left of the link button. */
+  .modal-link, .modal-wiki {
     position: absolute; top: 16px; right: 56px;
     background: var(--paper-2); border: 0;
     width: 30px; height: 30px; border-radius: 999px;
@@ -1330,8 +1331,9 @@
     color: var(--ink); box-shadow: var(--raised);
     cursor: pointer; z-index: 1;
   }
-  .modal-link svg { width: 14px; height: 14px; }
-  .modal-link:hover, .modal-link[data-copied="true"] { color: var(--accent-2); }
+  .modal-wiki { right: 96px; }
+  .modal-link svg, .modal-wiki svg { width: 14px; height: 14px; }
+  .modal-link:hover, .modal-link[data-copied="true"], .modal-wiki:hover { color: var(--accent-2); }
   .modal-grid {
     display: grid; grid-template-columns: 1fr 1.15fr; gap: 32px;
     align-items: start;
@@ -1593,24 +1595,6 @@
     font: 11px/1.5 var(--av-font-display); color: var(--ink-soft);
     text-align: center;
   }
-  .modal-actions {
-    display: flex; gap: 8px; margin-top: 18px;
-  }
-  .modal-actions .chip {
-    flex: 0 0 auto;
-    background: var(--paper-2);
-    border: 0; color: var(--ink);
-    padding: 7px 12px;
-    border-radius: 4px;
-    font: 10px/1 var(--av-font-mono);
-    text-transform: lowercase; letter-spacing: 0.12em;
-    text-decoration: none;
-    display: inline-flex; align-items: center; gap: 5px;
-    box-shadow: var(--raised);
-    transition: transform 160ms ease;
-  }
-  .modal-actions .chip:hover { transform: translateY(-1px); }
-  .modal-actions .chip.ext::after { content: '↗'; opacity: 0.6; }
 
   /* Spectrogram appears on first audio play. Recoloured via CSS filter
      so BirdNET-Pi's default colour spectrogram comes out as a clean

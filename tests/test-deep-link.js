@@ -105,6 +105,12 @@ const optedOut = card({ deep_link: false });
     assert.strictEqual(copied, 'http://ha.local:8123/lovelace/birds#sci=Corvus%20corax', 'copied: ' + copied);
     assert.strictEqual(second.shadowRoot.getElementById('modalLink').getAttribute('data-copied'), 'true');
 
+    // #92: the Wikipedia article is an info button beside it; no eBird link.
+    const info = second.shadowRoot.getElementById('modalWiki');
+    assert.ok(info && info.classList.contains('modal-wiki'), 'info button in the modal header');
+    assert.strictEqual(info.getAttribute('href'), 'https://en.wikipedia.org/wiki/Corvus_corax');
+    assert.ok(!second.shadowRoot.querySelector('#modalEbird, a[href*="ebird.org"]'), 'no eBird links left');
+
     console.log('DEEP LINK TEST PASSED');
     process.exit(0);
   } catch (e) { console.error('FAIL:', e.message); process.exit(1); }

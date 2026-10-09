@@ -103,8 +103,7 @@
   'modal.recordings': 'Registrazioni',
   'modal.refCall': 'richiamo di riferimento',
   'modal.playRefCall': 'riproduci richiamo di riferimento',
-  'modal.wiki': 'wiki',
-  'modal.ebird': 'ebird',
+  'modal.wikipedia': 'Leggi di più su Wikipedia',
   // ---- Detail modal: dynamic ----
   'modal.loadingDesc': 'Caricamento descrizione...',
   'modal.loadingRecordings': 'Caricamento registrazioni...',

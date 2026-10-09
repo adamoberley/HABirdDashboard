@@ -103,8 +103,7 @@
   'modal.recordings': 'Nagrania',
   'modal.refCall': 'głos referencyjny',
   'modal.playRefCall': 'odtwórz głos referencyjny',
-  'modal.wiki': 'wiki',
-  'modal.ebird': 'ebird',
+  'modal.wikipedia': 'Więcej w Wikipedii',
   // ---- Detail modal: dynamic ----
   'modal.loadingDesc': 'Wczytywanie opisu...',
   'modal.loadingRecordings': 'Wczytywanie nagrań...',

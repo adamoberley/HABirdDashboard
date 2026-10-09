@@ -103,8 +103,7 @@
   'modal.recordings': 'Inspelningar',
   'modal.refCall': 'referensläte',
   'modal.playRefCall': 'spela upp referensläte',
-  'modal.wiki': 'wiki',
-  'modal.ebird': 'ebird',
+  'modal.wikipedia': 'Läs mer på Wikipedia',
   // ---- Detail modal: dynamic ----
   'modal.loadingDesc': 'Läser in beskrivning...',
   'modal.loadingRecordings': 'Läser in inspelningar...',

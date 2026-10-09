@@ -103,8 +103,7 @@
   'modal.recordings': 'Aufnahmen',
   'modal.refCall': 'Referenzruf',
   'modal.playRefCall': 'Referenzruf abspielen',
-  'modal.wiki': 'wiki',
-  'modal.ebird': 'ebird',
+  'modal.wikipedia': 'Mehr auf Wikipedia',
   // ---- Detail modal: dynamic ----
   'modal.loadingDesc': 'Beschreibung wird geladen...',
   'modal.loadingRecordings': 'Aufnahmen werden geladen...',

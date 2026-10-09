@@ -103,8 +103,7 @@
   'modal.recordings': 'Enregistrements',
   'modal.refCall': 'cri de référence',
   'modal.playRefCall': 'écouter le cri de référence',
-  'modal.wiki': 'wiki',
-  'modal.ebird': 'ebird',
+  'modal.wikipedia': 'En savoir plus sur Wikipédia',
   // ---- Detail modal: dynamic ----
   'modal.loadingDesc': 'Chargement de la description...',
   'modal.loadingRecordings': 'Chargement des enregistrements...',

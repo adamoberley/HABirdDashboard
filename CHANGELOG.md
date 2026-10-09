@@ -1,5 +1,27 @@
 # Changelog
 
+## v1.9.0 — 2026-10-08
+
+### Changed
+- **The eBird and wiki buttons are gone from a bird's details**
+  ([#92](https://github.com/adamoberley/HABirdDashboard/issues/92),
+  requested by @JosHarink). The Wikipedia article now opens from an info
+  button (ⓘ) beside the link button next to ×, and the eBird link is
+  removed. The atlas cards drop their wiki and eBird chips too; tapping a
+  card opens its details, info button included.
+
+### Fixed
+- **Ruby-crowned Kinglet shows up again**
+  ([#90](https://github.com/adamoberley/HABirdDashboard/issues/90),
+  reported by @nowagner). BirdNET-Go reports it as *Corthylio calendula*
+  (the AOS/eBird genus split), while its artwork is filed under *Regulus
+  calendula*, so it silently dropped out of the collage and atlas. The two
+  names are now aliased.
+- **Stats and Atlas work in right-to-left languages**
+  ([#89](https://github.com/adamoberley/HABirdDashboard/pull/89), by
+  @bjesus). With an RTL dashboard the view carousel slid the wrong way,
+  leaving those tabs blank.
+
 ## v1.8.0 — 2026-10-05
 
 ### Added

@@ -103,8 +103,7 @@
   'modal.recordings': 'Opnames',
   'modal.refCall': 'referentieroep',
   'modal.playRefCall': 'referentieroep afspelen',
-  'modal.wiki': 'wiki',
-  'modal.ebird': 'ebird',
+  'modal.wikipedia': 'Meer op Wikipedia',
   // ---- Detail modal: dynamic ----
   'modal.loadingDesc': 'Beschrijving laden...',
   'modal.loadingRecordings': 'Opnames laden...',
