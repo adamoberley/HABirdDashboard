@@ -25,6 +25,7 @@ const summary = [
   row('Accipiter fasciatus', 'Brown Goshawk', 20),      // art under Tachyspiza fasciata
   row('Tachyspiza fasciata', 'Brown Goshawk (new)', 10), // has its own art - unchanged
   row('Corvus corax', 'Common Raven', 5),               // no alias at all
+  row('Corthylio calendula', 'Ruby-crowned Kinglet', 3), // art under Regulus calendula (#90)
 ];
 const daily = summary.map(s => ({ ...s, hourly_counts: Array(24).fill(1), latest_heard: '13:55:00' }));
 window.fetch = (url) => {
@@ -73,15 +74,16 @@ setTimeout(() => {
     const root = card.shadowRoot;
     const tiles = [...root.querySelectorAll('.gtile img')];
     const src = (slug) => tiles.map(t => t.getAttribute('src')).find(s => s.includes('/illustrations/' + slug + '.png') || s.includes('/illustrations/' + slug + '-2.png'));
-    assert.strictEqual(tiles.length, 4, 'all four birds in the collage: ' + tiles.length);
+    assert.strictEqual(tiles.length, 5, 'all five birds in the collage: ' + tiles.length);
     assert.ok(src('corvus-monedula'), 'Coloeus monedula -> corvus-monedula art');
     assert.ok(!src('coloeus-monedula'), 'no request for the missing coloeus-monedula art');
     const goshawks = tiles.filter(t => t.getAttribute('src').includes('/illustrations/tachyspiza-fasciata'));
     assert.strictEqual(goshawks.length, 2, 'old + new goshawk names both land on tachyspiza-fasciata');
     assert.ok(src('corvus-corax'), 'unaliased species unchanged');
+    assert.ok(src('regulus-calendula'), 'Corthylio calendula -> regulus-calendula art (#90)');
     // Masks resolved too: every tile's slug is one the library has.
     root.querySelectorAll('.gtile img[data-slug]').forEach(img => {
-      assert.ok(!/coloeus|accipiter-fasciatus/.test(img.getAttribute('data-slug')), 'tile slug aliased: ' + img.getAttribute('data-slug'));
+      assert.ok(!/coloeus|accipiter-fasciatus|corthylio/.test(img.getAttribute('data-slug')), 'tile slug aliased: ' + img.getAttribute('data-slug'));
     });
     assert.deepStrictEqual(errors, [], 'no page errors');
     console.log('aliases + grid sizing OK');

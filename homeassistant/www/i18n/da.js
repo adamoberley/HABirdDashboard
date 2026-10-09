@@ -103,8 +103,7 @@
   'modal.recordings': 'Optagelser',
   'modal.refCall': 'referencekald',
   'modal.playRefCall': 'afspil referencekald',
-  'modal.wiki': 'wiki',
-  'modal.ebird': 'ebird',
+  'modal.wikipedia': 'Læs mere på Wikipedia',
   // ---- Detail modal: dynamic ----
   'modal.loadingDesc': 'Indlæser beskrivelse...',
   'modal.loadingRecordings': 'Indlæser optagelser...',

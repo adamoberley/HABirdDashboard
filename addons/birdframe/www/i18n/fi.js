@@ -103,8 +103,7 @@
   'modal.recordings': 'Tallenteet',
   'modal.refCall': 'vertailuääni',
   'modal.playRefCall': 'toista vertailuääni',
-  'modal.wiki': 'wiki',
-  'modal.ebird': 'ebird',
+  'modal.wikipedia': 'Lue lisää Wikipediasta',
   // ---- Detail modal: dynamic ----
   'modal.loadingDesc': 'Ladataan kuvausta...',
   'modal.loadingRecordings': 'Ladataan tallenteita...',

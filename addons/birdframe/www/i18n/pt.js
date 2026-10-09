@@ -104,8 +104,7 @@
   'modal.recordings': 'Gravações',
   'modal.refCall': 'chamada de referência',
   'modal.playRefCall': 'reproduzir chamada de referência',
-  'modal.wiki': 'wiki',
-  'modal.ebird': 'ebird',
+  'modal.wikipedia': 'Saiba mais na Wikipédia',
   // ---- Detail modal: dynamic ----
   'modal.loadingDesc': 'A carregar descrição...',
   'modal.loadingRecordings': 'A carregar gravações...',

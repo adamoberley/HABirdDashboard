@@ -116,8 +116,7 @@
   'modal.recordings': 'Recordings',
   'modal.refCall': 'reference call',
   'modal.playRefCall': 'play reference call',
-  'modal.wiki': 'wiki',
-  'modal.ebird': 'ebird',
+  'modal.wikipedia': 'Read more on Wikipedia',
   // ---- Detail modal: dynamic ----
   'modal.loadingDesc': 'Loading description...',
   'modal.loadingRecordings': 'Loading recordings...',
