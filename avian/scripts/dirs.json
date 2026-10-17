@@ -14334,6 +14334,19 @@
 "y": 0.86
 }
 },
+"prosthemadera-novaeseelandiae-2": {
+"ambiguous": false,
+"beak": {
+"x": 0.027,
+"y": 0.556
+},
+"confidence": "high",
+"heading": 204,
+"tail": {
+"x": 0.85,
+"y": 0.93
+}
+},
 "protonotaria-citrea-2": {
 "ambiguous": false,
 "ambiguous2": false,
