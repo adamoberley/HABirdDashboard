@@ -1730,6 +1730,11 @@ body.av-picker-top .view#v0, body.av-picker-top .view#v1 { padding-bottom: 24px;
 body.av-title-overlay.av-picker-top .static-head { top: 50px; }
 body.av-title-overlay.av-picker-top .view#v1,
 body.av-title-overlay.av-picker-top .view#v2 { padding-top: 140px; }
+/* ...and steps down below the window picker when apt.js measures the
+   centred words running into it on a narrow display (#96). */
+body.av-title-overlay.av-title-low .static-head { top: 52px; }
+body.av-title-overlay.av-title-low .view#v1,
+body.av-title-overlay.av-title-low .view#v2 { padding-top: 140px; }
 
 /* ---- Species-name strip (issue #69) ---- */
 /* A centred, wrapping line of names along the bottom of the collage

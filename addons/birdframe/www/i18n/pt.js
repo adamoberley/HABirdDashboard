@@ -147,7 +147,7 @@
   'flag.noPath': 'sem caminho',
   'flag.errCode': 'erro {code}',
   'flag.couldNotSave': 'não foi possível guardar: {why}',
-  'flag.needsIngress': 'requer a ligação ingress do HA - {detail}',
+  'flag.needsProxy': 'requer o Bird Card Proxy ou o BirdNET-Go no mesmo endereço desta página',
   'flag.refused': 'o BirdNET-Go recusou ({err})',
 
   // ---- Weather conditions (standalone / fallback path) ----

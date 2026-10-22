@@ -1,14 +1,15 @@
 // Review write-back v2: ghost-x flag arms to a labelled pill, second tap
-// POSTs false_positive with a self-minted double-submit CSRF token (the
-// header equals the cookie the card set). Cross-origin direct base must
-// refuse with the needs-ingress reason.
+// POSTs false_positive. With BirdNET-Go on the page's own origin (a
+// same-origin reverse proxy) the header echoes the csrf cookie BirdNET-Go
+// set - the card never mints one. A cross-origin direct base must refuse
+// with the needs-proxy reason.
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const fs = require('fs');
 const { JSDOM } = require('jsdom');
 const CARD = fs.readFileSync(ROOT + '/dist/habird-card.js', 'utf8');
 
-function boot({ ingress, reviewStatus }) {
+function boot({ sameOrigin, reviewStatus }) {
   const dom = new JSDOM('<!doctype html><html><body></body></html>', { url: 'http://ha.local:8123/x', runScripts: 'outside-only', pretendToBeVisual: true });
   const { window } = dom;
   const summary = [
@@ -16,10 +17,11 @@ function boot({ ingress, reviewStatus }) {
   ];
   const daily = summary.map(s => ({ ...s, hourly_counts: Array(24).fill(1), latest_heard: '13:55:00' }));
   const posts = [];
-  const INGRESS = '/api/hassio_ingress/TOK';
+  const SAME = '/birdnet';
+  if (sameOrigin) window.document.cookie = 'csrf=FROMBIRDNETGO;path=/';
   window.fetch = (url, opts) => {
     const u = String(url);
-    const p = u.replace('http://ha.local:8080', '').replace(INGRESS, '');
+    const p = u.replace('http://ha.local:8080', '').replace(SAME, '');
     const ok = (b) => Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(JSON.parse(JSON.stringify(b))) });
     if (u.startsWith('https://en.wikipedia.org/')) return ok({ extract: 'A large bird.' });
     if (opts && opts.method === 'POST' && p.includes('/review')) {
@@ -43,15 +45,9 @@ function boot({ ingress, reviewStatus }) {
   window.eval(CARD);
   const hass = {
     themes: {}, states: {},
-    callApi: ingress ? (m, p2) => {
-      if (p2 === 'hassio/addons') return Promise.resolve({ data: { addons: [{ slug: 'db21ed7f_birdnet-go', name: 'Birdnet-go' }] } });
-      if (p2 === 'hassio/addons/db21ed7f_birdnet-go/info') return Promise.resolve({ data: { ingress: true, ingress_url: INGRESS + '/' } });
-      if (p2 === 'hassio/ingress/session') return Promise.resolve({ data: { session: 'S' } });
-      return Promise.reject(404);
-    } : undefined,
   };
   const card = window.document.createElement('habird-card');
-  card.setConfig({});
+  card.setConfig(sameOrigin ? { birdnet_url: SAME } : {});
   card.hass = hass;
   window.document.body.appendChild(card);
   return { window, card, posts };
@@ -60,9 +56,9 @@ function boot({ ingress, reviewStatus }) {
 const assert = require('assert');
 let done = 0;
 
-// --- A: with ingress, the write succeeds via self-minted CSRF ---
+// --- A: same-origin BirdNET-Go, the write echoes BirdNET-Go's own CSRF cookie ---
 {
-  const { window, card, posts } = boot({ ingress: true });
+  const { window, card, posts } = boot({ sameOrigin: true });
   setTimeout(() => {
     const root = card.shadowRoot;
     root.querySelector('.bird-card').dispatchEvent(new window.MouseEvent('click', { bubbles: true, composed: true }));
@@ -79,7 +75,7 @@ let done = 0;
         setTimeout(() => {
           try {
             assert.strictEqual(posts.length, 1, 'one POST');
-            assert.ok(posts[0].url.startsWith('/api/hassio_ingress/TOK/api/v2/detections/42/review'), 'via ingress: ' + posts[0].url);
+            assert.ok(posts[0].url.startsWith('/birdnet/api/v2/detections/42/review'), 'same-origin base: ' + posts[0].url);
             assert.strictEqual(posts[0].body.verified, 'false_positive');
             // Sent alongside the legacy field: BirdNET-Go's public API docs
             // don't pin down the review body's field name, and the Apr 2026
@@ -87,12 +83,11 @@ let done = 0;
             // 'verified' -> 'correct' - unknown fields are ignored
             // server-side, so sending both reads correctly either way.
             assert.strictEqual(posts[0].body.correct, 'false_positive');
-            const tok = posts[0].headers['X-CSRF-Token'];
-            assert.ok(tok && tok.length > 10, 'token minted');
-            assert.ok(posts[0].cookie.includes('csrf=' + tok), 'header equals the cookie (double-submit)');
+            assert.strictEqual(posts[0].headers['X-CSRF-Token'], 'FROMBIRDNETGO', "header echoes BirdNET-Go's cookie");
+            assert.strictEqual(posts[0].cookie, 'csrf=FROMBIRDNETGO', 'card set no cookies of its own');
             assert.strictEqual(flag.getAttribute('data-state'), 'done');
             assert.strictEqual(flag.textContent, '✓');
-            console.log('A: ingress write-back OK (self-minted double-submit token)');
+            console.log('A: same-origin write-back OK (BirdNET-Go\'s own CSRF cookie)');
             if (++done === 3) console.log('\nREVIEW V2 TESTS PASSED');
           } catch (e) { console.error('A FAIL:', e.message); process.exit(1); }
         }, 400);
@@ -101,9 +96,9 @@ let done = 0;
   }, 1700);
 }
 
-// --- B: no ingress (cross-origin direct base) -> graceful needs-ingress fail ---
+// --- B: cross-origin direct base -> graceful needs-proxy fail ---
 {
-  const { window, card, posts } = boot({ ingress: false });
+  const { window, card, posts } = boot({ sameOrigin: false });
   setTimeout(() => {
     const root = card.shadowRoot;
     root.querySelector('.bird-card').dispatchEvent(new window.MouseEvent('click', { bubbles: true, composed: true }));
@@ -116,7 +111,7 @@ let done = 0;
           try {
             assert.strictEqual(posts.length, 0, 'no POST attempted cross-origin');
             assert.strictEqual(flag.getAttribute('data-state'), 'failed');
-            assert.ok(flag.title.includes('ingress'), 'tooltip explains: ' + flag.title);
+            assert.ok(flag.title.includes('Bird Card Proxy'), 'tooltip explains: ' + flag.title);
             setTimeout(() => {
               try {
                 assert.strictEqual(flag.getAttribute('data-state'), 'idle', 'failure auto-resets');
@@ -138,7 +133,7 @@ let done = 0;
 // -> the flag pill fails with a distinct "blocked" message, not the
 // generic error-code pill.
 {
-  const { window, card, posts } = boot({ ingress: true, reviewStatus: 403 });
+  const { window, card, posts } = boot({ sameOrigin: true, reviewStatus: 403 });
   setTimeout(() => {
     const root = card.shadowRoot;
     root.querySelector('.bird-card').dispatchEvent(new window.MouseEvent('click', { bubbles: true, composed: true }));

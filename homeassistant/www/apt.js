@@ -223,126 +223,22 @@
     return fetch(url, merged);
   }
 
-  // ---- HTTPS / Nabu Casa: route the API through HA ingress ----
-  // Remote access tunnels only HA itself, and the browser blocks an
-  // https page from calling a plain-http LAN URL (mixed content) - so
-  // there is NO direct BirdNET-Go URL that works remotely. The add-on
-  // ships HA ingress though, which is same-origin with HA and rides the
-  // tunnel. When the page is https and a hass connection is available,
-  // discover the add-on's ingress endpoint, open an ingress session
-  // (cookie, renewed every 5 minutes), and rebase the API onto it -
-  // full functionality, audio included, from anywhere. Discovery needs
-  // an admin user (the supervisor API); anything failing here quietly
-  // leaves the LAN default in place and the MQTT fallback carries data.
-  var _ingressP = null;
-  var _ingressWhy = '';
-  function ingressApiBase() {
-    if (_ingressP) return _ingressP;
-    if (!AV_CFG.__getHass) {
-      _ingressWhy = 'no hass connection';
-      return (_ingressP = Promise.resolve(null));
-    }
-    _ingressP = (function () {
-      function unwrap(res) { return (res && res.data) || res || {}; }
-      // Supervisor access, two channels: the REST proxy (/api/hassio/*)
-      // and, where that's unavailable, the WebSocket supervisor/api
-      // command modern frontends use.
-      function sup(method, path, data) {
-        var hass = AV_CFG.__getHass();
-        if (!hass) return Promise.reject('no hass');
-        var rest = hass.callApi
-          ? Promise.resolve(hass.callApi(method, 'hassio/' + path, data)).then(unwrap)
-          : Promise.reject('no callApi');
-        return rest.catch(function () {
-          if (!hass.callWS) return Promise.reject('no supervisor access');
-          return hass.callWS({
-            type: 'supervisor/api',
-            endpoint: '/' + path,
-            method: method.toLowerCase(),
-            data: data,
-          }).then(unwrap);
-        });
-      }
-      return sup('GET', 'addons').then(function (res) {
-        var addons = (res && res.addons) || [];
-        var hit = addons.filter(function (a) {
-          return /birdnet/i.test(a.slug || '') || /birdnet/i.test(a.name || '');
-        })[0];
-        if (!hit) throw new Error('no birdnet add-on in the list');
-        return sup('GET', 'addons/' + hit.slug + '/info');
-      }, function () {
-        // Listing failed (older proxies restrict it) - probe the
-        // alexbelgium add-on's well-known slug directly; the repo hash
-        // prefix is stable across installs.
-        return sup('GET', 'addons/db21ed7f_birdnet-go/info');
-      }).then(function (info) {
-        if (!info.ingress || !(info.ingress_url || info.ingress_entry)) throw new Error('add-on has no ingress');
-        // ingress_url may include the add-on's landing subpath (this one
-        // declares ingress_entry: ui/dashboard) - POSTing under that hits
-        // the UI's GET-only catch-all and 405s. The API lives at the bare
-        // token mount, so strip everything after the token.
-        var raw = String(info.ingress_url || info.ingress_entry);
-        var m = raw.match(/^(\/api\/hassio_ingress\/[^\/]+)/);
-        var base = m ? m[1] : raw.replace(/\/+$/, '');
-        var session = null;
-        function newSession() {
-          return sup('POST', 'ingress/session').then(function (r) {
-            session = (r && r.session) || null;
-            if (session) {
-              // NOTE: ';Secure' only over https - browsers silently DROP
-              // JS-set Secure cookies on http pages, which would leave
-              // every ingress request without its session (the
-              // exclamation-mark flag failure on LAN installs).
-              document.cookie = 'ingress_session=' + session +
-                ';path=/api/hassio_ingress/;SameSite=Strict' +
-                (location.protocol === 'https:' ? ';Secure' : '');
-            }
-            return session;
-          });
-        }
-        return newSession().then(function (s) {
-          if (!s) throw new Error('no ingress session');
-          setInterval(function () {
-            sup('POST', 'ingress/validate_session', { session: session })
-              .catch(function () { newSession().catch(function () {}); });
-          }, 5 * 60 * 1000);
-          _ingressWhy = '';
-          return base;
-        });
-      }).catch(function (e) {
-        // Remember WHY for the flag's error surface, and don't poison
-        // the cache - the next caller tries again.
-        _ingressWhy = (e && e.message) || String(e);
-        try { console.warn('[bird-card] ingress unavailable:', _ingressWhy); } catch (e2) {}
-        _ingressP = null;
-        return null;
-      });
-    })();
-    return _ingressP;
-  }
-  // On an HTTPS page the LAN default is dead on arrival (mixed content) -
-  // rebase ALL reads onto ingress. On plain http the direct LAN base is
-  // faster and stays; ingress is still resolved on demand for writes.
-  var BG_READY = Promise.resolve();
-  if (!PROXY_MODE && !AV_CFG.birdnetGoUrl && location.protocol === 'https:' && AV_CFG.__getHass) {
-    BG_READY = ingressApiBase().then(function (b) { if (b) BG_BASE = b; });
-  }
-
   function getCookie(name) {
     var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
     return m ? decodeURIComponent(m[1]) : null;
   }
   // Write-back: review a detection ('correct' | 'false_positive').
   // BirdNET-Go's CSRF guard is the stateless double-submit pattern: the
-  // X-CSRF-Token header must equal the `csrf` cookie. Cookies only flow on
-  // SAME-ORIGIN requests, so writes ride HA ingress (the cookie travels to
-  // BirdNET-Go through the proxy). The token itself can be self-minted -
-  // that's the nature of double-submit; the protection is that cross-site
-  // JS can't set this origin's cookies, and we're legitimately same-origin.
+  // X-CSRF-Token header must equal the `csrf` cookie BirdNET-Go set. The
+  // card never mints that cookie itself, so a write needs a path where
+  // BirdNET-Go's own cookie reaches us: Bird Card Proxy (it does the CSRF
+  // dance server-side), or a BirdNET-Go served on this page's own origin
+  // (a same-origin reverse proxy). A cross-origin direct URL can't carry
+  // cookies at all, so it's refused up front with a pointer to the proxy.
   function bgReview(id, verified) {
     if (PROXY_MODE) {
       // The proxy handles BirdNET-Go's CSRF check server-side (and only
-      // lets HA admins write, like ingress does).
+      // lets HA admins write).
       return bgFetch(PROXY_BASE + '/api/v2/detections/' + encodeURIComponent(id) + '/review', {
         method: 'POST',
         cache: 'no-store',
@@ -350,49 +246,25 @@
         body: JSON.stringify({ verified: verified, correct: verified }),
       }).then(function (r) { return r.ok ? r : Promise.reject(r.status); });
     }
-    return ingressApiBase().then(function (ib) {
-      var sameOrigin = !!ib ||
-        BG_BASE.indexOf(location.protocol + '//' + location.host) === 0 ||
-        BG_BASE.charAt(0) === '/';
-      if (!sameOrigin) {
-        // Cross-origin (direct LAN URL from the HA page): the browser
-        // won't carry cookies, so CSRF can never pass. Needs ingress.
-        return Promise.reject('needs-ingress: ' + (_ingressWhy || 'unavailable'));
-      }
-      var base = ib || BG_BASE;
-      var tok = getCookie('csrf');
-      if (!tok) {
-        tok = String(Date.now()) + Math.random().toString(36).slice(2) +
-          Math.random().toString(36).slice(2);
-        document.cookie = 'csrf=' + tok + ';path=/;SameSite=Lax' +
-          (location.protocol === 'https:' ? ';Secure' : '');
-      }
-      function post() {
-        // Field name: BirdNET-Go's public API reference documents this
-        // route (POST /detections/:id/review) but not its request body -
-        // and the Apr 2026 release renamed the SEARCH response's verdict
-        // field 'verified' -> 'correct'. Send both; BirdNET-Go ignores
-        // unknown JSON fields, so this reads correctly on either side of
-        // the rename without needing to sniff the server version first.
-        return bgFetch(base + '/api/v2/detections/' + encodeURIComponent(id) + '/review', {
-          method: 'POST',
-          credentials: 'same-origin',
-          cache: 'no-store',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-Token': tok,
-          },
-          body: JSON.stringify({ verified: verified, correct: verified }),
-        }).then(function (r) { return r.ok ? r : Promise.reject(r.status); });
-      }
-      return post().catch(function (status) {
-        // 401 usually means the ingress session lapsed - mint a fresh
-        // one and retry once.
-        if (status !== 401 || !ib) return Promise.reject(status);
-        _ingressP = null;
-        return ingressApiBase().then(function () { return post(); });
-      });
-    });
+    var sameOrigin = BG_BASE.indexOf(location.protocol + '//' + location.host) === 0 ||
+      BG_BASE.charAt(0) === '/';
+    if (!sameOrigin) return Promise.reject('needs-proxy');
+    var headers = { 'Content-Type': 'application/json' };
+    var tok = getCookie('csrf');
+    if (tok) headers['X-CSRF-Token'] = tok;
+    // Field name: BirdNET-Go's public API reference documents this
+    // route (POST /detections/:id/review) but not its request body -
+    // and the Apr 2026 release renamed the SEARCH response's verdict
+    // field 'verified' -> 'correct'. Send both; BirdNET-Go ignores
+    // unknown JSON fields, so this reads correctly on either side of
+    // the rename without needing to sniff the server version first.
+    return bgFetch(BG_BASE + '/api/v2/detections/' + encodeURIComponent(id) + '/review', {
+      method: 'POST',
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: headers,
+      body: JSON.stringify({ verified: verified, correct: verified }),
+    }).then(function (r) { return r.ok ? r : Promise.reject(r.status); });
   }
 
   // ---- Audio boost ----
@@ -400,7 +272,7 @@
   // boost routes playback through WebAudio: gain (configurable dB) into a
   // compressor so the louder signal limits instead of clipping. Needs
   // CORS-clean audio (crossOrigin=anonymous; BirdNET-Go's media endpoints
-  // send permissive CORS, and ingress is same-origin anyway).
+  // send permissive CORS, and the proxy is same-origin anyway).
   var _boostCtx = null;
   // Private Mode: a plain `<audio src>` can never carry the Authorization
   // header BirdNET-Go now requires (see bgFetch) - clip playback would 401
@@ -458,9 +330,7 @@
   }
 
   function bgJson(path) {
-    return BG_READY.then(function () {
-      return bgFetch(bgUrl(path), { cache: 'no-store' });
-    }).then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); });
+    return bgFetch(bgUrl(path), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); });
   }
   // Short-TTL memo so one refreshAll() fan-out (stats + lifelist + recent +
   // firstseen all want the species summary) costs one HTTP request, while a
@@ -1462,6 +1332,25 @@
   function viewTitle(i) {
     return CUSTOM_TITLE != null ? CUSTOM_TITLE : tt(VIEW_TITLE_KEYS[i]);
   }
+  // The floated title shares the top row with the window picker. On a
+  // narrow display (an iPad in portrait) the centred words run under the
+  // pill, so measure the lettering itself (the h1 box spans the full
+  // width) and step the title down below the picker when they'd touch
+  // (#96). renderCollage calls this before stamping the h1 as an obstacle.
+  function fitTitleOverlay() {
+    var body = document.body;
+    if (!body.classList.contains('av-title-overlay') || !staticTitle || !winPick) return;
+    body.classList.remove('av-title-low');
+    if (body.classList.contains('av-picker-top') || !winPick.offsetWidth) return;
+    var range = staticTitle.ownerDocument.createRange();
+    range.selectNodeContents(staticTitle);
+    var a = range.getBoundingClientRect(), b = winPick.getBoundingClientRect();
+    var M = 8;
+    if (a.width && a.left < b.right + M && b.left - M < a.right &&
+        a.top < b.bottom + M && b.top - M < a.bottom) {
+      body.classList.add('av-title-low');
+    }
+  }
   function setTitleForView(i) {
     var next = viewTitle(i);
     if (!staticTitle || staticTitle.textContent === next) return;
@@ -2257,6 +2146,7 @@
 
   var _collageSig = null;
   function renderCollage(items, animate) {
+    fitTitleOverlay();
     if (!items.length) {
       // Blank rather than an empty-state message when there's simply
       // nothing heard yet - but a broken connection says so.
@@ -3821,6 +3711,11 @@
   }
 
   // ---- Menu dropdown ----
+  // The drawer is an AvianVisitors (BirdNET-Pi) admin hook backed by
+  // avian/api/*.php. Bird Card ships no PHP backend, so unless a config
+  // opts back in (avianMenu: true) the button stays hidden and nothing
+  // probes menu.php - on a plain static host it would only 404 (#96).
+  var AVIAN_MENU = AV_CFG.avianMenu === true;
   var dd = document.getElementById('menu-dd');
   var menuBtn = document.getElementById('menuBtn');
   var locked  = document.getElementById('dd-locked');
@@ -3829,6 +3724,7 @@
   function openDd()  { dd.classList.add('open'); dd.setAttribute('aria-hidden','false'); setTimeout(function () { document.getElementById('lockPass').focus(); }, 100); }
   function closeDd() { dd.classList.remove('open'); dd.setAttribute('aria-hidden','true'); }
   function toggleDd(){ dd.classList.contains('open') ? closeDd() : openDd(); }
+  if (!AVIAN_MENU) menuBtn.style.display = 'none';
   menuBtn.addEventListener('click', function (e) { e.stopPropagation(); toggleDd(); });
   document.addEventListener('click', function (e) { if (!dd.contains(e.target) && e.target !== menuBtn) closeDd(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDd(); });
@@ -3846,7 +3742,7 @@
       }
     }).catch(function () {});
   }
-  tryAutoUnlock();
+  if (AVIAN_MENU) tryAutoUnlock();
 
   document.getElementById('unlockForm').addEventListener('submit', function (e) {
     e.preventDefault();
@@ -5609,16 +5505,16 @@
       }).catch(function (err) {
         flagBtn.disabled = false;
         // Tooltips don't exist on touch - put a short reason IN the pill.
-        var isPath = typeof err === 'string' && err.indexOf('needs-ingress') === 0;
+        var isPath = err === 'needs-proxy';
         // 403 is BirdNET-Go's Aug 2026 CSRF enforcement rejecting the
-        // write (a stale self-minted token, or a proxy that stripped the
-        // cookie) - distinct enough from a generic error code to say so.
+        // write (no csrf cookie yet, or a proxy that stripped it) -
+        // distinct enough from a generic error code to say so.
         var isForbidden = err === 403;
         var label = isPath ? tt('flag.noPath')
           : isForbidden ? tt('flag.forbidden')
           : (typeof err === 'number' ? tt('flag.errCode', { code: err }) : tt('flag.failed'));
         var why = isPath
-          ? tt('flag.needsIngress', { detail: err.slice('needs-ingress: '.length) })
+          ? tt('flag.needsProxy')
           : isForbidden ? tt('flag.forbiddenDetail')
           : tt('flag.refused', { err: err });
         try { console.warn('[bird-card] review write failed:', err); } catch (e) {}
