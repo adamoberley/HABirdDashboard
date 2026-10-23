@@ -146,7 +146,7 @@
   'flag.noPath': 'ei polkua',
   'flag.errCode': 'virhe {code}',
   'flag.couldNotSave': 'tallennus epäonnistui: {why}',
-  'flag.needsIngress': 'vaatii HA:n ingress-yhteyden - {detail}',
+  'flag.needsProxy': 'vaatii Bird Card Proxyn tai BirdNET-Gon samassa osoitteessa kuin tämä sivu',
   'flag.refused': 'BirdNET-Go kieltäytyi ({err})',
 
   // ---- Weather conditions (standalone / fallback path) ----

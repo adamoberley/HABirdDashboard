@@ -146,7 +146,7 @@
   'flag.noPath': 'geen pad',
   'flag.errCode': 'fout {code}',
   'flag.couldNotSave': 'kon niet opslaan: {why}',
-  'flag.needsIngress': 'vereist de HA ingress-verbinding - {detail}',
+  'flag.needsProxy': 'vereist Bird Card Proxy of BirdNET-Go op hetzelfde adres als deze pagina',
   'flag.refused': 'BirdNET-Go weigerde ({err})',
 
   // ---- Weather conditions (standalone / fallback path) ----

@@ -451,12 +451,12 @@ The card can feed from two places:
 
 The REST API is reached **from your browser**, so away from home it only
 works if your browser can reach BirdNET-Go. Otherwise the card falls back
-to MQTT history, which has no recordings. On Home Assistant OS with the
-BirdNET-Go add-on, the card routes through add-on ingress automatically
-(admin users only).
+to MQTT history, which has no recordings. That includes any `https://`
+dashboard (Nabu Casa included): browsers block an `https` page from calling
+BirdNET-Go's plain-`http` address.
 
-For every other setup, including HA in Docker / Core, VPNs, and non-admin
-users, install the companion integration
+For remote access, `https://` dashboards, and the "not it?" review button,
+install the companion integration
 **[Bird Card Proxy](https://github.com/adamoberley/HABirdDashboard-proxy)**
 (HACS custom repository, type *Integration*). It serves BirdNET-Go's API
 on Home Assistant's own address, so recordings, the live feed and the
@@ -682,6 +682,15 @@ ring layout, `?names` (or `?names=scientific` / `?names=both`) plus
 (`AV_CONFIG.names`, `AV_CONFIG.namesSize`); the URL param wins, so one shared
 `config.js` can drive several displays that differ only in how they're dressed.
 
+The page is plain static files, so it doesn't need Home Assistant at all:
+any web server can host `homeassistant/www` (plus the artwork, as
+`install.sh` copies it). `birdnetGoUrl` must be an address the *browser*
+can reach. Putting the page and BirdNET-Go's `/api/v2/` behind one reverse
+proxy (same origin) is the easy route: no CORS settings, the "not it?"
+review works, and with Private Mode on the proxy can add the
+`Authorization` header server-side instead of `apiToken` sitting in a
+public `config.js`.
+
 ---
 
 ## Troubleshooting
@@ -716,23 +725,18 @@ ring layout, `?names` (or `?names=scientific` / `?names=both`) plus
   derives its default URL from the host you're browsing HA on, so if that
   tab fails, set `birdnet_url` to a URL that works (e.g.
   `http://192.168.1.50:8080`); (3) if you browse HA over **https://**, the
-  browser blocks the plain-http API (mixed content) - leave `birdnet_url`
-  empty and the card routes through HA ingress instead (next item).
-- **Nabu Casa / HTTPS remote access.** There is no direct BirdNET-Go URL
+  browser blocks the plain-http API (mixed content) - see the next item.
+- **Nabu Casa / HTTPS / remote access.** There is no direct BirdNET-Go URL
   that works remotely - the tunnel only carries HA itself, and browsers
-  block an `https://` page from calling a plain-`http` LAN address. The
-  card handles this automatically: on an HTTPS page it discovers the
-  app's **HA ingress** endpoint and routes the full API (audio
-  included) through it. Ingress discovery needs an admin HA user and the
-  default `birdnet_url` (leave it empty); if it can't be set up, data
-  still flows via the MQTT sensors - only audio playback is lost.
-- **HA in Docker / Core (no Supervisor), remote or on a VPN.** Ingress
-  discovery needs the Supervisor, so install
+  block an `https://` page from calling a plain-`http` LAN address. Install
   [Bird Card Proxy](https://github.com/adamoberley/HABirdDashboard-proxy)
-  (see [Remote access](#remote-access-with-bird-card-proxy-optional)).
-  Alternatively, put BirdNET-Go behind an HTTPS reverse proxy (Traefik,
-  Caddy, nginx...) and set `birdnet_url` to that `https://` hostname: no
-  mixed content, and it works anywhere that hostname resolves.
+  (see [Remote access](#remote-access-with-bird-card-proxy-optional)): it
+  serves BirdNET-Go's API on HA's own address, audio included, for every
+  user. Alternatively, put BirdNET-Go behind an HTTPS reverse proxy
+  (Traefik, Caddy, nginx...) and set `birdnet_url` to that `https://`
+  hostname: no mixed content, and it works anywhere that hostname resolves.
+  Without either, data still flows via the MQTT sensors - only audio
+  playback is lost.
 - **"Can't reach BirdNET-Go from this browser."** The card gave up on
   the API after 15 seconds and had no MQTT history to fall back on. Work
   through the two items above; with MQTT enabled the card falls back to
@@ -741,9 +745,11 @@ ring layout, `?names` (or `?names=scientific` / `?names=both`) plus
   `*_scientific_name` sensors and found none - see
   [Enabling MQTT](#enabling-mqtt-recommended).
 - **The "not it?" flag fails.** The pill shows a short reason: `no path`
-  means the card couldn't reach HA ingress (writes need it - check
-  you're an admin user); `err 401/403/405` means BirdNET-Go refused -
-  the browser console (`[bird-card] ...`) carries the detail.
+  means the card has no way to write to BirdNET-Go - install
+  [Bird Card Proxy](https://github.com/adamoberley/HABirdDashboard-proxy)
+  (writes need an admin HA user), or serve BirdNET-Go on the page's own
+  address through a reverse proxy; `err 401/403/405` means BirdNET-Go
+  refused - the browser console (`[bird-card] ...`) carries the detail.
 - **Counts look shifted by a day.** Make sure the BirdNET-Go app's `TZ`
   option matches your actual timezone - the card aligns its rolling windows
   with BirdNET-Go's local dates.

@@ -147,7 +147,7 @@
   'flag.noPath': 'ingen sti',
   'flag.errCode': 'feil {code}',
   'flag.couldNotSave': 'kunne ikke lagre: {why}',
-  'flag.needsIngress': 'krever HA ingress-tilkoblingen - {detail}',
+  'flag.needsProxy': 'krever Bird Card Proxy eller BirdNET-Go på samme adresse som denne siden',
   'flag.refused': 'BirdNET-Go avviste ({err})',
 
   // ---- Weather conditions (standalone / fallback path) ----

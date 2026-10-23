@@ -161,7 +161,7 @@
   'flag.noPath': 'no path',
   'flag.errCode': 'err {code}',
   'flag.couldNotSave': 'could not save: {why}',
-  'flag.needsIngress': 'needs the HA ingress connection - {detail}',
+  'flag.needsProxy': 'needs Bird Card Proxy, or BirdNET-Go on this page\'s own address',
   'flag.refused': 'BirdNET-Go refused ({err})',
   'flag.forbidden': 'blocked',
   'flag.forbiddenDetail': 'BirdNET-Go rejected the request (CSRF) - reload the card and try again',

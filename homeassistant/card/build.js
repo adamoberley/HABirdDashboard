@@ -234,7 +234,7 @@ const wrapper = `
 // you copied the artwork locally (homeassistant/install.sh layout).
 var HABIRD_CDN_ASSETS = 'https://cdn.jsdelivr.net/gh/adamoberley/HABirdDashboard@HABirdDashboard/avian/assets/';
 
-var HABIRD_VERSION = '1.9.0';
+var HABIRD_VERSION = '1.10.0';
 
 var HABIRD_EDITOR_SCHEMA = [
   { name: 'dashboard', type: 'expandable', flatten: true, title: 'Dashboard', expanded: true, schema: [
@@ -403,7 +403,7 @@ var HABIRD_HELPERS = {
   collage_flow_strength: "How strictly birds align to the circle. 1 = a full head-to-tail wheel; lower keeps more of the natural pose.",
   collage_spacing: 'How much space sits between birds (any shape). Birds never overlap; lower packs them closer and a touch bigger, higher gives more breathing room.',
   image_base: 'Default (blank): artwork from the CDN. Use /local/habird-art/ for an offline copy.',
-  birdnet_url: 'Default (blank): this host on port 8080, or HA ingress when remote.',
+  birdnet_url: 'Default (blank): this host on port 8080. For https or remote access, install Bird Card Proxy.',
   api_token: "Default (blank): none. Required if BirdNET-Go's Security > Private Mode is on - every API call 401s without it. Create a token in BirdNET-Go's own settings; sent as an Authorization: Bearer header, never to Wikipedia/Xeno-Canto/Home Assistant.",
   data_source: 'Automatic uses the API and falls back to the MQTT sensors.',
   history_days: 'How far MQTT history reaches; bounded by recorder retention.',

@@ -146,7 +146,7 @@
   'flag.noPath': 'ingen sökväg',
   'flag.errCode': 'fel {code}',
   'flag.couldNotSave': 'det gick inte att spara: {why}',
-  'flag.needsIngress': 'kräver HA-ingress-anslutningen - {detail}',
+  'flag.needsProxy': 'kräver Bird Card Proxy eller BirdNET-Go på samma adress som den här sidan',
   'flag.refused': 'BirdNET-Go nekade ({err})',
 
   // ---- Weather conditions (standalone / fallback path) ----

@@ -1,5 +1,46 @@
 # Changelog
 
+## v1.10.0 — 2026-10-22
+
+### Removed
+- **The card no longer goes through the BirdNET-Go add-on's ingress.** It
+  used to open Supervisor ingress sessions of its own on `https://`
+  dashboards to reach BirdNET-Go's API. Ingress sessions belong to Home
+  Assistant's own add-on panels, so this was flagged in the HACS review
+  ([hacs/default#11399](https://github.com/hacs/default/pull/11399)). The
+  card now makes no Supervisor API calls and sets no cookies of its own.
+  For `https://`, Nabu Casa or other remote access, install
+  [Bird Card Proxy](https://github.com/adamoberley/HABirdDashboard-proxy),
+  which works for every user, not only admins, and on Docker / Core too.
+  An `https://` reverse proxy in front of BirdNET-Go, set as
+  `birdnet_url`, also works. Without either, birds still show from MQTT
+  history, but recordings can't play.
+- **The "not it?" review button needs Bird Card Proxy** (or BirdNET-Go
+  served from the page's own address). The card no longer creates
+  BirdNET-Go's CSRF cookie itself; it only sends back the one BirdNET-Go
+  set. Without a write path the pill says `no path` and the tooltip says
+  what to install.
+
+### Added
+- **Tui (*Prosthemadera novaeseelandiae*) artwork**
+  ([#95](https://github.com/adamoberley/HABirdDashboard/pull/95), by
+  @jensbri). Perched and flight poses with masks and a flight heading.
+  Cache-bust r19 -> r20.
+
+### Fixed
+- **A custom title no longer runs under the time-window picker**
+  ([#96](https://github.com/adamoberley/HABirdDashboard/issues/96),
+  reported by @razorfrog). On a narrow display such as an iPad in portrait,
+  the centred title now steps down below the picker. The card measures the
+  title instead of guessing a breakpoint.
+- **The standalone page no longer requests `avian/api/*.php`**
+  ([#96](https://github.com/adamoberley/HABirdDashboard/issues/96)). The
+  leftover Avian Visitors admin menu is hidden and doesn't probe
+  `menu.php` unless a config sets `avianMenu: true`.
+- **The README explains hosting the standalone page anywhere**
+  ([#96](https://github.com/adamoberley/HABirdDashboard/issues/96)),
+  including a same-origin reverse proxy for CORS and Private Mode.
+
 ## v1.9.0 — 2026-10-08
 
 ### Changed
