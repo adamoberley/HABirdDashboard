@@ -2960,20 +2960,29 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
     var p = _xcFetchWithRetry(url, 0)
       .then(function (j) {
         var recs = (j && j.recordings) || [];
-        // Rank: real audio file first, then call/song over other types,
-        // then short clips (<=30s), then best quality (q 'A' beats 'E').
+        // Rank: real audio file first, then a typical call/song (nest and
+        // juvenile sounds last), then a good quality grade (A/B), then a
+        // useful length, then the exact grade. A 2-second fragment of
+        // distant calls is hard to recognise, so very short clips rank
+        // below 8-40 s ones even when they are graded A.
         var scored = recs.filter(function (r) { return r && r.file; }).map(function (r) {
           var t = (r.type || '').toLowerCase();
           var len = _xcLenSeconds(r.length);
+          var qual = (r.q || 'E').charAt(0).toUpperCase();
+          var pref = /\b(begging|nestling|juvenile|subsong)\b/.test(t) ? 2
+            : /\b(call|song)\b/.test(t) ? 0 : 1;
+          var lenBand = (len >= 8 && len <= 40) ? 0
+            : ((len >= 4 && len < 8) || (len > 40 && len <= 90)) ? 1 : 2;
           return {
             r: r,
-            pref: /\b(call|song)\b/.test(t) ? 0 : 1,
-            shortish: (len > 0 && len <= 30) ? 0 : 1,
-            qual: (r.q || 'E').charAt(0).toUpperCase()
+            pref: pref,
+            good: (qual === 'A' || qual === 'B') ? 0 : 1,
+            lenBand: lenBand,
+            qual: qual
           };
         });
         scored.sort(function (a, b) {
-          return (a.pref - b.pref) || (a.shortish - b.shortish)
+          return (a.pref - b.pref) || (a.good - b.good) || (a.lenBand - b.lenBand)
             || (a.qual < b.qual ? -1 : a.qual > b.qual ? 1 : 0);
         });
         // Return a ranked CANDIDATE LIST so playback can fall through to
@@ -6518,10 +6527,10 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
   // presses (and later sessions) skip straight to it instead of falling
   // through the dead candidates again. Stored in localStorage by slug.
   function _refSaveWorking(sci, info) {
-    if (info && info.url) writeLS('bird:refcall:' + slugify(sci), JSON.stringify(info));
+    if (info && info.url) writeLS('bird:refcall2:' + slugify(sci), JSON.stringify(info));
   }
   function _refCallOrder(sci, cands) {
-    var raw = readLS('bird:refcall:' + slugify(sci), '');
+    var raw = readLS('bird:refcall2:' + slugify(sci), '');
     if (!raw) return cands;
     var saved;
     try { saved = JSON.parse(raw); } catch (e) { return cands; }
