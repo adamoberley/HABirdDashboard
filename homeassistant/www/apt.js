@@ -506,6 +506,11 @@
             // Count a bucket if any part of it lies inside [windowStart, now].
             var bStart = dayBase + h * 3600000;
             if (bStart + 3600000 <= windowStart || bStart > now.getTime()) continue;
+            // In the 24h window the heatmap shows each hour once, oldest
+            // left and the current hour right. Yesterday's bucket for the
+            // current hour only partly overlaps the window and would land
+            // in the same column as today's, so leave it out.
+            if (winHours === 24 && bStart < windowStart) continue;
             var rec = bySci[r.scientific_name];
             if (!rec) {
               rec = bySci[r.scientific_name] = {
@@ -1137,6 +1142,12 @@
       var by = {};
       ev.forEach(function (e) {
         if (e.t < since) return;
+        // Same rule as bgActivity: in the 24h window skip the partial
+        // hour from yesterday that shares a column with the current hour.
+        if (winHours === 24) {
+          var hs = new Date(e.t); hs.setMinutes(0, 0, 0);
+          if (hs.getTime() < since) return;
+        }
         var r = by[e.sci];
         if (!r) r = by[e.sci] = { sci: e.sci, com: e.com, n: 0, byHour: new Array(24).fill(0) };
         r.n++;
@@ -3075,16 +3086,27 @@
       }
     }
 
+    // Column order. Windows up to a day roll with the clock: the oldest
+    // hour on the left, the current hour on the far right, so the hours
+    // after "now" read as yesterday instead of later today. A line marks
+    // midnight. Longer windows aggregate hour of day, so they keep 00-23.
+    var order = [];
+    var rolling = winHours <= 24;
+    var nowHr = new Date().getHours();
+    for (var oi = 0; oi < 24; oi++) order.push(rolling ? (nowHr + 1 + oi) % 24 : oi);
+    function midCls(idx) { return (rolling && idx > 0 && order[idx] === 0) ? ' mid' : ''; }
+
     var head = '<div class="stats-hm-head"><span class="stats-hm-name"></span>';
-    for (var hh = 0; hh < 24; hh++) head += '<span class="stats-hm-hr">' + pad(hh) + '</span>';
+    for (var hi = 0; hi < 24; hi++) head += '<span class="stats-hm-hr' + midCls(hi) + '">' + pad(order[hi]) + '</span>';
     head += '<span class="stats-hm-tot">' + esc(tt('stats.heatmapTotal')) + '</span></div>';
 
     var rows = species.map(function (s) {
       var cells = '';
-      for (var h = 0; h < 24; h++) {
+      for (var ci = 0; ci < 24; ci++) {
+        var h = order[ci];
         var n = +((s.byHour || [])[h]) || 0;
         cells += '<span class="stats-hm-cell' + (n ? ' l' + shade(n) : '') +
-          (inWin[h] ? '' : ' off') + '">' + (n ? fmtN(n) : '') + '</span>';
+          (inWin[h] ? '' : ' off') + midCls(ci) + '">' + (n ? fmtN(n) : '') + '</span>';
       }
       return '<div class="stats-hm-row" data-sci="' + esc(s.sci) + '">'
         + '<span class="stats-hm-name"><span class="com">' + esc(s.com || s.sci) + '</span></span>'
