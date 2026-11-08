@@ -711,6 +711,13 @@
   /* Hours outside the current sub-day window get no tray tint, so the
      window's extent reads as the band of filled trays. */
   .stats-hm-cell.off { background: transparent; box-shadow: inset 0 0 0 1px var(--paper-2); }
+  /* Midnight in a rolling (up to 24h) window: a thin line in the gap
+     before the 00 column separates yesterday from today. */
+  .stats-hm-hr.mid, .stats-hm-cell.mid { position: relative; overflow: visible; }
+  .stats-hm-hr.mid::before, .stats-hm-cell.mid::before {
+    content: ''; position: absolute; left: -2.5px; top: -1px; bottom: -1px;
+    width: 1px; background: var(--ink-soft); opacity: 0.6;
+  }
   /* Five count steps (log scale, set in renderActivity), paper -> ink. */
   .stats-hm-cell.l1 { background: color-mix(in srgb, var(--ink) 12%, var(--paper)); }
   .stats-hm-cell.l2 { background: color-mix(in srgb, var(--ink) 26%, var(--paper)); }
