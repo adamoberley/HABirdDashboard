@@ -296,12 +296,23 @@
       // "done with this clip" moment short of the element being GC'd -
       // one clip's worth of blob per play is an acceptable trade for
       // Private Mode installs actually being able to play clips at all.
-      var ready = bgAudioFetch(url).then(function (r) {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.blob();
-      }).then(function (blob) {
-        audio.src = URL.createObjectURL(blob);
-      });
+      function viaBlob() {
+        return bgAudioFetch(url).then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.blob();
+        }).then(function (blob) {
+          audio.src = URL.createObjectURL(blob);
+        });
+      }
+      // Through the proxy, prefer an HA signed URL (as the live stream
+      // does): the element then streams the clip like any plain URL.
+      // Firefox aborts playback of the fetched-blob variant; the blob
+      // path stays as the fallback and for api_token installs.
+      var ph = PROXY_MODE && url.indexOf(PROXY_BASE + '/') === 0 && proxyHass();
+      var ready = (ph && ph.callWS)
+        ? ph.callWS({ type: 'auth/sign_path', path: url, expires: 300 })
+            .then(function (r) { audio.src = r.path; }, viaBlob)
+        : viaBlob();
       ready.catch(function () {
         // Surface the same failure state a bare <audio src> 401/404 would -
         // existing 'error' listeners (e.g. the play button's "missing"
