@@ -6499,6 +6499,7 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
   }
   // Hard-stop: pause + tear down the audio + clear cursor. Used when
   // switching rows or closing the modal.
+  var _lastPlayEv = null, _lastPlayBtn = null, _lastPlayTs = -1e9;
   function stopModalAudio() {
     if (modalAudio) { try { console.debug('[bird-card audio] stopModalAudio'); console.trace(); } catch (e) {} }
     audioRelease(stopModalAudio);
@@ -7794,6 +7795,17 @@ function runHABirdApp(__root, __shell, __cardConfig, __imgBase) {
 
     var playBtn = ev.target.closest('.play');
     if (playBtn) {
+      _audDbg('play click', ev.type, 'trusted=' + ev.isTrusted, 'ts=' + Math.round(ev.timeStamp), 'detail=' + ev.detail);
+      // One press must act once. In Firefox a single press reached this
+      // handler three times (start, resume, pause), and the pause
+      // aborted the clip before it played. Ignore repeats of the same
+      // event and presses on the same button within 400 ms.
+      if (ev === _lastPlayEv ||
+          (playBtn === _lastPlayBtn && ev.timeStamp - _lastPlayTs < 400 && ev.timeStamp >= _lastPlayTs)) {
+        _audDbg('play click ignored (repeat)');
+        return;
+      }
+      _lastPlayEv = ev; _lastPlayBtn = playBtn; _lastPlayTs = ev.timeStamp;
       // Play / pause toggle. Three cases:
       //   (a) clicking the playing row's button -> pause (KEEP audio
       //       alive so the user can scrub then resume).
