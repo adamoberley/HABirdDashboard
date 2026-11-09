@@ -281,18 +281,8 @@
   // detour through a fetched blob when a token is actually configured -
   // the common (no token) case keeps the cheap direct <audio src>, and
   // reuses bgAudioFetch's 503+Retry-After retry for free.
-  // Temporary playback trace (fork only) to find why Firefox aborts
-  // recordings in the details window. Logs under the console's Debug level.
-  function _audDbg() {
-    try { console.debug.apply(console, ['[bird-card audio]'].concat([].slice.call(arguments))); } catch (e) {}
-  }
   function makeAudio(url) {
     var audio = new Audio();
-    _audDbg('makeAudio', url, 'proxy=' + PROXY_MODE, 'boost=' + (+AV_CFG.audioBoostDb || 0));
-    ['loadstart', 'loadedmetadata', 'canplay', 'playing', 'pause', 'abort', 'emptied', 'stalled', 'suspend', 'ended'].forEach(function (evn) {
-      audio.addEventListener(evn, function () { _audDbg('event', evn, 'paused=' + audio.paused, 't=' + audio.currentTime, 'src=' + String(audio.src).slice(0, 60)); });
-    });
-    audio.addEventListener('error', function () { _audDbg('event error', audio.error && audio.error.code, audio.error && audio.error.message); });
     var db = +AV_CFG.audioBoostDb || 0;
     if (db > 0) audio.crossOrigin = 'anonymous';
     // Through the proxy, the clip request needs HA's login header too.
@@ -321,7 +311,7 @@
       var ph = PROXY_MODE && url.indexOf(PROXY_BASE + '/') === 0 && proxyHass();
       var ready = (ph && ph.callWS)
         ? ph.callWS({ type: 'auth/sign_path', path: url, expires: 300 })
-            .then(function (r) { _audDbg('signed', r.path.slice(0, 60)); audio.src = r.path; }, function (e) { _audDbg('sign failed', e); return viaBlob(); })
+            .then(function (r) { audio.src = r.path; }, viaBlob)
         : viaBlob();
       ready.catch(function () {
         // Surface the same failure state a bare <audio src> 401/404 would -
@@ -334,19 +324,15 @@
       // rejects it at once (no source yet), and the caller's catch then
       // stops playback. Hold play() until the source is set.
       // A second play() while the first is still starting returns the
-      // same promise: Firefox aborted the clip when play() reached the
-      // element twice before it had started.
+      // same promise. (Browser extensions that re-play every new Audio,
+      // such as Plasma Browser Integration, can still abort the clip.)
       var nativePlay = audio.play;
       var pending = null;
       audio.play = function () {
         var el = this;
-        _audDbg('play() requested', pending ? '(already starting)' : '', String(new Error().stack || '').split('\n').slice(1, 4).join(' | '));
         if (pending) return pending;
         pending = ready.then(function () {
-          _audDbg('native play()');
-          var pr = nativePlay.call(el);
-          if (pr && pr.then) pr.then(function () { _audDbg('play resolved'); }, function (e) { _audDbg('play rejected', e && e.name, e && e.message); });
-          return pr;
+          return nativePlay.call(el);
         });
         var mine = pending;
         mine.then(function () { if (pending === mine) pending = null; }, function () { if (pending === mine) pending = null; });
@@ -4318,7 +4304,6 @@
   // switching rows or closing the modal.
   var _lastPlayEv = null, _lastPlayBtn = null, _lastPlayTs = -1e9;
   function stopModalAudio() {
-    if (modalAudio) { try { console.debug('[bird-card audio] stopModalAudio'); console.trace(); } catch (e) {} }
     audioRelease(stopModalAudio);
     stopCursorLoop();
     if (modalAudio) { try { modalAudio.pause(); } catch (e) {} modalAudio = null; }
@@ -5612,14 +5597,10 @@
 
     var playBtn = ev.target.closest('.play');
     if (playBtn) {
-      _audDbg('play click', ev.type, 'trusted=' + ev.isTrusted, 'ts=' + Math.round(ev.timeStamp), 'detail=' + ev.detail);
-      // One press must act once. In Firefox a single press reached this
-      // handler three times (start, resume, pause), and the pause
-      // aborted the clip before it played. Ignore repeats of the same
-      // event and presses on the same button within 400 ms.
+      // One press must act once: ignore repeats of the same event and
+      // presses on the same button within 400 ms.
       if (ev === _lastPlayEv ||
           (playBtn === _lastPlayBtn && ev.timeStamp - _lastPlayTs < 400 && ev.timeStamp >= _lastPlayTs)) {
-        _audDbg('play click ignored (repeat)');
         return;
       }
       _lastPlayEv = ev; _lastPlayBtn = playBtn; _lastPlayTs = ev.timeStamp;
