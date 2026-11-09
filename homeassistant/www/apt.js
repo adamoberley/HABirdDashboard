@@ -281,8 +281,18 @@
   // detour through a fetched blob when a token is actually configured -
   // the common (no token) case keeps the cheap direct <audio src>, and
   // reuses bgAudioFetch's 503+Retry-After retry for free.
+  // Temporary playback trace (fork only) to find why Firefox aborts
+  // recordings in the details window. Logs under the console's Debug level.
+  function _audDbg() {
+    try { console.debug.apply(console, ['[bird-card audio]'].concat([].slice.call(arguments))); } catch (e) {}
+  }
   function makeAudio(url) {
     var audio = new Audio();
+    _audDbg('makeAudio', url, 'proxy=' + PROXY_MODE, 'boost=' + (+AV_CFG.audioBoostDb || 0));
+    ['loadstart', 'loadedmetadata', 'canplay', 'playing', 'pause', 'abort', 'emptied', 'stalled', 'suspend', 'ended'].forEach(function (evn) {
+      audio.addEventListener(evn, function () { _audDbg('event', evn, 'paused=' + audio.paused, 't=' + audio.currentTime, 'src=' + String(audio.src).slice(0, 60)); });
+    });
+    audio.addEventListener('error', function () { _audDbg('event error', audio.error && audio.error.code, audio.error && audio.error.message); });
     var db = +AV_CFG.audioBoostDb || 0;
     if (db > 0) audio.crossOrigin = 'anonymous';
     // Through the proxy, the clip request needs HA's login header too.
@@ -311,7 +321,7 @@
       var ph = PROXY_MODE && url.indexOf(PROXY_BASE + '/') === 0 && proxyHass();
       var ready = (ph && ph.callWS)
         ? ph.callWS({ type: 'auth/sign_path', path: url, expires: 300 })
-            .then(function (r) { audio.src = r.path; }, viaBlob)
+            .then(function (r) { _audDbg('signed', r.path.slice(0, 60)); audio.src = r.path; }, function (e) { _audDbg('sign failed', e); return viaBlob(); })
         : viaBlob();
       ready.catch(function () {
         // Surface the same failure state a bare <audio src> 401/404 would -
@@ -326,7 +336,13 @@
       var nativePlay = audio.play;
       audio.play = function () {
         var el = this;
-        return ready.then(function () { return nativePlay.call(el); });
+        _audDbg('play() requested');
+        return ready.then(function () {
+          _audDbg('native play()');
+          var pr = nativePlay.call(el);
+          if (pr && pr.then) pr.then(function () { _audDbg('play resolved'); }, function (e) { _audDbg('play rejected', e && e.name, e && e.message); });
+          return pr;
+        });
       };
     } else {
       audio.src = url;
@@ -4293,6 +4309,7 @@
   // Hard-stop: pause + tear down the audio + clear cursor. Used when
   // switching rows or closing the modal.
   function stopModalAudio() {
+    if (modalAudio) { try { console.debug('[bird-card audio] stopModalAudio'); console.trace(); } catch (e) {} }
     audioRelease(stopModalAudio);
     stopCursorLoop();
     if (modalAudio) { try { modalAudio.pause(); } catch (e) {} modalAudio = null; }
