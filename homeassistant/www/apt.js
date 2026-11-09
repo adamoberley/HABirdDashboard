@@ -296,17 +296,48 @@
       // "done with this clip" moment short of the element being GC'd -
       // one clip's worth of blob per play is an acceptable trade for
       // Private Mode installs actually being able to play clips at all.
-      bgAudioFetch(url).then(function (r) {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.blob();
-      }).then(function (blob) {
-        audio.src = URL.createObjectURL(blob);
-      }).catch(function () {
+      function viaBlob() {
+        return bgAudioFetch(url).then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.blob();
+        }).then(function (blob) {
+          audio.src = URL.createObjectURL(blob);
+        });
+      }
+      // Through the proxy, prefer an HA signed URL (as the live stream
+      // does): the element then streams the clip like any plain URL.
+      // Firefox aborts playback of the fetched-blob variant; the blob
+      // path stays as the fallback and for api_token installs.
+      var ph = PROXY_MODE && url.indexOf(PROXY_BASE + '/') === 0 && proxyHass();
+      var ready = (ph && ph.callWS)
+        ? ph.callWS({ type: 'auth/sign_path', path: url, expires: 300 })
+            .then(function (r) { audio.src = r.path; }, viaBlob)
+        : viaBlob();
+      ready.catch(function () {
         // Surface the same failure state a bare <audio src> 401/404 would -
         // existing 'error' listeners (e.g. the play button's "missing"
         // state) still fire even though this never touched audio.src.
         try { audio.dispatchEvent(new Event('error')); } catch (e2) {}
       });
+      // Callers play() right away, while the blob is still downloading.
+      // Chrome keeps that play() pending until a source arrives; Firefox
+      // rejects it at once (no source yet), and the caller's catch then
+      // stops playback. Hold play() until the source is set.
+      // A second play() while the first is still starting returns the
+      // same promise. (Browser extensions that re-play every new Audio,
+      // such as Plasma Browser Integration, can still abort the clip.)
+      var nativePlay = audio.play;
+      var pending = null;
+      audio.play = function () {
+        var el = this;
+        if (pending) return pending;
+        pending = ready.then(function () {
+          return nativePlay.call(el);
+        });
+        var mine = pending;
+        mine.then(function () { if (pending === mine) pending = null; }, function () { if (pending === mine) pending = null; });
+        return mine;
+      };
     } else {
       audio.src = url;
     }
@@ -506,6 +537,11 @@
             // Count a bucket if any part of it lies inside [windowStart, now].
             var bStart = dayBase + h * 3600000;
             if (bStart + 3600000 <= windowStart || bStart > now.getTime()) continue;
+            // In the 24h window the heatmap shows each hour once, oldest
+            // left and the current hour right. Yesterday's bucket for the
+            // current hour only partly overlaps the window and would land
+            // in the same column as today's, so leave it out.
+            if (winHours === 24 && bStart < windowStart) continue;
             var rec = bySci[r.scientific_name];
             if (!rec) {
               rec = bySci[r.scientific_name] = {
@@ -769,20 +805,35 @@
     var p = _xcFetchWithRetry(url, 0)
       .then(function (j) {
         var recs = (j && j.recordings) || [];
-        // Rank: real audio file first, then call/song over other types,
-        // then short clips (<=30s), then best quality (q 'A' beats 'E').
+        // Rank: real audio file first, then a typical call/song (flight
+        // calls after that, nest and juvenile sounds last), then recordings
+        // made by a person rather than an unattended night-migration
+        // recorder (those hold one faint call in seconds of noise), then a
+        // good quality grade (A/B), then a useful length, then the exact
+        // grade. A 2-second fragment of distant calls is hard to recognise,
+        // so very short clips rank below 8-40 s ones even when graded A.
         var scored = recs.filter(function (r) { return r && r.file; }).map(function (r) {
           var t = (r.type || '').toLowerCase();
           var len = _xcLenSeconds(r.length);
+          var qual = (r.q || 'E').charAt(0).toUpperCase();
+          var pref = /\b(begging|nestling|juvenile|subsong)\b/.test(t) ? 3
+            : /\bflight call\b/.test(t) ? 1
+            : /\b(call|song)\b/.test(t) ? 0 : 2;
+          var nocmig = String(r.auto || '').toLowerCase() === 'yes'
+            || /\b(nocturnal|nocmig|nfc)\b/i.test(String(r.rmk || ''));
+          var lenBand = (len >= 8 && len <= 40) ? 0
+            : ((len >= 4 && len < 8) || (len > 40 && len <= 90)) ? 1 : 2;
           return {
             r: r,
-            pref: /\b(call|song)\b/.test(t) ? 0 : 1,
-            shortish: (len > 0 && len <= 30) ? 0 : 1,
-            qual: (r.q || 'E').charAt(0).toUpperCase()
+            pref: pref,
+            nocmig: nocmig ? 1 : 0,
+            good: (qual === 'A' || qual === 'B') ? 0 : 1,
+            lenBand: lenBand,
+            qual: qual
           };
         });
         scored.sort(function (a, b) {
-          return (a.pref - b.pref) || (a.shortish - b.shortish)
+          return (a.pref - b.pref) || (a.nocmig - b.nocmig) || (a.good - b.good) || (a.lenBand - b.lenBand)
             || (a.qual < b.qual ? -1 : a.qual > b.qual ? 1 : 0);
         });
         // Return a ranked CANDIDATE LIST so playback can fall through to
@@ -1122,6 +1173,12 @@
       var by = {};
       ev.forEach(function (e) {
         if (e.t < since) return;
+        // Same rule as bgActivity: in the 24h window skip the partial
+        // hour from yesterday that shares a column with the current hour.
+        if (winHours === 24) {
+          var hs = new Date(e.t); hs.setMinutes(0, 0, 0);
+          if (hs.getTime() < since) return;
+        }
         var r = by[e.sci];
         if (!r) r = by[e.sci] = { sci: e.sci, com: e.com, n: 0, byHour: new Array(24).fill(0) };
         r.n++;
@@ -3060,16 +3117,27 @@
       }
     }
 
+    // Column order. Windows up to a day roll with the clock: the oldest
+    // hour on the left, the current hour on the far right, so the hours
+    // after "now" read as yesterday instead of later today. A line marks
+    // midnight. Longer windows aggregate hour of day, so they keep 00-23.
+    var order = [];
+    var rolling = winHours <= 24;
+    var nowHr = new Date().getHours();
+    for (var oi = 0; oi < 24; oi++) order.push(rolling ? (nowHr + 1 + oi) % 24 : oi);
+    function midCls(idx) { return (rolling && idx > 0 && order[idx] === 0) ? ' mid' : ''; }
+
     var head = '<div class="stats-hm-head"><span class="stats-hm-name"></span>';
-    for (var hh = 0; hh < 24; hh++) head += '<span class="stats-hm-hr">' + pad(hh) + '</span>';
+    for (var hi = 0; hi < 24; hi++) head += '<span class="stats-hm-hr' + midCls(hi) + '">' + pad(order[hi]) + '</span>';
     head += '<span class="stats-hm-tot">' + esc(tt('stats.heatmapTotal')) + '</span></div>';
 
     var rows = species.map(function (s) {
       var cells = '';
-      for (var h = 0; h < 24; h++) {
+      for (var ci = 0; ci < 24; ci++) {
+        var h = order[ci];
         var n = +((s.byHour || [])[h]) || 0;
         cells += '<span class="stats-hm-cell' + (n ? ' l' + shade(n) : '') +
-          (inWin[h] ? '' : ' off') + '">' + (n ? fmtN(n) : '') + '</span>';
+          (inWin[h] ? '' : ' off') + midCls(ci) + '">' + (n ? fmtN(n) : '') + '</span>';
       }
       return '<div class="stats-hm-row" data-sci="' + esc(s.sci) + '">'
         + '<span class="stats-hm-name"><span class="com">' + esc(s.com || s.sci) + '</span></span>'
@@ -4234,6 +4302,7 @@
   }
   // Hard-stop: pause + tear down the audio + clear cursor. Used when
   // switching rows or closing the modal.
+  var _lastPlayEv = null, _lastPlayBtn = null, _lastPlayTs = -1e9;
   function stopModalAudio() {
     audioRelease(stopModalAudio);
     stopCursorLoop();
@@ -4327,10 +4396,10 @@
   // presses (and later sessions) skip straight to it instead of falling
   // through the dead candidates again. Stored in localStorage by slug.
   function _refSaveWorking(sci, info) {
-    if (info && info.url) writeLS('bird:refcall:' + slugify(sci), JSON.stringify(info));
+    if (info && info.url) writeLS('bird:refcall3:' + slugify(sci), JSON.stringify(info));
   }
   function _refCallOrder(sci, cands) {
-    var raw = readLS('bird:refcall:' + slugify(sci), '');
+    var raw = readLS('bird:refcall3:' + slugify(sci), '');
     if (!raw) return cands;
     var saved;
     try { saved = JSON.parse(raw); } catch (e) { return cands; }
@@ -5528,6 +5597,13 @@
 
     var playBtn = ev.target.closest('.play');
     if (playBtn) {
+      // One press must act once: ignore repeats of the same event and
+      // presses on the same button within 400 ms.
+      if (ev === _lastPlayEv ||
+          (playBtn === _lastPlayBtn && ev.timeStamp - _lastPlayTs < 400 && ev.timeStamp >= _lastPlayTs)) {
+        return;
+      }
+      _lastPlayEv = ev; _lastPlayBtn = playBtn; _lastPlayTs = ev.timeStamp;
       // Play / pause toggle. Three cases:
       //   (a) clicking the playing row's button -> pause (KEEP audio
       //       alive so the user can scrub then resume).
