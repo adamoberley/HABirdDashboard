@@ -333,16 +333,24 @@
       // Chrome keeps that play() pending until a source arrives; Firefox
       // rejects it at once (no source yet), and the caller's catch then
       // stops playback. Hold play() until the source is set.
+      // A second play() while the first is still starting returns the
+      // same promise: Firefox aborted the clip when play() reached the
+      // element twice before it had started.
       var nativePlay = audio.play;
+      var pending = null;
       audio.play = function () {
         var el = this;
-        _audDbg('play() requested');
-        return ready.then(function () {
+        _audDbg('play() requested', pending ? '(already starting)' : '', String(new Error().stack || '').split('\n').slice(1, 4).join(' | '));
+        if (pending) return pending;
+        pending = ready.then(function () {
           _audDbg('native play()');
           var pr = nativePlay.call(el);
           if (pr && pr.then) pr.then(function () { _audDbg('play resolved'); }, function (e) { _audDbg('play rejected', e && e.name, e && e.message); });
           return pr;
         });
+        var mine = pending;
+        mine.then(function () { if (pending === mine) pending = null; }, function () { if (pending === mine) pending = null; });
+        return mine;
       };
     } else {
       audio.src = url;
