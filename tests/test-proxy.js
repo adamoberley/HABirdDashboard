@@ -90,7 +90,9 @@ setTimeout(() => {
     click(window, play);
     setTimeout(() => {
       try {
-        assert.ok(log.viaHa.some(c => c.url === '/api/habird_proxy/api/v2/audio/42'), 'clip fetched through HA: ' + log.viaHa.map(c => c.url));
+        // The clip plays from an HA signed URL (EventSource-style), not a
+        // fetched blob, so every browser streams it like a plain URL.
+        assert.ok(log.signed.some(m => m.path === '/api/habird_proxy/api/v2/audio/42'), 'clip URL signed through HA: ' + log.signed.map(m => m.path));
         // Review write-back: plain POST through the proxy, no ingress, no CSRF from the browser.
         click(window, root.querySelector('.bird-card'));
         setTimeout(() => {
