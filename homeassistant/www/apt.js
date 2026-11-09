@@ -296,17 +296,27 @@
       // "done with this clip" moment short of the element being GC'd -
       // one clip's worth of blob per play is an acceptable trade for
       // Private Mode installs actually being able to play clips at all.
-      bgAudioFetch(url).then(function (r) {
+      var ready = bgAudioFetch(url).then(function (r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.blob();
       }).then(function (blob) {
         audio.src = URL.createObjectURL(blob);
-      }).catch(function () {
+      });
+      ready.catch(function () {
         // Surface the same failure state a bare <audio src> 401/404 would -
         // existing 'error' listeners (e.g. the play button's "missing"
         // state) still fire even though this never touched audio.src.
         try { audio.dispatchEvent(new Event('error')); } catch (e2) {}
       });
+      // Callers play() right away, while the blob is still downloading.
+      // Chrome keeps that play() pending until a source arrives; Firefox
+      // rejects it at once (no source yet), and the caller's catch then
+      // stops playback. Hold play() until the source is set.
+      var nativePlay = audio.play;
+      audio.play = function () {
+        var el = this;
+        return ready.then(function () { return nativePlay.call(el); });
+      };
     } else {
       audio.src = url;
     }
