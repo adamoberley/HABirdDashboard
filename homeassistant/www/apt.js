@@ -1,7 +1,7 @@
 (function () {
   // Bumped whenever the offline sketch build changes, so the browser
   // doesn't keep a stale cache after we regenerate the sketches.
-  var SKETCH_VERSION = 'r20'; // r20: add Tui (Prosthemadera novaeseelandiae).
+  var SKETCH_VERSION = 'r21'; // r21: 73 southeastern US species (birds, frogs, insects, mammals, bats).
                               // r18: Middle Spotted Woodpecker flight pose fixed (#81).
                               // r16: Black-billed Magpie (#60).
                               // r15: 64 new Australian species (BirdNET-Go
@@ -16,7 +16,7 @@
   // equivalent to a global cache purge for /api/img. (caches.default
   // .delete() in the worker only affects ONE colo at a time, so a
   // versioned URL is the only reliable way to invalidate everywhere.)
-  var IMG_VERSION = 'r20'; // r20: add Tui (Prosthemadera novaeseelandiae).
+  var IMG_VERSION = 'r21'; // r21: 73 southeastern US species (birds, frogs, insects, mammals, bats).
                            // r18: Middle Spotted Woodpecker flight pose fixed (#81).
                            // r16: Black-billed Magpie (#60).
                            // r15: 64 new Australian species (BirdNET-Go

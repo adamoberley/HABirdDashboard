@@ -302,7 +302,8 @@ def fetch_wikipedia_thumb(sci: str, com: str) -> tuple[bytes, str] | None:
         # Prefer originalimage (higher res) over thumbnail.
         for k in ("originalimage", "thumbnail"):
             src = (meta.get(k) or {}).get("source")
-            if not src or not src.lower().endswith((".jpg", ".jpeg", ".png")):
+            # Wikipedia now appends ?utm_... query params; check the path only.
+            if not src or not src.split("?", 1)[0].lower().endswith((".jpg", ".jpeg", ".png")):
                 continue
             try:
                 req2 = urllib.request.Request(src, headers={"User-Agent": USER_AGENT})
