@@ -339,3 +339,27 @@ function fail(tag, e) { console.error(tag + ' FAIL:', e && e.stack || e); proces
     finish('G: 100 species - captions stay cheap and lose no bird');
   } catch (e) { fail('G', e); }
 }
+
+// --- H: the bird-only fallback keeps every bird (second review of #107).
+//     Caption passes sort the tiles in place; the fallback restored their
+//     sizes but kept the reordered ties, and on a crowded plate (340x300, 40
+//     equal birds, fill 0.8, widest spacing, 40px captions) it then placed
+//     one bird fewer than captions-off. ---
+{
+  function crowded(config) {
+    const { window, errors } = boot({ search: '', noFetch: true, w: 340, h: 300,
+      config: Object.assign({ birdnetGoUrl: '', collageFill: 0.8, collageSpacing: 1 }, config) });
+    window.__layout({ n: 40, weights: 'uniform' });
+    const placed = [...window.document.querySelectorAll('.gtile')]
+      .filter(t => parseFloat(t.style.left) > -1000).map(t => t.getAttribute('data-sci'));
+    return { placed, errors };
+  }
+  try {
+    const off = crowded({});
+    const on = crowded({ labels: 'common', namesSize: 40 });
+    const lost = off.placed.filter(sci => !on.placed.includes(sci));
+    assert.deepStrictEqual(lost, [], 'captions cost birds the captions-off layout places');
+    assert.deepStrictEqual(on.errors, [], 'errors: ' + on.errors.join('; '));
+    finish(`H: crowded fallback keeps all ${off.placed.length} birds`);
+  } catch (e) { fail('H', e); }
+}

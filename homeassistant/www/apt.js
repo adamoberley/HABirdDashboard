@@ -2696,7 +2696,12 @@
         tiles.forEach(function (t) { t.fullW *= 0.93; t.fullH *= 0.93; });
       }
       if (!bestFit) {
-        startSize.forEach(function (e) { e.t.fullW = e.w; e.t.fullH = e.h; });
+        // Back to exactly the captions-off input: sizes AND order. The
+        // caption passes sorted `tiles` in place, and the packer's sort
+        // keeps ties in input order, so a reordered tie packs differently
+        // and can cost a bird the captions-off layout places.
+        tiles.length = 0;
+        startSize.forEach(function (e) { e.t.fullW = e.w; e.t.fullH = e.h; tiles.push(e.t); });
         bestFit = snapFit(packToFit({ lateLabels: true }));
       }
       bestFit.tiles.forEach(function (e) {
