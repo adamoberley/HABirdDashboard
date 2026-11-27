@@ -19,8 +19,8 @@ marked **ASK THE USER**. (Contributor build/test notes are at the very bottom.)
 - **An image generator — one of:**
   - **The Codex CLI signed in with a ChatGPT plan** (`codex login`). No
     per-image bill: images come out of the plan's own image allowance. Check
-    `codex --version` works. This is `--backend codex`, and what `pregen.py`
-    uses when no Gemini key is set. About 40 s per image.
+    `codex --version` works. Pass `--backend codex` (or `--backend auto`,
+    which uses Gemini only when a key is set). About 40 s per image.
   - **A billing-enabled Google Gemini API key.** Image generation is **not** on
     the free tier — a free key returns `HTTP 429 ... quota ... limit: 0`. Get
     one at <https://aistudio.google.com/apikey> and **enable billing** on its

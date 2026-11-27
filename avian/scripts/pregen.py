@@ -57,7 +57,8 @@ Two image backends (--backend):
             `codex login` signed in with. A ChatGPT plan covers it, so
             there's no per-image bill; the plan's image limits apply.
             Needs the `codex` CLI on PATH.
-    auto    (default) gemini when a key is set, otherwise codex.
+    auto    gemini when a key is set, otherwise codex. The default is
+            gemini, so a run never switches to Codex unasked.
 """
 from __future__ import annotations
 import argparse
@@ -566,6 +567,25 @@ def _downscaled_png(src: Path, dest: Path, long_side: int = 384) -> Path:
 CODEX_TIMEOUT = 600   # one image is typically 30-90 s
 
 
+def _codex_events(stdout: str) -> tuple[str, str]:
+    """(thread id, last agent message) from `codex exec --json` output."""
+    thread_id = message = ""
+    for line in (stdout or "").splitlines():
+        try:
+            ev = json.loads(line)
+        except ValueError:
+            continue
+        if ev.get("type") == "thread.started":
+            thread_id = str(ev.get("thread_id") or "")
+        item = ev.get("item") or {}
+        if item.get("type") == "agent_message":
+            message = str(item.get("text") or "")
+    # The id names a folder under generated_images; accept nothing else.
+    if not re.fullmatch(r"[0-9a-fA-F-]{8,64}", thread_id):
+        thread_id = ""
+    return thread_id, message
+
+
 def gen_one_codex(
     prompt: str,
     sci: str,
@@ -638,27 +658,35 @@ def gen_one_codex(
             "reply with just that path.\n\n"
             "=== ART BRIEF ===\n" + body
         )
-        cmd = [codex, "exec", "--skip-git-repo-check", "--sandbox", "workspace-write",
-               "--color", "never", "-C", str(work)]
+        cmd = [codex, "exec", "--json", "--skip-git-repo-check", "--sandbox",
+               "workspace-write", "-C", str(work)]
         if model:
             cmd += ["-m", model]
         for path, _ in attach:
             cmd += ["-i", str(path)]
         cmd.append("-")                      # the prompt comes on stdin
-        started = time.time()
         try:
             res = subprocess.run(cmd, input=instructions, text=True, capture_output=True,
                                  timeout=CODEX_TIMEOUT)
         except subprocess.TimeoutExpired:
             raise RuntimeError(f"codex timed out after {CODEX_TIMEOUT}s")
-        if out.is_file() and out.stat().st_size:
-            return out.read_bytes()
-        # The copy step didn't happen: take the image the tool saved this run.
-        fresh = sorted((p for p in gen_dir.glob("*/*.png") if p.stat().st_mtime >= started),
-                       key=lambda p: p.stat().st_mtime)
-        if fresh:
-            return fresh[-1].read_bytes()
-        tail = (res.stdout or "").strip().splitlines()[-3:] + (res.stderr or "").strip().splitlines()[-3:]
+        thread_id, last_message = _codex_events(res.stdout)
+        if "IMAGE TOOL UNAVAILABLE" in last_message:
+            raise RuntimeError("codex has no image tool here - check `codex login` "
+                               "(a ChatGPT plan) and `codex features list`")
+        # The copy this run was asked to make; failing that, the image the
+        # tool saved in THIS run's own folder. Never another run's newest
+        # file - several pregen runs can be generating at once.
+        candidates = [out]
+        if thread_id:
+            candidates += sorted((gen_dir / thread_id).glob("*.png"),
+                                 key=lambda p: p.stat().st_mtime, reverse=True)
+        for path in candidates:
+            if path.is_file():
+                data = path.read_bytes()
+                if data.startswith(b"\x89PNG\r\n\x1a\n"):
+                    return data
+        tail = [last_message] if last_message else (res.stderr or "").strip().splitlines()[-3:]
         raise RuntimeError("codex produced no image (exit %s): %s"
                            % (res.returncode, " | ".join(tail) or "no output"))
 
@@ -689,11 +717,11 @@ def main() -> int:
                           "generate for exactly the species your station has detected")
     ap.add_argument("--ebird-region", help="eBird region code (e.g. US-CA, US-CA-085) to filter labels")
     ap.add_argument("--ebird-key", help="eBird API key (or EBIRD_API_KEY env)")
-    ap.add_argument("--backend", choices=["auto", "gemini", "codex"], default="auto",
-                    help="Image generator. 'gemini' = the Gemini API (billed per image, "
-                         "needs GEMINI_API_KEY). 'codex' = the Codex CLI's built-in image "
-                         "tool on the account `codex` is signed in with (a ChatGPT plan: "
-                         "no per-image bill). 'auto' (default) = gemini when a key is set, "
+    ap.add_argument("--backend", choices=["gemini", "codex", "auto"], default="gemini",
+                    help="Image generator. 'gemini' (default) = the Gemini API (billed per "
+                         "image, needs GEMINI_API_KEY). 'codex' = the Codex CLI's built-in "
+                         "image tool on the account `codex` is signed in with (a ChatGPT "
+                         "plan: no per-image bill). 'auto' = gemini when a key is set, "
                          "otherwise codex.")
     ap.add_argument("--gemini-key", help="Gemini API key (or GEMINI_API_KEY env)")
     ap.add_argument("--model",

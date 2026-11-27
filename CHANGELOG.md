@@ -7,8 +7,9 @@
   `pregen.py --backend codex` renders through the Codex CLI's built-in
   image tool on whatever account `codex` is signed in with, so a ChatGPT
   plan covers it with no per-image bill. Same prompt, references and
-  cream ground as the Gemini path, and it's the default when no
-  `GEMINI_API_KEY` is set. AGENTS.md and the pipeline README cover both.
+  cream ground as the Gemini path. Gemini stays the default;
+  `--backend auto` picks Codex when no `GEMINI_API_KEY` is set. AGENTS.md
+  and the pipeline README cover both.
 
 ### Fixed
 - **`pregen.py` finds Wikipedia reference photos again.** Wikipedia now

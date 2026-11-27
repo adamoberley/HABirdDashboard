@@ -15,8 +15,8 @@ renders.
 1. `pregen.py` renders each bird on a flat cream ground, with either backend:
    `--backend gemini` (Gemini 2.5 Flash Image, billed per image) or
    `--backend codex` (the Codex CLI's image tool on a ChatGPT plan, no
-   per-image bill). The default picks Gemini when `GEMINI_API_KEY` is set,
-   otherwise Codex.
+   per-image bill). Gemini is the default; `--backend auto` uses Gemini when
+   `GEMINI_API_KEY` is set, otherwise Codex.
 2. `cutout.py` removes the ground with BiRefNet and crops to the bird.
 3. `build_masks.py` rebuilds the generated silhouette tables (`DIMS` + `MASKS`)
    in `homeassistant/www/masks.js`. **The collage packs birds by these masks
