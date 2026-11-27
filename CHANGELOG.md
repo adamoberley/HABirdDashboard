@@ -10,11 +10,25 @@
   cream ground as the Gemini path. Gemini stays the default;
   `--backend auto` picks Codex when no `GEMINI_API_KEY` is set. AGENTS.md
   and the pipeline README cover both.
+- **Docker setup for the standalone page**
+  ([#96](https://github.com/adamoberley/HABirdDashboard/issues/96),
+  suggested by @max-elman and @razorfrog). `docker/` runs the page in
+  nginx beside BirdNET-Go, with no Home Assistant and no clone: the image
+  downloads only the page for a chosen release, fetches artwork from the
+  CDN and caches it, and proxies `/api/v2/` to BirdNET-Go on the same
+  origin, adding a Private Mode token server-side when one is set.
 
 ### Fixed
 - **`pregen.py` finds Wikipedia reference photos again.** Wikipedia now
   appends `?utm_…` to image URLs, so the extension check rejected every
   reference (found by @praxis88 in #103).
+- **Birds heard within 2 seconds of each other keep their own names**
+  ([#104](https://github.com/adamoberley/HABirdDashboard/issues/104),
+  reported with a fix by @GuiAlDuS). With `data_source: ha`, two
+  detections published less than 2 s apart (two species in one audio
+  chunk) could swap common names, and the second was counted twice. The
+  history join now pairs each species change with its nearest name and
+  confidence change, so a bird heard once no longer keeps the wrong name.
 
 ## v1.10.0 — 2026-10-22
 

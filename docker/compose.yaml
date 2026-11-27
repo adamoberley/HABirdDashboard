@@ -1,0 +1,32 @@
+# Bird Card standalone page next to BirdNET-Go, no Home Assistant needed.
+#
+#   docker compose up -d --build      # then open http://<host>:8090/
+#
+# Put this service in the same compose project (or network) as BirdNET-Go,
+# or point BIRDNET_GO_URL at wherever BirdNET-Go answers. See README.md.
+services:
+  habird:
+    build:
+      context: .
+      args:
+        # A release tag (e.g. v1.11.0) pins the page and the artwork; the
+        # branch name follows the latest release.
+        HABIRD_REF: HABirdDashboard
+    image: habird-standalone
+    ports:
+      - "8090:80"
+    environment:
+      BIRDNET_GO_URL: http://birdnet-go:8080
+      # Only if BirdNET-Go's Private Mode is on - added server-side.
+      BIRDNET_GO_TOKEN: ""
+    volumes:
+      # Your settings: copy config.js out once (see README.md), edit it,
+      # then uncomment. Rebuilding the image never overwrites it.
+      # - ./config.js:/usr/share/nginx/html/config.js:ro
+      # Optional offline artwork (avian/assets from a clone): no CDN calls.
+      # - /path/to/HABirdDashboard/avian/assets:/usr/share/nginx/html/assets:ro
+      - art-cache:/var/cache/nginx/art
+    restart: unless-stopped
+
+volumes:
+  art-cache:
