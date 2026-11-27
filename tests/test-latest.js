@@ -13,45 +13,87 @@ const ROOT = path.resolve(__dirname, '..');
 const WWW = ROOT + '/homeassistant/www';
 const CARD = fs.readFileSync(ROOT + '/dist/habird-card.js', 'utf8');
 
-// Local "YYYY-MM-DD HH:MM:SS", minutes before now (BirdNET-Go's format).
-function stamp(minsAgo) {
-  const d = new Date(Date.now() - minsAgo * 60000);
+// Local "YYYY-MM-DD HH:MM:SS" (BirdNET-Go's format).
+function fmt(d) {
   const p = (n) => (n < 10 ? '0' : '') + n;
   return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) +
     ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
 }
+// ...minutes before now.
+function stamp(minsAgo) { return fmt(new Date(Date.now() - minsAgo * 60000)); }
 
 // Mutable fake station: the window is 'all', so the card reads the
 // all-time species summary (last_heard = newest detection per species).
+// The newest bird (Anna's, 5 min ago) is deliberately NOT the most-heard
+// one (the Raven), so "newest" can't pass by picking the biggest count.
+// Test knobs: st.hold (an array) parks summary responses until released;
+// st.speciesFail[sci] = n answers that species' detection search with n
+// 503s; st.dailyFail fails the daily summary; st.events feeds the daily
+// summary (hourly buckets) for windows up to 24h; st.calls counts
+// detection searches per species.
 function station() {
   const st = {
     summary: [
-      { scientific_name: 'Corvus corax', common_name: 'Common Raven', count: 9,
+      { scientific_name: 'Corvus corax', common_name: 'Common Raven', count: 500,
         first_heard: stamp(600), last_heard: stamp(120), max_confidence: 0.71 },
-      { scientific_name: 'Calypte anna', common_name: "Anna's Hummingbird", count: 500,
+      { scientific_name: 'Calypte anna', common_name: "Anna's Hummingbird", count: 9,
         first_heard: stamp(900), last_heard: stamp(5), max_confidence: 0.99 },
     ],
     detections: {},   // sci -> [{date, time, confidence}]
+    hold: null,
+    speciesFail: {},
+    dailyFail: false,
+    events: [],       // [{sci, com, t (ms), conf}] for the daily summary
+    calls: {},
   };
   const annaLast = st.summary[1].last_heard;
   st.detections['Calypte anna'] = [
     { id: 7, scientificName: 'Calypte anna', date: annaLast.slice(0, 10), time: annaLast.slice(11), confidence: 0.934 },
   ];
+  const resp = (b) => ({ ok: true, status: 200, json: () => Promise.resolve(JSON.parse(JSON.stringify(b))) });
+  const fail = (status) => Promise.resolve({ ok: false, status, json: () => Promise.reject(status) });
   st.fetch = (url) => {
     const u = String(url);
     const p = u.replace(/^https?:\/\/[^/]+(:\d+)?/, '');
-    const ok = (b) => Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(JSON.parse(JSON.stringify(b))) });
+    const ok = (b) => Promise.resolve(resp(b));
     if (u.startsWith('https://en.wikipedia.org/')) return ok({ extract: 'A bird.' });
-    if (p.startsWith('/api/v2/analytics/species/summary')) return ok(st.summary);
-    if (p.startsWith('/api/v2/analytics/species/daily')) return ok([]);
+    if (p.startsWith('/api/v2/analytics/species/summary')) {
+      const body = JSON.parse(JSON.stringify(st.summary));   // as of the request
+      if (st.hold) return new Promise((res) => st.hold.push(() => res(resp(body))));
+      return ok(body);
+    }
+    if (p.startsWith('/api/v2/analytics/species/daily')) {
+      if (st.dailyFail) return fail(503);
+      return ok(dailyRows(st.events, decodeURIComponent((/date=([^&]+)/.exec(p) || [])[1] || '')));
+    }
+    if (p.startsWith('/api/v2/analytics/time/distribution/hourly')) return ok([]);
     if (p.includes('/analytics/')) return ok({ data: [] });
     if (p.includes('/detections?queryType=search')) {
       const sci = decodeURIComponent((/search=([^&]+)/.exec(p) || [])[1] || '');
+      st.calls[sci] = (st.calls[sci] || 0) + 1;
+      if (st.speciesFail[sci] > 0) { st.speciesFail[sci]--; return fail(503); }
       return ok({ data: st.detections[sci] || [], total: 0 });
     }
-    return Promise.resolve({ ok: false, status: 404, json: () => Promise.reject(404) });
+    return fail(404);
   };
   return st;
+}
+
+// BirdNET-Go's /analytics/species/daily rows for one local date, built
+// from detection events: hourly buckets, newest time, best confidence.
+function dailyRows(events, date) {
+  const by = {};
+  events.forEach((e) => {
+    const ts = fmt(new Date(e.t));
+    if (ts.slice(0, 10) !== date) return;
+    const r = by[e.sci] || (by[e.sci] = { scientific_name: e.sci, common_name: e.com, count: 0,
+      hourly_counts: new Array(24).fill(0), latest_heard: '', max_confidence: 0 });
+    r.count++;
+    r.hourly_counts[new Date(e.t).getHours()]++;
+    if (ts.slice(11) > r.latest_heard) r.latest_heard = ts.slice(11);
+    r.max_confidence = Math.max(r.max_confidence, e.conf);
+  });
+  return Object.keys(by).map((k) => by[k]);
 }
 
 function makeWindow(url, html) {
@@ -65,16 +107,38 @@ function makeWindow(url, html) {
   Object.defineProperty(window.HTMLElement.prototype, 'clientHeight', { get() { return this.id === 'collage' ? 800 : 100; } });
   window.HTMLCanvasElement.prototype.getContext = () => null;
   window.ResizeObserver = class { observe(){} disconnect(){} };
+  window.HTMLElement.prototype.scrollIntoView = function () {};
+  // Track pending 30 s timers (the latest view's "5m ago" tick - nothing
+  // else in the app uses that period) so tests can see whether one is
+  // left running.
+  const live = window.__tick30 = new Set();
+  const si = window.setInterval, st = window.setTimeout, ci = window.clearInterval, ct = window.clearTimeout;
+  window.setInterval = function (fn, ms) {
+    const id = si.apply(window, arguments);
+    if (ms === 30000) live.add(id);
+    return id;
+  };
+  window.setTimeout = function (fn, ms) {
+    const args = [].slice.call(arguments);
+    let id;
+    if (ms === 30000 && typeof fn === 'function') args[0] = function () { live.delete(id); return fn.apply(this, arguments); };
+    id = st.apply(window, args);
+    if (ms === 30000) live.add(id);
+    return id;
+  };
+  window.clearInterval = function (id) { live.delete(id); return ci.call(window, id); };
+  window.clearTimeout = function (id) { live.delete(id); return ct.call(window, id); };
   return window;
 }
 
-function mountCard(config, st) {
-  const window = makeWindow('http://ha.local:8123/x');
+function mountCard(config, st, opts) {
+  opts = opts || {};
+  const window = makeWindow(opts.url || 'http://ha.local:8123/x');
   window.fetch = st.fetch;
   window.eval(CARD);
   const card = window.document.createElement('habird-card');
   card.setConfig(Object.assign({ birdnet_url: 'http://ha.local:8080', live: false }, config));
-  card.hass = { themes: {}, states: {} };
+  card.hass = opts.hass || { themes: {}, states: {} };
   window.document.body.appendChild(card);
   return { window, card, root: card.shadowRoot };
 }
@@ -186,4 +250,7 @@ async function main() {
   process.exit(0);
 }
 
-main().catch((e) => { console.error('FAIL:', e && e.stack || e); process.exit(1); });
+module.exports = { fmt, stamp, station, makeWindow, mountCard, wait, WWW };
+if (require.main === module) {
+  main().catch((e) => { console.error('FAIL:', e && e.stack || e); process.exit(1); });
+}
