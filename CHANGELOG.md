@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Added
+- **Docker setup for the standalone page**
+  ([#96](https://github.com/adamoberley/HABirdDashboard/issues/96),
+  suggested by @max-elman and @razorfrog). `docker/` runs the page in
+  nginx beside BirdNET-Go, with no Home Assistant and no clone: the image
+  downloads only the page for a chosen release, fetches artwork from the
+  CDN and caches it, and proxies `/api/v2/` to BirdNET-Go on the same
+  origin, adding a Private Mode token server-side when one is set.
+
+## Unreleased
+
 ### Fixed
 - **Birds heard within 2 seconds of each other keep their own names**
   ([#104](https://github.com/adamoberley/HABirdDashboard/issues/104),
