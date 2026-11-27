@@ -1,0 +1,50 @@
+# Bird Card standalone page + same-origin proxy to BirdNET-Go.
+# Filled from the environment at start (see Dockerfile / compose.yaml).
+
+# Private Mode: with BIRDNET_GO_TOKEN set, nginx adds the bearer token
+# server-side, so it never sits in a public config.js - and it also covers
+# the live EventSource stream, which can't carry the header itself.
+map "${BIRDNET_GO_TOKEN}" $birdnet_auth {
+    ""      "";
+    default "Bearer ${BIRDNET_GO_TOKEN}";
+}
+
+proxy_cache_path /var/cache/nginx/art levels=1:2 keys_zone=art:10m max_size=2g inactive=30d use_temp_path=off;
+
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    location = /config.js { add_header Cache-Control "no-cache"; }
+
+    # BirdNET-Go's API, same origin as the page.
+    location /api/v2/ {
+        proxy_pass ${BIRDNET_GO_URL};
+        proxy_http_version 1.1;
+        proxy_set_header Host $proxy_host;
+        proxy_set_header Connection "";
+        proxy_set_header Authorization $birdnet_auth;
+        proxy_buffering off;            # live detections/stream (SSE)
+        proxy_cache off;
+        proxy_read_timeout 1h;
+    }
+
+    # Artwork: a local copy mounted at /usr/share/nginx/html/assets wins;
+    # anything missing comes from the CDN and is cached here.
+    location /assets/ {
+        try_files $uri @art;
+    }
+    location @art {
+        rewrite ^/assets/(.*)$ ${ART_PATH}/$1 break;
+        proxy_pass ${ART_ORIGIN};
+        proxy_ssl_server_name on;
+        proxy_set_header Host $proxy_host;
+        proxy_cache art;
+        proxy_cache_valid 200 30d;
+        proxy_cache_valid 404 1m;
+        proxy_ignore_headers Set-Cookie;
+        add_header X-Art-Cache $upstream_cache_status;
+    }
+}

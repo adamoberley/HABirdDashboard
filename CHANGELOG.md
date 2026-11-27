@@ -15,6 +15,55 @@
   it rather than being left out. Tapping a name opens its bird. On the
   standalone page `?labels`,
   `?labels=scientific` or `?labels=off` overrides `config.js` per display.
+- **73 southeastern US species**
+  ([#103](https://github.com/adamoberley/HABirdDashboard/pull/103), by
+  @praxis88): birds, frogs and toads, insects, mammals and bats from north
+  Alabama BirdNET-Go range lists, 120 illustrations. Mammals and frogs
+  run, leap or glide instead of flying.
+- **Rusty Blackbird**
+  ([#101](https://github.com/adamoberley/HABirdDashboard/pull/101), by
+  @audreyhommes).
+- **33 more species for Pennsylvania and New Zealand**
+  ([#91](https://github.com/adamoberley/HABirdDashboard/issues/91),
+  requested by @nowagner;
+  [#105](https://github.com/adamoberley/HABirdDashboard/issues/105),
+  requested by @garethamyes-spec). The seven PA birds still missing (Bay-breasted
+  Warbler, Boat-tailed Grackle, Royal Tern, American Oystercatcher, Clapper
+  Rail, Philadelphia Vireo, Short-billed Dowitcher; the rest of that list
+  arrived with #101 and #103) and all 26 NZ birds on the request, from
+  Tomtit and Kōkako to Morepork, Kākā and the North Island Brown Kiwi.
+  Kiwi and Weka are drawn standing, perched pose only. Lesser Redpoll
+  (*Acanthis cabaret*) now shows the Common Redpoll's art. These were
+  made with the new Codex backend.
+- **Generate artwork with a ChatGPT plan instead of a Gemini key.**
+  `pregen.py --backend codex` renders through the Codex CLI's built-in
+  image tool on whatever account `codex` is signed in with, so a ChatGPT
+  plan covers it with no per-image bill. Same prompt, references and
+  cream ground as the Gemini path. Gemini stays the default;
+  `--backend auto` picks Codex when no `GEMINI_API_KEY` is set. AGENTS.md
+  and the pipeline README cover both.
+- **Docker setup for the standalone page**
+  ([#96](https://github.com/adamoberley/HABirdDashboard/issues/96),
+  suggested by @max-elman and @razorfrog). `docker/` runs the page in
+  nginx beside BirdNET-Go, with no Home Assistant and no clone: the image
+  downloads only the page for a chosen release, fetches artwork from the
+  CDN and caches it, and proxies `/api/v2/` to BirdNET-Go on the same
+  origin, adding a Private Mode token server-side when one is set.
+
+### Fixed
+- **The flying White-throated Sparrow has two wings again**
+  ([#102](https://github.com/adamoberley/HABirdDashboard/issues/102),
+  reported by @patrickkettner). Its flight pose is redrawn.
+- **`pregen.py` finds Wikipedia reference photos again.** Wikipedia now
+  appends `?utm_…` to image URLs, so the extension check rejected every
+  reference (found by @praxis88 in #103).
+- **Birds heard within 2 seconds of each other keep their own names**
+  ([#104](https://github.com/adamoberley/HABirdDashboard/issues/104),
+  reported with a fix by @GuiAlDuS). With `data_source: ha`, two
+  detections published less than 2 s apart (two species in one audio
+  chunk) could swap common names, and the second was counted twice. The
+  history join now pairs each species change with its nearest name and
+  confidence change, so a bird heard once no longer keeps the wrong name.
 
 ## v1.10.0 — 2026-10-22
 

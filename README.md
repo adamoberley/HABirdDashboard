@@ -76,8 +76,8 @@ at home [pushed to a Samsung Frame TV](#display-it-on-a-samsung-frame-tv-optiona
   the Wikipedia article, plus an optional **reference call** (from Xeno-Canto) to
   compare against your own recordings. A tap can open the details, play
   the call, or both.
-- **2,521 illustrations** - 1,283 species (North American + European /
-  eBird region DE + Australian / eBird region AU), a perched pose and, for
+- **2,709 illustrations** - 1,391 species (North American + European /
+  eBird region DE + Australian / eBird region AU + New Zealand), a perched pose and, for
   anything that flies, a flight pose, lazy-loaded per detected species (no
   bulk download). A [regeneration pipeline](avian/scripts/README.md) builds
   sets for other regions.
@@ -373,8 +373,8 @@ each, cached by the browser. For a fully offline install, copy
 
 ### Missing artwork for your area?
 
-The bundled library covers 1,283 species (North American + European / eBird
-region DE + Australian / eBird region AU), so other regions may still have gaps. (Plain photos are deliberately not used as a
+The bundled library covers 1,391 species (North American + European / eBird
+region DE + Australian / eBird region AU + New Zealand), so other regions may still have gaps. (Plain photos are deliberately not used as a
 stand-in - they'd break the kachō-e style and have no silhouette masks
 for the collage packing.)
 
@@ -706,13 +706,44 @@ review works, and with Private Mode on the proxy can add the
 `Authorization` header server-side instead of `apiToken` sitting in a
 public `config.js`.
 
+### Docker (no Home Assistant)
+
+[`docker/`](docker/) runs the standalone page in nginx next to BirdNET-Go,
+without cloning the repository. The image downloads only the page (about
+4 MB) for the release you pick, and fetches artwork from the same CDN the card
+uses, caching it locally. nginx also proxies `/api/v2/` to BirdNET-Go on the
+same origin, so CORS, the hard-coded `:8080` and the live stream all just
+work, and with Private Mode on it adds your token server-side.
+
+```bash
+mkdir habird && cd habird
+for f in compose.yaml Dockerfile default.conf.template; do
+  curl -fsSLO "https://raw.githubusercontent.com/adamoberley/HABirdDashboard/HABirdDashboard/docker/$f"
+done
+# edit compose.yaml: BIRDNET_GO_URL (and BIRDNET_GO_TOKEN for Private Mode)
+docker compose up -d --build        # open http://<host>:8090/
+```
+
+- **Settings:** copy the page's `config.js` out once
+  (`docker compose cp habird:/usr/share/nginx/html/config.js .`), edit it, and
+  uncomment its volume line in `compose.yaml`. Updates never overwrite it.
+  URL parameters (`?wall`, `?names`, `?ring` …) work as above.
+- **Version:** `HABIRD_REF` in `compose.yaml` pins a release tag (for example
+  `v1.11.0`); the default follows the latest. Rebuild to update:
+  `docker compose up -d --build`.
+- **Offline artwork:** mount a clone's `avian/assets` at
+  `/usr/share/nginx/html/assets` (the commented line in `compose.yaml`);
+  anything missing still falls back to the CDN.
+- Put the service in BirdNET-Go's compose project or network so
+  `http://birdnet-go:8080` resolves, or set `BIRDNET_GO_URL` to its address.
+
 ---
 
 ## Troubleshooting
 
 - **Some birds have no picture.** The most common question, and usually
-  not a bug: the bundled library covers **1,283 species (North American +
-  European / eBird region DE + Australian / eBird region AU)**, so detections
+  not a bug: the bundled library covers **1,391 species (North American +
+  European / eBird region DE + Australian / eBird region AU + New Zealand)**, so detections
   outside it simply have no illustration yet
   (the bird still counts everywhere - it just isn't drawn in the
   collage; turn on `names` to see it listed by name). Three checks, then the fix:
@@ -791,7 +822,7 @@ homeassistant/
     ├── styles.css
     └── favicon.png
 avian/
-├── assets/          # 2,521 bundled illustrations + photo-cutout fallbacks
+├── assets/          # 2,709 bundled illustrations + photo-cutout fallbacks
 └── scripts/         # generate -> cutout -> masks pipeline (Gemini + BiRefNet)
 addons/
 └── birdframe/       # optional app: push the collage to a Samsung Frame TV
