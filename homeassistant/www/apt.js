@@ -1,7 +1,8 @@
 (function () {
   // Bumped whenever the offline sketch build changes, so the browser
   // doesn't keep a stale cache after we regenerate the sketches.
-  var SKETCH_VERSION = 'r22'; // r22: 73 southeastern US species (birds, frogs, insects, mammals, bats) (#103).
+  var SKETCH_VERSION = 'r23'; // r23: 33 species for PA (#91) and New Zealand (#105), White-throated Sparrow flight pose (#102).
+                              // r22: 73 southeastern US species (birds, frogs, insects, mammals, bats) (#103).
                               // r21: add Rusty Blackbird (Euphagus carolinus).
                               // r20: add Tui (Prosthemadera novaeseelandiae).
                               // r18: Middle Spotted Woodpecker flight pose fixed (#81).
@@ -18,7 +19,8 @@
   // equivalent to a global cache purge for /api/img. (caches.default
   // .delete() in the worker only affects ONE colo at a time, so a
   // versioned URL is the only reliable way to invalidate everywhere.)
-  var IMG_VERSION = 'r22'; // r22: 73 southeastern US species (birds, frogs, insects, mammals, bats) (#103).
+  var IMG_VERSION = 'r23'; // r23: 33 species for PA (#91) and New Zealand (#105), White-throated Sparrow flight pose (#102).
+                           // r22: 73 southeastern US species (birds, frogs, insects, mammals, bats) (#103).
                            // r21: add Rusty Blackbird (Euphagus carolinus).
                            // r20: add Tui (Prosthemadera novaeseelandiae).
                            // r18: Middle Spotted Woodpecker flight pose fixed (#81).
@@ -1689,6 +1691,7 @@
   // internal/openfauna/data/aliases.json (tphakala/birdnet-go@5a94fc78),
   // CC BY-NC-SA 4.0 - see THIRD_PARTY_NOTICES.md.
   var TAXON_ALIASES = {
+    "Acanthis cabaret": "Acanthis flammea",  // Lesser Redpoll (#105)
     "Accipiter badius": "Tachyspiza badia",
     "Accipiter bicolor": "Astur bicolor",
     "Accipiter cirrocephalus": "Tachyspiza cirrocephala",

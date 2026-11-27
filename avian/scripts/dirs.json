@@ -19515,22 +19515,6 @@
 "y": 0.743
 }
 },
-"zonotrichia-albicollis-2": {
-"ambiguous": false,
-"ambiguous2": false,
-"beak": {
-"x": 0.78,
-"y": 0.37
-},
-"confidence": "high",
-"confidence2": "high",
-"heading": 335,
-"heading2": 335,
-"tail": {
-"x": 0.17,
-"y": 0.65
-}
-},
 "zonotrichia-atricapilla-2": {
 "ambiguous": false,
 "ambiguous2": false,
