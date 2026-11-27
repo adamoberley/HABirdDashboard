@@ -75,8 +75,8 @@ at home [pushed to a Samsung Frame TV](#display-it-on-a-samsung-frame-tv-optiona
   the Wikipedia article, plus an optional **reference call** (from Xeno-Canto) to
   compare against your own recordings. A tap can open the details, play
   the call, or both.
-- **2,521 illustrations** - 1,283 species (North American + European /
-  eBird region DE + Australian / eBird region AU), a perched pose and, for
+- **2,709 illustrations** - 1,391 species (North American + European /
+  eBird region DE + Australian / eBird region AU + New Zealand), a perched pose and, for
   anything that flies, a flight pose, lazy-loaded per detected species (no
   bulk download). A [regeneration pipeline](avian/scripts/README.md) builds
   sets for other regions.
@@ -360,8 +360,8 @@ each, cached by the browser. For a fully offline install, copy
 
 ### Missing artwork for your area?
 
-The bundled library covers 1,283 species (North American + European / eBird
-region DE + Australian / eBird region AU), so other regions may still have gaps. (Plain photos are deliberately not used as a
+The bundled library covers 1,391 species (North American + European / eBird
+region DE + Australian / eBird region AU + New Zealand), so other regions may still have gaps. (Plain photos are deliberately not used as a
 stand-in - they'd break the kachō-e style and have no silhouette masks
 for the collage packing.)
 
@@ -727,8 +727,8 @@ docker compose up -d --build        # open http://<host>:8090/
 ## Troubleshooting
 
 - **Some birds have no picture.** The most common question, and usually
-  not a bug: the bundled library covers **1,283 species (North American +
-  European / eBird region DE + Australian / eBird region AU)**, so detections
+  not a bug: the bundled library covers **1,391 species (North American +
+  European / eBird region DE + Australian / eBird region AU + New Zealand)**, so detections
   outside it simply have no illustration yet
   (the bird still counts everywhere - it just isn't drawn in the
   collage; turn on `names` to see it listed by name). Three checks, then the fix:
@@ -807,7 +807,7 @@ homeassistant/
     ├── styles.css
     └── favicon.png
 avian/
-├── assets/          # 2,521 bundled illustrations + photo-cutout fallbacks
+├── assets/          # 2,709 bundled illustrations + photo-cutout fallbacks
 └── scripts/         # generate -> cutout -> masks pipeline (Gemini + BiRefNet)
 addons/
 └── birdframe/       # optional app: push the collage to a Samsung Frame TV
