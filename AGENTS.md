@@ -16,16 +16,22 @@ marked **ASK THE USER**. (Contributor build/test notes are at the very bottom.)
 
 ## 0. Prerequisites — ASK THE USER first
 
-- **A billing-enabled Google Gemini API key.** Image generation is **not** on
-  the free tier — a free key returns `HTTP 429 ... quota ... limit: 0`. Get one
-  at <https://aistudio.google.com/apikey> and **enable billing** on its project.
-  Cost is roughly **$0.04 per image** (2 images per species); a typical missing
-  set runs a few dollars.
+- **An image generator — one of:**
+  - **The Codex CLI signed in with a ChatGPT plan** (`codex login`). No
+    per-image bill: images come out of the plan's own image allowance. Check
+    `codex --version` works. Pass `--backend codex` (or `--backend auto`,
+    which uses Gemini only when a key is set). About 40 s per image.
+  - **A billing-enabled Google Gemini API key.** Image generation is **not** on
+    the free tier — a free key returns `HTTP 429 ... quota ... limit: 0`. Get
+    one at <https://aistudio.google.com/apikey> and **enable billing** on its
+    project. Roughly **$0.04 per image** (2 per species). `--backend gemini`.
 - **Python 3.10+** (always) and **Node 18+** (only to rebuild the card).
 - Their **BirdNET-Go species list** — Step 1.
 
-Don't generate anything until the user confirms a billing-enabled key. That 429
-is the #1 thing that wastes a run.
+Don't generate anything until the user confirms which one to use: a signed-in
+`codex`, or a billing-enabled Gemini key. A free-tier Gemini key's 429 is the #1
+thing that wastes a run. (`verify.py` and `build_dirs.py`, both optional, are
+Gemini-only.)
 
 ---
 
@@ -71,7 +77,8 @@ bundle for **every** pipeline command in this session:
 export SSL_CERT_FILE="$(.venv/bin/python -m certifi)"
 ```
 
-Provide the Gemini key without putting it in shell history or git:
+**Gemini only** — provide the key without putting it in shell history or git
+(the Codex backend needs nothing here, just a signed-in `codex`):
 
 ```bash
 echo 'YOUR_GEMINI_KEY' > avian/scripts/.gemini_key   # already gitignored
@@ -141,7 +148,12 @@ already illustrated**, so only the ones your library is missing cost anything:
 .venv/bin/python avian/scripts/pregen.py --labels avian/scripts/mybirds.txt --sleep 6
 # …or straight from the station instead of a CSV:
 # .venv/bin/python avian/scripts/pregen.py --from-birdnet http://homeassistant.local:8080 --sleep 6
+# With a ChatGPT plan instead of a Gemini key (no pause needed between images):
+# .venv/bin/python avian/scripts/pregen.py --backend codex --labels avian/scripts/mybirds.txt --sleep 0
 ```
+
+The Codex backend renders on a 3:2 canvas (about 1536×1024); `cutout.py` crops
+to the bird either way, so the results line up with the Gemini set.
 
 **Cut** the cream ground to transparency. First run downloads a ~1 GB matting
 model; on CPU it's ~6 s/image:
@@ -255,7 +267,11 @@ artwork into `/config/www/habird/`; no card build needed.)
 ## Gotchas (the ones that actually bite)
 
 - **Gemini `429 ... limit: 0`** — the key is free-tier; image generation needs
-  billing enabled on its Google Cloud project.
+  billing enabled on its Google Cloud project. Or skip Gemini: `--backend codex`
+  with a ChatGPT-signed-in `codex`.
+- **`codex produced no image`** — run `codex login` (a ChatGPT plan), check
+  `codex features list` shows `image_generation` as true, and re-run without
+  `--force` to retry only the misses.
 - **macOS `CERTIFICATE_VERIFY_FAILED`** — you didn't `export SSL_CERT_FILE=…`
   (Step 2). It affects both the Wikipedia reference fetch and the Gemini call.
 - **`cutout.py` dies partway** — re-run it (idempotent). On macOS prefix with

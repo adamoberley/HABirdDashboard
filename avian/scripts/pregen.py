@@ -50,7 +50,15 @@ Usage:
     # Re-render everything after a prompt change:
     python3 pregen.py --labels labels.txt --force
 
-Set GEMINI_API_KEY in the environment (preferred) or pass --gemini-key.
+Two image backends (--backend):
+    gemini  The Gemini API. Set GEMINI_API_KEY (preferred) or pass
+            --gemini-key. Billed per image (~$0.04).
+    codex   The Codex CLI's built-in image tool, on whatever account
+            `codex login` signed in with. A ChatGPT plan covers it, so
+            there's no per-image bill; the plan's image limits apply.
+            Needs the `codex` CLI on PATH.
+    auto    gemini when a key is set, otherwise codex. The default is
+            gemini, so a run never switches to Codex unasked.
 """
 from __future__ import annotations
 import argparse
@@ -302,7 +310,8 @@ def fetch_wikipedia_thumb(sci: str, com: str) -> tuple[bytes, str] | None:
         # Prefer originalimage (higher res) over thumbnail.
         for k in ("originalimage", "thumbnail"):
             src = (meta.get(k) or {}).get("source")
-            if not src or not src.lower().endswith((".jpg", ".jpeg", ".png")):
+            # Wikipedia now appends ?utm_... query params; check the path only.
+            if not src or not src.split("?", 1)[0].lower().endswith((".jpg", ".jpeg", ".png")):
                 continue
             try:
                 req2 = urllib.request.Request(src, headers={"User-Agent": USER_AGENT})
@@ -417,13 +426,7 @@ def gen_one(
                   appended as the last paragraph before the reference
                   block.
     """
-    body = (prompt
-            .replace("{sci_name}", sci)
-            .replace("{com_name}", com)
-            .replace("{pose}", POSES[pose])
-            .replace("{anti_ref_line}", _anti_ref_line(anti_ref_key)))
-    if species_note:
-        body = body + "\n\nSpecies-specific note: " + species_note
+    body = _prompt_body(prompt, sci, com, pose, anti_ref_key, species_note)
 
     parts: list[dict] = [{"text": body}]
     if positive_ref:
@@ -533,6 +536,161 @@ def gen_one(
     raise RuntimeError(f"no image (finish={finish} block={block})")
 
 
+def _prompt_body(prompt: str, sci: str, com: str, pose: int,
+                 anti_ref_key: str | None, species_note: str | None) -> str:
+    body = (prompt
+            .replace("{sci_name}", sci)
+            .replace("{com_name}", com)
+            .replace("{pose}", POSES[pose])
+            .replace("{anti_ref_line}", _anti_ref_line(anti_ref_key)))
+    if species_note:
+        body = body + "\n\nSpecies-specific note: " + species_note
+    return body
+
+
+def _downscaled_png(src: Path, dest: Path, long_side: int = 384) -> Path:
+    """Copy an anatomy reference at <= long_side px (see gen_one for why)."""
+    try:
+        from PIL import Image
+        img = Image.open(src).convert("RGB")
+        if max(img.size) > long_side:
+            s = long_side / max(img.size)
+            img = img.resize((int(img.width * s), int(img.height * s)), Image.LANCZOS)
+        img.save(dest, format="PNG", optimize=True)
+        return dest
+    except Exception:
+        dest = dest.with_suffix(src.suffix)
+        dest.write_bytes(src.read_bytes())
+        return dest
+
+
+CODEX_TIMEOUT = 600   # one image is typically 30-90 s
+
+
+def _codex_events(stdout: str) -> tuple[str, str]:
+    """(thread id, last agent message) from `codex exec --json` output."""
+    thread_id = message = ""
+    for line in (stdout or "").splitlines():
+        try:
+            ev = json.loads(line)
+        except ValueError:
+            continue
+        if ev.get("type") == "thread.started":
+            thread_id = str(ev.get("thread_id") or "")
+        item = ev.get("item") or {}
+        if item.get("type") == "agent_message":
+            message = str(item.get("text") or "")
+    # The id names a folder under generated_images; accept nothing else.
+    if not re.fullmatch(r"[0-9a-fA-F-]{8,64}", thread_id):
+        thread_id = ""
+    return thread_id, message
+
+
+def gen_one_codex(
+    prompt: str,
+    sci: str,
+    com: str,
+    pose: int,
+    positive_ref: Path | None = None,
+    anti_ref: Path | None = None,
+    anti_ref_key: str | None = None,
+    species_note: str | None = None,
+    style_ref: Path | None = None,
+    model: str | None = None,
+) -> bytes:
+    """Render one illustration with the Codex CLI's built-in image tool.
+
+    Uses whatever account `codex` is signed in with - a ChatGPT plan
+    covers it, so there is no per-image API bill (the plan's own image
+    limits apply). Same brief and references as the Gemini path: the
+    references are attached to the Codex prompt in order and captioned
+    there. Returns raw PNG bytes.
+    """
+    import shutil
+    import subprocess
+    import tempfile
+
+    codex = shutil.which("codex")
+    if not codex:
+        raise RuntimeError("codex CLI not found - install it and run `codex login`")
+    body = _prompt_body(prompt, sci, com, pose, anti_ref_key, species_note)
+    codex_home = Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex")
+    gen_dir = codex_home / "generated_images"
+
+    with tempfile.TemporaryDirectory(prefix="pregen-codex-") as tmp:
+        work = Path(tmp)
+        attach: list[tuple[Path, str]] = []
+        if positive_ref:
+            attach.append((_downscaled_png(positive_ref, work / "image1-anatomy.png"),
+                           "IMAGE 1 (positive, target species - anatomy and colour only)"))
+        if anti_ref:
+            name = (ANTI_REFS.get(anti_ref_key or "") or {}).get("common_name", "lookalike species")
+            dest = work / ("image2-negative" + anti_ref.suffix)
+            dest.write_bytes(anti_ref.read_bytes())
+            attach.append((dest, f"IMAGE 2 (negative, {name}, do NOT copy)"))
+        if style_ref:
+            dest = work / ("image3-style" + style_ref.suffix)
+            dest.write_bytes(style_ref.read_bytes())
+            attach.append((dest, "IMAGE 3 (positive STYLE reference - Edo-period kachō-e "
+                                 "woodblock print; borrow only its painting technique, "
+                                 "none of its scenery)"))
+        out = work / "out.png"
+        captions = "\n".join(f"- Attachment {i + 1} is {cap}." for i, (_, cap) in enumerate(attach))
+        instructions = (
+            "Create exactly ONE image with your built-in image generation tool, "
+            "following the art brief below. Do not use any script, API, CLI or "
+            "network fallback, and do not write any code: if the built-in tool is "
+            "unavailable, stop and say IMAGE TOOL UNAVAILABLE.\n\n"
+            + (f"The attached images, in order:\n{captions}\n\n" if attach else "")
+            + "Background: the flat, uniform warm cream paper ground described in "
+            "the brief, filling the whole frame. Ignore any instruction in the brief "
+            "about a transparent background - a later step cuts the cream away.\n\n"
+            "Two things this set needs that image models tend to miss:\n"
+            "- It must read as a hand-printed woodblock, not a vector or digital "
+            "illustration: soft, slightly uneven watercolour washes with a little "
+            "pigment mottling inside each colour zone, and a confident, slightly "
+            "varied ink outline - the surface quality of the style reference.\n"
+            "- Make the animal large: it should span about 60-70% of the frame's "
+            "width (still with clear cream margin on every side, nothing cropped), "
+            "so the cut-out keeps plenty of pixels. This overrides the brief's "
+            "one-third-to-one-half composition note.\n\n"
+            f"When the image is done, copy the generated PNG file to {out} and "
+            "reply with just that path.\n\n"
+            "=== ART BRIEF ===\n" + body
+        )
+        cmd = [codex, "exec", "--json", "--skip-git-repo-check", "--sandbox",
+               "workspace-write", "-C", str(work)]
+        if model:
+            cmd += ["-m", model]
+        for path, _ in attach:
+            cmd += ["-i", str(path)]
+        cmd.append("-")                      # the prompt comes on stdin
+        try:
+            res = subprocess.run(cmd, input=instructions, text=True, capture_output=True,
+                                 timeout=CODEX_TIMEOUT)
+        except subprocess.TimeoutExpired:
+            raise RuntimeError(f"codex timed out after {CODEX_TIMEOUT}s")
+        thread_id, last_message = _codex_events(res.stdout)
+        if "IMAGE TOOL UNAVAILABLE" in last_message:
+            raise RuntimeError("codex has no image tool here - check `codex login` "
+                               "(a ChatGPT plan) and `codex features list`")
+        # The copy this run was asked to make; failing that, the image the
+        # tool saved in THIS run's own folder. Never another run's newest
+        # file - several pregen runs can be generating at once.
+        candidates = [out]
+        if thread_id:
+            candidates += sorted((gen_dir / thread_id).glob("*.png"),
+                                 key=lambda p: p.stat().st_mtime, reverse=True)
+        for path in candidates:
+            if path.is_file():
+                data = path.read_bytes()
+                if data.startswith(b"\x89PNG\r\n\x1a\n"):
+                    return data
+        tail = [last_message] if last_message else (res.stderr or "").strip().splitlines()[-3:]
+        raise RuntimeError("codex produced no image (exit %s): %s"
+                           % (res.returncode, " | ".join(tail) or "no output"))
+
+
 def _mime_for(p: Path) -> str:
     ext = p.suffix.lower()
     if ext in (".jpg", ".jpeg"):
@@ -559,10 +717,17 @@ def main() -> int:
                           "generate for exactly the species your station has detected")
     ap.add_argument("--ebird-region", help="eBird region code (e.g. US-CA, US-CA-085) to filter labels")
     ap.add_argument("--ebird-key", help="eBird API key (or EBIRD_API_KEY env)")
+    ap.add_argument("--backend", choices=["gemini", "codex", "auto"], default="gemini",
+                    help="Image generator. 'gemini' (default) = the Gemini API (billed per "
+                         "image, needs GEMINI_API_KEY). 'codex' = the Codex CLI's built-in "
+                         "image tool on the account `codex` is signed in with (a ChatGPT "
+                         "plan: no per-image bill). 'auto' = gemini when a key is set, "
+                         "otherwise codex.")
     ap.add_argument("--gemini-key", help="Gemini API key (or GEMINI_API_KEY env)")
-    ap.add_argument("--model", default="gemini-2.5-flash-image",
-                    help="Gemini image model id (default: gemini-2.5-flash-image). "
-                         "gemini-3-pro-image renders at 2K/4K for hero-quality art.")
+    ap.add_argument("--model",
+                    help="Model id. Gemini default: gemini-2.5-flash-image "
+                         "(gemini-3-pro-image renders at 2K/4K). Codex: the chat model "
+                         "that drives the image tool (default: your codex config).")
     ap.add_argument("--image-size", choices=["1K", "2K", "4K"],
                     help="Output resolution (Gemini 3 image models). Default: model native (~1K).")
     ap.add_argument("--aspect-ratio",
@@ -589,16 +754,25 @@ def main() -> int:
     ap.add_argument("--no-refs", action="store_true",
                     help="Skip the Wikipedia reference fetch (faster, lower-quality output)")
     ap.add_argument("--sleep", type=float, default=6.0,
-                    help="Seconds between API calls (default 6 = headroom under free-tier RPM cap)")
+                    help="Seconds between API calls (default 6 = headroom under free-tier RPM cap; "
+                         "0 is fine with --backend codex)")
     ap.add_argument("--limit", type=int, default=0, help="Cap species count for testing")
     args = ap.parse_args()
 
     gemini_key = args.gemini_key or os.environ.get("GEMINI_API_KEY", "")
-    if not gemini_key:
-        print("error: GEMINI_API_KEY required (--gemini-key or env)", file=sys.stderr)
+    backend = args.backend
+    if backend == "auto":
+        backend = "gemini" if gemini_key else "codex"
+    if backend == "gemini" and not gemini_key:
+        print("error: GEMINI_API_KEY required (--gemini-key or env), "
+              "or use --backend codex", file=sys.stderr)
         return 2
     gemini_url = ("https://generativelanguage.googleapis.com/v1beta/models/"
-                  + args.model + ":generateContent")
+                  + (args.model or "gemini-2.5-flash-image") + ":generateContent")
+    if backend == "codex" and (args.image_size or args.aspect_ratio):
+        print("[codex] --image-size / --aspect-ratio are Gemini-only; ignored",
+              file=sys.stderr)
+    print(f"[backend] {backend}")
 
     # Build species list
     if args.from_birdnet:
@@ -677,14 +851,22 @@ def main() -> int:
                 style_ref_path = args.styles / select_style_ref(sci, pose)
                 if not style_ref_path.exists():
                     style_ref_path = None
-                data = gen_one(gemini_key, prompt, sci, com, pose,
-                               positive_ref=pos_ref, anti_ref=anti,
-                               anti_ref_key=anti_key_for_call,
-                               species_note=notes.get(sci),
-                               style_ref=style_ref_path,
-                               url=gemini_url,
-                               image_size=args.image_size,
-                               aspect_ratio=args.aspect_ratio)
+                if backend == "codex":
+                    data = gen_one_codex(prompt, sci, com, pose,
+                                         positive_ref=pos_ref, anti_ref=anti,
+                                         anti_ref_key=anti_key_for_call,
+                                         species_note=notes.get(sci),
+                                         style_ref=style_ref_path,
+                                         model=args.model)
+                else:
+                    data = gen_one(gemini_key, prompt, sci, com, pose,
+                                   positive_ref=pos_ref, anti_ref=anti,
+                                   anti_ref_key=anti_key_for_call,
+                                   species_note=notes.get(sci),
+                                   style_ref=style_ref_path,
+                                   url=gemini_url,
+                                   image_size=args.image_size,
+                                   aspect_ratio=args.aspect_ratio)
                 path.write_bytes(data)
                 done += 1
                 refs_tag = "+ref" if pos_ref else ""
