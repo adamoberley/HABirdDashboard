@@ -65,7 +65,8 @@ at home [pushed to a Samsung Frame TV](#display-it-on-a-samsung-frame-tv-optiona
 - **Species names** (optional) - a line of names along the bottom of the
   collage, common and/or scientific at any size, so a bird you don't
   recognise can be looked up (tap a name for its details). Also lists any
-  species the library has no artwork for yet.
+  species the library has no artwork for yet. Or write each name right under
+  its bird instead (`labels`); the birds pack around the names.
 - **Stats** - an editorial detection timeline plus by-period counts, top
   species, and the newest additions to your life list.
 - **Atlas** - a field-guide card grid of every species ever heard, with
@@ -235,6 +236,8 @@ title: ""                    # empty = no title; set any text for a heading
 names: off                   # species-name strip along the bottom of the
                              #   collage: off | common | scientific | both
 names_size: 13               # font size of that strip, in px
+labels: off                  # each bird's name under it in the collage:
+                             #   off | common | scientific (size: names_size)
 window: "24"                 # time window in hours, "today" or "all" - the
                              #   card has no on-screen picker; this is the
                              #   window. "24" is the rolling 24 hours;
@@ -330,6 +333,14 @@ simply not drawn. There is deliberately no "missing artwork" badge, because
 that isn't an open-ended situation: see [Missing artwork for your
 area?](#missing-artwork-for-your-area) - your station's species list is
 finite, so one pass of the art pipeline closes every gap for good.
+
+**Name beside each bird** (`labels`, default off): writes each bird's name
+right under it in the collage - `common` or `scientific` - at the same size
+as the strip (`names_size`). The packing treats each name as part of its
+bird, so a name never sits on another bird, on the clock or on the strip;
+birds simply pack a little further apart, and shrink a little on a busy day
+to make room. Tapping a name opens that bird, like tapping the bird. Use it
+on its own or alongside the strip.
 
 **Weather** reads your Home Assistant weather integration directly through
 the card's own connection - no access token, in your HA units, with
@@ -678,8 +689,10 @@ ring layout). Add it with a **Webpage** dashboard pointing at
 `/local/habird/index.html`, and dress up a specific display with URL params:
 `?wall` / `?corner=top-left` for the clock block, `?ring` / `?hole=0.5` for the
 ring layout, `?names` (or `?names=scientific` / `?names=both`) plus
-`?names_size=18` for the species-name strip. Each has a `config.js` equivalent
-(`AV_CONFIG.names`, `AV_CONFIG.namesSize`); the URL param wins, so one shared
+`?names_size=18` for the species-name strip, `?labels` (or
+`?labels=scientific` / `?labels=off`) for a name under each bird. Each has a
+`config.js` equivalent (`AV_CONFIG.names`, `AV_CONFIG.namesSize`,
+`AV_CONFIG.labels`); the URL param wins, so one shared
 `config.js` can drive several displays that differ only in how they're dressed.
 
 The page is plain static files, so it doesn't need Home Assistant at all:

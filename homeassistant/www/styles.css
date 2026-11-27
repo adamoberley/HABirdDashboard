@@ -1772,6 +1772,28 @@ body.av-no-picker .name-strip, body.av-picker-top .name-strip { bottom: 18px; }
   body.av-no-picker .name-strip, body.av-picker-top .name-strip { bottom: 12px; }
 }
 
+/* Name caption under each bird (issue #97). A child of its .gtile, placed
+   by JS exactly where the packer reserved its box, so it glides, blooms
+   and fades with the bird. Same voice as the strip: display face, common
+   names upright, scientific italic, at the shared names size (--gl-size,
+   set on the collage). One line; a name wider than the card ends in an
+   ellipsis rather than being cut. dir="auto" on the element keeps an
+   RTL-script name in its own order. */
+.gtile-label {
+  position: absolute; left: 0; top: 0; display: block; box-sizing: border-box;
+  margin: 0; padding: 0;
+  font-family: var(--av-font-display); font-style: normal; font-weight: 400;
+  font-size: var(--gl-size, 13px); line-height: 1.3; letter-spacing: 0;
+  color: var(--ink); text-align: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  pointer-events: none; user-select: none;
+  transition: left 760ms cubic-bezier(.3, 0, .2, 1),
+              top 760ms cubic-bezier(.3, 0, .2, 1),
+              color 140ms ease;
+}
+.gtile-label[data-mode="scientific"] { font-style: italic; }
+.gtile.is-hover .gtile-label { color: var(--accent-2); }
+
 /* ---- Recording-row review flag ---- */
 /* Writes a false-positive review back to BirdNET-Go. A quiet ghost x
    beside the confidence; first tap arms it into a labelled pill, second
