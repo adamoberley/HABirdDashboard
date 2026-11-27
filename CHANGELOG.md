@@ -3,6 +3,13 @@
 ## Unreleased
 
 ### Added
+- **Generate artwork with a ChatGPT plan instead of a Gemini key.**
+  `pregen.py --backend codex` renders through the Codex CLI's built-in
+  image tool on whatever account `codex` is signed in with, so a ChatGPT
+  plan covers it with no per-image bill. Same prompt, references and
+  cream ground as the Gemini path. Gemini stays the default;
+  `--backend auto` picks Codex when no `GEMINI_API_KEY` is set. AGENTS.md
+  and the pipeline README cover both.
 - **Docker setup for the standalone page**
   ([#96](https://github.com/adamoberley/HABirdDashboard/issues/96),
   suggested by @max-elman and @razorfrog). `docker/` runs the page in
@@ -11,9 +18,10 @@
   CDN and caches it, and proxies `/api/v2/` to BirdNET-Go on the same
   origin, adding a Private Mode token server-side when one is set.
 
-## Unreleased
-
 ### Fixed
+- **`pregen.py` finds Wikipedia reference photos again.** Wikipedia now
+  appends `?utm_…` to image URLs, so the extension check rejected every
+  reference (found by @praxis88 in #103).
 - **Birds heard within 2 seconds of each other keep their own names**
   ([#104](https://github.com/adamoberley/HABirdDashboard/issues/104),
   reported with a fix by @GuiAlDuS). With `data_source: ha`, two
