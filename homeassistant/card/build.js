@@ -75,6 +75,7 @@ let css = cssSrc
   .replace(/body\.av-title-overlay/g, '.av-shell.av-title-overlay')
   .replace(/body\.av-picker-top/g, '.av-shell.av-picker-top')
   .replace(/body\.av-no-picker/g, '.av-shell.av-no-picker')
+  .replace(/body\.av-view-latest/g, '.av-shell.av-view-latest')
   // app chrome pinned to the app frame, not the browser viewport
   .replace(/position: fixed/g, 'position: absolute')
   // Responsiveness must track the CARD's box, not the browser window: a
@@ -124,6 +125,11 @@ css += `
    (it's stamped into the packing grid as an obstacle instead), so the
    flock centres in the true middle of the card. */
 .view#v0 { padding: 12px 14px; }
+/* Latest-bird view (#94): the card has no window picker on top, so the
+   bird uses the full height, clearing only the view switcher. */
+.view#v3 { padding: 20px 16px 64px; }
+.av-shell.av-no-picker .view#v3 { padding-bottom: 20px; }
+.av-shell.av-picker-top .view#v3 { padding: 64px 16px 20px; }
 /* Clock/weather sit a finger's width off the card's true corners. */
 .wall-widgets[data-corner$="right"] { right: 16px; }
 .wall-widgets[data-corner$="left"]  { left: 16px; }
@@ -284,7 +290,9 @@ var HABIRD_EDITOR_SCHEMA = [
         { value: 'collage', label: 'Collage' },
         { value: 'stats', label: 'Stats' },
         { value: 'atlas', label: 'Atlas' },
+        { value: 'latest', label: 'Latest bird' },
       ] } } },
+      { name: 'latest_view', selector: { boolean: {} } },
       { name: 'selector_position', selector: { select: { mode: 'dropdown', options: [
         { value: 'bottom', label: 'Bottom' },
         { value: 'top', label: 'Top' },
@@ -355,6 +363,7 @@ var HABIRD_LABELS = {
   names_size: 'Species names size',
   labels: 'Name beside each bird',
   view_selector: 'Show the view switcher',
+  latest_view: 'Latest-bird view',
   selector_position: 'Switcher position',
   background: 'Background',
   font: 'Font',
@@ -392,6 +401,7 @@ var HABIRD_HELPERS = {
   names_size: 'Font size of the species-name strip and the name captions, in pixels (default 13).',
   labels: "Default: off. Writes each bird's name right under it in the collage. The birds pack around the names, so a name never sits on another bird.",
   view_selector: 'Turn off to lock this card to one view.',
+  latest_view: 'Adds a fourth view showing only the most recently heard bird, large, with its name, when it was heard and its confidence. Choosing View: Latest bird turns it on too.',
   selector_position: 'At the top, a title moves down to sit below the switcher.',
   weather_entity: 'Default (blank): the first weather.* entity found.',
   hide_cursor: 'For wall displays: pointer disappears after 8 s idle.',
@@ -443,8 +453,11 @@ function habirdClaimLink(card, link) {
 class HABirdCard extends HTMLElement {
   setConfig(config) {
     config = config || {};
-    if (config.view && ['collage', 'stats', 'atlas'].indexOf(config.view) < 0) {
-      throw new Error("view must be 'collage', 'stats' or 'atlas'");
+    if (config.view && ['collage', 'stats', 'atlas', 'latest'].indexOf(config.view) < 0) {
+      throw new Error("view must be 'collage', 'stats', 'atlas' or 'latest'");
+    }
+    if (config.latest_view != null && typeof config.latest_view !== 'boolean') {
+      throw new Error('latest_view must be true or false');
     }
     if (config.window && config.window !== 'all' && config.window !== 'today' && !(+config.window > 0)) {
       throw new Error("window must be a positive number of hours, 'today' or 'all'");
@@ -591,6 +604,8 @@ class HABirdCard extends HTMLElement {
       labels: c.labels || 'off',
       view: c.view || 'collage',             // which view this card shows
       viewSelector: c.view_selector !== false,
+      // Latest-bird view (#94): off unless asked for (or view: latest).
+      latestView: c.latest_view === true,
       selectorPosition: c.selector_position || 'bottom',
       windowHours: c.window || 24,           // hours, 'today' or 'all'
       birdnetGoUrl: c.birdnet_url || '',
@@ -716,7 +731,7 @@ class HABirdCardEditor extends HTMLElement {
       this.appendChild(this._form);
     }
     this._form.schema = HABIRD_EDITOR_SCHEMA;
-    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, selector_position: 'bottom', names: 'off', names_size: 13, labels: 'off', collage_fill: 0.5, size_contrast: 0.5, paper_color: '', paper_color_dark: '', paper_texture: 0, audio_boost: 24, live: true }, this._config);
+    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, latest_view: false, selector_position: 'bottom', names: 'off', names_size: 13, labels: 'off', collage_fill: 0.5, size_contrast: 0.5, paper_color: '', paper_color_dark: '', paper_texture: 0, audio_boost: 24, live: true }, this._config);
     this._form.hass = this._hass;
   }
 }

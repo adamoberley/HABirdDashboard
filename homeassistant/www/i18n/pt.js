@@ -11,6 +11,7 @@
   'view.collage': 'colagem',
   'view.stats': 'estatísticas',
   'view.atlas': 'atlas',
+  'view.latest': 'último',
   'view.aria': 'Vista',
 
   // ---- Window picker (abbreviations) ----
@@ -31,6 +32,7 @@
   'aria.collage': 'Colagem de aves',
   'aria.stats': 'Estatísticas',
   'aria.atlas': 'Atlas',
+  'aria.latest': 'Última ave',
   'names.aria': 'Espécies ouvidas',
 
   // ---- Time-window labels (windowLabel) ----
@@ -87,6 +89,11 @@
   'atlas.allTime': 'sempre',
   'atlas.new': 'nova',
   'atlas.newTitle': 'primeira vez que esta espécie foi ouvida aqui',
+
+  // ---- Latest-bird view ----
+  'latest.eyebrow': 'ouvida pela última vez',
+  'latest.emptyHint': 'A próxima ave ouvida aparece aqui.',
+  'latest.confidence': '{pct}% de confiança',
 
   // ---- Detail modal: chrome ----
   'modal.close': 'Fechar',

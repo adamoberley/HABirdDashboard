@@ -1328,6 +1328,27 @@
   // ---- Slider ----
   var views = document.getElementById('views');
   var slider = document.getElementById('slider');
+  // Which views this page has (#94). The latest-bird view (#v3) is opt-in:
+  // latestView: true (card: latest_view), view: 'latest', or on the static
+  // page ?latest / ?view=latest. Without it, its section and switcher
+  // button leave the DOM before anything indexes them, so the collage,
+  // stats and atlas keep their places and the switcher its three tabs.
+  var VIEW_NAMES = ['collage', 'stats', 'atlas', 'latest'];
+  var START_VIEW = (function () {
+    if (window.AV_CONFIG) {   // static page only: a card never reads the URL
+      var m = location.search.match(/[?&]view=([a-z]+)/);
+      if (m && VIEW_NAMES.indexOf(m[1]) >= 0) return m[1];
+    }
+    return VIEW_NAMES.indexOf(AV_CFG.view) >= 0 ? AV_CFG.view : 'collage';
+  })();
+  var LATEST_ON = AV_CFG.latestView === true || START_VIEW === 'latest' ||
+    (!!window.AV_CONFIG && /[?&]latest(=|&|$)/.test(location.search));
+  if (!LATEST_ON) {
+    var __latestView = document.getElementById('v3');
+    if (__latestView) __latestView.parentNode.removeChild(__latestView);
+    var __latestBtn = slider.querySelector('button[data-i="3"]');
+    if (__latestBtn) __latestBtn.parentNode.removeChild(__latestBtn);
+  }
   var btns = [].slice.call(slider.querySelectorAll('button'));
   var winPick = document.getElementById('winPick');
 
@@ -1336,7 +1357,7 @@
   // with no fade (collage and stats both say Heard Recently). Titles are
   // resolved through t() lazily (at view-switch time) so translations that
   // load with the app are picked up; a config `title` pins a custom string.
-  var VIEW_TITLE_KEYS = ['title.heardRecently', 'title.heardRecently', 'title.avianVisitors'];
+  var VIEW_TITLE_KEYS = ['title.heardRecently', 'title.heardRecently', 'title.avianVisitors', 'title.heardRecently'];
   var CUSTOM_TITLE = null;
   var staticHead = document.querySelector('.static-head');
   var staticTitle = document.getElementById('staticTitle');
@@ -1407,7 +1428,7 @@
   var STATS_LEAD = SLIDE_MS - 200;    // stats - begin a touch sooner
   var currentView = 0;                // collage shows first (no go() needed)
   function go(i) {
-    i = Math.max(0, Math.min(2, i));
+    i = Math.max(0, Math.min(btns.length - 1, i));
     // Only a genuine view *switch* replays the entrance. go() also fires when
     // a card is expanded (it sets the #sci= hash, which routes through go(2))
     // while already on the atlas - that must not retrigger the load-in.
@@ -1416,6 +1437,9 @@
     // Stats + atlas drop the shared title so their content gets the full height.
     document.body.classList.toggle('av-view-stats', i === 1);
     document.body.classList.toggle('av-view-atlas', i === 2);
+    // The latest-bird view prints its own name heading, so it drops the
+    // shared title too (a floated custom title would sit on the bird).
+    document.body.classList.toggle('av-view-latest', i === 3);
     views.style.transform = 'translateX(' + (getComputedStyle(views).direction === 'rtl' ? '' : '-') + (i * 100) + '%)';
     btns.forEach(function (b, j) { b.setAttribute('aria-current', j === i ? 'true' : 'false'); });
     syncPill(slider);
@@ -1426,6 +1450,10 @@
     if (i === 0) playCollageEntrance();
     else if (i === 1) playStatsEntrance(STATS_LEAD);
     else if (i === 2) playAtlasEntrance(SWITCH_LEAD);
+    else if (i === 3) playLatestEntrance(SWITCH_LEAD);
+    // The latest view only works (confidence lookup, "ago" tick) while
+    // it's the one on screen.
+    if (i === 3) renderLatest(); else stopLatestTick();
   }
   btns.forEach(function (b) { b.addEventListener('click', function () { go(+b.dataset.i); }); });
 
@@ -1538,10 +1566,12 @@
   // Card builds: pin the starting view, and optionally hide the
   // collage/stats/atlas selector so a card can BE a single view (one
   // dashboard can then mix a collage card, a stats card, an atlas card).
-  if (AV_CFG && AV_CFG.view) {
-    var __vi = { collage: 0, stats: 1, atlas: 2 }[AV_CFG.view];
-    if (__vi) go(__vi);
-  }
+  // The static page takes the same from config.js view or ?view=.
+  var __vi = VIEW_NAMES.indexOf(START_VIEW);
+  if (__vi > 0 && __vi < btns.length) go(__vi);
+  // A card locked to the latest view (no switcher) can't get back from
+  // the atlas, so a #sci= deep link opens the details in place there.
+  var LATEST_LOCKED = LATEST_ON && START_VIEW === 'latest' && AV_CFG.viewSelector === false;
   if (AV_CFG && AV_CFG.viewSelector === false && slider) {
     slider.style.display = 'none';
     // Lets the CSS reclaim the picker's clearance (paddings, wall
@@ -3293,8 +3323,11 @@
   // this file). Call sites throughout this file still ask for the BirdNET-Pi
   // PHP shims; this recognises those URLs and answers them from BirdNET-Go's
   // REST API instead, returning the exact same JSON shapes. Anything else
-  // falls through to a plain fetch.
-  function fetchJson(url) {
+  // falls through to a plain fetch. opts.quiet: a side lookup whose data
+  // source (REST or HA history) must not change what the rest of the card
+  // believes about where its data came from (fetchJson.viaHa / .haWhy).
+  function fetchJson(url, opts) {
+    var quiet = !!(opts && opts.quiet);
     var m = /avian\/api\/([a-z-]+)\.php(?:\?(.*))?$/.exec(url);
     if (m) {
       var q = {};
@@ -3330,18 +3363,18 @@
           // recordings need the direct connection instead of offering play
           // buttons that can only fail (#73).
           var viaHa = function () {
-            return ha().then(function (v) { fetchJson.viaHa = true; return v; });
+            return ha().then(function (v) { if (!quiet) fetchJson.viaHa = true; return v; });
           };
           var viaApi = function () {
-            return api().then(function (v) { fetchJson.viaHa = false; return v; });
+            return api().then(function (v) { if (!quiet) fetchJson.viaHa = false; return v; });
           };
           if (mode === 'ha') return haAvailable() ? viaHa() : Promise.reject('HA data source needs the card (hass) or a haToken');
           if (mode === 'api' || !haAvailable()) return viaApi();
           return viaApi().catch(function (apiErr) {
             // Keep the fallback's own reason so the card can explain why
             // it found nothing (#73) - read by apiErrorText().
-            return viaHa().then(function (v) { fetchJson.haWhy = ''; return v; },
-              function (haErr) { fetchJson.haWhy = haErr; return Promise.reject(apiErr); });
+            return viaHa().then(function (v) { if (!quiet) fetchJson.haWhy = ''; return v; },
+              function (haErr) { if (!quiet) fetchJson.haWhy = haErr; return Promise.reject(apiErr); });
           });
         };
         var hours, sci2, days2, lim;
@@ -3862,6 +3895,175 @@
     if (animate) playAtlasEntrance();
   }
 
+  // ---- Latest-bird view (#94) ----
+  // Only the most recently heard species in the current window, drawn
+  // large: its perched illustration, its name (common and/or scientific,
+  // following the names setting), how long ago it was heard, and - when
+  // that detection is in the species' detection list - how sure BirdNET
+  // was. It reads DATA.recent like the collage, so every data source
+  // (BirdNET-Go's API, HA's MQTT history) and every refresh trigger (the
+  // poll, the live stream, an MQTT push) moves it on the same way. Tapping
+  // the bird goes through the same tap dispatcher as the collage.
+  var latestEl = document.getElementById('latestBird');
+  // Local "YYYY-MM-DD HH:MM[:SS]" (or with a T) -> ms epoch; NaN if not one.
+  function stampMs(v) {
+    var m = /^(\d{4})-(\d\d)-(\d\d)[T ](\d\d):(\d\d)(?::(\d\d))?/.exec(String(v || ''));
+    return m ? new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0)).getTime() : NaN;
+  }
+  // Start of the selected window, exactly. The collage's hourly
+  // aggregation (bgRecent) counts a whole hour bucket that overlaps the
+  // window edge - fine for sizing a flock, but this view names one call,
+  // so a call from before the edge must not be it.
+  function latestCutoff() {
+    if (windowToday) {
+      var n = new Date();
+      return new Date(n.getFullYear(), n.getMonth(), n.getDate()).getTime();
+    }
+    return currentHours >= 1000000 ? -Infinity : Date.now() - currentHours * 3600000;
+  }
+  // The newest row by last_seen that lies inside the window. Rows are
+  // only used when they were fetched for the window now selected - a
+  // window change whose fetch failed leaves the previous window's rows
+  // in DATA.recent, and its bird isn't this window's latest. Rows without
+  // a timestamp only win when nothing has one, and never in a window
+  // shorter than a day: there the rows come from hour buckets that can
+  // overlap the window edge, and an undated row can't be checked.
+  function latestSpecies() {
+    if (!DATA.recent || DATA.recentKey !== windowKey()) return null;
+    var rows = (DATA.recent.species || []).filter(function (s) { return s && s.sci; });
+    var timed = rows.filter(function (s) { return !isNaN(stampMs(s.last_seen)); });
+    if (!timed.length) return (windowToday || currentHours >= 24) ? (rows[0] || null) : null;
+    var cutoff = latestCutoff(), best = null, bestT = -Infinity;
+    timed.forEach(function (s) {
+      var t = stampMs(s.last_seen);
+      if (t >= cutoff && t > bestT) { best = s; bestT = t; }
+    });
+    return best;
+  }
+  // A timestamp in last_seen's format ("YYYY-MM-DD HH:MM:SS"). The API
+  // splits a detection's into date + time; some builds send one ISO
+  // string in the date field.
+  function detectionStamp(d) {
+    var ds = String(d.d || '');
+    return (/[T ]\d\d:/.test(ds) ? ds.replace('T', ' ') : ds + ' ' + (d.t || '')).slice(0, 19);
+  }
+  // Confidence of the detection on show: the entry of the species'
+  // detection list with last_seen's exact timestamp (to the second; when
+  // last_seen only has minutes, the one call in that minute). Unknown (no
+  // match, or the lookup failed) leaves the confidence off rather than
+  // guessing - the window's best confidence would misstate this one call.
+  // A failed or unmatched lookup (the list can lag the summary) is tried
+  // again on a later render, up to LATEST_CONF_TRIES times per detection.
+  // It runs only while the view is on screen, and its data source stays
+  // its own: the quiet fetch doesn't touch the card-wide API-vs-MQTT flag
+  // the atlas and the details modal read.
+  // After an answer that had no match, the next try waits out the species
+  // fetch's 30 s memo, so it's a fresh request rather than the same cached
+  // answer counted again. A failed request isn't cached; it retries at once.
+  var LATEST_CONF_TRIES = 3, LATEST_CONF_SPACING = 31000;
+  var latestConf = { key: '', conf: null, tries: 0, busy: false, at: 0 };
+  function lookupLatestConf(s, key) {
+    if (latestConf.key !== key) latestConf = { key: key, conf: null, tries: 0, busy: false, at: 0 };
+    var mine = latestConf;
+    if (mine.conf != null || mine.busy || mine.tries >= LATEST_CONF_TRIES) return;
+    if (mine.at && Date.now() - mine.at < LATEST_CONF_SPACING) return;
+    if (currentView !== 3 || document.hidden || !latestEl || !latestEl.isConnected) return;
+    var want = String(s.last_seen || '').replace('T', ' ').slice(0, 19);
+    if (!/:\d\d:\d\d$/.test(want)) want = want.slice(0, 16);
+    if (want.length < 16) return;
+    mine.busy = true;
+    mine.tries++;
+    fetchJson('./avian/api/birdnet-api.php?action=species&sci=' + encodeURIComponent(s.sci), { quiet: true }).then(function (j) {
+      mine.busy = false;
+      mine.at = Date.now();               // answered: a retry must outlive the memo
+      var hits = ((j && j.detections) || []).filter(function (d) {
+        return detectionStamp(d).slice(0, want.length) === want;
+      });
+      var hit = (want.length === 19 || hits.length === 1) ? hits[0] : null;
+      if (latestConf !== mine || !hit || !(+hit.conf > 0)) return;
+      mine.conf = +hit.conf;
+      renderLatest();
+    }, function () { mine.busy = false; });
+  }
+  // "5m ago" keeps counting between detections: a 30 s re-render while
+  // the view is on screen and the card is on the page. Leaving the view,
+  // a hidden tab, removal and reconfigure (via the exposed stop) end it;
+  // the next render of the shown view starts it again.
+  var latestTickT = null;
+  function stopLatestTick() { clearTimeout(latestTickT); latestTickT = null; }
+  function scheduleLatestTick() {
+    stopLatestTick();
+    if (currentView !== 3 || document.hidden || !latestEl || !latestEl.isConnected) return;
+    latestTickT = setTimeout(function () { latestTickT = null; renderLatest(); }, 30000);
+  }
+  function renderLatest() {
+    if (!LATEST_ON || !latestEl) return;
+    var s = latestSpecies();
+    if (!s) {
+      var err = apiErrorText();
+      latestEl.__bird = '';
+      setHtml(latestEl, '<div class="latest-empty">' + (err
+        ? '<p>' + esc(err) + '</p>'
+        : '<p>' + esc(tt('atlas.noWindowTitle')) + '</p><p class="hint">' + esc(tt('latest.emptyHint')) + '</p>')
+        + '</div>');
+      scheduleLatestTick();
+      return;
+    }
+    var mode = nameStripMode();
+    var com = s.com || s.sci;
+    // The bird itself only rebuilds when the species (or the names
+    // setting) changes; a new call from the same bird just updates the
+    // line under it, so the artwork doesn't blink on every detection.
+    var bird = s.sci + '|' + mode;
+    if (latestEl.__bird !== bird) {
+      var hadBird = !!latestEl.__bird;
+      latestEl.__bird = bird;
+      setHtml(latestEl, '<button type="button" class="latest-bird" data-sci="' + esc(s.sci) + '">'
+        + '<span class="latest-img"><img decoding="async" src="' + sketchSrc(s.sci, 1) + '" alt=""' + birdImgAttrs(s.sci, 1) + '></span>'
+        + '<span class="latest-eyebrow">' + esc(tt('latest.eyebrow')) + '</span>'
+        + '<span class="latest-com">' + esc(mode === 'scientific' ? s.sci : com) + '</span>'
+        + (mode === 'scientific' || mode === 'common' ? '' : '<span class="latest-sci">' + esc(s.sci) + '</span>')
+        + '<span class="latest-meta"></span>'
+        + '</button>');
+      // A different bird arriving while the view is up fades it in.
+      if (hadBird) playLatestEntrance();
+    }
+    lookupLatestConf(s, s.sci + '|' + (s.last_seen || ''));
+    var meta = '';
+    if (s.last_seen) {
+      var d = s.last_seen.slice(0, 10), t = s.last_seen.slice(11);
+      meta += '<span class="latest-ago">' + esc(fmtRecTime(d, t)) + '</span>'
+        + '<span class="latest-clock">' + esc(fmtDateLine(d, t)) + '</span>';
+    }
+    if (latestConf.conf != null) {
+      meta += '<span class="latest-conf">' + esc(tt('latest.confidence', { pct: Math.round(latestConf.conf * 100) })) + '</span>';
+    }
+    setHtml(latestEl.querySelector('.latest-meta'), meta);
+    scheduleLatestTick();
+  }
+  // Fade + rise the bird in: on switching to the view (after the slide,
+  // like the atlas) and when a different bird takes its place.
+  var latestEntranceT = null;
+  function playLatestEntrance(lead) {
+    var el = latestEl && latestEl.firstElementChild;
+    if (!el) return;
+    el.classList.remove('entering');
+    el.style.animationDelay = (lead || 0) + 'ms';
+    void el.offsetWidth;
+    el.classList.add('entering');
+    clearTimeout(latestEntranceT);
+    latestEntranceT = setTimeout(function () {
+      el.classList.remove('entering');
+      el.style.animationDelay = '';
+    }, (lead || 0) + 700);
+  }
+  if (LATEST_ON && latestEl) {
+    latestEl.addEventListener('click', function (ev) {
+      var b = ev.target.closest && ev.target.closest('.latest-bird');
+      if (b) handleBirdTap(b.getAttribute('data-sci'));
+    });
+  }
+
   function renderWindowDependent(animate) {
     // renderStatsLists runs BEFORE renderActivity so the stats entrance
     // (fired at the end of renderActivity) can stagger the side-panel rows
@@ -3870,6 +4072,7 @@
     renderStatsLists();
     renderActivity(animate);
     renderAtlas(animate);
+    renderLatest();
   }
   function renderTimeIndependent(animate) {
     // Lists first, then the heatmap (see renderWindowDependent).
@@ -3878,13 +4081,30 @@
     renderAtlas(animate);
   }
 
+  // Issue order of the window-scoped fetches (refreshAll and
+  // refreshRecent share it). Two refreshes of the same window can land out
+  // of order (a slow response behind a push refresh): the older must not
+  // put older rows back over newer ones - in the collage or the
+  // latest-bird view. Tracked per window AND per slice, so an older
+  // response for the window now showing still lands when the newer one
+  // was for another window, or failed for that slice.
+  var recentGen = 0, shownGen = {};
+  function acceptSlice(slice, key, gen) {
+    var k = slice + '|' + key;
+    if (gen < (shownGen[k] || 0)) return false;
+    shownGen[k] = gen;
+    return true;
+  }
+  function sliceCurrent(slice, key, gen) {
+    return gen >= (shownGen[slice + '|' + key] || 0);
+  }
   function refreshRecent(animate) {
     // Capture the window this fetch was issued for. If the user
     // changes the picker again before it resolves - or a slower poll
     // lands later - we discard the stale response so the collage
     // never reverts to a different window.
     syncTodayWindow();
-    var forHours = currentHours, forKey = windowKey();
+    var forHours = currentHours, forKey = windowKey(), gen = ++recentGen;
     return Promise.all([
       fetchJson('./avian/api/birdnet-api.php?action=recent&hours=' + forHours),
       fetchJson('./avian/api/birdnet-api.php?action=activity&hours=' + forHours)
@@ -3894,16 +4114,25 @@
         : Promise.resolve(null),
     ]).then(function (parts) {
         if (forKey !== windowKey()) return; // window changed mid-flight
+        if (!acceptSlice('recent', forKey, gen)) return;   // a newer fetch already landed
         DATA.recent = parts[0];
-        DATA.activity = parts[1];
-        DATA.visits = parts[2];
+        DATA.recentKey = forKey;
+        // A failed secondary slice still clears to null, as before - unless
+        // a newer fetch has already filled it.
+        if (parts[1] ? acceptSlice('activity', forKey, gen) : sliceCurrent('activity', forKey, gen)) DATA.activity = parts[1];
+        if (parts[2] ? acceptSlice('visits', forKey, gen) : sliceCurrent('visits', forKey, gen)) DATA.visits = parts[2];
         renderWindowDependent(animate);
       })
-      .catch(function (e) { console.warn('recent fetch failed', e); });
+      .catch(function (e) {
+        console.warn('recent fetch failed', e);
+        // The collage keeps the rows it has, but they belong to the
+        // previous window - the latest-bird view stops naming one of them.
+        renderLatest();
+      });
   }
   function refreshAll(animate) {
     syncTodayWindow();
-    var forHours = currentHours, forKey = windowKey();
+    var forHours = currentHours, forKey = windowKey(), gen = ++recentGen;
     // Only the primary summary/daily fetches (stats + lifelist) flip the
     // Private Mode message - a 401 from a secondary call (timeseries,
     // visits, ...) still means "not signed in", but stats/lifelist always
@@ -3935,15 +4164,17 @@
       DATA.timeseries = parts[2];
       DATA.firstseen = parts[3];
       // Only accept the window-scoped slices if the window hasn't changed
-      // since this poll started - otherwise keep what's there.
+      // since this poll started, and no newer fetch has landed since -
+      // otherwise keep what's there.
       if (forKey === windowKey()) {
-        if (parts[4]) DATA.recent = parts[4];
-        if (parts[5]) DATA.activity = parts[5];
-        if (parts[6]) DATA.visits = parts[6];
+        if (parts[4] && acceptSlice('recent', forKey, gen)) { DATA.recent = parts[4]; DATA.recentKey = forKey; }
+        if (parts[5] && acceptSlice('activity', forKey, gen)) DATA.activity = parts[5];
+        if (parts[6] && acceptSlice('visits', forKey, gen)) DATA.visits = parts[6];
       }
       recomputeDerived();
       renderTimeIndependent(animate);
       renderCollageFromData(animate);
+      renderLatest();
     });
   }
 
@@ -3982,6 +4213,7 @@
     if (document.hidden) {
       stopPolling();
       stopLive();
+      stopLatestTick();
     } else {
       // Force an immediate refresh on return so the user sees fresh
       // data right away, then resume normal polling cadence.
@@ -4094,7 +4326,7 @@
   // Card builds call this from disconnectedCallback so a stream doesn't
   // linger once the card leaves the dashboard. No-op on the static page.
   if (AV_CFG.__exposeLiveStop) {
-    AV_CFG.__exposeLiveStop(stopLive);
+    AV_CFG.__exposeLiveStop(function () { stopLive(); stopLatestTick(); });
   }
 
   // ---- Menu dropdown ----
@@ -5539,7 +5771,10 @@
 
   // Initial load: if URL has a sci hash, jump to atlas, highlight, and
   // open the modal.
-  if (readHash()) { go(2); highlightAtlas(readHash()); openDetailModal(readHash()); }
+  if (readHash()) {
+    if (!LATEST_LOCKED) { go(2); highlightAtlas(readHash()); }
+    openDetailModal(readHash());
+  }
   // Admin overlay routing: #admin=system|logs|tools opens the admin
   // screen with that sub-tab. Clearing the hash closes it.
   function readAdminHash() {
@@ -5557,7 +5792,10 @@
     if (location.hash === '#about') openAbout(); else closeAbout();
     if (adm) { openAdmin(adm); return; }
     closeAdmin();
-    if (sci) { go(2); highlightAtlas(sci); openDetailModal(sci); }
+    if (sci) {
+      if (!LATEST_LOCKED) { go(2); highlightAtlas(sci); }
+      openDetailModal(sci);
+    }
     else     { highlightAtlas(null); closeDetailModal(); }
   }
   if (readAdminHash()) openAdmin(readAdminHash());

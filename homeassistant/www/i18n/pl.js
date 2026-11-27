@@ -10,6 +10,7 @@
   'view.collage': 'kolaż',
   'view.stats': 'statystyki',
   'view.atlas': 'atlas',
+  'view.latest': 'ostatni',
   'view.aria': 'Widok',
 
   // ---- Window picker (abbreviations) ----
@@ -30,6 +31,7 @@
   'aria.collage': 'Kolaż ptaków',
   'aria.stats': 'Statystyki',
   'aria.atlas': 'Atlas',
+  'aria.latest': 'Ostatni ptak',
   'names.aria': 'Usłyszane gatunki',
 
   // ---- Time-window labels (windowLabel) ----
@@ -86,6 +88,11 @@
   'atlas.allTime': 'zawsze',
   'atlas.new': 'nowy',
   'atlas.newTitle': 'pierwszy raz, gdy ten gatunek został tutaj usłyszany',
+
+  // ---- Latest-bird view ----
+  'latest.eyebrow': 'ostatnio usłyszany',
+  'latest.emptyHint': 'Tu pojawi się następny usłyszany ptak.',
+  'latest.confidence': '{pct}% pewności',
 
   // ---- Detail modal: chrome ----
   'modal.close': 'Zamknij',

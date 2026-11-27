@@ -10,7 +10,7 @@ const end = src.indexOf('// ======================= end BirdNET-Go adapter');
 const adapter = src.slice(start, end);
 
 // fetchJson dispatcher
-const fjStart = src.indexOf('function fetchJson(url) {');
+const fjStart = src.indexOf('function fetchJson(url, opts) {');
 const fjEnd = src.indexOf('\n  }', src.indexOf('return fetch(url, { cache: \'no-store\' })', fjStart)) + 4;
 const fetchJsonSrc = src.slice(fjStart, fjEnd);
 

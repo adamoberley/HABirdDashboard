@@ -3,6 +3,18 @@
 ## Unreleased
 
 ### Added
+- **A latest-bird view**
+  ([#94](https://github.com/adamoberley/HABirdDashboard/issues/94),
+  requested by @tismofied). An optional fourth view shows only the most
+  recently heard bird, full size, instead of the collage: its perched
+  illustration, its name (following `names`), how long ago it was heard and
+  that detection's confidence. It follows the time window, moves on as new
+  detections arrive, and tapping the bird opens its details. Turn it on
+  with `latest_view: true`, or `view: latest` to open on it (with
+  `view_selector: false` for a card that is only the latest bird). On the
+  standalone page: `latestView` / `view` in `config.js`, or `?latest` and
+  `?view=latest` in the URL. Off by default, so existing dashboards don't
+  change.
 - **Optional name beside each bird in the collage**
   ([#97](https://github.com/adamoberley/HABirdDashboard/issues/97),
   requested by @max-elman). New `labels` option (card and visual editor;

@@ -155,6 +155,17 @@
       <div class="atlas-grid" id="atlasGrid"></div>
     </section>
 
+    <!-- ========== View 4 - Latest bird (#94) ==========
+         Just the most recently heard bird, large, with its name, when it
+         was heard and how sure BirdNET was. Off unless enabled in config
+         (latestView: true / card latest_view: true, or view: 'latest') or
+         via ?latest on the URL; apt.js removes this section and its
+         switcher button otherwise, so the other views keep their places.
+         renderLatest() fills it from the same window data as the collage. -->
+    <section class="view" id="v3" aria-label="Latest bird" data-i18n-aria="aria.latest">
+      <div class="latest" id="latestBird" aria-live="polite"></div>
+    </section>
+
   </div>
 </main>
 
@@ -253,6 +264,7 @@
   <button type="button" data-i="0" aria-current="true" data-i18n="view.collage">collage</button>
   <button type="button" data-i="1" data-i18n="view.stats">stats</button>
   <button type="button" data-i="2" data-i18n="view.atlas">atlas</button>
+  <button type="button" data-i="3" data-i18n="view.latest">latest</button>
 </nav>
 
 
