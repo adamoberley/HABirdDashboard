@@ -3,6 +3,18 @@
 ## Unreleased
 
 ### Added
+- **Optional name beside each bird in the collage**
+  ([#97](https://github.com/adamoberley/HABirdDashboard/issues/97),
+  requested by @max-elman). New `labels` option (card and visual editor;
+  `labels` in the standalone page's `config.js`): `off` (default),
+  `common` or `scientific`. Each bird's name sits right under it, at the
+  names-strip size (`names_size`). The packer reserves each name's box as
+  part of its bird, so a name never lands on another bird, the clock, the
+  title or the names strip, including rotated birds in the ring flow
+  layout. On a crowded plate a bird with no room for its name goes without
+  it rather than being left out. Tapping a name opens its bird. On the
+  standalone page `?labels`,
+  `?labels=scientific` or `?labels=off` overrides `config.js` per display.
 - **73 southeastern US species**
   ([#103](https://github.com/adamoberley/HABirdDashboard/pull/103), by
   @praxis88): birds, frogs and toads, insects, mammals and bats from north
