@@ -189,6 +189,18 @@ window.AV_CONFIG = {
   names: 'off',
   namesSize: 13,
 
+  // Latest-bird view (#94): a fourth view, after the atlas, that shows
+  // only the most recently heard bird - its perched illustration, large,
+  // with its name, how long ago it was heard and how sure BirdNET was. It
+  // follows the time window like the collage and updates as new
+  // detections arrive. Off by default, so the switcher keeps its three
+  // views. view picks the view the page opens on: 'collage' (default),
+  // 'stats', 'atlas' or 'latest' ('latest' turns the view on by itself).
+  // Per-display URL overrides on this static page: ?latest adds the view,
+  // ?view=latest (or collage / stats / atlas) opens on that view.
+  latestView: false,
+  // view: 'collage',
+
   // Wall-mounted display extras. All off by default for desk browsing.
   //
   // The clock/weather block lives in a corner of the collage itself, and

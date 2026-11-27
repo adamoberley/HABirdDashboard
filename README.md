@@ -70,6 +70,9 @@ at home [pushed to a Samsung Frame TV](#display-it-on-a-samsung-frame-tv-optiona
   species, and the newest additions to your life list.
 - **Atlas** - a field-guide card grid of every species ever heard, with
   playback of the latest recording and client-rendered spectrograms.
+- **Latest bird** (optional) - a fourth view with just the most recently
+  heard bird, full size: its name, how long ago it was heard and how sure
+  BirdNET was. It changes as new detections come in.
 - **Detail modals** - per-species recording history with scrubbable
   spectrograms, Wikipedia descriptions, rarity, and an info button that opens
   the Wikipedia article, plus an optional **reference call** (from Xeno-Canto) to
@@ -226,10 +229,13 @@ All editable in the visual editor; YAML equivalents:
 
 ```yaml
 type: custom:habird-card
-view: collage                # collage | stats | atlas - what this card shows
+view: collage                # collage | stats | atlas | latest - what this card shows
 view_selector: true          # false hides the switcher (single-view cards;
                              #   put a collage card, a stats card and an
                              #   atlas card on one dashboard if you like)
+latest_view: false           # true adds the latest-bird view to the switcher
+                             #   (see Latest bird below); view: latest turns
+                             #   it on too
 title: ""                    # empty = no title; set any text for a heading
                              #   (birds pack around it, clock-style)
 names: off                   # species-name strip along the bottom of the
@@ -330,6 +336,26 @@ simply not drawn. There is deliberately no "missing artwork" badge, because
 that isn't an open-ended situation: see [Missing artwork for your
 area?](#missing-artwork-for-your-area) - your station's species list is
 finite, so one pass of the art pipeline closes every gap for good.
+
+**Latest bird** (`latest_view`, default off): a fourth view, after the
+atlas, showing only the most recently heard bird instead of the whole
+flock - its perched illustration as large as the card allows, its name
+(common and scientific; `names: common` or `names: scientific` keeps just
+one), how long ago it was heard with the clock time, and that detection's
+confidence. It follows the card's time window, so when nothing has been
+heard in the window it says so. It moves on as soon as a new detection
+arrives (by MQTT, the live stream or the refresh interval), and tapping the
+bird opens its details like a tap in the collage. For a card that is
+*only* the latest bird:
+
+```yaml
+type: custom:habird-card
+view: latest
+view_selector: false
+```
+
+Without `latest_view` or `view: latest` the card keeps its three views
+exactly as before.
 
 **Weather** reads your Home Assistant weather integration directly through
 the card's own connection - no access token, in your HA units, with
@@ -678,9 +704,12 @@ ring layout). Add it with a **Webpage** dashboard pointing at
 `/local/habird/index.html`, and dress up a specific display with URL params:
 `?wall` / `?corner=top-left` for the clock block, `?ring` / `?hole=0.5` for the
 ring layout, `?names` (or `?names=scientific` / `?names=both`) plus
-`?names_size=18` for the species-name strip. Each has a `config.js` equivalent
-(`AV_CONFIG.names`, `AV_CONFIG.namesSize`); the URL param wins, so one shared
-`config.js` can drive several displays that differ only in how they're dressed.
+`?names_size=18` for the species-name strip, `?latest` to add the latest-bird
+view and `?view=latest` (or `collage` / `stats` / `atlas`) to open on a
+view. Each has a `config.js` equivalent (`AV_CONFIG.names`,
+`AV_CONFIG.namesSize`, `AV_CONFIG.latestView`, `AV_CONFIG.view`); the URL
+param wins, so one shared `config.js` can drive several displays that differ
+only in how they're dressed.
 
 The page is plain static files, so it doesn't need Home Assistant at all:
 any web server can host `homeassistant/www` (plus the artwork, as

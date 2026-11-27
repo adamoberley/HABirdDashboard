@@ -10,6 +10,7 @@
   'view.collage': 'collage',
   'view.stats': 'statistik',
   'view.atlas': 'atlas',
+  'view.latest': 'senaste',
   'view.aria': 'Vy',
 
   // ---- Window picker (abbreviations) ----
@@ -30,6 +31,7 @@
   'aria.collage': 'Fågelcollage',
   'aria.stats': 'Statistik',
   'aria.atlas': 'Atlas',
+  'aria.latest': 'Senaste fågeln',
   'names.aria': 'Hörda arter',
 
   // ---- Time-window labels (windowLabel) ----
@@ -86,6 +88,11 @@
   'atlas.allTime': 'någonsin',
   'atlas.new': 'ny',
   'atlas.newTitle': 'första gången denna art någonsin har hörts här',
+
+  // ---- Latest-bird view ----
+  'latest.eyebrow': 'senast hörd',
+  'latest.emptyHint': 'Nästa fågel som hörs visas här.',
+  'latest.confidence': '{pct}% säkerhet',
 
   // ---- Detail modal: chrome ----
   'modal.close': 'Stäng',

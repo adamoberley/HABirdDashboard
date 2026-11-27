@@ -10,6 +10,7 @@
   'view.collage': 'kollaasi',
   'view.stats': 'tilastot',
   'view.atlas': 'atlas',
+  'view.latest': 'viimeisin',
   'view.aria': 'Näkymä',
 
   // ---- Window picker (abbreviations) ----
@@ -30,6 +31,7 @@
   'aria.collage': 'Lintukollaasi',
   'aria.stats': 'Tilastot',
   'aria.atlas': 'Atlas',
+  'aria.latest': 'Viimeisin lintu',
   'names.aria': 'Kuullut lajit',
 
   // ---- Time-window labels (windowLabel) ----
@@ -86,6 +88,11 @@
   'atlas.allTime': 'kautta aikojen',
   'atlas.new': 'uusi',
   'atlas.newTitle': 'ensimmäinen kerta, kun tämä laji on kuultu täällä',
+
+  // ---- Latest-bird view ----
+  'latest.eyebrow': 'viimeksi kuultu',
+  'latest.emptyHint': 'Seuraava kuultu lintu näkyy tässä.',
+  'latest.confidence': '{pct}% varmuus',
 
   // ---- Detail modal: chrome ----
   'modal.close': 'Sulje',

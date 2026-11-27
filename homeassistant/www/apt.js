@@ -1298,6 +1298,27 @@
   // ---- Slider ----
   var views = document.getElementById('views');
   var slider = document.getElementById('slider');
+  // Which views this page has (#94). The latest-bird view (#v3) is opt-in:
+  // latestView: true (card: latest_view), view: 'latest', or on the static
+  // page ?latest / ?view=latest. Without it, its section and switcher
+  // button leave the DOM before anything indexes them, so the collage,
+  // stats and atlas keep their places and the switcher its three tabs.
+  var VIEW_NAMES = ['collage', 'stats', 'atlas', 'latest'];
+  var START_VIEW = (function () {
+    if (window.AV_CONFIG) {   // static page only: a card never reads the URL
+      var m = location.search.match(/[?&]view=([a-z]+)/);
+      if (m && VIEW_NAMES.indexOf(m[1]) >= 0) return m[1];
+    }
+    return VIEW_NAMES.indexOf(AV_CFG.view) >= 0 ? AV_CFG.view : 'collage';
+  })();
+  var LATEST_ON = AV_CFG.latestView === true || START_VIEW === 'latest' ||
+    (!!window.AV_CONFIG && /[?&]latest(=|&|$)/.test(location.search));
+  if (!LATEST_ON) {
+    var __latestView = document.getElementById('v3');
+    if (__latestView) __latestView.parentNode.removeChild(__latestView);
+    var __latestBtn = slider.querySelector('button[data-i="3"]');
+    if (__latestBtn) __latestBtn.parentNode.removeChild(__latestBtn);
+  }
   var btns = [].slice.call(slider.querySelectorAll('button'));
   var winPick = document.getElementById('winPick');
 
@@ -1306,7 +1327,7 @@
   // with no fade (collage and stats both say Heard Recently). Titles are
   // resolved through t() lazily (at view-switch time) so translations that
   // load with the app are picked up; a config `title` pins a custom string.
-  var VIEW_TITLE_KEYS = ['title.heardRecently', 'title.heardRecently', 'title.avianVisitors'];
+  var VIEW_TITLE_KEYS = ['title.heardRecently', 'title.heardRecently', 'title.avianVisitors', 'title.heardRecently'];
   var CUSTOM_TITLE = null;
   var staticHead = document.querySelector('.static-head');
   var staticTitle = document.getElementById('staticTitle');
@@ -1377,7 +1398,7 @@
   var STATS_LEAD = SLIDE_MS - 200;    // stats - begin a touch sooner
   var currentView = 0;                // collage shows first (no go() needed)
   function go(i) {
-    i = Math.max(0, Math.min(2, i));
+    i = Math.max(0, Math.min(btns.length - 1, i));
     // Only a genuine view *switch* replays the entrance. go() also fires when
     // a card is expanded (it sets the #sci= hash, which routes through go(2))
     // while already on the atlas - that must not retrigger the load-in.
@@ -1386,6 +1407,9 @@
     // Stats + atlas drop the shared title so their content gets the full height.
     document.body.classList.toggle('av-view-stats', i === 1);
     document.body.classList.toggle('av-view-atlas', i === 2);
+    // The latest-bird view prints its own name heading, so it drops the
+    // shared title too (a floated custom title would sit on the bird).
+    document.body.classList.toggle('av-view-latest', i === 3);
     views.style.transform = 'translateX(' + (getComputedStyle(views).direction === 'rtl' ? '' : '-') + (i * 100) + '%)';
     btns.forEach(function (b, j) { b.setAttribute('aria-current', j === i ? 'true' : 'false'); });
     syncPill(slider);
@@ -1396,6 +1420,7 @@
     if (i === 0) playCollageEntrance();
     else if (i === 1) playStatsEntrance(STATS_LEAD);
     else if (i === 2) playAtlasEntrance(SWITCH_LEAD);
+    else if (i === 3) playLatestEntrance(SWITCH_LEAD);
   }
   btns.forEach(function (b) { b.addEventListener('click', function () { go(+b.dataset.i); }); });
 
@@ -1508,10 +1533,9 @@
   // Card builds: pin the starting view, and optionally hide the
   // collage/stats/atlas selector so a card can BE a single view (one
   // dashboard can then mix a collage card, a stats card, an atlas card).
-  if (AV_CFG && AV_CFG.view) {
-    var __vi = { collage: 0, stats: 1, atlas: 2 }[AV_CFG.view];
-    if (__vi) go(__vi);
-  }
+  // The static page takes the same from config.js view or ?view=.
+  var __vi = VIEW_NAMES.indexOf(START_VIEW);
+  if (__vi > 0 && __vi < btns.length) go(__vi);
   if (AV_CFG && AV_CFG.viewSelector === false && slider) {
     slider.style.display = 'none';
     // Lets the CSS reclaim the picker's clearance (paddings, wall
@@ -3475,6 +3499,116 @@
     if (animate) playAtlasEntrance();
   }
 
+  // ---- Latest-bird view (#94) ----
+  // Only the most recently heard species in the current window, drawn
+  // large: its perched illustration, its name (common and/or scientific,
+  // following the names setting), how long ago it was heard, and - when
+  // that detection is in the species' detection list - how sure BirdNET
+  // was. It reads DATA.recent like the collage, so every data source
+  // (BirdNET-Go's API, HA's MQTT history) and every refresh trigger (the
+  // poll, the live stream, an MQTT push) moves it on the same way. Tapping
+  // the bird goes through the same tap dispatcher as the collage.
+  var latestEl = document.getElementById('latestBird');
+  var latestConf = { key: '', conf: null };   // confidence of the shown detection
+  // The newest row by last_seen ("YYYY-MM-DD HH:MM:SS" sorts as text).
+  // Rows without a timestamp only win when nothing has one.
+  function latestSpecies() {
+    var best = null;
+    ((DATA.recent && DATA.recent.species) || []).forEach(function (s) {
+      if (s && s.sci && (!best || (s.last_seen || '') > (best.last_seen || ''))) best = s;
+    });
+    return best;
+  }
+  // A detection's own timestamp in last_seen's format. The API splits it
+  // into date + time; some builds send one ISO string in the date field.
+  function detectionStamp(d) {
+    var ds = String(d.d || '');
+    return (/[T ]\d\d:/.test(ds) ? ds.replace('T', ' ') : ds + ' ' + (d.t || '')).slice(0, 16);
+  }
+  // Confidence of the detection on show: the newest entry of the species'
+  // detection list whose minute matches last_seen. Unknown (no match, or
+  // the lookup failed) leaves the confidence off rather than guessing -
+  // the window's best confidence would misstate this one call.
+  function lookupLatestConf(s, key) {
+    latestConf = { key: key, conf: null };
+    if (!s.last_seen) return;
+    fetchJson('./avian/api/birdnet-api.php?action=species&sci=' + encodeURIComponent(s.sci)).then(function (j) {
+      var want = s.last_seen.slice(0, 16);
+      var hit = ((j && j.detections) || []).filter(function (d) { return detectionStamp(d) === want; })[0];
+      if (latestConf.key !== key || !hit || !(+hit.conf > 0)) return;
+      latestConf.conf = +hit.conf;
+      renderLatest();
+    }).catch(function () {});
+  }
+  function renderLatest() {
+    if (!LATEST_ON || !latestEl) return;
+    var s = latestSpecies();
+    if (!s) {
+      var err = apiErrorText();
+      latestEl.__bird = '';
+      setHtml(latestEl, '<div class="latest-empty">' + (err
+        ? '<p>' + esc(err) + '</p>'
+        : '<p>' + esc(tt('atlas.noWindowTitle')) + '</p><p class="hint">' + esc(tt('latest.emptyHint')) + '</p>')
+        + '</div>');
+      return;
+    }
+    var mode = nameStripMode();
+    var com = s.com || s.sci;
+    // The bird itself only rebuilds when the species (or the names
+    // setting) changes; a new call from the same bird just updates the
+    // line under it, so the artwork doesn't blink on every detection.
+    var bird = s.sci + '|' + mode;
+    if (latestEl.__bird !== bird) {
+      var hadBird = !!latestEl.__bird;
+      latestEl.__bird = bird;
+      setHtml(latestEl, '<button type="button" class="latest-bird" data-sci="' + esc(s.sci) + '">'
+        + '<span class="latest-img"><img decoding="async" src="' + sketchSrc(s.sci, 1) + '" alt=""' + birdImgAttrs(s.sci, 1) + '></span>'
+        + '<span class="latest-eyebrow">' + esc(tt('latest.eyebrow')) + '</span>'
+        + '<span class="latest-com">' + esc(mode === 'scientific' ? s.sci : com) + '</span>'
+        + (mode === 'scientific' || mode === 'common' ? '' : '<span class="latest-sci">' + esc(s.sci) + '</span>')
+        + '<span class="latest-meta"></span>'
+        + '</button>');
+      // A different bird arriving while the view is up fades it in.
+      if (hadBird) playLatestEntrance();
+    }
+    var key = s.sci + '|' + (s.last_seen || '');
+    if (latestConf.key !== key) lookupLatestConf(s, key);
+    var meta = '';
+    if (s.last_seen) {
+      var d = s.last_seen.slice(0, 10), t = s.last_seen.slice(11);
+      meta += '<span class="latest-ago">' + esc(fmtRecTime(d, t)) + '</span>'
+        + '<span class="latest-clock">' + esc(fmtDateLine(d, t)) + '</span>';
+    }
+    if (latestConf.conf != null) {
+      meta += '<span class="latest-conf">' + esc(tt('latest.confidence', { pct: Math.round(latestConf.conf * 100) })) + '</span>';
+    }
+    setHtml(latestEl.querySelector('.latest-meta'), meta);
+  }
+  // Fade + rise the bird in: on switching to the view (after the slide,
+  // like the atlas) and when a different bird takes its place.
+  var latestEntranceT = null;
+  function playLatestEntrance(lead) {
+    var el = latestEl && latestEl.firstElementChild;
+    if (!el) return;
+    el.classList.remove('entering');
+    el.style.animationDelay = (lead || 0) + 'ms';
+    void el.offsetWidth;
+    el.classList.add('entering');
+    clearTimeout(latestEntranceT);
+    latestEntranceT = setTimeout(function () {
+      el.classList.remove('entering');
+      el.style.animationDelay = '';
+    }, (lead || 0) + 700);
+  }
+  if (LATEST_ON && latestEl) {
+    latestEl.addEventListener('click', function (ev) {
+      var b = ev.target.closest && ev.target.closest('.latest-bird');
+      if (b) handleBirdTap(b.getAttribute('data-sci'));
+    });
+    // "5m ago" keeps counting between detections.
+    setInterval(function () { if (!document.hidden) renderLatest(); }, 30000);
+  }
+
   function renderWindowDependent(animate) {
     // renderStatsLists runs BEFORE renderActivity so the stats entrance
     // (fired at the end of renderActivity) can stagger the side-panel rows
@@ -3483,6 +3617,7 @@
     renderStatsLists();
     renderActivity(animate);
     renderAtlas(animate);
+    renderLatest();
   }
   function renderTimeIndependent(animate) {
     // Lists first, then the heatmap (see renderWindowDependent).
@@ -3557,6 +3692,7 @@
       recomputeDerived();
       renderTimeIndependent(animate);
       renderCollageFromData(animate);
+      renderLatest();
     });
   }
 

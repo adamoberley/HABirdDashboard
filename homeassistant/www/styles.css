@@ -89,7 +89,8 @@
   .static-head.swap-out h1 { opacity: 0; }
   /* Stats + Atlas hide the shared title so their content uses the full
      height (the collage keeps it). */
-  body.av-view-stats .static-head, body.av-view-atlas .static-head { display: none; }
+  body.av-view-stats .static-head, body.av-view-atlas .static-head,
+  body.av-view-latest .static-head { display: none; }
   @media (max-width: 700px) {
     .static-head { padding: 96px 18px 22px; }
   }
@@ -618,6 +619,72 @@
   }
   /* Connection error in place of the flock (#73): centred in the collage. */
   .collage-error { position: absolute; inset: 0; margin: auto; height: fit-content; padding: 0 24px; }
+
+  /* ============ Latest-bird view (#94) ============
+     One bird, as big as the view allows: the artwork takes whatever height
+     the name lines leave (a minmax(0, 1fr) grid row), so it scales with
+     the screen or card without scrolling. The whole bird is one button
+     that opens its details, like a collage tile. Logical properties and
+     centred text keep it the same in right-to-left languages. */
+  .view#v3 { overflow: hidden; display: flex; padding: 72px 32px 96px; }
+  @media (max-width: 700px) { .view#v3 { padding: 72px 16px 96px; } }
+  .latest { flex: 1 1 auto; min-width: 0; min-height: 0; display: flex; }
+  .latest-bird {
+    flex: 1 1 auto; min-width: 0; min-height: 0;
+    display: grid; grid-template-rows: minmax(0, 1fr) auto auto auto auto;
+    justify-items: center; align-items: center;
+    background: none; border: 0; padding: 0; margin: 0;
+    color: inherit; font: inherit; text-align: center; cursor: pointer;
+  }
+  .latest-bird:focus-visible { outline: 2px solid var(--ink-soft); outline-offset: 6px; border-radius: 12px; }
+  .latest-img {
+    width: 100%; height: 100%; min-height: 0;
+    display: flex; align-items: center; justify-content: center;
+    padding-bottom: 14px; box-sizing: border-box;
+  }
+  .latest-img img {
+    display: block; max-width: min(100%, 900px); max-height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 14px rgba(26,22,18,0.12));
+    transition: transform 260ms cubic-bezier(.3, 0, .2, 1);
+  }
+  .latest-bird:hover .latest-img img { transform: scale(1.02); }
+  .latest-eyebrow {
+    font: italic 400 clamp(12px, 1.3vw, 16px)/1 var(--av-font-display);
+    color: var(--ink-2); letter-spacing: 0.06em; margin-bottom: 8px;
+  }
+  .latest-com {
+    font: 700 clamp(22px, 3.4vw, 44px)/1.1 var(--av-font-display);
+    color: var(--ink); letter-spacing: 0.02em;
+  }
+  .latest-sci {
+    font: italic clamp(13px, 1.5vw, 19px)/1.3 var(--av-font-display);
+    color: var(--ink-2); margin-top: 4px;
+  }
+  .latest-meta {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 0;
+    margin-top: 12px;
+    font: 10.5px/1.4 var(--av-font-mono); letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-soft);
+  }
+  .latest-meta:empty { display: none; }
+  .latest-meta > * + *::before { content: '\00b7'; margin-inline: 10px; }
+  .latest-meta .latest-ago { color: var(--ink); }
+  .latest-empty {
+    margin: auto; padding: 0 16px; text-align: center;
+    font: 12px/1.6 var(--av-font-display); color: var(--ink-2);
+  }
+  .latest-empty p { margin: 0 0 4px; }
+  .latest-empty p.hint {
+    font: 10px var(--av-font-mono); color: var(--ink-soft);
+    letter-spacing: 0.06em;
+  }
+  @keyframes latest-in {
+    from { opacity: 0; transform: translateY(14px) scale(0.97); }
+    to   { opacity: 1; transform: none; }
+  }
+  .latest-bird.entering { animation: latest-in 520ms cubic-bezier(.2,.7,.3,1) backwards; }
+  @media (prefers-reduced-motion: reduce) { .latest-bird.entering { animation: none; } }
 
   /* Page header is now shared at .stage > .static-head - see top of CSS. */
   /* Stats grid: the activity heatmap on the LEFT, text sections on the
