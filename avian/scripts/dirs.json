@@ -7040,6 +7040,19 @@
 "y": 0.79
 }
 },
+"euphagus-carolinus-2": {
+"ambiguous": false,
+"beak": {
+"x": 0.02,
+"y": 0.493
+},
+"confidence": "high",
+"heading": 204,
+"tail": {
+"x": 0.965,
+"y": 0.91
+}
+},
 "euphagus-cyanocephalus-2": {
 "ambiguous": false,
 "ambiguous2": false,
