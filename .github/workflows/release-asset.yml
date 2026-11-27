@@ -1,0 +1,63 @@
+# Attach the built card to every GitHub release.
+#
+# Home Assistant 2026.11's Marketplace installs a default-catalog card from
+# its release asset first. Without one it falls back to the repository
+# archive, which this repo's artwork puts far over the Marketplace's 100 MB
+# limit, and the install fails with "has no content the Marketplace can
+# install" (#99). So every release carries dist/habird-card.js as an asset.
+#
+# To have it there from the first second, create the release as a draft,
+# attach the card, then publish (AGENTS.md, "Releasing"). This workflow
+# then finds the identical asset and leaves it;
+# for a release published without one it builds and attaches it.
+name: Release asset
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to attach the card to (e.g. v1.11.0)
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  attach:
+    name: Attach habird-card.js
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The tag, never a branch of the same name.
+          ref: refs/tags/${{ env.TAG }}
+          persist-credentials: false
+          # Root files (package.json, the lockfile) come with any sparse
+          # checkout; the 1.1 GB of artwork isn't needed to build the card.
+          sparse-checkout: |
+            homeassistant
+            dist
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # The asset must be exactly what the tag's sources build to - and the
+      # tag must actually carry a committed card.
+      - run: git ls-files --error-unmatch dist/habird-card.js
+      - run: npm ci
+      - run: npm run build
+      - run: git diff --exit-code dist/
+      - name: Upload (unless the identical file is already attached)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/attached
+          if gh release download "$TAG" --pattern habird-card.js --dir /tmp/attached --repo "$GITHUB_REPOSITORY" 2>/dev/null \
+             && cmp -s /tmp/attached/habird-card.js dist/habird-card.js; then
+            echo "habird-card.js already attached to $TAG and identical - nothing to do"
+          else
+            gh release upload "$TAG" dist/habird-card.js --clobber --repo "$GITHUB_REPOSITORY"
+          fi

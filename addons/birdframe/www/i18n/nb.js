@@ -11,6 +11,7 @@
   'view.collage': 'kollasje',
   'view.stats': 'statistikk',
   'view.atlas': 'atlas',
+  'view.latest': 'siste',
   'view.aria': 'Visning',
 
   // ---- Window picker (abbreviations) ----
@@ -31,6 +32,7 @@
   'aria.collage': 'Fuglekollasje',
   'aria.stats': 'Statistikk',
   'aria.atlas': 'Atlas',
+  'aria.latest': 'Siste fugl',
   'names.aria': 'Arter hørt',
 
   // ---- Time-window labels (windowLabel) ----
@@ -87,6 +89,11 @@
   'atlas.allTime': 'noensinne',
   'atlas.new': 'ny',
   'atlas.newTitle': 'første gang denne arten noensinne er hørt her',
+
+  // ---- Latest-bird view ----
+  'latest.eyebrow': 'sist hørt',
+  'latest.emptyHint': 'Den neste fuglen som høres, vises her.',
+  'latest.confidence': '{pct}% sikkerhet',
 
   // ---- Detail modal: chrome ----
   'modal.close': 'Lukk',
