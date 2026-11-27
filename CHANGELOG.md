@@ -11,7 +11,9 @@
   names-strip size (`names_size`). The packer reserves each name's box as
   part of its bird, so a name never lands on another bird, the clock, the
   title or the names strip, including rotated birds in the ring flow
-  layout. Tapping a name opens its bird. On the standalone page `?labels`,
+  layout. On a crowded plate a bird with no room for its name goes without
+  it rather than being left out. Tapping a name opens its bird. On the
+  standalone page `?labels`,
   `?labels=scientific` or `?labels=off` overrides `config.js` per display.
 
 ## v1.10.0 — 2026-10-22

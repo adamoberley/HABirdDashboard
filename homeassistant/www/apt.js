@@ -1626,6 +1626,11 @@
     };
   }
   var GRID_STRIDE = 4; // viewport px per occupancy cell; smaller = slower
+  var LABEL_GAP_PX = 2; // px between a bird and its name caption (issue #97)
+  // Search work (spots tested) allowed for re-packing a captioned flock
+  // smaller after the first pass: ~50 ms - plenty of retries for a dozen
+  // birds, none to speak of for a hundred.
+  var CAPTION_RETRY_WORK = 60000;
   var COLLAGE_PAD = 3; // breathing room (grid cells) around each bird;
                        // eased on narrow screens where birds are smaller.
   // Pose is deterministic in this build: a species sits (perched pose) when
@@ -1940,7 +1945,16 @@
   // which hangs under the silhouette and is packed as part of the bird -
   // see labelBox below. Placed tiles get .lab = {dx, dy, w, h}, the
   // caption's box relative to the tile's top-left.
-  function maskPack(tiles, W, H, xBias, yBias, pad, obstacles, ringMode) {
+  // `opts` (captions only): abortOnMiss - give up and return null at the
+  // first bird with no room at all (the caller shrinks or falls back, so
+  // the remaining full-box searches would be wasted); lateLabels - pack the
+  // birds with no captions (exactly the captions-off layout), then hang a
+  // caption under each placed bird whose words have room where it sits;
+  // work - a {n} counter of candidate spots tested, and budget - give up
+  // and return null once work.n passes it.
+  function maskPack(tiles, W, H, xBias, yBias, pad, obstacles, ringMode, opts) {
+    opts = opts || {};
+    var packLabels = !opts.lateLabels;
     var GW = Math.ceil(W / GRID_STRIDE) + 2;
     var GH = Math.ceil(H / GRID_STRIDE) + 2;
     var grid = new Uint8Array(GW * GH);
@@ -1972,6 +1986,7 @@
         for (var ogx = ox0; ogx <= ox1; ogx++) grid[ooff + ogx] = 1;
       }
     });
+    var obGrid = opts.lateLabels ? grid.slice() : null;   // obstacles only
 
     function tileXf(tile, tx, ty) {
       // Flow rotation for `tile` centred at this candidate position, IDENTICAL
@@ -1987,7 +2002,8 @@
       var deg = flip ? (tau - 180 + tile.headingDeg) : (tau - tile.headingDeg);
       deg = ((((deg % 360) + 540) % 360) - 180) * tile.flow.strength;
       var rad = deg * Math.PI / 180;
-      return { cos: Math.cos(rad), sin: Math.sin(rad), fx: flip ? -1 : 1, ox: ccx, oy: ccy };
+      return { cos: Math.cos(rad), sin: Math.sin(rad), fx: flip ? -1 : 1, ox: ccx, oy: ccy,
+               deg: deg, flip: flip };
     }
     function cellRange(tile, tx, ty, c, xf) {
       // Grid range [gx0, gy0, gx1, gy1] (inclusive, clamped) the mask cell
@@ -2024,9 +2040,9 @@
     // lowest point. With a flow rotation the opaque box's four corners are
     // rotated first, so a banked bird's wingtip can't dip into its own
     // words. null when the tile has no caption.
-    var LABEL_GAP = 2;
+    var LABEL_GAP = LABEL_GAP_PX;
     function labelBox(tile, tx, ty, xf) {
-      if (!tile.label) return null;
+      if (!tile.label || !packLabels) return null;
       var op = tile.mask.opaque;
       var sx = tile.fullW / tile.mask.w, sy = tile.fullH / tile.mask.h;
       var mid, bottom;
@@ -2055,21 +2071,43 @@
               Math.min(GW - 1, (b.x + b.w) / GRID_STRIDE | 0),
               Math.min(GH - 1, (b.y + b.h) / GRID_STRIDE | 0)];
     }
-    function collides(tile, tx, ty) {
-      var xf = tileXf(tile, tx, ty);
-      // The caption first: cheaper than the mask, and it must sit wholly
-      // inside the box (a name cut off by the card edge is no name).
-      var lb = labelBox(tile, tx, ty, xf);
-      if (lb) {
-        if (lb.x < 0 || lb.y < 0 || lb.x + lb.w > W || lb.y + lb.h > H) return true;
-        var lr = boxCells(lb);
-        for (var ly = lr[1]; ly <= lr[3]; ly++) {
-          var loff = ly * GW;
-          for (var lx = lr[0]; lx <= lr[2]; lx++) {
-            if (grid[loff + lx]) return true;
-          }
+    // True when this caption box can't go here: past the card edge (a
+    // name cut off by the edge is no name) or on anything stamped already.
+    function labelHits(lb) {
+      if (lb.x < 0 || lb.y < 0 || lb.x + lb.w > W || lb.y + lb.h > H) return true;
+      var lr = boxCells(lb);
+      for (var ly = lr[1]; ly <= lr[3]; ly++) {
+        var loff = ly * GW;
+        for (var lx = lr[0]; lx <= lr[2]; lx++) {
+          if (grid[loff + lx]) return true;
         }
       }
+      return false;
+    }
+    // Where `tile` can go at this candidate position: 2 = bird and its
+    // caption both fit, 1 = only the bare bird fits, 0 = not even that.
+    // A tile without a caption scores 2 or 0, exactly as before captions.
+    // needBare false: a bare-only spot is of no use to the caller, so a
+    // caption that can't go here rules the spot out before the (dearer)
+    // mask test.
+    var work = opts.work || { n: 0 }, budget = opts.budget || Infinity;
+    function fits(tile, tx, ty, needBare) {
+      var xf = tileXf(tile, tx, ty);
+      var lb = labelBox(tile, tx, ty, xf);
+      var lbHit = lb ? labelHits(lb) : false;
+      // Work: a spot ruled out by its caption alone costs about a third
+      // of one that needs the silhouette test (measured).
+      if (lbHit && !needBare) { work.n += 1 / 3; return 0; }
+      work.n++;
+      if (collides(tile, tx, ty, xf)) return 0;
+      return lbHit ? 1 : 2;
+    }
+    // The bird alone, caption ignored (counted as search work too).
+    function collidesBare(tile, tx, ty) {
+      work.n++;
+      return collides(tile, tx, ty, tileXf(tile, tx, ty));
+    }
+    function collides(tile, tx, ty, xf) {
       var cells = tile.mask.cells;
       for (var i = 0; i < cells.length; i++) {
         var r = cellRange(tile, tx, ty, cells[i], xf);
@@ -2082,8 +2120,15 @@
       }
       return false;
     }
-    function stamp(tile, tx, ty) {
+    // `bare`: place the bird without its caption (no room for the words
+    // here); the tile keeps .label so the next pass tries again.
+    function stamp(tile, tx, ty, bare) {
       var xf = tileXf(tile, tx, ty);
+      // The angle this bird was packed at. Once the flock is re-centred
+      // the renderer draws it at THIS angle (not one recomputed from the
+      // shifted position), so the drawn outline is exactly the packed
+      // one, moved - and still clear of its own and every other caption.
+      tile.packRot = xf ? { deg: xf.deg, flip: xf.flip } : null;
       var cells = tile.mask.cells;
       for (var i = 0; i < cells.length; i++) {
         var r = cellRange(tile, tx, ty, cells[i], xf);
@@ -2101,7 +2146,7 @@
       }
       // The caption's box goes into the grid too, with the same air around
       // it, so the next bird packs around the words like another bird.
-      var lb = labelBox(tile, tx, ty, xf);
+      var lb = bare ? null : labelBox(tile, tx, ty, xf);
       if (lb) {
         var lr = boxCells(lb);
         var ly0 = Math.max(0, lr[1] - pad), ly1 = Math.min(GH - 1, lr[3] + pad);
@@ -2116,6 +2161,35 @@
     function offGrid(tile, tx, ty) {
       // True if the rendered tile bbox extends past the viewport.
       return tx < 0 || ty < 0 || tx + tile.fullW > W || ty + tile.fullH > H;
+    }
+
+    // CLUSTER search for `tile`: rings out to `limR`, stopping at the first
+    // ring with any free spot (+2 rings), and keeping the free spot nearest
+    // the flock's centre of mass. withLabel: the spot needs room for the
+    // tile's caption too.
+    function spiral(tile, step, limR, comX, comY, withLabel) {
+      var bestCost = Infinity, found = null, foundRing = -1;
+      var phase = rand() * Math.PI * 2;
+      for (var r = 0; r <= limR; r += step) {
+        if (foundRing >= 0 && r > foundRing + step * 2) break;
+        var samples = Math.max(36, Math.floor(r / 1.6));
+        for (var k = 0; k < samples; k++) {
+          var theta = phase + (k / samples) * Math.PI * 2;
+          // Elliptical ring - stretched per axis: xBias>yBias gives a wide
+          // (landscape) cluster, yBias>xBias a tall (portrait) one.
+          var px = cx + r * xBias * Math.cos(theta) - tile.fullW / 2;
+          var py = cy + r * yBias * Math.sin(theta) - tile.fullH / 2;
+          if (offGrid(tile, px, py)) continue;
+          if (withLabel ? fits(tile, px, py, false) < 2 : collidesBare(tile, px, py)) continue;
+          // Distance to existing cluster centre of mass + small noise.
+          var dxx = (px + tile.fullW / 2 - comX);
+          var dyy = (py + tile.fullH / 2 - comY);
+          var cost = Math.hypot(dxx / xBias, dyy / yBias) + rand() * step * 0.5;
+          if (cost < bestCost) { bestCost = cost; found = { x: px, y: py }; }
+        }
+        if (found && foundRing < 0) foundRing = r;
+      }
+      return found;
     }
 
     var cx = W / 2, cy = H / 2;
@@ -2135,7 +2209,7 @@
       // case it falls through to the spiral search like everyone else.
       // Ring mode never centres the anchor: the open middle is the point.
       // A captioned anchor is checked too: its name must fit in the box.
-      if (i === 0 && !ringMode && !(((obstacles && obstacles.length) || t.label) && collides(t, cx - t.fullW / 2, cy - t.fullH / 2))) {
+      if (i === 0 && !ringMode && !(((obstacles && obstacles.length) || (t.label && packLabels)) && fits(t, cx - t.fullW / 2, cy - t.fullH / 2, false) < 2)) {
         tx = cx - t.fullW / 2;
         ty = cy - t.fullH / 2;
         t.x = tx; t.y = ty;
@@ -2143,7 +2217,7 @@
         placed.push(t);
         continue;
       }
-      var best = null;
+      var best = null, bareBest = null;
       if (ringMode) {
         // RING: fill the whole frame around an open centre. The cluster
         // spiral below grows one compact blob (so a hole in it just reads
@@ -2155,11 +2229,14 @@
         // the void. Largest birds (placed first) stake out the open frame,
         // smaller ones fill the gaps in toward the rim - the look from the
         // original poster.
-        var bestScore = -Infinity;
+        // A captioned bird keeps the best spot with room for its words;
+        // failing that, the best spot for the bare bird (captionless).
+        var bestScore = -Infinity, bareScore = -Infinity;
         var rangeX = Math.max(0, W - t.fullW), rangeY = Math.max(0, H - t.fullH);
         for (var s = 0; s < 96; s++) {
           var sx = rand() * rangeX, sy = rand() * rangeY;
-          if (collides(t, sx, sy)) continue;
+          var fit = fits(t, sx, sy, true);
+          if (!fit) continue;
           var scx = sx + t.fullW / 2, scy = sy + t.fullH / 2;
           var nd = Infinity;
           for (var pi = 0; pi < placed.length; pi++) {
@@ -2168,7 +2245,9 @@
             var d = Math.hypot(scx - (pp.x + pp.fullW / 2), scy - (pp.y + pp.fullH / 2));
             if (d < nd) nd = d;
           }
-          if (nd > bestScore) { bestScore = nd; best = { x: sx, y: sy }; }
+          if (fit === 2) {
+            if (nd > bestScore) { bestScore = nd; best = { x: sx, y: sy }; }
+          } else if (nd > bareScore) { bareScore = nd; bareBest = { x: sx, y: sy }; }
         }
       } else {
         // CLUSTER: spiral outward, stopping at the first ring with any
@@ -2185,42 +2264,117 @@
         if (comW > 0) { comX /= comW; comY /= comW; }
         else { comX = cx; comY = cy; }       // nothing placed yet: grow from centre
 
-        var bestCost = Infinity;
         var step = Math.max(GRID_STRIDE, Math.min(t.fullW, t.fullH) * 0.05);
         var maxR = Math.max(W, H);
-        var foundRing = -1;
-        var phase = rand() * Math.PI * 2;
-        for (var r = 0; r <= maxR; r += step) {
-          if (foundRing >= 0 && r > foundRing + step * 2) break;
-          var samples = Math.max(36, Math.floor(r / 1.6));
-          for (var k = 0; k < samples; k++) {
-            var theta = phase + (k / samples) * Math.PI * 2;
-            // Elliptical ring - stretched per axis: xBias>yBias gives a wide
-            // (landscape) cluster, yBias>xBias a tall (portrait) one.
-            var px = cx + r * xBias * Math.cos(theta) - t.fullW / 2;
-            var py = cy + r * yBias * Math.sin(theta) - t.fullH / 2;
-            if (offGrid(t, px, py)) continue;
-            if (collides(t, px, py)) continue;
-            // Distance to existing cluster centre of mass + small noise.
-            var dxx = (px + t.fullW / 2 - comX);
-            var dyy = (py + t.fullH / 2 - comY);
-            var cost = Math.hypot(dxx / xBias, dyy / yBias) + rand() * step * 0.5;
-            if (cost < bestCost) { bestCost = cost; best = { x: px, y: py }; }
-          }
-          if (best && foundRing < 0) foundRing = r;
+        if (t.label && packLabels) {
+          // A captioned bird spirals out for a spot with room for bird AND
+          // words - but only to just past the flock's current rim (the
+          // farthest placed bird or caption, plus this bird and its
+          // caption, plus air): out there nothing stands in the way, so
+          // a caption that hasn't found room by then is blocked by the
+          // card's edge or the clock, not by birds. Then it drops its
+          // caption for this pass and spirals again for the bare bird.
+          // Sweeping the whole box for every such caption took seconds
+          // per repack at 100 birds.
+          var rimR = 0;
+          placed.forEach(function (p) {
+            if (p.x < -1000) return;
+            var bx = [p.x, p.x + p.fullW], by = [p.y, p.y + p.fullH];
+            if (p.lab) {
+              bx.push(p.x + p.lab.dx, p.x + p.lab.dx + p.lab.w);
+              by.push(p.y + p.lab.dy + p.lab.h);
+            }
+            for (var xi = 0; xi < bx.length; xi++) {
+              for (var yi = 0; yi < by.length; yi++) {
+                var rr = Math.hypot((bx[xi] - cx) / xBias, (by[yi] - cy) / yBias);
+                if (rr > rimR) rimR = rr;
+              }
+            }
+          });
+          var ext = Math.hypot(Math.max(t.fullW, t.label.w) / 2 / xBias,
+                               (t.fullH / 2 + LABEL_GAP + t.label.h) / yBias);
+          var capLim = Math.min(maxR, rimR + ext + (pad * GRID_STRIDE) / Math.min(xBias, yBias) + step * 2);
+          best = spiral(t, step, capLim, comX, comY, true);
+          if (!best) bareBest = spiral(t, step, maxR, comX, comY, false);
+        } else {
+          best = spiral(t, step, maxR, comX, comY, false);
         }
       }
+      if (work.n > budget) return null;
       if (best) {
         t.x = best.x; t.y = best.y;
         stamp(t, best.x, best.y);
         placed.push(t);
+      } else if (bareBest) {
+        t.x = bareBest.x; t.y = bareBest.y;
+        stamp(t, bareBest.x, bareBest.y, true);
+        placed.push(t);
       } else {
+        if (opts.abortOnMiss) return null;
         // Couldn't fit anywhere - hide off-screen rather than overlap.
         t.x = -99999; t.y = -99999;
         placed.push(t);
       }
     }
+    if (opts.lateLabels) hangLateLabels(placed);
     return placed;
+
+    // lateLabels: the birds are down; caption each one (largest first)
+    // whose words fit right where it sits. A separate grid records which
+    // bird owns each cell (first stamp wins, so every drawn cell keeps its
+    // own bird and padding never claims a neighbour), letting a caption
+    // sit close under its own bird - inside its padding - but never on
+    // another bird, another caption, an obstacle or past the edge.
+    function hangLateLabels(arr) {
+      var own = new Uint16Array(GW * GH);
+      var WALL = 65535;
+      for (var gi = 0; gi < obGrid.length; gi++) if (obGrid[gi]) own[gi] = WALL;
+      function claim(x0, y0, x1, y1, id) {
+        if (x0 < 0) x0 = 0; if (y0 < 0) y0 = 0;
+        if (x1 >= GW) x1 = GW - 1; if (y1 >= GH) y1 = GH - 1;
+        for (var y = y0; y <= y1; y++) {
+          var off = y * GW;
+          for (var x = x0; x <= x1; x++) if (!own[off + x]) own[off + x] = id;
+        }
+      }
+      arr.forEach(function (t, k) {
+        if (t.x < -1000) return;
+        var xf = tileXf(t, t.x, t.y), cells = t.mask.cells;
+        for (var ci = 0; ci < cells.length; ci++) {
+          var r = cellRange(t, t.x, t.y, cells[ci], xf);
+          claim(r[0] - pad, r[1] - pad, r[2] + pad, r[3] + pad, k + 1);
+        }
+      });
+      packLabels = true;
+      function free(lb, id) {
+        if (lb.x < 0 || lb.y < 0 || lb.x + lb.w > W || lb.y + lb.h > H) return false;
+        var r = boxCells(lb);
+        for (var y = r[1]; y <= r[3]; y++) {
+          for (var x = r[0]; x <= r[2]; x++) {
+            var o = own[y * GW + x];
+            if (o && o !== id) return false;
+          }
+        }
+        return true;
+      }
+      arr.forEach(function (t, k) {
+        if (t.x < -1000 || !t.label) return;
+        var lb0 = labelBox(t, t.x, t.y, tileXf(t, t.x, t.y));
+        // Centred under the bird first; else slid left or right, as far as
+        // keeps the caption's middle under the bird's drawn width.
+        var reach = t.fullW * (t.mask.opaque.x1 - t.mask.opaque.x0) / t.mask.w / 2;
+        var slides = [0, -0.5, 0.5, -1, 1];
+        for (var si = 0; si < slides.length; si++) {
+          var lb = { x: lb0.x + slides[si] * reach, y: lb0.y, w: lb0.w, h: lb0.h };
+          if (!free(lb, k + 1)) continue;
+          var r = boxCells(lb);
+          claim(r[0] - pad, r[1] - pad, r[2] + pad, r[3] + pad, WALL);
+          t.lab = { dx: lb.x - t.x, dy: lb.y - t.y, w: lb.w, h: lb.h };
+          return;
+        }
+      });
+      packLabels = false;
+    }
   }
 
   var _collageSig = null;
@@ -2448,8 +2602,6 @@
     spacing = Math.max(0, Math.min(1, spacing));
     var basePad = Math.max(1, Math.round(spacing * 2 * COLLAGE_PAD));  // 0->1 tight, 0.5->3 default, 1->6 airy
     var pad = narrow ? Math.max(1, basePad - 1) : basePad;
-    var placed = maskPack(tiles, W, H, xBias, yBias, pad, obstacles, ringMode);
-
     // Scale-to-fit: iterate shrink + repack until every tile lands on
     // screen. The old single-pass version dropped birds when one pass
     // wasn't enough (narrow viewports + many species). Capped at 10
@@ -2473,33 +2625,87 @@
       });
       return { L: L, R: R, T: T2, B: B };
     }
-    var b = clusterBounds(placed);
-    for (var iter = 0; iter < 10; iter++) {
-      var missing  = placed.some(function (t) { return t.x < -1000; });
-      var overflow = b.L < 0 || b.T < 0 || b.R > W || b.B > H;
-      if (!missing && !overflow) break;
-      // Base 0.93 linear shrink (≈ 0.86 area). If overflow, take the
-      // tighter of cluster-to-viewport ratios so we converge fast.
-      var scale = 0.93;
-      if (overflow) {
-        var clW = b.R - b.L, clH = b.B - b.T;
-        var sx = (W * 0.96) / Math.max(clW, W * 0.96);
-        var sy = (H * 0.94) / Math.max(clH, H * 0.94);
-        scale = Math.min(scale, sx, sy);
+    function packToFit(opts) {
+      var placed = maskPack(tiles, W, H, xBias, yBias, pad, obstacles, ringMode, opts);
+      var b = clusterBounds(placed);
+      for (var iter = 0; iter < 10; iter++) {
+        var missing  = placed.some(function (t) { return t.x < -1000; });
+        var overflow = b.L < 0 || b.T < 0 || b.R > W || b.B > H;
+        if (!missing && !overflow) break;
+        // Base 0.93 linear shrink (≈ 0.86 area). If overflow, take the
+        // tighter of cluster-to-viewport ratios so we converge fast.
+        var scale = 0.93;
+        if (overflow) {
+          var clW = b.R - b.L, clH = b.B - b.T;
+          var sx = (W * 0.96) / Math.max(clW, W * 0.96);
+          var sy = (H * 0.94) / Math.max(clH, H * 0.94);
+          scale = Math.min(scale, sx, sy);
+        }
+        tiles.forEach(function (t) { t.fullW *= scale; t.fullH *= scale; });
+        placed = maskPack(tiles, W, H, xBias, yBias, pad, obstacles, ringMode, opts);
+        b = clusterBounds(placed);
       }
-      tiles.forEach(function (t) { t.fullW *= scale; t.fullH *= scale; });
-      placed = maskPack(tiles, W, H, xBias, yBias, pad, obstacles, ringMode);
-      b = clusterBounds(placed);
+      return { placed: placed, b: b };
     }
-    // Captions don't shrink with the birds, so on a small card with a big
-    // flock a captioned bird can still find no room. Drawing the bird
-    // matters more than its caption: drop the caption on just those birds
-    // (the names strip still lists them) and pack once more.
-    if (placed.some(function (t) { return t.x < -1000 && t.label; })) {
-      tiles.forEach(function (t) { if (t.x < -1000) t.label = null; });
-      placed = maskPack(tiles, W, H, xBias, yBias, pad, obstacles, ringMode);
-      b = clusterBounds(placed);
+    var fit;
+    if (labelMode === 'off') {
+      fit = packToFit();
+    } else {
+      // Name captions (issue #97). Captions never shrink, so on a busy
+      // plate they crowd the birds, and every search for room for the
+      // words costs time. So:
+      // 1. Shrink the birds up front so birds plus captions (with their
+      //    air) take about the area the birds alone did - not below half
+      //    of it - and pack once with the captions. A bird with no room
+      //    for its caption goes in without it; a bird with no room at all
+      //    ends the pass.
+      // 2. Captions left off (or a bird left out): shrink 7% and pack
+      //    again, but only within a small, fixed amount of search work, so
+      //    a small flock gets several tries and a 100-bird plate none.
+      // 3. Keep the pass that hung the most captions. If no pass placed
+      //    every bird, lay the flock out exactly as with captions off and
+      //    hang each caption that has room where its bird landed: a
+      //    caption never costs a bird.
+      var startSize = tiles.map(function (t) { return { t: t, w: t.fullW, h: t.fullH }; });
+      var snapFit = function (f) {
+        return { placed: f.placed, b: f.b, caps: f.placed.filter(function (t) { return t.lab; }).length,
+                 tiles: tiles.map(function (t) {
+                   return { t: t, x: t.x, y: t.y, w: t.fullW, h: t.fullH, lab: t.lab, rot: t.packRot };
+                 }) };
+      };
+      var birdArea = 0, capArea = 0, padPx = pad * GRID_STRIDE;
+      startSize.forEach(function (e) {
+        birdArea += e.w * e.h;
+        if (e.t.label) capArea += (e.t.label.w + 2 * padPx) * (e.t.label.h + LABEL_GAP_PX + 2 * padPx);
+      });
+      var pre = Math.sqrt(Math.max(0.5, 1 - capArea / birdArea));
+      tiles.forEach(function (t) { t.fullW *= pre; t.fullH *= pre; });
+      var nCaps = tiles.filter(function (t) { return t.label; }).length;
+      var bestFit = null, work = { n: 0 }, capBudget = Infinity;
+      for (var cp = 0; cp < 10; cp++) {
+        var cPlaced = maskPack(tiles, W, H, xBias, yBias, pad, obstacles, ringMode,
+                               { abortOnMiss: true, work: work, budget: capBudget });
+        var cB = cPlaced && clusterBounds(cPlaced);
+        if (cB && !(cB.L < 0 || cB.T < 0 || cB.R > W || cB.B > H)) {
+          var cFit = snapFit({ placed: cPlaced, b: cB });
+          if (!bestFit || cFit.caps > bestFit.caps) bestFit = cFit;
+          if (cFit.caps === nCaps) break;
+        }
+        if (cp === 0) capBudget = work.n + CAPTION_RETRY_WORK;
+        if (work.n > capBudget) break;
+        tiles.forEach(function (t) { t.fullW *= 0.93; t.fullH *= 0.93; });
+      }
+      if (!bestFit) {
+        startSize.forEach(function (e) { e.t.fullW = e.w; e.t.fullH = e.h; });
+        bestFit = snapFit(packToFit({ lateLabels: true }));
+      }
+      bestFit.tiles.forEach(function (e) {
+        e.t.x = e.x; e.t.y = e.y; e.t.fullW = e.w; e.t.fullH = e.h;
+        e.t.lab = e.lab; e.t.packRot = e.rot;
+      });
+      fit = { placed: bestFit.placed, b: bestFit.b };
     }
+    var placed = fit.placed, b = fit.b;
 
     // Re-centre the cluster in the FULL box so it doesn't drift to one
     // side from the spiral's center-of-mass bias. With obstacles (clock /
@@ -2608,7 +2814,14 @@
       // birds whose belly would otherwise face outward. Far-side birds roll
       // fully over - that's the wheel. Applied every render pass.
       var head = DIRTAB[slugify(s.sci) + (r.pose === 2 ? '-2' : '')];
-      if (flowOn && r.pose === 2 && typeof head === 'number') {
+      if (labelMode !== 'off' && r.packRot) {
+        // With captions (issue #97), draw the bird at the exact angle the
+        // packer reserved: re-centring shifted the flock after packing, and
+        // an angle recomputed from the shifted position can swing a wing
+        // into the bird's own caption.
+        imgEl.style.transformOrigin = '50% 50%';
+        imgEl.style.transform = 'rotate(' + r.packRot.deg.toFixed(1) + 'deg)' + (r.packRot.flip ? ' scaleX(-1)' : '');
+      } else if (flowOn && r.pose === 2 && typeof head === 'number') {
         var phi = Math.atan2(r.y + r.fullH / 2 - H / 2, r.x + r.fullW / 2 - W / 2) * 180 / Math.PI;
         var dir = (flow === 'ccw') ? -1 : 1;
         var tau = phi + dir * 90;                          // nose rides the tangent

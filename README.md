@@ -339,7 +339,9 @@ right under it in the collage - `common` or `scientific` - at the same size
 as the strip (`names_size`). The packing treats each name as part of its
 bird, so a name never sits on another bird, on the clock or on the strip;
 birds simply pack a little further apart, and shrink a little on a busy day
-to make room. Tapping a name opens that bird, like tapping the bird. Use it
+to make room. On a very crowded plate, birds that can't fit their name go
+without it - a name never costs a bird its place (the strip still lists them
+all). Tapping a name opens that bird, like tapping the bird. Use it
 on its own or alongside the strip.
 
 **Weather** reads your Home Assistant weather integration directly through
