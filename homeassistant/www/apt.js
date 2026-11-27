@@ -1,7 +1,8 @@
 (function () {
   // Bumped whenever the offline sketch build changes, so the browser
   // doesn't keep a stale cache after we regenerate the sketches.
-  var SKETCH_VERSION = 'r21'; // r21: add Rusty Blackbird (Euphagus carolinus).
+  var SKETCH_VERSION = 'r22'; // r22: 73 southeastern US species (birds, frogs, insects, mammals, bats) (#103).
+                              // r21: add Rusty Blackbird (Euphagus carolinus).
                               // r20: add Tui (Prosthemadera novaeseelandiae).
                               // r18: Middle Spotted Woodpecker flight pose fixed (#81).
                               // r16: Black-billed Magpie (#60).
@@ -17,7 +18,8 @@
   // equivalent to a global cache purge for /api/img. (caches.default
   // .delete() in the worker only affects ONE colo at a time, so a
   // versioned URL is the only reliable way to invalidate everywhere.)
-  var IMG_VERSION = 'r21'; // r21: add Rusty Blackbird (Euphagus carolinus).
+  var IMG_VERSION = 'r22'; // r22: 73 southeastern US species (birds, frogs, insects, mammals, bats) (#103).
+                           // r21: add Rusty Blackbird (Euphagus carolinus).
                            // r20: add Tui (Prosthemadera novaeseelandiae).
                            // r18: Middle Spotted Woodpecker flight pose fixed (#81).
                            // r16: Black-billed Magpie (#60).
