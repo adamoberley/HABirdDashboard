@@ -1,7 +1,9 @@
 (function () {
   // Bumped whenever the offline sketch build changes, so the browser
   // doesn't keep a stale cache after we regenerate the sketches.
-  var SKETCH_VERSION = 'r21'; // r21: 73 southeastern US species (birds, frogs, insects, mammals, bats).
+  var SKETCH_VERSION = 'r22'; // r22: 73 southeastern US species (birds, frogs, insects, mammals, bats) (#103).
+                              // r21: add Rusty Blackbird (Euphagus carolinus).
+                              // r20: add Tui (Prosthemadera novaeseelandiae).
                               // r18: Middle Spotted Woodpecker flight pose fixed (#81).
                               // r16: Black-billed Magpie (#60).
                               // r15: 64 new Australian species (BirdNET-Go
@@ -16,7 +18,9 @@
   // equivalent to a global cache purge for /api/img. (caches.default
   // .delete() in the worker only affects ONE colo at a time, so a
   // versioned URL is the only reliable way to invalidate everywhere.)
-  var IMG_VERSION = 'r21'; // r21: 73 southeastern US species (birds, frogs, insects, mammals, bats).
+  var IMG_VERSION = 'r22'; // r22: 73 southeastern US species (birds, frogs, insects, mammals, bats) (#103).
+                           // r21: add Rusty Blackbird (Euphagus carolinus).
+                           // r20: add Tui (Prosthemadera novaeseelandiae).
                            // r18: Middle Spotted Woodpecker flight pose fixed (#81).
                            // r16: Black-billed Magpie (#60).
                            // r15: 64 new Australian species (BirdNET-Go
@@ -982,47 +986,71 @@
         out.sort(function (a, b) { return a.t - b.t; });
         return out;
       }
-      // Monotonic "latest value at time t (+2s MQTT fan-out jitter)"
-      // walker: the event streams are processed in ascending time, so
-      // a single advancing pointer replaces the old O(n^2) rescans -
-      // a 10-day busy-station history joins in linear time.
-      function walker(tl) {
-        var i = 0, last = null;
-        return function (t) {
-          while (i < tl.length && tl[i].t <= t + 2000) { last = tl[i].v; i++; }
-          return last;
-        };
-      }
       function toConf(v) {
         var n = parseFloat(v);
         if (isNaN(n)) return 0;
         return n > 1 ? n / 100 : n;   // sensor publishes percent
       }
+      // MQTT fans one detection out to three sensors within a few ms, but
+      // HA can record them up to ~2 s apart. Two detections can also be
+      // published < 2 s apart (two species in one audio chunk), so a
+      // species change is paired with its NEAREST name / confidence change
+      // inside that window - never "the latest value up to t + 2 s", which
+      // handed the first bird the second one's name and counted it twice
+      // (#104).
+      var JITTER = 2000;
+      function firstAtOrAfter(tl, t) {          // binary search, tl sorted by t
+        var lo = 0, hi = tl.length;
+        while (lo < hi) {
+          var mid = (lo + hi) >> 1;
+          if (tl[mid].t < t) lo = mid + 1; else hi = mid;
+        }
+        return lo;
+      }
+      function nearestIdx(tl, t) {             // nearest entry within JITTER, or -1
+        var i = firstAtOrAfter(tl, t), best = -1, bestD = JITTER + 1;
+        [i - 1, i].forEach(function (k) {
+          if (k < 0 || k >= tl.length) return;
+          var d = Math.abs(tl[k].t - t);
+          if (d < bestD) { bestD = d; best = k; }
+        });
+        return best;
+      }
+      function lastAtOrBefore(tl, t) {         // index of the value in force at t, or -1
+        return firstAtOrAfter(tl, t + 1) - 1;
+      }
       var events = [];
       sets.forEach(function (s) {
         var confs = timeline(s.conf);
         var scis = timeline(s.sci);
-        var comAtA = walker(timeline(s.com));
-        var comAtB = walker(timeline(s.com));
-        var sciAt = walker(scis);
-        var confAt = walker(confs);
-        // 2-second buckets of (species, time) already emitted via the
-        // confidence stream, so the species pass can skip duplicates
-        // without scanning the whole event list per entry.
-        var seen = {};
-        confs.forEach(function (c) {
-          var sci = sciAt(c.t);
-          if (!sci) return;
-          var b = Math.round(c.t / 2000);
-          seen[sci + '|' + (b - 1)] = 1;
-          seen[sci + '|' + b] = 1;
-          seen[sci + '|' + (b + 1)] = 1;
-          events.push({ t: c.t, sci: sci, com: comAtA(c.t) || sci, conf: toConf(c.v) });
+        var coms = timeline(s.com);
+        function comFor(sc) {
+          var k = nearestIdx(coms, sc.t);
+          if (k < 0) k = lastAtOrBefore(coms, sc.t);   // name unchanged since earlier
+          return (k >= 0 && coms[k].v) || sc.v;
+        }
+        // Each species change claims its nearest confidence change.
+        var claimedBy = {}, confOf = {};
+        scis.forEach(function (sc, j) {
+          var k = nearestIdx(confs, sc.t);
+          if (k >= 0 && claimedBy[k] == null) { claimedBy[k] = j; confOf[j] = k; }
         });
-        scis.forEach(function (sc) {
-          if (seen[sc.v + '|' + Math.round(sc.t / 2000)]) return;
-          events.push({ t: sc.t, sci: sc.v, com: comAtB(sc.t) || sc.v,
-            conf: toConf(confAt(sc.t)) });
+        confs.forEach(function (c, k) {
+          var j = claimedBy[k];
+          // Unclaimed: a repeat detection of the species already in force
+          // (no look-ahead, so a later species can't take it).
+          if (j == null) j = lastAtOrBefore(scis, c.t);
+          if (j < 0) return;
+          var sc = scis[j];
+          events.push({ t: c.t, sci: sc.v, com: comFor(sc), conf: toConf(c.v) });
+        });
+        // A species change whose confidence never changed (the same value
+        // twice in a row records no new state) is still a detection.
+        scis.forEach(function (sc, j) {
+          if (confOf[j] != null) return;
+          var k = lastAtOrBefore(confs, sc.t + JITTER);
+          events.push({ t: sc.t, sci: sc.v, com: comFor(sc),
+            conf: toConf(k >= 0 ? confs[k].v : null) });
         });
       });
       events.sort(function (a, b) { return a.t - b.t; });

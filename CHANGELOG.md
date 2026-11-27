@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **Birds heard within 2 seconds of each other keep their own names**
+  ([#104](https://github.com/adamoberley/HABirdDashboard/issues/104),
+  reported with a fix by @GuiAlDuS). With `data_source: ha`, two
+  detections published less than 2 s apart (two species in one audio
+  chunk) could swap common names, and the second was counted twice. The
+  history join now pairs each species change with its nearest name and
+  confidence change, so a bird heard once no longer keeps the wrong name.
+
 ## v1.10.0 — 2026-10-22
 
 ### Removed
