@@ -123,6 +123,61 @@ const scenarios = {
     noErrors(window);
   },
 
+  // 1c. Default collage (latest view off): All is parked, the user goes to
+  // the past hour and back to All, and the fresh All fetch fails. The
+  // parked All answer is the right data for the window on show and must
+  // land - a newer fetch for ANOTHER window doesn't make it stale.
+  async windowReturnKeepsOlderAll() {
+    const st = station();
+    const base = st.fetch;
+    st.summaryFail = false;
+    st.fetch = (url) => (st.summaryFail && /\/species\/summary/.test(String(url)))
+      ? Promise.resolve({ ok: false, status: 503, json: () => Promise.reject(503) })
+      : base(url);
+    const { window, card, root } = mountCard({ window: 'all' }, st);
+    await wait(1200);
+    const tiles = () => [...root.querySelectorAll('.gtile')].map((t) => t.dataset.sci).sort();
+    assert.deepStrictEqual(tiles(), ['Calypte anna', 'Corvus corax'], 'all-time flock');
+    st.hold = [];
+    card._refresh();                       // All, parked
+    await wait(100);
+    const parked = st.hold;
+    st.hold = null;
+    root.querySelector('#winPick button[data-h="1"]').click();         // past hour: empty
+    await wait(600);
+    assert.deepStrictEqual(tiles(), [], 'past hour is empty');
+    st.summaryFail = true;
+    // Past the 10 s request memo, so going back to All really asks again
+    // (and fails) instead of sharing the parked request.
+    const realNow = window.Date.now;
+    window.Date.now = () => realNow() + 11000;
+    root.querySelector('#winPick button[data-h="1000000"]').click();   // back to All, fails
+    await wait(600);
+    parked.forEach((release) => release());
+    await wait(600);
+    assert.deepStrictEqual(tiles(), ['Calypte anna', 'Corvus corax'], 'the parked All answer lands');
+    noErrors(window);
+  },
+
+  // 3b. Past hour without timestamps (daily rows missing latest_heard):
+  // an undated row can't be checked against the cutoff, so it isn't named.
+  async undatedPastHour() {
+    const st = station();
+    const ws = Date.now() - 3600000;
+    const hourStart = new Date(ws); hourStart.setMinutes(0, 0, 0);
+    const t = Math.max(hourStart.getTime(), ws - 10 * 60000);
+    st.events = [{ sci: 'Corvus corax', com: 'Common Raven', t, conf: 0.71 }];
+    const base = st.fetch;
+    st.fetch = (url) => /\/species\/daily/.test(String(url))
+      ? base(url).then((r) => ({ ok: true, status: 200,
+          json: () => r.json().then((rows) => rows.map((x) => Object.assign({}, x, { latest_heard: '' }))) }))
+      : base(url);
+    const { window, root } = mountCard({ window: 1, view: 'latest' }, st);
+    await wait(1200);
+    assert.strictEqual(shownSci(root), null, 'no undated bird named in the past hour');
+    noErrors(window);
+  },
+
   // 4. A card locked to the latest view: a #sci= link opens the details
   // in place and the view stays (the switcher is hidden - no way back).
   async lockedDeepLink() {

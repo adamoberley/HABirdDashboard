@@ -3566,12 +3566,14 @@
   // only used when they were fetched for the window now selected - a
   // window change whose fetch failed leaves the previous window's rows
   // in DATA.recent, and its bird isn't this window's latest. Rows without
-  // a timestamp only win when nothing has one.
+  // a timestamp only win when nothing has one, and never in a window
+  // shorter than a day: there the rows come from hour buckets that can
+  // overlap the window edge, and an undated row can't be checked.
   function latestSpecies() {
     if (!DATA.recent || DATA.recentKey !== windowKey()) return null;
     var rows = (DATA.recent.species || []).filter(function (s) { return s && s.sci; });
     var timed = rows.filter(function (s) { return !isNaN(stampMs(s.last_seen)); });
-    if (!timed.length) return rows[0] || null;
+    if (!timed.length) return (windowToday || currentHours >= 24) ? (rows[0] || null) : null;
     var cutoff = latestCutoff(), best = null, bestT = -Infinity;
     timed.forEach(function (s) {
       var t = stampMs(s.last_seen);
@@ -3596,13 +3598,17 @@
   // It runs only while the view is on screen, and its data source stays
   // its own: the quiet fetch doesn't touch the card-wide API-vs-MQTT flag
   // the atlas and the details modal read.
-  var LATEST_CONF_TRIES = 3;
-  var latestConf = { key: '', conf: null, tries: 0, busy: false };
+  // After an answer that had no match, the next try waits out the species
+  // fetch's 30 s memo, so it's a fresh request rather than the same cached
+  // answer counted again. A failed request isn't cached; it retries at once.
+  var LATEST_CONF_TRIES = 3, LATEST_CONF_SPACING = 31000;
+  var latestConf = { key: '', conf: null, tries: 0, busy: false, at: 0 };
   function lookupLatestConf(s, key) {
-    if (latestConf.key !== key) latestConf = { key: key, conf: null, tries: 0, busy: false };
+    if (latestConf.key !== key) latestConf = { key: key, conf: null, tries: 0, busy: false, at: 0 };
     var mine = latestConf;
     if (mine.conf != null || mine.busy || mine.tries >= LATEST_CONF_TRIES) return;
-    if (currentView !== 3 || document.hidden) return;
+    if (mine.at && Date.now() - mine.at < LATEST_CONF_SPACING) return;
+    if (currentView !== 3 || document.hidden || !latestEl || !latestEl.isConnected) return;
     var want = String(s.last_seen || '').replace('T', ' ').slice(0, 19);
     if (!/:\d\d:\d\d$/.test(want)) want = want.slice(0, 16);
     if (want.length < 16) return;
@@ -3610,6 +3616,7 @@
     mine.tries++;
     fetchJson('./avian/api/birdnet-api.php?action=species&sci=' + encodeURIComponent(s.sci), { quiet: true }).then(function (j) {
       mine.busy = false;
+      mine.at = Date.now();               // answered: a retry must outlive the memo
       var hits = ((j && j.detections) || []).filter(function (d) {
         return detectionStamp(d).slice(0, want.length) === want;
       });
@@ -3716,11 +3723,22 @@
   }
 
   // Issue order of the window-scoped fetches (refreshAll and
-  // refreshRecent share it), and the newest one whose rows are on show.
-  // Two refreshes of the same window can land out of order (a slow
-  // response behind a push refresh): the older must not put older rows
-  // back over newer ones - in the collage or the latest-bird view.
-  var recentGen = 0, recentShownGen = 0;
+  // refreshRecent share it). Two refreshes of the same window can land out
+  // of order (a slow response behind a push refresh): the older must not
+  // put older rows back over newer ones - in the collage or the
+  // latest-bird view. Tracked per window AND per slice, so an older
+  // response for the window now showing still lands when the newer one
+  // was for another window, or failed for that slice.
+  var recentGen = 0, shownGen = {};
+  function acceptSlice(slice, key, gen) {
+    var k = slice + '|' + key;
+    if (gen < (shownGen[k] || 0)) return false;
+    shownGen[k] = gen;
+    return true;
+  }
+  function sliceCurrent(slice, key, gen) {
+    return gen >= (shownGen[slice + '|' + key] || 0);
+  }
   function refreshRecent(animate) {
     // Capture the window this fetch was issued for. If the user
     // changes the picker again before it resolves - or a slower poll
@@ -3737,12 +3755,13 @@
         : Promise.resolve(null),
     ]).then(function (parts) {
         if (forKey !== windowKey()) return; // window changed mid-flight
-        if (gen < recentShownGen) return;   // a newer fetch already landed
-        recentShownGen = gen;
+        if (!acceptSlice('recent', forKey, gen)) return;   // a newer fetch already landed
         DATA.recent = parts[0];
         DATA.recentKey = forKey;
-        DATA.activity = parts[1];
-        DATA.visits = parts[2];
+        // A failed secondary slice still clears to null, as before - unless
+        // a newer fetch has already filled it.
+        if (parts[1] ? acceptSlice('activity', forKey, gen) : sliceCurrent('activity', forKey, gen)) DATA.activity = parts[1];
+        if (parts[2] ? acceptSlice('visits', forKey, gen) : sliceCurrent('visits', forKey, gen)) DATA.visits = parts[2];
         renderWindowDependent(animate);
       })
       .catch(function (e) {
@@ -3788,10 +3807,10 @@
       // Only accept the window-scoped slices if the window hasn't changed
       // since this poll started, and no newer fetch has landed since -
       // otherwise keep what's there.
-      if (forKey === windowKey() && gen > recentShownGen) {
-        if (parts[4]) { DATA.recent = parts[4]; DATA.recentKey = forKey; recentShownGen = gen; }
-        if (parts[5]) DATA.activity = parts[5];
-        if (parts[6]) DATA.visits = parts[6];
+      if (forKey === windowKey()) {
+        if (parts[4] && acceptSlice('recent', forKey, gen)) { DATA.recent = parts[4]; DATA.recentKey = forKey; }
+        if (parts[5] && acceptSlice('activity', forKey, gen)) DATA.activity = parts[5];
+        if (parts[6] && acceptSlice('visits', forKey, gen)) DATA.visits = parts[6];
       }
       recomputeDerived();
       renderTimeIndependent(animate);
@@ -3835,6 +3854,7 @@
     if (document.hidden) {
       stopPolling();
       stopLive();
+      stopLatestTick();
     } else {
       // Force an immediate refresh on return so the user sees fresh
       // data right away, then resume normal polling cadence.
