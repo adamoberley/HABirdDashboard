@@ -313,3 +313,23 @@ npm test                           # jsdom test suite (run after edits)
 
 `avian/scripts/README.md` documents the illustration pipeline internals
 (prompt, references, per-species tuning). `CHANGELOG.md` tracks releases.
+
+## Releasing (maintainers)
+
+A "Ship x.y.z" PR bumps the version in `package.json` (+ lockfile),
+`HABIRD_VERSION` in `homeassistant/card/build.js` and
+`addons/birdframe/config.yaml`, runs `bash addons/birdframe/sync-www.sh`,
+renames `## Unreleased` in `CHANGELOG.md`, and rebuilds the card. After it
+merges, release **with the card attached before publishing**: Home
+Assistant's Marketplace installs the card from that asset, and without it
+the install fails (the repository archive is too big, #99).
+
+```bash
+git checkout HABirdDashboard && git pull
+gh release create vX.Y.Z --draft --target HABirdDashboard --title "vX.Y.Z — …" --notes-file notes.md
+gh release upload vX.Y.Z dist/habird-card.js
+gh release edit vX.Y.Z --draft=false
+```
+
+`.github/workflows/release-asset.yml` then rebuilds the card from the tag,
+checks it matches, and attaches it if it's missing or different.
