@@ -12,7 +12,11 @@ renders.
 
 ## Pipeline
 
-1. `pregen.py` renders each bird with Gemini 2.5 Flash Image, on a flat cream ground.
+1. `pregen.py` renders each bird on a flat cream ground, with either backend:
+   `--backend gemini` (Gemini 2.5 Flash Image, billed per image) or
+   `--backend codex` (the Codex CLI's image tool on a ChatGPT plan, no
+   per-image bill). The default picks Gemini when `GEMINI_API_KEY` is set,
+   otherwise Codex.
 2. `cutout.py` removes the ground with BiRefNet and crops to the bird.
 3. `build_masks.py` rebuilds the generated silhouette tables (`DIMS` + `MASKS`)
    in `homeassistant/www/masks.js`. **The collage packs birds by these masks
@@ -25,7 +29,7 @@ renders.
 
 ```bash
 pip install -r requirements.txt
-export GEMINI_API_KEY='your-key'
+export GEMINI_API_KEY='your-key'     # or skip this and use --backend codex
 
 # 1. generate (cream ground) for your region's species
 python3 pregen.py --labels labels.txt --ebird-region US-CA

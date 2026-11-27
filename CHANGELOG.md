@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- **Generate artwork with a ChatGPT plan instead of a Gemini key.**
+  `pregen.py --backend codex` renders through the Codex CLI's built-in
+  image tool on whatever account `codex` is signed in with, so a ChatGPT
+  plan covers it with no per-image bill. Same prompt, references and
+  cream ground as the Gemini path, and it's the default when no
+  `GEMINI_API_KEY` is set. AGENTS.md and the pipeline README cover both.
+
+### Fixed
+- **`pregen.py` finds Wikipedia reference photos again.** Wikipedia now
+  appends `?utm_…` to image URLs, so the extension check rejected every
+  reference (found by @praxis88 in #103).
+
 ## v1.10.0 — 2026-10-22
 
 ### Removed
