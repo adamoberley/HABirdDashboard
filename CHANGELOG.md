@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.11.0 — 2026-11-27
 
 ### Added
 - **A latest-bird view**
@@ -63,6 +63,15 @@
   origin, adding a Private Mode token server-side when one is set.
 
 ### Fixed
+- **Bird Card installs from the Home Assistant 2026.11 Marketplace again**
+  ([#99](https://github.com/adamoberley/HABirdDashboard/issues/99),
+  reported by @audreyhommes, with help from @beercpd831 and
+  @MichelfrancisBustillos). For a card in the default catalog, the
+  Marketplace installs the file attached to the GitHub release; ours had
+  none, so it fell back to the repository archive, which the artwork puts
+  over its 100 MB limit ("has no content the Marketplace can install").
+  Every release now carries `habird-card.js`, attached by a workflow; it
+  was added to v1.10.0 by hand.
 - **The flying White-throated Sparrow has two wings again**
   ([#102](https://github.com/adamoberley/HABirdDashboard/issues/102),
   reported by @patrickkettner). Its flight pose is redrawn.

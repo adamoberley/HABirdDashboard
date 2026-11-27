@@ -12,6 +12,7 @@
   'view.collage': 'collage',
   'view.stats': 'stats',
   'view.atlas': 'atlas',
+  'view.latest': 'latest',
   'view.aria': 'View',
 
   // ---- Window picker (abbreviations) ----
@@ -32,6 +33,7 @@
   'aria.collage': 'Bird collage',
   'aria.stats': 'Stats',
   'aria.atlas': 'Atlas',
+  'aria.latest': 'Latest bird',
   // aria-label of the optional species-name strip along the collage's bottom.
   'names.aria': 'Species heard',
 
@@ -94,6 +96,13 @@
   'atlas.allTime': 'all time',
   'atlas.new': 'new',
   'atlas.newTitle': 'first time this species has ever been heard here',
+
+  // ---- Latest-bird view (#94) ----
+  // Small line above the bird's name.
+  'latest.eyebrow': 'last heard',
+  'latest.emptyHint': 'The next bird heard will show up here.',
+  // Confidence of the detection shown, as a whole percent.
+  'latest.confidence': '{pct}% confidence',
 
   // ---- API errors ----
   'error.privateMode': 'BirdNET-Go requires sign-in (Private Mode) — set api_token in the card config',

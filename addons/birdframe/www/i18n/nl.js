@@ -10,6 +10,7 @@
   'view.collage': 'collage',
   'view.stats': 'statistieken',
   'view.atlas': 'atlas',
+  'view.latest': 'laatste',
   'view.aria': 'Weergave',
 
   // ---- Window picker (abbreviations) ----
@@ -30,6 +31,7 @@
   'aria.collage': 'Vogelcollage',
   'aria.stats': 'Statistieken',
   'aria.atlas': 'Atlas',
+  'aria.latest': 'Laatste vogel',
   'names.aria': 'Gehoorde soorten',
 
   // ---- Time-window labels (windowLabel) ----
@@ -86,6 +88,11 @@
   'atlas.allTime': 'ooit',
   'atlas.new': 'nieuw',
   'atlas.newTitle': 'eerste keer dat deze soort hier ooit is gehoord',
+
+  // ---- Latest-bird view ----
+  'latest.eyebrow': 'laatst gehoord',
+  'latest.emptyHint': 'De volgende gehoorde vogel verschijnt hier.',
+  'latest.confidence': '{pct}% zekerheid',
 
   // ---- Detail modal: chrome ----
   'modal.close': 'Sluiten',
