@@ -65,7 +65,8 @@ at home [pushed to a Samsung Frame TV](#display-it-on-a-samsung-frame-tv-optiona
 - **Species names** (optional) - a line of names along the bottom of the
   collage, common and/or scientific at any size, so a bird you don't
   recognise can be looked up (tap a name for its details). Also lists any
-  species the library has no artwork for yet.
+  species the library has no artwork for yet. Or write each name right under
+  its bird instead (`labels`); the birds pack around the names.
 - **Stats** - an editorial detection timeline plus by-period counts, top
   species, and the newest additions to your life list.
 - **Atlas** - a field-guide card grid of every species ever heard, with
@@ -78,8 +79,8 @@ at home [pushed to a Samsung Frame TV](#display-it-on-a-samsung-frame-tv-optiona
   the Wikipedia article, plus an optional **reference call** (from Xeno-Canto) to
   compare against your own recordings. A tap can open the details, play
   the call, or both.
-- **2,521 illustrations** - 1,283 species (North American + European /
-  eBird region DE + Australian / eBird region AU), a perched pose and, for
+- **2,709 illustrations** - 1,391 species (North American + European /
+  eBird region DE + Australian / eBird region AU + New Zealand), a perched pose and, for
   anything that flies, a flight pose, lazy-loaded per detected species (no
   bulk download). A [regeneration pipeline](avian/scripts/README.md) builds
   sets for other regions.
@@ -241,6 +242,8 @@ title: ""                    # empty = no title; set any text for a heading
 names: off                   # species-name strip along the bottom of the
                              #   collage: off | common | scientific | both
 names_size: 13               # font size of that strip, in px
+labels: off                  # each bird's name under it in the collage:
+                             #   off | common | scientific (size: names_size)
 window: "24"                 # time window in hours, "today" or "all" - the
                              #   card has no on-screen picker; this is the
                              #   window. "24" is the rolling 24 hours;
@@ -337,6 +340,16 @@ that isn't an open-ended situation: see [Missing artwork for your
 area?](#missing-artwork-for-your-area) - your station's species list is
 finite, so one pass of the art pipeline closes every gap for good.
 
+**Name beside each bird** (`labels`, default off): writes each bird's name
+right under it in the collage - `common` or `scientific` - at the same size
+as the strip (`names_size`). The packing treats each name as part of its
+bird, so a name never sits on another bird, on the clock or on the strip;
+birds simply pack a little further apart, and shrink a little on a busy day
+to make room. On a very crowded plate, birds that can't fit their name go
+without it - a name never costs a bird its place (the strip still lists them
+all). Tapping a name opens that bird, like tapping the bird. Use it
+on its own or alongside the strip.
+
 **Latest bird** (`latest_view`, default off): a fourth view, after the
 atlas, showing only the most recently heard bird instead of the whole
 flock - its perched illustration as large as the card allows, its name
@@ -386,8 +399,8 @@ each, cached by the browser. For a fully offline install, copy
 
 ### Missing artwork for your area?
 
-The bundled library covers 1,283 species (North American + European / eBird
-region DE + Australian / eBird region AU), so other regions may still have gaps. (Plain photos are deliberately not used as a
+The bundled library covers 1,391 species (North American + European / eBird
+region DE + Australian / eBird region AU + New Zealand), so other regions may still have gaps. (Plain photos are deliberately not used as a
 stand-in - they'd break the kachō-e style and have no silhouette masks
 for the collage packing.)
 
@@ -704,12 +717,13 @@ ring layout). Add it with a **Webpage** dashboard pointing at
 `/local/habird/index.html`, and dress up a specific display with URL params:
 `?wall` / `?corner=top-left` for the clock block, `?ring` / `?hole=0.5` for the
 ring layout, `?names` (or `?names=scientific` / `?names=both`) plus
-`?names_size=18` for the species-name strip, `?latest` to add the latest-bird
-view and `?view=latest` (or `collage` / `stats` / `atlas`) to open on a
-view. Each has a `config.js` equivalent (`AV_CONFIG.names`,
-`AV_CONFIG.namesSize`, `AV_CONFIG.latestView`, `AV_CONFIG.view`); the URL
-param wins, so one shared `config.js` can drive several displays that differ
-only in how they're dressed.
+`?names_size=18` for the species-name strip, `?labels` (or
+`?labels=scientific` / `?labels=off`) for a name under each bird, `?latest`
+to add the latest-bird view and `?view=latest` (or `collage` / `stats` /
+`atlas`) to open on a view. Each has a `config.js` equivalent
+(`AV_CONFIG.names`, `AV_CONFIG.namesSize`, `AV_CONFIG.labels`,
+`AV_CONFIG.latestView`, `AV_CONFIG.view`); the URL param wins, so one shared
+`config.js` can drive several displays that differ only in how they're dressed.
 
 The page is plain static files, so it doesn't need Home Assistant at all:
 any web server can host `homeassistant/www` (plus the artwork, as
@@ -756,8 +770,8 @@ docker compose up -d --build        # open http://<host>:8090/
 ## Troubleshooting
 
 - **Some birds have no picture.** The most common question, and usually
-  not a bug: the bundled library covers **1,283 species (North American +
-  European / eBird region DE + Australian / eBird region AU)**, so detections
+  not a bug: the bundled library covers **1,391 species (North American +
+  European / eBird region DE + Australian / eBird region AU + New Zealand)**, so detections
   outside it simply have no illustration yet
   (the bird still counts everywhere - it just isn't drawn in the
   collage; turn on `names` to see it listed by name). Three checks, then the fix:
@@ -836,7 +850,7 @@ homeassistant/
     ├── styles.css
     └── favicon.png
 avian/
-├── assets/          # 2,521 bundled illustrations + photo-cutout fallbacks
+├── assets/          # 2,709 bundled illustrations + photo-cutout fallbacks
 └── scripts/         # generate -> cutout -> masks pipeline (Gemini + BiRefNet)
 addons/
 └── birdframe/       # optional app: push the collage to a Samsung Frame TV

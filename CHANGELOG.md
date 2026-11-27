@@ -15,6 +15,38 @@
   standalone page: `latestView` / `view` in `config.js`, or `?latest` and
   `?view=latest` in the URL. Off by default, so existing dashboards don't
   change.
+- **Optional name beside each bird in the collage**
+  ([#97](https://github.com/adamoberley/HABirdDashboard/issues/97),
+  requested by @max-elman). New `labels` option (card and visual editor;
+  `labels` in the standalone page's `config.js`): `off` (default),
+  `common` or `scientific`. Each bird's name sits right under it, at the
+  names-strip size (`names_size`). The packer reserves each name's box as
+  part of its bird, so a name never lands on another bird, the clock, the
+  title or the names strip, including rotated birds in the ring flow
+  layout. On a crowded plate a bird with no room for its name goes without
+  it rather than being left out. Tapping a name opens its bird. On the
+  standalone page `?labels`,
+  `?labels=scientific` or `?labels=off` overrides `config.js` per display.
+- **73 southeastern US species**
+  ([#103](https://github.com/adamoberley/HABirdDashboard/pull/103), by
+  @praxis88): birds, frogs and toads, insects, mammals and bats from north
+  Alabama BirdNET-Go range lists, 120 illustrations. Mammals and frogs
+  run, leap or glide instead of flying.
+- **Rusty Blackbird**
+  ([#101](https://github.com/adamoberley/HABirdDashboard/pull/101), by
+  @audreyhommes).
+- **33 more species for Pennsylvania and New Zealand**
+  ([#91](https://github.com/adamoberley/HABirdDashboard/issues/91),
+  requested by @nowagner;
+  [#105](https://github.com/adamoberley/HABirdDashboard/issues/105),
+  requested by @garethamyes-spec). The seven PA birds still missing (Bay-breasted
+  Warbler, Boat-tailed Grackle, Royal Tern, American Oystercatcher, Clapper
+  Rail, Philadelphia Vireo, Short-billed Dowitcher; the rest of that list
+  arrived with #101 and #103) and all 26 NZ birds on the request, from
+  Tomtit and Kōkako to Morepork, Kākā and the North Island Brown Kiwi.
+  Kiwi and Weka are drawn standing, perched pose only. Lesser Redpoll
+  (*Acanthis cabaret*) now shows the Common Redpoll's art. These were
+  made with the new Codex backend.
 - **Generate artwork with a ChatGPT plan instead of a Gemini key.**
   `pregen.py --backend codex` renders through the Codex CLI's built-in
   image tool on whatever account `codex` is signed in with, so a ChatGPT
@@ -31,6 +63,9 @@
   origin, adding a Private Mode token server-side when one is set.
 
 ### Fixed
+- **The flying White-throated Sparrow has two wings again**
+  ([#102](https://github.com/adamoberley/HABirdDashboard/issues/102),
+  reported by @patrickkettner). Its flight pose is redrawn.
 - **`pregen.py` finds Wikipedia reference photos again.** Wikipedia now
   appends `?utm_…` to image URLs, so the extension check rejected every
   reference (found by @praxis88 in #103).

@@ -254,6 +254,11 @@ var HABIRD_EDITOR_SCHEMA = [
       ] } } },
       { name: 'names_size', selector: { number: { min: 8, max: 40, step: 1, mode: 'slider', unit_of_measurement: 'px' } } },
     ] },
+    { name: 'labels', selector: { select: { mode: 'dropdown', options: [
+      { value: 'off', label: 'Off' },
+      { value: 'common', label: 'Common names' },
+      { value: 'scientific', label: 'Scientific names' },
+    ] } } },
     { name: '', type: 'grid', schema: [
       { name: 'background', selector: { select: { mode: 'dropdown', options: [
         { value: 'transparent', label: 'Transparent' },
@@ -356,6 +361,7 @@ var HABIRD_LABELS = {
   title: 'Title',
   names: 'Species names',
   names_size: 'Species names size',
+  labels: 'Name beside each bird',
   view_selector: 'Show the view switcher',
   latest_view: 'Latest-bird view',
   selector_position: 'Switcher position',
@@ -392,7 +398,8 @@ var HABIRD_LABELS = {
 var HABIRD_HELPERS = {
   title: 'Default (blank): no heading. Any text adds a title the birds pack around, clock-style.',
   names: "Default: off. Lists every species in the window as a line of names along the bottom of the collage - a legend for birds you don't recognise (tap a name for its details). Also the one place a species without artwork still appears.",
-  names_size: 'Font size of the species-name strip, in pixels (default 13).',
+  names_size: 'Font size of the species-name strip and the name captions, in pixels (default 13).',
+  labels: "Default: off. Writes each bird's name right under it in the collage. The birds pack around the names, so a name never sits on another bird.",
   view_selector: 'Turn off to lock this card to one view.',
   latest_view: 'Adds a fourth view showing only the most recently heard bird, large, with its name, when it was heard and its confidence. Choosing View: Latest bird turns it on too.',
   selector_position: 'At the top, a title moves down to sit below the switcher.',
@@ -460,6 +467,9 @@ class HABirdCard extends HTMLElement {
     }
     if (config.names != null && ['off', 'common', 'scientific', 'both'].indexOf(config.names) < 0) {
       throw new Error("names must be 'off', 'common', 'scientific' or 'both'");
+    }
+    if (config.labels != null && ['off', 'common', 'scientific'].indexOf(config.labels) < 0) {
+      throw new Error("labels must be 'off', 'common' or 'scientific'");
     }
     if (config.proxy != null && typeof config.proxy !== 'boolean') {
       throw new Error('proxy must be true or false');
@@ -589,6 +599,9 @@ class HABirdCard extends HTMLElement {
       // off (default) | common | scientific | both, and its font size in px.
       names: c.names || 'off',
       namesSize: (c.names_size != null && +c.names_size > 0) ? +c.names_size : 13,
+      // Name captions beside each bird (issue #97): off (default) | common |
+      // scientific, at the names size above.
+      labels: c.labels || 'off',
       view: c.view || 'collage',             // which view this card shows
       viewSelector: c.view_selector !== false,
       // Latest-bird view (#94): off unless asked for (or view: latest).
@@ -718,7 +731,7 @@ class HABirdCardEditor extends HTMLElement {
       this.appendChild(this._form);
     }
     this._form.schema = HABIRD_EDITOR_SCHEMA;
-    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, latest_view: false, selector_position: 'bottom', names: 'off', names_size: 13, collage_fill: 0.5, size_contrast: 0.5, paper_color: '', paper_color_dark: '', paper_texture: 0, audio_boost: 24, live: true }, this._config);
+    this._form.data = Object.assign({ corner: 'bottom-right', sit_confidence: 0.90, window: '24', background: 'transparent', font: 'system', data_source: 'auto', view: 'collage', view_selector: true, latest_view: false, selector_position: 'bottom', names: 'off', names_size: 13, labels: 'off', collage_fill: 0.5, size_contrast: 0.5, paper_color: '', paper_color_dark: '', paper_texture: 0, audio_boost: 24, live: true }, this._config);
     this._form.hass = this._hass;
   }
 }

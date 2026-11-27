@@ -189,6 +189,14 @@ window.AV_CONFIG = {
   names: 'off',
   namesSize: 13,
 
+  // Name captions: each bird's name written right under it in the collage.
+  // The birds pack around the captions, so a name never sits on another
+  // bird. Same text size as the strip (namesSize).
+  //   'off' (default) | 'common' | 'scientific'
+  // Per-display URL override on this static page: ?labels (=common),
+  // ?labels=scientific, ?labels=off.
+  labels: 'off',
+
   // Latest-bird view (#94): a fourth view, after the atlas, that shows
   // only the most recently heard bird - its perched illustration, large,
   // with its name, how long ago it was heard and how sure BirdNET was. It
